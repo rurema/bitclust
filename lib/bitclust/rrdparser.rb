@@ -176,7 +176,7 @@ module BitClust
       if sigs.any? {|s| s[0] != first_ct }
         compile_error "alias entries have multiple class/type", header[0]
       end
-      body = f.break(/\A[=\-]/)
+      body = f.break(/\A(?:---|={1,2}[^=])/)
       src = (header + body).join('')
       Entry0.new(c, t, sigs.map {|s| s[1] }, src, header[0])
     end
@@ -229,6 +229,14 @@ module BitClust
 
   class Preprocessor
 
+    include Enumerable
+
+    def Preprocessor.process(path, params = {})
+      File.open(path) {|f|
+        return wrap(f, params).to_a
+      }
+    end
+
     def Preprocessor.wrap(f, params = {})
       new(params, LineStream.new(f))
     end
@@ -244,6 +252,12 @@ module BitClust
       @buf.shift || next_line(@f)
     end
 
+    def each
+      while line = gets()
+        yield line
+      end
+    end
+
     private
 
     def next_line(f)
@@ -252,6 +266,10 @@ module BitClust
         case line
         when /\A\#@\#/   # preprocessor comment
           ;
+        when /\A\#@include\s*\((.*?)\)/
+          file = $1.strip
+          basedir = File.dirname(line.location.file)
+          @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
         when /\A\#@if/
           m = /\A\#@if\s*\((.*)\)\s*\z/.match(line) or
               compile_error "syntax error: wrong #@if", line
