@@ -2,15 +2,84 @@
 
 $KCODE = 'EUC'
 
+require 'stringio'
+require 'fileutils'
+require 'tmpdir'
+require 'optparse'
+
 def main
-  ARGF.each do |line|
+  mode = :output
+  parser = OptionParser.new
+  parser.banner = "Usage: #{File.basename($0, '.*')} [--diff] [file...]"
+  parser.on('--diff', 'Show the diff between original file and output') {
+    mode = :diff
+  }
+  parser.on('--inplace', 'edit input files in-place (make backup)') {
+    mode = :inplace
+  }
+  parser.on('--help') {
+    puts parser.help
+    exit
+  }
+  begin
+    parser.parse!
+  rescue OptionParser::ParseError => err
+    $stderr.puts err.message
+    exit 1
+  end
+  case mode
+  when :output
+    do_convert ARGF
+  when :diff
+    ARGV.each do |path|
+      diff_output path
+    end
+  when :inplace
+    ARGV.each do |path|
+      inplace_edit path
+    end
+  else
+    raise "must not happen: mode=#{mode.inspect}"
+  end
+end
+
+def inplace_edit(path)
+  str = convert_file(path)
+  File.rename path, path + '.bak'
+  File.open(path, 'w') {|f|
+    f.write str
+  }
+end
+
+def diff_output(path)
+  tmppath = "#{Dir.tmpdir}/bc-convert-diff"
+  File.open(tmppath, 'w') {|f|
+    f.write convert_file(path)
+  }
+  system 'diff', '-u', path, tmppath
+ensure
+  FileUtils.rm_f tmppath
+end
+
+def convert_file(path)
+  File.open(path) {|f| convert(f) }
+end
+
+def convert(f)
+  buf = StringIO.new
+  do_convert f, buf
+  buf.string
+end
+
+def do_convert(f, out = $stdout)
+  f.each do |line|
     case line
     when /\A\#/
-      puts '#@' + line
+      out.puts '#@' + line
     when /\A---\s/
-      puts '--- ' + convert_signature(line.rstrip)
+      out.puts '--- ' + convert_signature(line.rstrip)
     else
-      puts convert_link(line.rstrip)
+      out.puts convert_link(line.rstrip)
     end
   end
 end
