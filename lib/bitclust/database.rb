@@ -168,14 +168,14 @@ get_class(name) or ForwardLibrary.new(name)
 
     def define_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:smethod, names, src, lib)
       define @singleton_methods, @s_table, m
       m
     end
 
     def define_private_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:smethod, names, src, lib)
       m.private
       define @singleton_methods, @s_table, m
       m
@@ -183,13 +183,13 @@ get_class(name) or ForwardLibrary.new(name)
 
     def define_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:imethod, names, src, lib)
       define @instance_methods, @i_table, m
     end
 
     def define_private_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:imethod, names, src, lib)
       m.private
       define @instance_methods, @i_table, m
     end
@@ -203,14 +203,14 @@ get_class(name) or ForwardLibrary.new(name)
 
     def overwrite_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:smethod, names, src, lib)
       overwrite @singleton_methods, m
       m
     end
 
     def overwrite_private_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:smethod, names, src, lib)
       m.private
       overwrite @singleton_methods, m
       m
@@ -218,18 +218,20 @@ get_class(name) or ForwardLibrary.new(name)
 
     def overwrite_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:imethod, names, src, lib)
       overwrite @instance_methods, m
       m
     end
 
     def overwrite_private_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:method, names, src, lib)
+      m = make_mdesc(:imethod, names, src, lib)
       m.private
       overwrite @instance_methods, m
       m
     end
+
+    private
 
     def make_mdesc(type, names, src, lib)
       m = MethodDescription.new(self, type, names, src)
@@ -237,8 +239,6 @@ get_class(name) or ForwardLibrary.new(name)
       lib.add_method m
       m
     end
-
-    private
 
     def define(list, table, m)
       m.names.each do |n|
@@ -258,7 +258,7 @@ get_class(name) or ForwardLibrary.new(name)
   end
 
 
-  # Represents methods, constants and special variables.
+  # Represents methods, constants, and special variables.
   class MethodDescription
 
     def initialize(klass, type, names, src)
@@ -276,7 +276,30 @@ get_class(name) or ForwardLibrary.new(name)
     attr_accessor :library
 
     def inspect
-      "\#<#{@type} #{@names.join(',')}>"
+      "\#<#{@type} #{@class.name}#{type_string()}#{@names.join(',')}>"
+    end
+
+    def singleton_method?
+      @type == :smethod
+    end
+
+    def instance_method?
+      @type == :imethod
+    end
+
+    def constant?
+      @type == :constant
+    end
+
+    def type_string
+      case @type
+      when :imethod  then '#'
+      when :smethod  then '.'
+      when :constant then '::'
+      when :svar     then '$'
+      else
+        raise @type.inspect
+      end
     end
 
     def document_html

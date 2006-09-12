@@ -1,3 +1,10 @@
+Wed Sep 13 00:12:09 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-list.rb: debug.
+
+	* lib/bitclust/database.rb (MethodDescription#inspect): show entry
+	  type.
+
 Tue Sep 12 23:48:04 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-list.rb: new file.
