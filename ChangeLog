@@ -1,3 +1,9 @@
+Wed Sep 13 03:41:09 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-convert.rb: convert links.
+
+	* bin/bc-convert.rb: convert comments.
+
 Wed Sep 13 02:17:36 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (Preprocessor): support #@include.
