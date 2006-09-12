@@ -1,3 +1,7 @@
+Wed Sep 13 00:54:34 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-convert.rb: new file.
+
 Wed Sep 13 00:12:09 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-list.rb: debug.
