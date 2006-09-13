@@ -56,6 +56,14 @@ module BitClust
       @db = db
     end
 
+    def parse_file(path, params = {})
+      libname = File.basename(path, '.rd')
+      File.open(path) {|f|
+        preproc = Preprocessor.wrap(f, params)
+        return parse(preproc, libname, path)
+      }
+    end
+
     def parse(input, libname, path)
       f = LineInput.new(input)
       f.skip_blank_lines
