@@ -65,16 +65,21 @@ module BitClust
       @db = db
     end
 
-    def parse_file(path, params = {})
-      libname = File.basename(path, '.rd')
+    def parse_file(path, libname, params = {})
       File.open(path) {|f|
-        preproc = Preprocessor.wrap(f, params)
-        return parse(preproc, libname, path)
+        return parse(f, libname, params)
       }
     end
 
-    def parse(input, libname, path)
-      f = LineInput.new(input)
+    def parse(f, libname, params = {})
+      preproc = Preprocessor.wrap(f, params)
+      parse_0(preproc, libname)
+    end
+
+    private
+
+    def parse_0(preproc, libname)
+      f = LineInput.new(preproc)
       f.skip_blank_lines
       reqs = f.span(/\Arequire /).map {|line| line.split[1] }
       f.skip_blank_lines
@@ -86,8 +91,6 @@ module BitClust
       end
       lib
     end
-
-    private
 
     def read_classes(f, lib)
       f.while_match(/\A=[^=]/) do |line|

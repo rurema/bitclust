@@ -1,0 +1,17 @@
+def setup_environment
+  $KCODE = 'EUC'
+  $LOAD_PATH.unshift './lib'
+  require 'bitclust'
+end
+
+def bitclust_context
+  cgidir = File.dirname(File.expand_path(__FILE__))
+  vardir = "#{cgidir}/var"
+  srcdir = cgidir
+  db = BitClust::Database.new(nil)
+  manager = BitClust::ScreenManager.new(
+    :baseurl     => 'http://doc.loveruby.net/refm/api/view',
+    :templatedir => srcdir
+  )
+  BitClust::RequestHandler.new(db, manager)
+end

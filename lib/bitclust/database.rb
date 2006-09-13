@@ -17,13 +17,25 @@ module BitClust
       @prefix = prefix
       @libraries = []
       @classes = []
+      @props = {}
     end
 
     attr_reader :libraries
     attr_reader :classes
+    attr_reader :props
 
     def encoding
-      'euc-jp'   # FIXME
+      'euc-jp'   # FIXME: tmp
+    end
+
+    def transaction
+      # FIXME
+      yield
+      # FIXME: store here
+    end
+
+    def update_by_file(path, libname)
+      RRDParser.new(self).parse_file(path, libname, @props)
     end
 
     def add_library(lib)
