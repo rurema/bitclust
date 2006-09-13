@@ -103,6 +103,12 @@ module BitClust
           read_class_body f, lib, m
         when :object
           o = @db.define_object(name, lib)
+          f.skip_blank_lines
+          f.while_match(/\Aextend\s/) do |line|
+            o.extend @db.get_class!(line.split[1])
+          end
+          f.skip_blank_lines
+          o.source = f.break(/\A=|\A---/).join('').rstrip
           read_entries f, lib, o, [:singleton_method]
         when :reopen
           c = name ? @db.get_class!(name) : nil

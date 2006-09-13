@@ -145,6 +145,7 @@ get_class(name) or ForwardLibrary.new(name)
       @name = name
       @superclass = superclass
       @included = []
+      @extended = []
       @singleton_methods = []
       @s_table = {}
       @instance_methods = []
@@ -162,6 +163,7 @@ get_class(name) or ForwardLibrary.new(name)
     attr_reader :name
     attr_reader :superclass
     attr_reader :included
+    attr_reader :extended
     attr_reader :singleton_methods
     attr_reader :instance_methods
     attr_reader :constants
@@ -198,6 +200,10 @@ get_class(name) or ForwardLibrary.new(name)
 
     def include(m)
       @included.push m
+    end
+
+    def extend(m)
+      @extended.push m
     end
 
     def define_singleton_method(names, src, lib)

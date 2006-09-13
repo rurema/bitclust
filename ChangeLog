@@ -1,3 +1,11 @@
+Wed Sep 13 23:55:10 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: support extend for objects.
+	  [ruby-reference-manual:59]
+
+	* lib/bitclust/database.rb (ClassDescription): store extended
+	  modules.
+
 Wed Sep 13 22:38:57 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* view.cgi: new file.
