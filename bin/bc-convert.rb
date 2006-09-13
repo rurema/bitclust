@@ -146,7 +146,7 @@ def convert_href(link)
   when /\A組み込み定数\/(.*)/e     then "[[m:Kernel::#{$1}]]"
   when /\A組み込み関数\/(.*)/e     then "[[m:Kernel\##{$1}]]"
   when /\A([\w:]+[\#\.][^|]+)\|/   then "[[m:#{$1}]]"
-  when /\A(.*?)\/manual page\z/    then "[[man:#{$1}]]"
+  when /\A(.*?)\|manual page\z/    then "[[man:#{$1}]]"
   when /\A([\w:]+)\/(.*)\z/n       then "[[m:#{$1}\##{$2}]]"
   when /\A([A-Z][\w:]*)\z/         then "[[c:#{$1}]]"
   else
