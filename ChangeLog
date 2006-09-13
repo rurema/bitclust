@@ -1,3 +1,10 @@
+Wed Sep 13 22:38:57 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* view.cgi: new file.
+
+	* lib/bitclust.rb: remove bitclust/interface, it is required only
+	  from entry point
+
 Wed Sep 13 22:27:38 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-tohtml.rb: new file.
