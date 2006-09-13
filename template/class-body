@@ -1,0 +1,17 @@
+<%= headline("class #{@curr.name}") %>
+<%
+    headline_push
+%>
+<%= compile_rd(@curr.source) %>
+
+<%= headline("Methods") %>
+<%
+    headline_push
+    @curr.entries.each do |m|
+%>
+<%=   compile_rd(m.source) %>
+<%
+    end
+    headline_pop
+    headline_pop
+%>

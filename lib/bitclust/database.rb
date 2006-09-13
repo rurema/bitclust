@@ -1,3 +1,12 @@
+#
+# bitclust/database.rb
+#
+# Copyright (c) 2006 Minero Aoki
+#
+# This program is free software.
+# You can distribute/modify this program under the Ruby License.
+#
+
 require 'bitclust/exception'
 
 module BitClust
@@ -12,6 +21,10 @@ module BitClust
 
     attr_reader :libraries
     attr_reader :classes
+
+    def encoding
+      'euc-jp'   # FIXME
+    end
 
     def add_library(lib)
       # FIXME: check duplication
@@ -31,7 +44,7 @@ module BitClust
     end
 
     def define_c(type, name, superclass, lib)
-      c = ClassDescription.new(:class, name, superclass)
+      c = ClassDescription.new(self, :class, name, superclass)
       # FIXME: check duplication
       @classes.push c
       lib.add_class c
@@ -66,16 +79,32 @@ get_class(name) or ForwardLibrary.new(name)
   end
 
 
-  class LibraryDescription
+  class Entity
+    def initialize(db)
+      @db = db
+    end
+
+    def encoding
+      @db.encoding
+    end
+  end
+
+
+  class LibraryDescription < Entity
 
     include Enumerable
 
-    def initialize(name, requires, src)
+    def initialize(db, name, requires, src)
+      super db
       @name = name
       @requires = []
       @source = src
       @classes = []    # DEFINED classes
       @methods = []    # DEFINED methods
+    end
+
+    def type_id
+      :library
     end
 
     attr_reader :name
@@ -108,9 +137,10 @@ get_class(name) or ForwardLibrary.new(name)
 
 
   # Represents classes, modules and singleton objects.
-  class ClassDescription
+  class ClassDescription < Entity
 
-    def initialize(type, name, superclass)
+    def initialize(db, type, name, superclass)
+      super db
       @type = type   # :class | :module | :object
       @name = name
       @superclass = superclass
@@ -122,6 +152,10 @@ get_class(name) or ForwardLibrary.new(name)
       @constants = []
       @source = nil
       @library = nil
+    end
+
+    def type_id
+      :class
     end
 
     attr_reader :type
@@ -168,14 +202,14 @@ get_class(name) or ForwardLibrary.new(name)
 
     def define_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:smethod, names, src, lib)
+      m = new_method(:smethod, names, src, lib)
       define @singleton_methods, @s_table, m
       m
     end
 
     def define_private_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:smethod, names, src, lib)
+      m = new_method(:smethod, names, src, lib)
       m.private
       define @singleton_methods, @s_table, m
       m
@@ -183,34 +217,34 @@ get_class(name) or ForwardLibrary.new(name)
 
     def define_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:imethod, names, src, lib)
+      m = new_method(:imethod, names, src, lib)
       define @instance_methods, @i_table, m
     end
 
     def define_private_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:imethod, names, src, lib)
+      m = new_method(:imethod, names, src, lib)
       m.private
       define @instance_methods, @i_table, m
     end
 
     def define_constant(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:constant, names, src, lib)
+      m = new_method(:constant, names, src, lib)
       define @singleton_methods, @s_table, m
       m
     end
 
     def overwrite_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:smethod, names, src, lib)
+      m = new_method(:smethod, names, src, lib)
       overwrite @singleton_methods, m
       m
     end
 
     def overwrite_private_singleton_method(names, src, lib)
       t = @singleton_methods
-      m = make_mdesc(:smethod, names, src, lib)
+      m = new_method(:smethod, names, src, lib)
       m.private
       overwrite @singleton_methods, m
       m
@@ -218,14 +252,14 @@ get_class(name) or ForwardLibrary.new(name)
 
     def overwrite_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:imethod, names, src, lib)
+      m = new_method(:imethod, names, src, lib)
       overwrite @instance_methods, m
       m
     end
 
     def overwrite_private_instance_method(names, src, lib)
       t = @instance_methods
-      m = make_mdesc(:imethod, names, src, lib)
+      m = new_method(:imethod, names, src, lib)
       m.private
       overwrite @instance_methods, m
       m
@@ -233,8 +267,8 @@ get_class(name) or ForwardLibrary.new(name)
 
     private
 
-    def make_mdesc(type, names, src, lib)
-      m = MethodDescription.new(self, type, names, src)
+    def new_method(type, names, src, lib)
+      m = MethodDescription.new(@db, self, type, names, src)
       m.library = lib
       lib.add_method m
       m
@@ -259,14 +293,19 @@ get_class(name) or ForwardLibrary.new(name)
 
 
   # Represents methods, constants, and special variables.
-  class MethodDescription
+  class MethodDescription < Entity
 
-    def initialize(klass, type, names, src)
+    def initialize(db, klass, type, names, src)
+      super db
       @class = klass
       @type = type
       @names = names
       @source = src
       @library = nil
+    end
+
+    def type_id
+      :method
     end
 
     attr_reader :class
@@ -291,6 +330,10 @@ get_class(name) or ForwardLibrary.new(name)
       @type == :constant
     end
 
+    def svar?
+      @type == :svar
+    end
+
     def type_string
       case @type
       when :imethod  then '#'
@@ -300,10 +343,6 @@ get_class(name) or ForwardLibrary.new(name)
       else
         raise @type.inspect
       end
-    end
-
-    def document_html
-      raise 'not implemented'
     end
 
   end

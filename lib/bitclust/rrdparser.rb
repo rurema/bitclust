@@ -1,3 +1,12 @@
+#
+# bitclust/rrdparser.rb
+#
+# Copyright (c) 2006 Minero Aoki
+#
+# This program is free software.
+# You can distribute/modify this program under the Ruby License.
+#
+
 require 'bitclust/lineinput'
 require 'bitclust/exception'
 require 'strscan'
@@ -70,7 +79,7 @@ module BitClust
       reqs = f.span(/\Arequire /).map {|line| line.split[1] }
       f.skip_blank_lines
       src = f.break(/\A=[^=]/).join('').rstrip
-      lib = LibraryDescription.new(libname, reqs, src)
+      lib = LibraryDescription.new(@db, libname, reqs, src)
       read_classes f, lib
       unless f.eof?
         compile_error "syntax error", f.gets

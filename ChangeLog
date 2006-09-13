@@ -1,3 +1,45 @@
+Wed Sep 13 22:27:38 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-tohtml.rb: new file.
+
+	* lib/bitclust/interface.rb: new file.
+
+	* lib/bitclust/requesthandler.rb: new file.
+
+	* lib/bitclust/screen.rb: new file.
+
+	* lib/bitclust/urlmapper.rb: new file.
+
+	* lib/bitclust/rdcompiler.rb: new file.
+
+	* lib/bitclust/textutils.rb: new file.
+
+	* lib/bitclust.rb: add above files.
+
+	* lib/bitclust/database.rb: new class Entity.
+
+	* lib/bitclust/database.rb: new method Entity#type_id.
+
+	* lib/bitclust/database.rb: new method Entity#encoding.
+
+	* lib/bitclust/database.rb: all entities should hold a Database.
+
+	* lib/bitclust/rrdparser.rb: ditto.
+
+	* lib/bitclust/exception.rb: new exception RequestError.
+
+	* template/method: new file.
+
+	* template/class-body: new file.
+
+	* template/library: new file.
+
+	* template/class: new file.
+
+	* template/method-body: new file.
+
+	* theme/default: new theme.
+
 Wed Sep 13 17:34:35 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-list.rb: should use RRDParser#parse_file.
