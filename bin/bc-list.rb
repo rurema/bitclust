@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
+
+bindir = Pathname.new(__FILE__).realpath.dirname
+$LOAD_PATH.unshift((bindir + '../lib').realpath)
+
 require 'bitclust'
 require 'pp'
 
