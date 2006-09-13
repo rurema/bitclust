@@ -1,4 +1,3 @@
-require 'bitclust/interface'
 require 'bitclust/requesthandler'
 require 'bitclust/screen'
 require 'bitclust/database'
