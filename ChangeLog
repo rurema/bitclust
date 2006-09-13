@@ -1,3 +1,7 @@
+Thu Sep 14 01:06:37 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-list.rb: parse command line options.
+
 Thu Sep 14 01:01:15 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-convert.rb: ((<tr(1)|manual page>)) -> [[man:tr(1)]]
