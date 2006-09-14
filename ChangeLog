@@ -1,3 +1,21 @@
+Thu Sep 14 17:25:20 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/screen.rb: new class LibraryIndexScreen.
+
+	* lib/bitclust/screen.rb: new class ClassIndexScreen.
+
+	* lib/bitclust/screen.rb: merge urlmapper.rb.
+
+	* lib/bitclust/urlmapper.rb: removed (merged in to screen.rb).
+
+	* lib/bitclust/interface.rb: fix typo.
+
+	* lib/bitclust/requesthandler.rb
+
+	* template/library-index: new file.
+
+	* template/class-index: new file.
+
 Thu Sep 14 16:41:33 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: commit miss.

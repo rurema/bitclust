@@ -7,7 +7,6 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
-require 'bitclust/urlmapper'
 require 'bitclust/rdcompiler'
 require 'bitclust/textutils'
 require 'erb'
@@ -17,43 +16,62 @@ module BitClust
 
   class ScreenManager
     def initialize(h)
-      @urlmapper = URLMapper.new(h[:baseurl])
-      @params = Params.new(@urlmapper,
-                           TemplateRepository.new(h[:templatedir]),
-                           h[:theme] || 'default')
+      @template = TemplateRepository.new(h.delete(:templatedir))
+      @urlmapper = URLMapper.new(h)
     end
 
     def entity_screen(entity)
-      Screen.for_entity(entity).new(@params, entity)
+      new_screen(Screen.for_entity(entity), entity)
+    end
+
+    def library_index_screen(libs)
+      new_screen(LibraryIndexScreen, libs)
     end
 
     def library_screen(lib)
-      LibraryScreen.new(@params, lib)
+      new_screen(LibraryScreen.new, lib)
+    end
+
+    def class_index_screen(cs)
+      new_screen(ClassIndexScreen, cs)
     end
 
     def class_screen(c)
-      ClassScreen.new(@params, c)
+      new_screen(ClassScreen, c)
     end
 
     def method_screen(m)
-      MethodScreen.new(@params, m)
+      new_screen(MethodScreen, m)
     end
 
-    class Params
-      def initialize(umap, tmpl, theme)
-        @urlmapper = umap
-        @template_repository = tmpl
-        @theme = theme
-      end
+    private
 
-      attr_reader :urlmapper
-      attr_reader :template_repository
-
-      def css_url
-        "#{@theme}/style.css"
-      end
+    def new_screen(c, *args)
+      c.new(@urlmapper, @template, *args)
     end
   end
+
+
+  class URLMapper
+    def initialize(h)
+      @base_url = h[:base_url]
+      @cgi_url = h[:cgi_url]
+      @css_url = h[:css_url]
+      @theme = h[:theme] || 'default'
+    end
+
+    attr_reader :base_url
+
+    def cgi_url
+      @cgi_url
+    end
+
+    def css_url
+      return @css_url if @css_url
+      "#{@base_url}/theme/#{@theme}/style.css"
+    end
+  end
+
 
   class TemplateRepository
     def initialize(prefix)
@@ -71,21 +89,12 @@ module BitClust
     end
   end
 
+
   class Screen
     include TextUtils
 
     def Screen.for_entity(entity)
       ::BitClust.const_get("#{entity.type_id.to_s.capitalize}Screen")
-    end
-
-    def http_response
-      body = body()
-      out = StringIO.new
-      out.puts "Content-Type: #{content_type()}"
-      out.puts "Content-Length: #{body.length}"
-      out.puts
-      out.puts body
-      out.string
     end
   end
 
@@ -113,42 +122,28 @@ module BitClust
   end
 
   class TemplateScreen < Screen
-    def initialize(params)
-      @params = params
-      @urlmapper = params.urlmapper
-      @template_repository = params.template_repository
+    def initialize(urlmapper, template_repository)
+      @urlmapper = urlmapper
+      @template_repository = template_repository
+    end
+
+    def content_type
+      "text/html; charset=#{encoding()}"
     end
 
     private
 
     def run_template(id)
       erb = ERB.new(@template_repository.load(id))
-      erb.filename = id
+      erb.filename = id + '.erb'
       erb.result(binding())
     end
 
     alias h escape_html
 
     def css_url
-      @params.css_url
+      @urlmapper.css_url
     end
-  end
-
-  class EntityBoundScreen < TemplateScreen
-    def initialize(params, entity)
-      super params
-      @entity = entity
-    end
-
-    def content_type
-      "text/html; charset=#{@entity.encoding}"
-    end
-
-    def encoding
-      @entity.encoding
-    end
-
-    alias charset encoding
 
     def headline_init
       @hlevel = 1
@@ -171,9 +166,48 @@ module BitClust
     end
   end
 
+  class IndexScreen < TemplateScreen
+    def initialize(u, t, entities)
+      super u, t
+      @entities = entities
+    end
+
+    def encoding
+      return 'us-ascii' if @entities.empty?
+      @entities.first.encoding
+    end
+
+    alias charset encoding
+  end
+
+  class EntityBoundScreen < TemplateScreen
+    def initialize(u, t, entity)
+      super u, t
+      @entity = entity
+    end
+
+    def encoding
+      @entity.encoding
+    end
+
+    alias charset encoding
+  end
+
+  class LibraryIndexScreen < IndexScreen
+    def body
+      run_template('library-index')
+    end
+  end
+
   class LibraryScreen < EntityBoundScreen
     def body
       run_template('library')
+    end
+  end
+
+  class ClassIndexScreen < IndexScreen
+    def body
+      run_template('class-index')
     end
   end
 

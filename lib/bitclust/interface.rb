@@ -24,10 +24,10 @@ module BitClust
 
     def main
       if fastcgi?
-        FCGI.new(@webrick_conf).main(@handlers)
+        FCGI.new(@webrick_conf).main(@handler)
       else
         # CGI, mod_ruby
-        CGI.new(@webrick_conf).main(@handlers)
+        CGI.new(@webrick_conf).main(@handler)
       end
     end
 
@@ -48,7 +48,7 @@ module BitClust
       end
 
       def do_GET(wreq, wres)
-        @handler.handle(Request.new(wreq)).update_for wres
+        @handler.handle(wreq).update wres
       end
 
       alias do_POST do_GET
