@@ -1,3 +1,7 @@
+Fri Sep 15 02:10:31 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: temporary fix (allow private methods).
+
 Thu Sep 14 17:25:20 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/screen.rb: new class LibraryIndexScreen.

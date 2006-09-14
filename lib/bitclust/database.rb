@@ -228,7 +228,7 @@ get_class(name) or ForwardLibrary.new(name)
     def define_private_singleton_method(names, src, lib)
       t = @singleton_methods
       m = new_method(:smethod, names, src, lib)
-      m.private
+      # m.private
       define @singleton_methods, @s_table, m
       m
     end
@@ -242,7 +242,7 @@ get_class(name) or ForwardLibrary.new(name)
     def define_private_instance_method(names, src, lib)
       t = @instance_methods
       m = new_method(:imethod, names, src, lib)
-      m.private
+      # m.private
       define @instance_methods, @i_table, m
     end
 
@@ -263,7 +263,7 @@ get_class(name) or ForwardLibrary.new(name)
     def overwrite_private_singleton_method(names, src, lib)
       t = @singleton_methods
       m = new_method(:smethod, names, src, lib)
-      m.private
+      # m.private
       overwrite @singleton_methods, m
       m
     end
@@ -278,7 +278,7 @@ get_class(name) or ForwardLibrary.new(name)
     def overwrite_private_instance_method(names, src, lib)
       t = @instance_methods
       m = new_method(:imethod, names, src, lib)
-      m.private
+      # m.private
       overwrite @instance_methods, m
       m
     end
