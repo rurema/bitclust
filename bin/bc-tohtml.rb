@@ -59,7 +59,8 @@ end
 def parse_file(path)
   db = BitClust::Database.new(nil)
   parser = BitClust::RRDParser.new(db)
-  parser.parse_file(path, {"version" => "1.9.0"})
+  libname = File.basename(path, '.rd')
+  parser.parse_file(path, libname, {"version" => "1.9.0"})
 end
 
 def lookup(lib, key)

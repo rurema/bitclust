@@ -1,3 +1,7 @@
+Thu Sep 14 16:40:19 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-tohtml.rb: follow database method change.
+
 Thu Sep 14 16:39:56 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: forgot to add receiver.
