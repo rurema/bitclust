@@ -28,7 +28,7 @@ module BitClust
         f.while_match(/\A---/) do |line|
           compile_signature(line)
         end
-        puts '<dd>'
+        @out.puts '<dd>'
         while f.next?
           case f.peek
           when /\A---/
@@ -51,7 +51,7 @@ module BitClust
             end
           end
         end
-        puts '</dd>'
+        @out.puts '</dd>'
       end
       @out.string
     end
