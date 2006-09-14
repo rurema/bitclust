@@ -25,7 +25,18 @@ def main
   prefix = nil
 
   parser = OptionParser.new
-  parser.banner = "Usage: #{File.basename($0, '.*')} (init|update|list|lookup) [options]"
+  parser.banner = <<-EndBanner
+Usage: #{File.basename($0, '.*')} [global options] <subcommand> [options] [args]
+
+Subcommands:
+    init        Initialize database.
+    update      Update database.
+    list        List libraries/classes/methods in database.
+    lookup      Lookup libraries/classes/methods from database.
+    property    Handle database properties.
+
+Global Options:
+  EndBanner
   parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
     prefix = path
   }
