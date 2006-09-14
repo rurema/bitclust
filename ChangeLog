@@ -1,3 +1,7 @@
+Thu Sep 14 16:39:56 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: forgot to add receiver.
+
 Thu Sep 14 01:11:22 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: new file.
