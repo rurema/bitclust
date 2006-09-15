@@ -9,8 +9,12 @@ require 'bitclust'
 require 'optparse'
 
 def main
+  check_only = false
   parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0, '.*')} <file>..."
+  parser.on('-c', '--check-only', 'Check syntax and output status.') {
+    check_only = true
+  }
   parser.on('--help', 'Prints this message and quit.') {
     puts parser.help
     exit
@@ -22,9 +26,22 @@ def main
     exit 1
   end
 
+  success = true
   ARGV.each do |path|
-    show_library BitClust::RRDParser.parse_stdlib_file(path)
+    begin
+      lib = BitClust::RRDParser.parse_stdlib_file(path)
+      if check_only
+        $stderr.puts "#{path}: OK"
+      else
+        show_library lib
+      end
+    rescue BitClust::CompilerError => err
+      raise if $DEBUG
+      $stderr.puts "#{path}: FAIL: #{err.message}"
+      success = false
+    end
   end
+  exit success
 end
 
 def show_library(lib)

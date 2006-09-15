@@ -129,7 +129,8 @@ module BitClust
           end
           f.skip_blank_lines
           @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
-          @context.singleton_method
+          @context.visibility = :public
+          @context.type = :singleton_method
           read_entries f
         when 'reopen'
           @context.reopen_class name
@@ -259,7 +260,7 @@ module BitClust
       end
 
       def define_object(name)
-        register_class :object, name
+        register_class :object, name, nil
       end
 
       def register_class(type, name, superclass)
