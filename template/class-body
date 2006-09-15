@@ -7,7 +7,7 @@
 <%= headline("Methods") %>
 <%
     headline_push
-    @curr.entries.each do |m|
+    @curr.entries.sort_by {|m| m.name }.each do |m|
 %>
 <%=   compile_rd(m.source) %>
 <%

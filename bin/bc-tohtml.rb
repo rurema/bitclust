@@ -48,19 +48,12 @@ def main
     exit 1
   end
 
-  lib = parse_file(ARGV[0])
+  lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0])
   entity = lookup(lib, target)
   manager = BitClust::ScreenManager.new(
     :baseurl => 'http://example.com/',
     :templatedir => templatedir)
   puts manager.entity_screen(entity).body
-end
-
-def parse_file(path)
-  db = BitClust::Database.new(nil)
-  parser = BitClust::RRDParser.new(db)
-  libname = File.basename(path, '.rd')
-  parser.parse_file(path, libname, {"version" => "1.9.0"})
 end
 
 def lookup(lib, key)

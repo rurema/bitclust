@@ -1,6 +1,0 @@
-<% @method.signatures.each do |sig| %>
-<dt><%=h sig %></dt>
-<% end %>
-<dd>
-<%= @method.body_html %>
-</dd>

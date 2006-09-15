@@ -47,16 +47,6 @@ span.menuseparator {
     margin: 0px;
 }
 
-/*
-span.lastmodified {
-}
-*/
-
-/*
-div.footer {
-}
-*/
-
 address {
     text-align: right;
     font-size: x-small;
@@ -90,12 +80,20 @@ h3 {
     margin-bottom: 0.5em;
 }
 
+/* tmp */
+h4 {
+    font-size: 150%;
+    text-align: left;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
 /* never use */
-h4, h5, h6 {
+h5, h6 {
     background-color: red;
 }
 
-div.main p {
+p {
     line-height: 1.4;
     margin-top: 1em;
     margin-bottom: 1em;
@@ -168,70 +166,6 @@ hr {
     height: 1px;
 }
 
-/*
-    diff
-*/
-span.addedline {
-    background-color: #fdd;
-}
-span.removedline {
-    background-color: #ddd;
-}
-pre.diff {
-    background-color: transparent;
-    line-height: 1.4;
-    padding: 0px;
-    font-weight: normal;
-}
-
-/*
-    gdiff
-*/
-p.minimenu {
-}
-
-/*
-    annotate
-*/
-pre.annotate {
-    background-color: transparent;
-}
-span.new4 {
-    background-color: #fdd;
-}
-span.new3 {
-    background-color: #fbb;
-}
-span.new2 {
-    background-color: #faa;
-}
-span.new1 {
-    background-color: #f88;
-}
-span.new0 {
-    background-color: #f66;
-}
-
-/*
-    edit
-*/
-textarea.edit {
-    width: 100%;
-}
-
-/*
-    preview
-*/
-span.previewmark {
-    color: red;
-    background-color: transparent;
-    font-size: 200%;
-    font-weight: bold;
-}
-
-/*
-    For Printing
-*/
 @media print {
     body {
         font-family: osaka,'MS Mincho',serif;
@@ -252,8 +186,5 @@ span.previewmark {
     a, a:link, a:visited {
         color: #33a;
         font-weight: normal;
-    }
-    a.dangling {
-        display: none;
     }
 }

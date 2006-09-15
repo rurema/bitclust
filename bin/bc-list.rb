@@ -6,7 +6,6 @@ bindir = Pathname.new(__FILE__).realpath.dirname
 $LOAD_PATH.unshift((bindir + '../lib').realpath)
 
 require 'bitclust'
-require 'pp'
 require 'optparse'
 
 def main
@@ -23,11 +22,24 @@ def main
     exit 1
   end
 
-  db = BitClust::Database.new(nil)
-  parser = BitClust::RRDParser.new(db)
   ARGV.each do |path|
-    libname = File.basename(path, '.rd')
-    pp parser.parse_file(path, libname, {"version" => "1.9.0"})
+    show_library BitClust::RRDParser.parse_stdlib_file(path)
+  end
+end
+
+def show_library(lib)
+  puts "= Library #{lib.name}"
+  lib.classes.each do |c|
+    puts c.inspect
+    c.each do |m|
+      puts "\t#{m.inspect}"
+    end
+  end
+  unless lib.methods.empty?
+    puts "Additional Methods:"
+    lib.methods.each do |m|
+      puts "\t#{m.inspect}"
+    end
   end
 end
 

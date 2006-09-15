@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>Library <%=h @entity.name %></title>
+  <title>library <%=h @entity.name %></title>
 </head>
 <body>
 
@@ -16,15 +16,22 @@
     headline_push
 %>
 <%= compile_rd(@entity.source) %>
+<%= headline("Provided Classes and Modules") %>
+<dl>
 <%
     @entity.classes.each do |c|
-      @curr = c
 %>
-.include class-body
+<dt><%=h c.type.to_s %> <%=h c.name %></dt>
+<dd>
+<%    c.entries.map {|m| m.names }.flatten.sort.each do |name| %>
+<%=h name %>
+<%    end %>
+</dd>
 <%
     end
     headline_pop
 %>
+</dl>
 
 </body>
 </html>

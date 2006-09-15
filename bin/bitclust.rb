@@ -61,6 +61,10 @@ Global Options:
     $stderr.puts parser.help
     exit 1
   end
+  unless prefix
+    $stderr.puts "no database given. Use --database option"
+    exit 1
+  end
   db = BitClust::Database.new(prefix)
   cmd.exec db
 end
@@ -87,7 +91,7 @@ class InitCommand
 
   def exec(db)
     db.init
-    db.transction {
+    db.transaction {
       ARGV.each do |kv|
         k, v = kv.split('=', 2)
         db.propset k, v

@@ -4,15 +4,15 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title>method <%=h @entity.name %></title>
+  <title>method <%=h @entity.label %></title>
 </head>
 <body>
 
 <% headline_init %>
-<%= headline("method #{@entity.name}") %>
+<%= headline("method #{@entity.label}") %>
 
 <dl>
-<%= @entity.document_html %>
+<%= compile_rd(@entity.source) %>
 </dl>
 
 </body>

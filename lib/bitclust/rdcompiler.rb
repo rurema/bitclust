@@ -25,80 +25,123 @@ module BitClust
       @f = f = LineInput.new(StringIO.new(src))
       @out = StringIO.new
       while f.next?
-        f.while_match(/\A---/) do |line|
-          compile_signature(line)
-        end
-        @out.puts '<dd>'
-        while f.next?
-          case f.peek
-          when /\A---/
-            break
-          when /\A=+/
-            h f.gets
-          when /\A\s+\*\s/
-            ul
-          when /\A\s+\(\d+\)\s/
-            ol
-          when %r<\A//emlist\{>
-            emlist
-          when /\A\s+\S/
-            list
+        case f.peek
+        when /\A---/
+          method_list
+        when /\A=+/
+          h f.gets
+        when /\A\s+\*\s/
+          ul
+        when /\A\s+\(\d+\)\s/
+          ol
+        when %r<\A//emlist\{>
+          emlist
+        when /\A\s+\S/
+          list
+        else
+          if f.peek.strip.empty?
+            f.gets
           else
-            if f.peek.strip.empty?
-              f.gets
-            else
-              paragraph
-            end
+            paragraph
           end
         end
-        @out.puts '</dd>'
       end
       @out.string
     end
 
     private
 
-    def h(line)
+    def method_list
+      @f.while_match(/\A---/) do |line|
+        compile_signature(line)
+      end
+      @out.puts '<dd>'
+      while @f.next?
+        case @f.peek
+        when /\A===+/
+          headline @f.gets
+        when /\A=/, /\A---/
+          break
+        when /\A\s+\*\s/
+          ulist
+        when /\A\s+\(\d+\)\s/
+          olist
+        when /\A:\s/
+          dlist
+        when %r<\A//emlist\{>
+          emlist
+        when /\A\s+\S/
+          list
+        else
+          if @f.peek.strip.empty?
+            @f.gets
+          else
+            paragraph
+          end
+        end
+      end
+      @out.puts '</dd>'
+    end
+
+    def headline(line)
       level = @hlevel + (line.slice(/\A=+/).size - 3)
       label = line.sub(/\A=+/, '').strip
-      @out.puts "<h#{level}>#{escape_html(label)}</h#{level}>"
+      line h(level, escape_html(label))
     end
 
-    def ul
-      puts '<ul>'
+    def h(level, label)
+      "<h#{level}>#{label}</h#{level}>"
+    end
+
+    def ulist
+      @out.puts '<ul>'
       @f.while_match(/\A\s+\*\s/) do |line|
-        @out.print '<li>'
-        @out.print compile_text(line.sub(/\A\s+\*/, '').strip)
+        string '<li>'
+        string compile_text(line.sub(/\A\s+\*/, '').strip)
         @f.while_match(/\A\s+[^\*\s]/) do |cont|
-          @out.print "\n"
-          @out.print compile_text(cont.strip)
+          nl
+          string compile_text(cont.strip)
         end
-        @out.puts '</li>'
+        line '</li>'
       end
-      @out.puts '</ul>'
+      line '</ul>'
     end
 
-    def ol
-      puts '<ol>'
+    def olist
+      @out.puts '<ol>'
       @f.while_match(/\A\s+\(\d+\)/) do |line|
-        @out.print '<li>'
-        @out.print compile_text(line.sub(/\A\s+\(\d+\)/, '').strip)
+        string '<li>'
+        string compile_text(line.sub(/\A\s+\(\d+\)/, '').strip)
         @f.while_match(/\A\s+(?!\(\d+\))\S/) do |cont|
-          @out.print "\n"
-          @out.print compile_text(cont.strip)
+          string "\n"
+          string compile_text(cont.strip)
         end
-        @out.puts '</li>'
+        line '</li>'
       end
-      @out.puts '</ol>'
+      line '</ol>'
+    end
+
+    def dlist
+      line '<dl>'
+      @f.while_match(/\A:/) do |line|
+        line dt(compile_text(line.sub(/\A:/, '').strip))
+      end
+      line '<dd>'
+# FIXME: allow nested pre??
+      @f.while_match(/\A(?:\s|\z)/) do |line|
+        line compile_text(line.strip)
+      end
+      line '</dd>'
+      line '</dl>'
     end
 
     def emlist
       @f.gets   # discard "//emlist{"
-      @out.puts '<pre>'
+      line '<pre>'
       @f.until_terminator(%r<\A//\}>) do |line|
-        @out.puts escape_html(line.rstrip)
+        line escape_html(line.rstrip)
       end
-      @out.puts '</pre>'
+      line '</pre>'
     end
 
     def list
@@ -106,11 +149,11 @@ module BitClust
       while lines.last.empty?
         lines.pop
       end
-      @out.puts '<pre>'
+      line '<pre>'
       lines.each do |line|
-        @out.puts escape_html(line)
+        line escape_html(line)
       end
-      @out.puts '</pre>'
+      line '</pre>'
     end
 
     def canonicalize(lines)
@@ -118,18 +161,18 @@ module BitClust
     end
 
     def paragraph
-      @out.puts '<p>'
+      line '<p>'
       @f.while_match(%r<\A(?!---|=|//\w)\S>) do |line|
-        @out.puts compile_text(line.strip)
+        line compile_text(line.strip)
       end
-      @out.puts '</p>'
+      line '</p>'
     end
 
     def compile_signature(sig)
       # FIXME: check parameters, types, etc.
-      @out.print '<dt>'
-      @out.print escape_html(sig.sub(/\A---/, '').strip)
-      @out.puts '</dt>'
+      string '<dt>'
+      string escape_html(sig.sub(/\A---/, '').strip)
+      line '</dt>'
     end
 
     BracketLink = /\[\[[!-~]+?\]\]/n
@@ -155,6 +198,22 @@ module BitClust
     def seems_code(text)
       # FIXME
       escape_html(text)
+    end
+
+    def dt(s)
+      "<dt>#{s}</dt>"
+    end
+
+    def string(str)
+      @out.print str
+    end
+
+    def line(str)
+      @out.puts str
+    end
+
+    def nl
+      @out.puts
     end
 
   end

@@ -8,6 +8,8 @@
 #
 
 require 'bitclust/screen'
+require 'bitclust/database'
+require 'bitclust/nameutils'
 
 unless Object.method_defined?(:funcall)
   class Object
@@ -48,22 +50,19 @@ module BitClust
 
     def handle_library(req)
       return library_index() unless req.library_name
-      lib = @db.lookup_library(req.library_name) or
-              raise LibraryNotFound, "no such library: #{library.name.inspect}"
+      lib = @db.fetch_library(req.library_name)
       @screenmanager.library_screen(lib).response
     end
 
     def handle_class(req)
       return class_index() unless req.class_name
-      c = @db.lookup_class(req.class_name) or
-              raise ClassNotFound, "no such class: #{req.class_name.inspect}"
+      c = @db.fetch_class(req.class_name)
       @screenmanager.class_screen(c).response
     end
 
     def handle_method(req)
       return class_index() unless req.method_spec
-      m = @db.lookup_method(*req.method_spec) or
-              raise MethodNotFound, "no such method: #{req.method_spec.inspect}"
+      m = @db.fetch_method(req.method_spec)
       @screenmanager.method_screen(m).response
     end
 
@@ -83,6 +82,8 @@ module BitClust
 
 
   class Request
+
+    include NameUtils
 
     def initialize(wreq)
       @wreq = wreq
@@ -118,17 +119,11 @@ module BitClust
       return nil unless c
       return nil unless t
       return nil unless m
-      return nil unless /\A[\w+\:\-]+\z/ =~ c
-      type =
-          case t
-          when 'i' then :imethod
-          when 's' then :smethod
-          when 'c' then :constant
-          when 'v' then :svar
-          else
-            nil
-          end
-      [c, type, m]
+      c = c.gsub(/__/, '::')
+      return nil unless /\A[\w+\:]+\z/ =~ c
+      return nil unless /\A[simcv]\z/ =~ t
+      # m is going to be encoded
+      SearchPattern.for_ctm(c, typechar2mark(t), m)
     end
 
     def type_id

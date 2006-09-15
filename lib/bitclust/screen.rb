@@ -29,7 +29,7 @@ module BitClust
     end
 
     def library_screen(lib)
-      new_screen(LibraryScreen.new, lib)
+      new_screen(LibraryScreen, lib)
     end
 
     def class_index_screen(cs)
@@ -187,7 +187,7 @@ module BitClust
     end
 
     def encoding
-      @entity.encoding
+      @entity.encoding || 'us-ascii'
     end
 
     alias charset encoding

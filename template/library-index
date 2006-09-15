@@ -19,6 +19,11 @@
 %>
 <%= headline(lib.name) %>
 <%= compile_rd(lib.source) %>
+<ul>
+<%    lib.classes.each do |c| %>
+<li><%=h c.type.to_s %> <%=h c.name %></li>
+<%    end %>
+</ul>
 <%
     end
     headline_pop
