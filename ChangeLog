@@ -1,3 +1,56 @@
+Fri Sep 15 23:31:57 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: implement `init' subcommand.
+
+	* bin/bitclust.rb: implement `update' subcommand.
+
+	* bin/bc-list.rb: more friendly output.
+
+	* bin/bc-tohtml.rb: use new utility method parse_stdlib_file.
+
+	* lib/bitclust/screen.rb: entity.encoding might return nil (using
+	  dummy database).
+
+	* lib/bitclust/rdcompiler.rb: toplevel may not be a method list.
+
+	* lib/bitclust/rdcompiler.rb: support dlist (incomplete).
+
+	* lib/bitclust/nameutils.rb: new file.
+
+	* lib/bitclust/compat.rb: new file.
+
+	* lib/bitclust/database.rb: implement lazy loading.
+
+	* lib/bitclust/database.rb: implement save function.
+
+	* lib/bitclust/database.rb: rename class: *Description -> *Entry.
+
+	* lib/bitclust/database.rb: new class MethodSpec.
+
+	* lib/bitclust/database.rb: new class SearchPattern.
+
+	* lib/bitclust/database.rb: more and more changes/fixes.
+
+	* lib/bitclust/rrdparser.rb: new util method
+	  RRDParser.parse_stdlib_file.
+
+	* lib/bitclust/rrdparser.rb: introduce new class Context.
+
+	* lib/bitclust/requesthandler.rb: follow database interaface
+	  change.
+
+	* lib/bitclust/exception.rb: introduce new exceptions.
+
+	* template/class-body: sort entries.
+
+	* template/library: shorter output.
+
+	* template/library-index: show class names.
+
+	* template/method: better output.
+
+	* template/method-body: removed.
+
 Fri Sep 15 18:31:57 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-convert.rb: "self + other" wrongly converted to "+(o)".
