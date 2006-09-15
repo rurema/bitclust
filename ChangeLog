@@ -1,3 +1,7 @@
+Fri Sep 15 18:31:57 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-convert.rb: "self + other" wrongly converted to "+(o)".
+
 Fri Sep 15 02:10:31 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb: temporary fix (allow private methods).

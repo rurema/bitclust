@@ -102,7 +102,7 @@ def convert_signature(line)
     "[]=(#{$1}, #{$2.strip})"
   when /\A[\w\:]+\[(.*)\]/                   # self[key]
     "[](#{$1})"
-  when /\Aself\s*([+\-<>=~*^&|%\/]+)\s*(\w)/   # self + other
+  when /\Aself\s*([+\-<>=~*^&|%\/]+)\s*(\w+)/   # self + other
     "#{$1}(#{$2})"
   when /\A([+\-~`])\s*\w+/                   # ~ self
     case op = $1
