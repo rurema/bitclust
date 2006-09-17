@@ -4,6 +4,24 @@ module BitClust
 
   module NameUtils
 
+    def libname2id(name)
+      name.split('/').map {|ent| fsencode(ent) }.join('.')
+    end
+
+    def libid2name(id)
+      name.split('.').map {|ent| fsdecode(ent) }.join('/')
+    end
+
+    # A constant name must be composed by fs-safe characters.
+    def classname2id(name)
+      name.gsub(/::/, '__')
+    end
+
+    # A class name must not include '__'.
+    def classid2name(id)
+      id.gsub(/__/, '::')
+    end
+
     NAME_TO_MARK = {
       :singleton_method => '.',
       :instance_method  => '#',

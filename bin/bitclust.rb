@@ -144,8 +144,8 @@ class UpdateCommand
     Dir.glob("#{root}/_builtin/*.rd") do |path|
       db.update_by_file path, '_builtin'
     end
-    re = %r<\A#{Regexp.quote(@root)}/>
-    Dir.glob("#{@root}/**/*.rd").each do |path|
+    re = %r<\A#{Regexp.quote(root)}/>
+    Dir.glob("#{root}/**/*.rd").each do |path|
       libname = path.sub(re, '').sub(/\.rd\z/, '')
       next if %r<\A_builtin/> =~ libname
       db.update_by_file path, libname

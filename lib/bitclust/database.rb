@@ -475,7 +475,9 @@ module BitClust
 
     attr_reader :name
 
-    alias id name
+    def id
+      libname2id(@name)
+    end
 
     def inspect
       "#<library c=#{classnames().join(',')} m=#{methodnames().join(',')}>"
@@ -623,7 +625,9 @@ module BitClust
 
     attr_reader :name
 
-    alias id name
+    def id
+      classname2id(@name)
+    end
 
     property :type
     property :superclass
