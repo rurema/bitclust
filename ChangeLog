@@ -1,3 +1,9 @@
+Sun Sep 17 20:04:57 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: support special variables.
+
+	* lib/bitclust/rrdparser.rb: better error message.
+
 Sun Sep 17 18:24:29 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-list.rb: message header should be program name, not file

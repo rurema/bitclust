@@ -163,6 +163,8 @@ module BitClust
           @context.module_function
         when /\AConstants?\z/i
           @context.constant
+        when /\ASpecial\s+Variables?\z/i
+          @context.special_variable
         else
           compile_error "unknown level-2 header", line
         end
@@ -212,12 +214,15 @@ module BitClust
 
     def check_chunk_signatures(sigs, line)
       if cxt = @context.signature
+        unless cxt.fully_qualified?
+          compile_error "unqualified signature (#{cxt})", line
+        end
         if sig = sigs.detect {|sig| not cxt.compatible?(sig) }
           compile_error "incompatible signature: #{cxt} <-> #{sig}", line
         end
       else
         unless sigs[0].fully_qualified?
-          compile_error "unqualified signature : #{sigs[0]}", line
+          compile_error "unqualified signature (#{sigs[0]})", line
         end
         if sigs.all? {|s| sigs[0].same_type?(s) }
           compile_error "alias entries have multiple class/type", line
@@ -229,11 +234,16 @@ module BitClust
     cpath = /#{const}(?:::#{const})*/
     mid = /\w+[?!=]?|===|==|=~|<=|=>|<=>|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
     SIGNATURE = /\A---\s*(?:(#{cpath})([\.\#]|::))?(#{mid})/
+    SVAR = /\A---\s*\$(\w+|-.|\S)/
 
     def method_signature(line)
-      m = SIGNATURE.match(line) or
-          compile_error "failed to parse method signature", line
-      Signature.new(m[1], m[2], m[3])
+      if m = SIGNATURE.match(line)
+        Signature.new(m[1], m[2], m[3])
+      elsif m = SVAR.match(line)
+        Signature.new(nil, '$', m[1])
+      else
+        compile_error "failed to parse method signature", line
+      end
     end
 
     class Context
@@ -309,12 +319,18 @@ module BitClust
         @type = :constant
       end
 
+      def special_variable
+        unless @klass and @klass.name == 'Kernel'
+          raise "must not happen: type=special_variable but class!=Kernel"
+        end
+        @type = :special_variable
+      end
+
       include NameUtils
 
       def signature
         return nil unless @klass
-        return nil unless @type
-        Signature.new(@klass, typename2mark(@type), nil)
+        Signature.new(@klass, @type ? typename2mark(@type) : nil, nil)
       end
 
       def define_method(chunk)
@@ -380,8 +396,12 @@ module BitClust
       attr_reader :type
       attr_reader :name
 
+      def inspect
+        "\#<signature #{to_s()}>"
+      end
+
       def to_s
-        "#{@klass.name}#{@type}#{@name}"
+        "#{@klass ? @klass.name : '_'}#{@type || ' _ '}#{@name}"
       end
 
       def typename
@@ -398,7 +418,7 @@ module BitClust
       end
 
       def fully_qualified?
-        @klass and @type
+        not not (@klass and @type)
       end
     end
   
@@ -523,10 +543,6 @@ module BitClust
 
     def scan_error(msg)
       raise ScanError, msg
-    end
-
-    def compile_error(msg, line)
-      raise CompileError, "#{line.location}: #{msg}: #{line.inspect}"
     end
 
   end
