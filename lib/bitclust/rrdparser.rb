@@ -159,7 +159,7 @@ module BitClust
           @context.visibility = ($1 || 'public').downcase.intern
           t = ($2 || 'instance').downcase.sub(/class/, 'singleton')
           @context.type = "#{t}_method".intern
-        when /\AModule\+Functions?\z/i
+        when /\AModule\s+Functions?\z/i
           @context.module_function
         when /\AConstants?\z/i
           @context.constant
