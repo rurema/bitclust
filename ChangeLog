@@ -1,3 +1,12 @@
+Sun Sep 17 21:21:34 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: new subcommand "bitclust list".
+
+	* bin/bitclust.rb: new option "bitclust update --stdlibtree=PATH".
+
+	* lib/bitclust/rrdparser.rb: allow level>3 headline for class
+	  document.
+
 Sun Sep 17 20:32:48 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: new subcommand "bitclust list".

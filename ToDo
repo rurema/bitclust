@@ -16,9 +16,7 @@
 	* redefined メソッド
 - http://.../method/String/s/new が見えるようにする
 - bitclust list を実装する
-* bitclust update --tree を実装する
-	* 全部集める
-	* _builtin を特別扱いする
+- bitclust update --stdlibtree を実装する
 * クラスやメソッドへのリンクをちゃんとコンパイルする
 * メソッド目次？
 * dl 内で複数パラグラフ

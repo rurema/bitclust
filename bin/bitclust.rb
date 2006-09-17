@@ -19,6 +19,7 @@ $LOAD_PATH.unshift srcdir_root() + 'lib'
 $KCODE = 'EUC'
 
 require 'bitclust'
+require 'find'
 require 'optparse'
 
 def main
@@ -55,7 +56,7 @@ Global Options:
     error 'no sub-command given' if ARGV.empty?
     name = ARGV.shift
     cmd = subcommands[name] or error "no such sub-command: #{name}"
-    cmd.parse!(ARGV)
+    cmd.parse(ARGV)
   rescue OptionParser::ParseError => err
     $stderr.puts err.message
     $stderr.puts parser.help
@@ -85,7 +86,7 @@ class InitCommand
     }
   end
 
-  def parse!(argv)
+  def parse(argv)
     @parser.parse! argv
   end
 
@@ -102,14 +103,14 @@ end
 
 class UpdateCommand
   def initialize
-    @mode = :file
+    @root = nil
     @library = nil
     @parser = OptionParser.new {|opt|
-      opt.banner = "Usage: #{File.basename($0, '.*')} update <file>..."
-      opt.on('--tree', 'Process RD source directory tree.') {
-        @mode = :tree
+      opt.banner = "Usage: #{File.basename($0, '.*')} update [<file>...]"
+      opt.on('--stdlibtree=ROOT', 'Process stdlib source directory tree.') {|path|
+        @root = path
       }
-      opt.on('--library-name=NAME', 'Use NAME for library name.') {|name|
+      opt.on('--library-name=NAME', 'Use NAME for library name in file mode.') {|name|
         @library = name
       }
       opt.on('--help', 'Prints this message and quit.') {
@@ -119,44 +120,39 @@ class UpdateCommand
     }
   end
 
-  def parse!(argv)
+  def parse(argv)
     @parser.parse! argv
-    case @mode
-    when :file
-      if argv.empty?
-        error "no file given"
-      end
-    when :tree
-      unless argv.size == 1
-        error "-tree requires only 1 arg"
-      end
-    else
-      raise "must not happen: @mode=#{@mode.inspect}"
+    if not @root and argv.empty?
+      error "no file given"
     end
   end
 
   def exec(db, argv)
-    case @mode
-    when :file
-      db.transaction {
-        argv.each do |path|
-          db.update_by_file path, library_name(path)
-        end
-      }
-    when :tree
-     root = ARGV[0]
-     db.transaction {
-       
-     }
-    else
-      raise 'must not happen'
-    end
+    db.transaction {
+      if @root
+        process_stdlib_tree db, @root
+      end
+      argv.each do |path|
+        db.update_by_file path, @library || guess_library_name(path)
+      end
+    }
   end
 
   private
 
-  def library_name(path)
-    return @library if @library
+  def process_stdlib_tree(db, root)
+    Dir.glob("#{root}/_builtin/*.rd") do |path|
+      db.update_by_file path, '_builtin'
+    end
+    re = %r<\A#{Regexp.quote(@root)}/>
+    Dir.glob("#{@root}/**/*.rd").each do |path|
+      libname = path.sub(re, '').sub(/\.rd\z/, '')
+      next if %r<\A_builtin/> =~ libname
+      db.update_by_file path, libname
+    end
+  end
+
+  def guess_library_name(path)
     if %r<(\A|/)src/> =~ path
       path.sub(%r<.*(\A|/)src/>, '').sub(/\.rd\z/, '')
     else
@@ -186,7 +182,7 @@ class ListCommand
     }
   end
 
-  def parse!(argv)
+  def parse(argv)
     @parser.parse! argv
     unless @mode
       error 'one of (--library|--class|--method) is required'
@@ -236,9 +232,9 @@ class LookupCommand
     }
   end
 
-  def parse!(argv)
-raise 'FIXME'
+  def parse(argv)
     @parser.parse! argv
+raise 'FIXME'
   end
 
   def exec(db, argv)

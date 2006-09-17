@@ -51,7 +51,7 @@ module BitClust
   end
 
 
-  module CompilerUtils
+  module CompileUtils
     def compile_error(msg, line)
       raise CompileError, "#{line.location}: #{msg}: #{line.inspect}"
     end
@@ -60,7 +60,7 @@ module BitClust
 
   class RRDParser
 
-    include CompilerUtils
+    include CompileUtils
 
     def RRDParser.parse_stdlib_file(path)
       parser = new(Database.dummy)
@@ -150,7 +150,7 @@ module BitClust
         @context.include line.split[1]
       end
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
+      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       read_entries f
       f.skip_blank_lines
       f.while_match(/\A==[^=]/) do |line|
@@ -401,7 +401,7 @@ module BitClust
       end
 
       def to_s
-        "#{@klass ? @klass.name : '_'}#{@type || ' _ '}#{@name}"
+        "#{@klass || '_'}#{@type || ' _ '}#{@name}"
       end
 
       def typename
@@ -427,6 +427,7 @@ module BitClust
 
   class Preprocessor
 
+    include CompileUtils
     include Enumerable
 
     def Preprocessor.process(path, params = {})
