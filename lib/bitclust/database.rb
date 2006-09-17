@@ -521,6 +521,10 @@ module BitClust
     end
     private :classmap
 
+    def methodnames
+      methods().map {|m| m.label }
+    end
+
     def methods
       methodmap().values
     end

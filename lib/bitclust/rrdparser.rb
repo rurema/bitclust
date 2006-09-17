@@ -227,7 +227,7 @@ module BitClust
 
     const = /[A-Z]\w*/
     cpath = /#{const}(?:::#{const})*/
-    mid = /\w+[?!=]?|===|==|=~|<=|=>|<=>|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>]/
+    mid = /\w+[?!=]?|===|==|=~|<=|=>|<=>|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
     SIGNATURE = /\A---\s*(?:(#{cpath})([\.\#]|::))?(#{mid})/
 
     def method_signature(line)
@@ -325,7 +325,7 @@ module BitClust
           m.visibility = @visibility || :public
           m.source     = chunk.source
           case @kind
-          when :add, :redefine
+          when :added, :redefined
             @library.add_method m
           end
         }

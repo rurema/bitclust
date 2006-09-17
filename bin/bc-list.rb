@@ -37,7 +37,7 @@ def main
       end
     rescue BitClust::CompileError => err
       raise if $DEBUG
-      $stderr.puts "#{path}: FAIL: #{err.message}"
+      $stderr.puts "#{File.basename($0, '.*')}: FAIL: #{err.message}"
       success = false
     end
   end
