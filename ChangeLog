@@ -1,3 +1,10 @@
+Sun Sep 17 23:55:58 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: change database physical structure.
+
+	* lib/bitclust/nameutils.rb (libid2name): fix unexpected infinite
+	  recursion.
+
 Sun Sep 17 21:51:36 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: forgot to change ivar @root -> lvar root.

@@ -9,7 +9,7 @@ module BitClust
     end
 
     def libid2name(id)
-      name.split('.').map {|ent| fsdecode(ent) }.join('/')
+      id.split('.').map {|ent| fsdecode(ent) }.join('/')
     end
 
     # A constant name must be composed by fs-safe characters.

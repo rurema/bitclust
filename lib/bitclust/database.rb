@@ -87,6 +87,8 @@ module BitClust
 
   class Database
 
+    include NameUtils
+
     def Database.dummy
       new(nil)
     end
@@ -114,12 +116,16 @@ module BitClust
       FileUtils.touch "#{@prefix}/properties"
     end
 
+    #
+    # Transaction
+    #
+
     def transaction
       @in_transaction = true
       yield
       return if dummy?
       if @properties_dirty
-        save_string_map 'properties', @properties
+        save_properties 'properties', @properties
         @properties_dirty = false
       end
       @dirty_entities.each_key do |x|
@@ -146,105 +152,19 @@ module BitClust
     alias dirty_class   dirty
     alias dirty_method  dirty
 
+    def update_by_file(path, libname)
+      check_transaction
+      RRDParser.new(self).parse_file(path, libname, properties())
+    end
+
+    #
+    # Properties
+    #
+
     def properties
-      @properties ||= load_string_map('properties')
+      @properties ||= load_properties('properties')
     end
     private :properties
-
-    def libraries
-      librarymap().values
-    end
-
-    def librarymap
-      @librarymap ||= load_extent(LibraryEntry)
-    end
-    private :librarymap
-
-    def classes
-      classmap().values
-    end
-
-    def classmap
-      @classmap ||= load_extent(ClassEntry)
-    end
-    private :classmap
-
-    def load_extent(klass)
-      h = {}
-      entries(klass.type_id).each do |ent|
-        h[ent] = klass.new(self, ent)
-      end
-      h
-    end
-    private :load_extent
-
-    def entries(rel)
-      Dir.entries(fullpath(rel)).reject {|ent| ent[0,1] == '.' }
-    rescue Errno::ENOENT
-      []
-    end
-
-    # internal use only
-    def load_entities(rel, klass)
-      read(rel).split.map {|id| klass.load(self, id) }
-    end
-
-    # internal use only
-    def save_entities(rel, xs)
-      write rel, xs.map {|x| x.id + "\n" }.join('')
-    end
-
-    # internal use only
-    def load_string_map(rel)
-      h = {}
-      read(rel).each do |line|
-        k, v = line.strip.split('=', 2)
-        h[k] = v
-      end
-      h
-    end
-
-    # internal use only
-    def save_string_map(rel, h)
-      write rel, h.map {|k,v| "#{k}=#{v}\n" }.join('')
-    end
-
-    # internal use only
-    def exist?(rel)
-      File.exist?(fullpath(rel))
-    end
-
-    # internal use only
-    def makepath(rel)
-      FileUtils.mkdir_p fullpath(rel)
-    end
-
-    # internal use only
-    def read(rel)
-      File.read(fullpath(rel))
-    rescue Errno::ENOENT
-      raise unless dummy?
-      return ''
-    end
-
-    # internal use only
-    def write(rel, str)
-      tmppath = fullpath(rel) + '.writing'
-      File.open(tmppath, 'w') {|f|
-        f.write str
-      }
-      File.rename tmppath, fullpath(rel)
-    ensure
-      begin
-        File.unlink tmppath
-      rescue
-      end
-    end
-
-    # internal use only
-    def fullpath(rel)
-      "#{@prefix}/#{rel}"
-    end
 
     def propkeys
       properties().keys
@@ -264,9 +184,26 @@ module BitClust
       propget('encoding')
     end
 
-    def update_by_file(path, libname)
-      check_transaction
-      RRDParser.new(self).parse_file(path, libname, properties())
+    #
+    # Libraries
+    #
+
+    def libraries
+      librarymap().values
+    end
+
+    def librarymap
+      @librarymap ||= load_extent(LibraryEntry)
+    end
+    private :librarymap
+
+    def get_library(name)
+      librarymap()[name] ||= LibraryEntry.new(self, libname2id(name))
+    end
+
+    def fetch_library(name)
+      librarymap()[name] or
+          raise EntityNotFound, "library not found: #{name.inspect}"
     end
 
     def open_library(name, reopen = false)
@@ -275,10 +212,32 @@ module BitClust
       if lib = table[name]
         lib.clear unless reopen
       else
-        table[name] = lib = LibraryEntry.new(self, name)
+        table[name] = lib = LibraryEntry.new(self, libname2id(name))
       end
       dirty_library lib
       lib
+    end
+
+    #
+    # Classes
+    #
+
+    def classes
+      classmap().values
+    end
+
+    def classmap
+      @classmap ||= load_extent(ClassEntry)
+    end
+    private :classmap
+
+    def get_class(name)
+      classmap()[name] ||= ClassEntry.new(self, classname2id(name))
+    end
+
+    def fetch_class(name)
+      classmap()[name] or
+          raise EntityNotFound, "class not found: #{name.inspect}"
     end
 
     def open_class(name)
@@ -287,12 +246,25 @@ module BitClust
       if c = table[name]
         c.clear
       else
-        table[name] = c = ClassEntry.new(self, name)
+        table[name] = c = ClassEntry.new(self, classname2id(name))
       end
       yield c
       dirty_class c
       c
     end
+
+    def load_extent(klass)
+      h = {}
+      entries(klass.type_id).each do |ent|
+        h[ent] = klass.new(self, ent)
+      end
+      h
+    end
+    private :load_extent
+
+    #
+    # Methods
+    #
 
     # FIXME: see kind
     def open_method(spec)
@@ -311,24 +283,6 @@ module BitClust
       m
     end
 
-    def get_library(name)
-      librarymap()[name] ||= LibraryEntry.new(self, name)
-    end
-
-    def fetch_library(name)
-      librarymap()[name] or
-          raise EntityNotFound, "library not found: #{name.inspect}"
-    end
-
-    def get_class(name)
-      classmap()[name] ||= ClassEntry.new(self, name)
-    end
-
-    def fetch_class(name)
-      classmap()[name] or
-          raise EntityNotFound, "class not found: #{name.inspect}"
-    end
-
     def fetch_methods(spec)
       fetch_class(spec.klass).search_methods(spec)
     end
@@ -337,26 +291,173 @@ module BitClust
       fetch_class(spec.klass).search_method(spec)
     end
 
+    #
+    # Direct File Access (Internal use only)
+    #
+
+    def exist?(rel)
+      File.exist?(realpath(rel))
+    end
+
+    def entries(rel)
+      Dir.entries(realpath(rel)).reject {|ent| ent[0,1] == '.' }
+    rescue Errno::ENOENT
+      []
+    end
+
+    def makepath(rel)
+      FileUtils.mkdir_p realpath(rel)
+    end
+
+    def load_properties(rel)
+      h = {}
+      File.open(realpath(rel)) {|f|
+        while line = f.gets
+          k, v = line.strip.split('=', 2)
+          break unless k
+          h[k] = v
+        end
+        h['source'] = f.read
+      }
+      h
+    end
+
+    def save_properties(rel, h)
+      source = h.delete('source')
+      atomic_write_open(rel) {|f|
+        h.each do |key, val|
+          f.puts "#{key}=#{val}"
+        end
+        f.puts
+        f.puts source
+      }
+    end
+
+    private
+
+    def atomic_write_open(rel, &block)
+      tmppath = realpath(rel) + '.writing'
+      File.open(tmppath, 'w', &block)
+      File.rename tmppath, realpath(rel)
+    ensure
+      File.unlink tmppath  rescue nil
+    end
+
+    def realpath(rel)
+      "#{@prefix}/#{rel}"
+    end
+
   end
 
 
   class Entity
 
+    def self.persistent_properties
+      @slots = []
+      yield
+      sep = ";"
+      module_eval(src = <<-End, __FILE__, __LINE__ + 1)
+        def init_properties
+          if saved?
+            #{@slots.map {|s| "@#{s.name} = nil" }.join(sep)}
+          else
+            clear
+          end
+        end
+
+        def clear
+          #{@slots.map {|s| "@#{s.name} = #{s.initial_value}" }.join(sep)}
+        end
+
+        def _load_properties(h)
+          #{@slots.map {|s| "@#{s.name} = #{s.deserializer}" }.join(sep)}
+        end
+
+        def _hashize_properties
+          h = {}
+          #{@slots.map {|s| "h['#{s.name}'] = #{s.serializer}" }.join(sep)}
+          h
+        end
+      End
+      @slots.each do |slot|
+        module_eval(<<-End, __FILE__, __LINE__ + 1)
+          def #{slot.name}
+            @#{slot.name} or
+                begin
+                  _load_properties(@db.load_properties(objpath()))
+                  @#{slot.name}
+                end
+          end
+        End
+        attr_writer slot.name
+      end
+    end
+
+    def self.property(name, type)
+      @slots.push Property.new(name, type)
+    end
+
+    class Property
+      def initialize(name, type)
+        @name = name
+        @type = type
+      end
+
+      attr_reader :name
+
+      def initial_value
+        case @type
+        when 'String'         then "'(uninitialized)'"
+        when 'Symbol'         then ":unknown"
+        when 'LibraryEntry'   then ":unknown"
+        when 'ClassEntry'     then ":unknown"
+        when 'MethodEntry'    then ":unknown"
+        when '[String]'       then "[]"
+        when '[LibraryEntry]' then "[]"
+        when '[ClassEntry]'   then "[]"
+        when '[MethodEntry]'  then "[]"
+        else
+          raise "must not happen: @type=#{@type.inspect}"
+        end
+      end
+
+      def deserializer
+        case @type
+        when 'String'         then "h['#{@name}']"
+        when 'Symbol'         then "h['#{@name}'].intern"
+        when 'LibraryEntry'   then "restore_library(h['#{@name}'])"
+        when 'ClassEntry'     then "restore_class(h['#{@name}'])"
+        when 'MethodEntry'    then "restore_method(h['#{@name}'])"
+        when '[String]'       then "h['#{@name}'].split(',')"
+        when '[LibraryEntry]' then "restore_libraries(h['#{@name}'])"
+        when '[ClassEntry]'   then "restore_classes(h['#{@name}'])"
+        when '[MethodEntry]'  then "restore_methods(h['#{@name}'])"
+        else
+          raise "must not happen: @type=#{@type.inspect}"
+        end
+      end
+
+      def serializer
+        case @type
+        when 'String'         then "@#{@name}"
+        when 'Symbol'         then "@#{@name}.to_s"
+        when 'LibraryEntry'   then "serialize_entity(@#{@name})"
+        when 'ClassEntry'     then "serialize_entity(@#{@name})"
+        when 'MethodEntry'    then "serialize_entity(@#{@name})"
+        when '[String]'       then "@#{@name}.join(',')"
+        when '[LibraryEntry]' then "serialize_entities(@#{@name})"
+        when '[ClassEntry]'   then "serialize_entities(@#{@name})"
+        when '[MethodEntry]'  then "serialize_entities(@#{@name})"
+        else
+          raise "must not happen: @type=#{@type.inspect}"
+        end
+      end
+    end
+
     include NameUtils
 
     class << self
       alias load new
-    end
-
-    def self.property(name)
-      module_eval(<<-End, __FILE__, __LINE__ + 1)
-        def #{name}
-          load_props(load_properties()) unless @#{name}
-          @#{name}
-        end
-
-        attr_writer :#{name}
-      End
     end
 
     def initialize(db)
@@ -371,31 +472,17 @@ module BitClust
       @db.encoding
     end
 
-    def source
-      @source ||= db_read('source')
-    end
-
     attr_writer :source
 
     def save
-      @db.makepath objpath()
-      save_properties save_props()
-      db_write 'source', @source if @source
-      _save
+      @db.makepath File.dirname(objpath())
+      @db.save_properties objpath(), _hashize_properties()
     end
 
     private
 
     def saved?
       @db.exist?(objpath())
-    end
-
-    def load_properties
-      @db.load_string_map(objpath('properties'))
-    end
-
-    def save_properties(h)
-      @db.save_string_map(objpath('properties'), h)
     end
 
     def restore_library(id)
@@ -430,16 +517,8 @@ module BitClust
       xs.map {|x| x.id }.join(',')
     end
 
-    def db_read(rel)
-      @db.read(objpath(rel))
-    end
-
-    def db_write(rel, src)
-      @db.write objpath(rel), src
-    end
-
-    def objpath(rel = nil)
-      "#{type_id()}/#{id()}#{rel ? '/' : ''}#{rel}"
+    def objpath
+      "#{type_id()}/#{id()}"
     end
 
   end
@@ -453,69 +532,53 @@ module BitClust
       :library
     end
 
-    def initialize(db, name)
+    def initialize(db, id)
       super db
-      @name = name
+      @id = id
       if saved?
-        @requires = nil
-        @source = nil
-        @classmap = nil    # includes only DEFINED classes
-        @methodmap = nil   # includes only DEFINED methods
+        @classmap = nil
+        @methodmap = nil
       else
-        clear
+        @classmap = {}
+        @methodmap = {}
       end
+      init_properties
     end
 
-    def clear
-      @requires  = []
-      @source    = '(should be initialized)'
-      @classmap  = {}
-      @methodmap = {}
+    attr_reader :id
+
+    def name
+      libid2name(@id)
     end
 
-    attr_reader :name
-
-    def id
-      libname2id(@name)
-    end
+    persistent_properties {
+      property :requires, '[LibraryEntry]'
+      property :classes,  '[ClassEntry]'   # :defined classes
+      property :methods,  '[MethodEntry]'  # :added/:redefined entries
+      property :source,   'String'
+    }
 
     def inspect
       "#<library c=#{classnames().join(',')} m=#{methodnames().join(',')}>"
     end
-
-    property :requires
-
-    def load_props(h)
-      @requires = restore_libraries(h['requires'])
-    end
-    private :load_props
-
-    def save_props
-      {'requires' => serialize_entities(requires())}
-    end
-    private :save_props
 
     def require(lib)
       requires().push lib
     end
 
     def classnames
-      classmap().keys
+      classes().map {|c| c.name }
     end
 
     def each_class(&block)
-      classmap().each_value(&block)
-    end
-
-    def classes
-      classmap().values
+      classes().each(&block)
     end
 
     def classmap
       @classmap ||=
           begin
             h = {}
-            load_classes().each do |c|
+            classes().each do |c|
               h[c.name] = c
             end
             h
@@ -527,19 +590,15 @@ module BitClust
       methods().map {|m| m.label }
     end
 
-    def methods
-      methodmap().values
-    end
-
     def each_method(&block)
-      methodmap().each_key(&block)
+      methods().each(&block)
     end
 
     def methodmap
       @methodmap ||=
           begin
             h = {}
-            load_methods().each do |m|
+            methods().each do |m|
               h[m] = m
             end
             h
@@ -547,14 +606,9 @@ module BitClust
     end
     private :methodmap
 
-    def _save
-      save_classes classes()  if @classmap
-      save_methods methods()  if @methodmap
-    end
-    private :_save
-
     def add_class(c)
       unless classmap()[c.name]
+        classes().push c
         classmap()[c.name] = c
         @db.dirty_library self
       end
@@ -562,27 +616,10 @@ module BitClust
 
     def add_method(m)
       unless methodmap()[m]
+        methods().push m
         methodmap()[m] = m
         @db.dirty_library self
       end
-    end
-
-    private
-
-    def load_classes
-      @db.load_entities(objpath('classes'), ClassEntry)
-    end
-
-    def save_classes(cs)
-      @db.save_entities objpath('classes'), cs
-    end
-
-    def load_methods
-      @db.load_entities(objpath('methods'), MethodEntry)
-    end
-
-    def save_methods(ms)
-      @db.save_entities objpath('methods'), ms
     end
 
   end
@@ -597,83 +634,47 @@ module BitClust
       :class
     end
 
-    def initialize(db, name)
+    def initialize(db, id)
       super db
-      @name = name
-      if saved?
-        @type       = nil   # :class | :module | :object
-        @library    = nil
-        @superclass = nil
-        @included   = nil
-        @extended   = nil
-        @source     = nil
-        @entries    = nil
-      else
-        clear
-      end
+      @id = id
+      @entries = saved? ? nil : []
+      init_properties
     end
 
-    def clear
-      @type       = :unknown
-      @library    = :unknown
-      @superclass = :unknown
-      @included   = []
-      @extended   = []
-      @source     = '(should be initialized)'
-      @entries    = load_methods()
+    attr_reader :id
+
+    def name
+      classid2name(@id)
     end
 
-    attr_reader :name
-
-    def id
-      classname2id(@name)
-    end
-
-    property :type
-    property :superclass
-    property :included
-    property :extended
-    property :library
-
-    def load_props(h)
-      @type       = h['type'].intern
-      @superclass = restore_class(h['superclass'])
-      @included   = restore_classes(h['included'])
-      @extended   = restore_classes(h['extended'])
-    end
-    private :load_props
-
-    def save_props
-      { 'type'       => @type.to_s,
-        'superclass' => serialize_entity(@superclass),
-        'included'   => serialize_entities(@included),
-        'extended'   => serialize_entities(@extended) }
-    end
-    private :save_props
+    persistent_properties {
+      property :type,       'Symbol'         # :class | :module | :object
+      property :superclass, 'ClassEntry'
+      property :included,   '[ClassEntry]'
+      property :extended,   '[ClassEntry]'
+      property :library,    'LibraryEntry'
+      property :source,     'String'
+    }
 
     def entries
-      @entries ||= load_methods()
+      @entries ||= @db.entries("method/#{id()}")\
+          .map {|ent| MethodEntry.new(@db, "#{id()}/#{ent}") }
     end
-
-    def _save
-      save_methods  if @entries
-    end
-    private :_save
 
     def inspect
-      "\#<#{@type} #{@name}>"
+      "\#<#{type()} #{@name}>"
     end
 
     def class?
-      @type == :class
+      type() == :class
     end
 
     def module?
-      @type == :module
+      type() == :module
     end
 
     def object?
-      @type == :object
+      type() == :object
     end
 
     def include(m)
@@ -701,17 +702,6 @@ module BitClust
       entries().push m
     end
 
-    private
-
-    def load_methods
-      @db.entries("method/#{id()}")\
-          .map {|ent| MethodEntry.new(@db, "#{id()}/#{ent}") }
-    end
-
-    def save_methods
-      # FIXME: find removed methods and remove them.
-    end
-
   end
 
 
@@ -725,14 +715,7 @@ module BitClust
     def initialize(db, id)
       super db
       @id = id
-      @names = nil
-      @library = nil
-      @klass = nil
-      @type = nil    # :singleton_method | :instance_method | :module_function
-                     #    | :constant | :special_variable
-      @visibility = nil   # :public | :private | :protected
-      @kind = nil    # :defined | :added | :redefined
-      @source = nil
+      init_properties
     end
 
     attr_reader :id
@@ -741,39 +724,20 @@ module BitClust
       names().first
     end
 
-    property :names
-    property :library
-    property :klass
-    property :type
-    property :visibility
-    property :kind
-
-    def load_props(h)
-      @names      = h['names'].split(',')
-      @library    = restore_library(h['library'])
-      @klass      = restore_class(h['klass'])
-      @type       = h['type'].intern
-      @visibility = h['visibility'].intern
-      @kind       = h['kind'].intern
-    end
-    private :load_props
-
-    def save_props
-      { 'names'      => @names.join(','),
-        'library'    => @library.id,
-        'klass'      => @klass.id,
-        'type'       => @type.to_s,
-        'visibility' => @visibility.to_s,
-        'kind'       => @kind.to_s }
-    end
-    private :save_props
-
-    def _save
-    end
-    private :_save
+    persistent_properties {
+      property :names,      '[String]'
+      property :library,    'LibraryEntry'
+      property :klass,      'ClassEntry'
+      property :type,       'Symbol'   # :singleton_method | :instance_method
+                                       #     | :module_function | :constant
+                                       #     | :special_variable
+      property :visibility, 'Symbol'   # :public | :private | :protected
+      property :kind,       'Symbol'   # :defined | :added | :redefined
+      property :source,     'String'
+    }
 
     def inspect
-      "\#<method #{klass().name}#{typemark()}#{@names.join(',')}>"
+      "\#<method #{klass().name}#{typemark()}#{names().join(',')}>"
     end
 
     def label
@@ -785,19 +749,21 @@ module BitClust
     end
 
     def singleton_method?
-      @type == :singleton_method or @type == :module_function
+      t = type()
+      t == :singleton_method or t == :module_function
     end
 
     def instance_method?
-      @type == :instance_method or @type == :module_function
+      t = type()
+      t == :instance_method or t == :module_function
     end
 
     def constant?
-      @type == :constant
+      type() == :constant
     end
 
     def special_variable?
-      @type == :special_variable
+      type() == :special_variable
     end
 
   end
