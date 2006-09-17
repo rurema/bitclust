@@ -100,7 +100,7 @@ module BitClust
       @classmap = nil
       @in_transaction = false
       @properties_dirty = false
-      @dirty_entities = {}
+      @dirty_entries = {}
     end
 
     def dummy?
@@ -128,10 +128,10 @@ module BitClust
         save_properties 'properties', @properties
         @properties_dirty = false
       end
-      @dirty_entities.each_key do |x|
+      @dirty_entries.each_key do |x|
         x.save
       end
-      @dirty_entities.clear
+      @dirty_entries.clear
     ensure
       @in_transaction = false
     end
@@ -145,7 +145,7 @@ module BitClust
     private :check_transaction
 
     def dirty(x)
-      @dirty_entities[x] = true
+      @dirty_entries[x] = true
     end
 
     alias dirty_library dirty
@@ -203,7 +203,7 @@ module BitClust
 
     def fetch_library(name)
       librarymap()[name] or
-          raise EntityNotFound, "library not found: #{name.inspect}"
+          raise EntryNotFound, "library not found: #{name.inspect}"
     end
 
     def open_library(name, reopen = false)
@@ -237,7 +237,7 @@ module BitClust
 
     def fetch_class(name)
       classmap()[name] or
-          raise EntityNotFound, "class not found: #{name.inspect}"
+          raise EntryNotFound, "class not found: #{name.inspect}"
     end
 
     def open_class(name)
@@ -350,7 +350,7 @@ module BitClust
   end
 
 
-  class Entity
+  class Entry
 
     def self.persistent_properties
       @slots = []
@@ -451,13 +451,13 @@ module BitClust
         case @type
         when 'String'         then "@#{@name}"
         when 'Symbol'         then "@#{@name}.to_s"
-        when 'LibraryEntry'   then "serialize_entity(@#{@name})"
-        when 'ClassEntry'     then "serialize_entity(@#{@name})"
-        when 'MethodEntry'    then "serialize_entity(@#{@name})"
+        when 'LibraryEntry'   then "serialize_entry(@#{@name})"
+        when 'ClassEntry'     then "serialize_entry(@#{@name})"
+        when 'MethodEntry'    then "serialize_entry(@#{@name})"
         when '[String]'       then "@#{@name}.join(',')"
-        when '[LibraryEntry]' then "serialize_entities(@#{@name})"
-        when '[ClassEntry]'   then "serialize_entities(@#{@name})"
-        when '[MethodEntry]'  then "serialize_entities(@#{@name})"
+        when '[LibraryEntry]' then "serialize_entries(@#{@name})"
+        when '[ClassEntry]'   then "serialize_entries(@#{@name})"
+        when '[MethodEntry]'  then "serialize_entries(@#{@name})"
         else
           raise "must not happen: @type=#{@type.inspect}"
         end
@@ -508,26 +508,26 @@ module BitClust
     end
 
     def restore_libraries(str)
-      restore_entities(str, LibraryEntry)
+      restore_entries(str, LibraryEntry)
     end
 
     def restore_classes(str)
-      restore_entities(str, ClassEntry)
+      restore_entries(str, ClassEntry)
     end
 
     def restore_methods(str)
-      restore_entities(str, MethodEntry)
+      restore_entries(str, MethodEntry)
     end
 
-    def restore_entities(str, klass)
+    def restore_entries(str, klass)
       str.split(',').map {|id| klass.load(@db, id) }
     end
 
-    def serialize_entity(x)
+    def serialize_Entry(x)
       x ? x.id : ''
     end
 
-    def serialize_entities(xs)
+    def serialize_entries(xs)
       xs.map {|x| x.id }.join(',')
     end
 
@@ -538,7 +538,7 @@ module BitClust
   end
 
 
-  class LibraryEntry < Entity
+  class LibraryEntry < Entry
 
     include Enumerable
 
@@ -640,7 +640,7 @@ module BitClust
 
 
   # Represents classes, modules and singleton objects.
-  class ClassEntry < Entity
+  class ClassEntry < Entry
 
     include Enumerable
 
@@ -720,7 +720,7 @@ module BitClust
 
 
   # Represents methods, constants, and special variables.
-  class MethodEntry < Entity
+  class MethodEntry < Entry
 
     def MethodEntry.type_id
       :method

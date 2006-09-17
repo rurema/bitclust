@@ -1,3 +1,7 @@
+Mon Sep 18 01:04:51 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: rename: entity -> entry.
+
 Mon Sep 18 01:02:20 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: follow method name changes.
