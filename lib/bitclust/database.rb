@@ -494,7 +494,9 @@ module BitClust
       @db.encoding
     end
 
-    attr_writer :source
+    def synopsis_source
+      source().split(/\n\n/, 2).first
+    end
 
     def save
       @db.makepath File.dirname(objpath())

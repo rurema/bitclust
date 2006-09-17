@@ -4,15 +4,58 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>class <%=h @entity.name %></title>
+  <title>class <%=h @entry.name %></title>
 </head>
 <body>
 
 <%
     headline_init
-    @curr = @entity
 %>
-.include class-body
+<%= headline("#{@entry.type} #{@entry.name}") %>
+<p>
+library: <%= library_link(@entry.library.name) %>
+<% if @entry.superclass %>
+<br>superclass: <%= class_link(@entry.superclass.name) %>
+<% end %>
+<% unless @entry.extended.empty? %>
+<br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
+<% end %>
+<% unless @entry.included.empty? %>
+<br>include: <%= @entry.included.map {|c| class_link(c.name) }.join(', ') %>
+<% end %>
+</p>
+<%
+    headline_push
+%>
+<%= compile_rd(@entry.source) %>
+
+<%
+    ents = @entry.partitioned_entries
+    [['Singleton Methods',         ents.singleton_methods],
+     ['Instance Methods',          ents.instance_methods],
+     ['Private Singleton Methods', ents.private_singleton_methods],
+     ['Private Instance Methods',  ents.private_instance_methods],
+     ['Constants',                 ents.constants],
+     ['Special Variables',         ents.special_variables]]\
+    .each do |(label, entries)|
+      unless entries.empty? %>
+<%=     headline(label) %>
+<dl>
+<%
+        headline_push
+        entries.each do |m|
+%>
+<%=       compile_rd(m.source) %>
+<%
+        end
+        headline_pop
+      end
+%>
+</dl>
+<%
+    end
+    headline_pop
+%>
 
 </body>
 </html>

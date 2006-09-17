@@ -1,3 +1,29 @@
+Mon Sep 18 05:10:31 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: new method Entry#synopsis_source.
+
+	* lib/bitclust/requesthandler.rb: sort entries before show.
+
+	* lib/bitclust/rdcompiler.rb: surround method signature with
+	  <code>.
+
+	* lib/bitclust/screen.rb: entity -> entry.
+
+	* template/library-index: link to libraries, classes.
+
+	* template/library: show classes/modules, then classes/modules
+	  with methods.
+
+	* template/class-index: link to classes.
+
+	* template/class: merge class-body.
+
+	* template/class-body: merged in to template/class.
+
+	* template/method: link to source library.
+
+	* theme/default/style.css: use same color for visited link.
+
 Mon Sep 18 04:21:05 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb: new method Database#sorted_libraries,

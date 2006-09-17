@@ -21,8 +21,8 @@ module BitClust
       @urlmapper = URLMapper.new(h)
     end
 
-    def entity_screen(entity)
-      new_screen(Screen.for_entity(entity), entity)
+    def entry_screen(entry)
+      new_screen(Screen.for_entry(entry), entry)
     end
 
     def library_index_screen(libs)
@@ -106,8 +106,8 @@ module BitClust
 
 
   class Screen
-    def Screen.for_entity(entity)
-      ::BitClust.const_get("#{entity.type_id.to_s.capitalize}Screen")
+    def Screen.for_entry(entry)
+      ::BitClust.const_get("#{entry.type_id.to_s.capitalize}Screen")
     end
   end
 
@@ -188,27 +188,27 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
-    def initialize(u, t, entities)
+    def initialize(u, t, entries)
       super u, t
-      @entities = entities
+      @entries = entries
     end
 
     def encoding
-      return 'us-ascii' if @entities.empty?
-      @entities.first.encoding
+      return 'us-ascii' if @entries.empty?
+      @entries.first.encoding
     end
 
     alias charset encoding
   end
 
-  class EntityBoundScreen < TemplateScreen
-    def initialize(u, t, entity)
+  class EntryBoundScreen < TemplateScreen
+    def initialize(u, t, entry)
       super u, t
-      @entity = entity
+      @entry = entry
     end
 
     def encoding
-      @entity.encoding || 'us-ascii'
+      @entry.encoding || 'us-ascii'
     end
 
     alias charset encoding
@@ -220,7 +220,7 @@ module BitClust
     end
   end
 
-  class LibraryScreen < EntityBoundScreen
+  class LibraryScreen < EntryBoundScreen
     def body
       run_template('library')
     end
@@ -232,13 +232,13 @@ module BitClust
     end
   end
 
-  class ClassScreen < EntityBoundScreen
+  class ClassScreen < EntryBoundScreen
     def body
       run_template('class')
     end
   end
 
-  class MethodScreen < EntityBoundScreen
+  class MethodScreen < EntryBoundScreen
     def body
       run_template('method')
     end

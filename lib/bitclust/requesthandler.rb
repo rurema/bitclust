@@ -67,11 +67,11 @@ module BitClust
     end
 
     def library_index
-      @screenmanager.library_index_screen(@db.libraries).response
+      @screenmanager.library_index_screen(@db.sorted_libraries).response
     end
 
     def class_index
-      @screenmanager.class_index_screen(@db.classes).response
+      @screenmanager.class_index_screen(@db.sorted_classes).response
     end
 
     def handle_search(key)

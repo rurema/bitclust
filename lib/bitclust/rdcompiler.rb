@@ -173,9 +173,9 @@ module BitClust
 
     def compile_signature(sig)
       # FIXME: check parameters, types, etc.
-      string '<dt>'
+      string '<dt><code>'
       string escape_html(sig.sub(/\A---/, '').strip)
-      line '</dt>'
+      line '</code></dt>'
     end
 
     BracketLink = /\[\[[!-~]+?\]\]/n

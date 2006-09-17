@@ -12,12 +12,20 @@
     headline_init
 %>
 <%= headline("Class Index") %>
-<ul>
+<p>
+<%= @entries.size %> classes/modules in database
+</p>
 <%
     headline_push
-    @entities.each do |c|
+    @entries.each do |c|
 %>
-<li><%=h c.name %></li>
+<%= headline_noescape("#{c.type} #{class_link(c.name)}") %>
+<p>
+<%
+      c.sorted_entries {|m| m.id }.each do |m| %>
+<%= method_link_short(m) %>
+<%    end %>
+</p>
 <%
     end
     headline_pop

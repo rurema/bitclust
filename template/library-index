@@ -12,23 +12,34 @@
     headline_init
 %>
 <%= headline("Library Index") %>
-<ul>
 <%
     headline_push
-    @entities.each do |lib|
+    lib = @entries.detect {|lib| lib.id == '_builtin' }
 %>
-<%= headline(lib.name) %>
-<%= compile_rd(lib.source) %>
-<ul>
-<%    lib.classes.each do |c| %>
-<li><%=h c.type.to_s %> <%=h c.name %></li>
+<%= headline_noescape(library_link(lib.name, 'Builtin Library')) %>
+<%= compile_rd(lib.synopsis_source) %>
+<p>
+classes/modules:
+<%  lib.sorted_classes.each do |c| %>
+<%= class_link(c.name) %>
 <%    end %>
-</ul>
+</p>
+<%
+    @entries.each do |lib|
+      next if lib.id == '_builtin'
+%>
+<%= headline_noescape(library_link(lib.name)) %>
+<%= compile_rd(lib.synopsis_source) %>
+<p>
+classes/modules:
+<%    lib.sorted_classes.each do |c| %>
+<%= class_link(c.name) %>
+<%    end %>
+</p>
 <%
     end
     headline_pop
 %>
-</ul>
 
 </body>
 </html>
