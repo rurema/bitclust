@@ -1,3 +1,8 @@
+Sun Sep 17 21:37:01 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: library.requires is a [LibraryEntry],
+	  not a [String].
+
 Sun Sep 17 21:21:34 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: new subcommand "bitclust list".

@@ -99,7 +99,7 @@ module BitClust
     def do_parse(f)
       f.skip_blank_lines
       f.while_match(/\Arequire /) do |line|
-        @context.library.require line.split[1]
+        @context.require line.split[1]
       end
       f.skip_blank_lines
       @context.library.source = f.break(/\A=[^=]/).join('').rstrip
@@ -260,6 +260,10 @@ module BitClust
       attr_reader :klass
       attr_accessor :type
       attr_accessor :visibility
+
+      def require(libname)
+        @library.require @db.get_library(libname)
+      end
 
       def define_class(name, supername)
         register_class :class, name, @db.get_class(supername)
