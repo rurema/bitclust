@@ -29,11 +29,11 @@ module BitClust
         when /\A---/
           method_list
         when /\A=+/
-          h f.gets
+          headline f.gets
         when /\A\s+\*\s/
-          ul
+          ulist
         when /\A\s+\(\d+\)\s/
-          ol
+          olist
         when %r<\A//emlist\{>
           emlist
         when /\A\s+\S/

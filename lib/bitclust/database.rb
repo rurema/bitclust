@@ -360,6 +360,7 @@ module BitClust
         def init_properties
           if saved?
             #{@slots.map {|s| "@#{s.name} = nil" }.join(sep)}
+            @loaded = false
           else
             clear
           end
@@ -367,6 +368,7 @@ module BitClust
 
         def clear
           #{@slots.map {|s| "@#{s.name} = #{s.initial_value}" }.join(sep)}
+          @loaded = true
         end
 
         def _load_properties(h)
@@ -384,12 +386,20 @@ module BitClust
           def #{slot.name}
             @#{slot.name} or
                 begin
-                  _load_properties(@db.load_properties(objpath()))
+                  _load_properties @db.load_properties(objpath())
+                  @loaded = true
                   @#{slot.name}
                 end
           end
+
+          def #{slot.name}=(value)
+            unless @loaded
+              _load_properties @db.load_properties(objpath())
+              @loaded = true
+            end
+            @#{slot.name} = value
+          end
         End
-        attr_writer slot.name
       end
     end
 
@@ -466,6 +476,10 @@ module BitClust
 
     def type_id
       self.class.type_id
+    end
+
+    def loaded?
+      @loaded
     end
 
     def encoding
@@ -559,7 +573,7 @@ module BitClust
     }
 
     def inspect
-      "#<library c=#{classnames().join(',')} m=#{methodnames().join(',')}>"
+      "#<library #{@id}>"
     end
 
     def require(lib)
@@ -610,7 +624,7 @@ module BitClust
       unless classmap()[c.name]
         classes().push c
         classmap()[c.name] = c
-        @db.dirty_library self
+        @db.dirty_class self
       end
     end
 
@@ -618,7 +632,7 @@ module BitClust
       unless methodmap()[m]
         methods().push m
         methodmap()[m] = m
-        @db.dirty_library self
+        @db.dirty_method self
       end
     end
 
@@ -662,7 +676,7 @@ module BitClust
     end
 
     def inspect
-      "\#<#{type()} #{@name}>"
+      "\#<#{type()} #{@id}>"
     end
 
     def class?
@@ -721,7 +735,7 @@ module BitClust
     attr_reader :id
 
     def name
-      names().first
+      methodid2mname(@id)
     end
 
     persistent_properties {

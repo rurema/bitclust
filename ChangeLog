@@ -1,3 +1,17 @@
+Mon Sep 18 01:02:20 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: follow method name changes.
+
+	* lib/bitclust/nameutils.rb: new method methodid2mname, to avoid
+	  loading @names in MethodEntry#inspect.
+
+	* lib/bitclust/database.rb: load properties before write.
+
+	* lib/bitclust/rrdparser.rb: reopen/redefine block should not
+	  include class documents or `include' statements.
+
+	* lib/bitclust/rrdparser.rb: Signature#klass is a String.
+
 Sun Sep 17 23:55:58 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb: change database physical structure.

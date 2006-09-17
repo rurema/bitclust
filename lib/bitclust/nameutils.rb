@@ -22,6 +22,15 @@ module BitClust
       id.gsub(/__/, '::')
     end
 
+    def build_method_id(libid, cid, t, name)
+      # FIXME: class-ID is filesystem-safe??
+      "#{cid}/#{typename2char(t)}.#{fsencode(name)}.#{fsencode(libid)}"
+    end
+
+    def methodid2mname(id)
+      fsdecode(id.slice(/\.([\w%]+)\./, 1))
+    end
+
     NAME_TO_MARK = {
       :singleton_method => '.',
       :instance_method  => '#',
@@ -64,11 +73,6 @@ module BitClust
 
     def typechar2mark(char)
       typename2mark(typechar2name(char))
-    end
-
-    def build_method_id(libid, cid, t, name)
-      # FIXME: class-ID is filesystem-safe??
-      "#{cid}/#{typename2char(t)}.#{fsencode(name)}.#{fsencode(libid)}"
     end
 
     def fsencode(str)

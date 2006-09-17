@@ -134,14 +134,19 @@ module BitClust
           read_entries f
         when 'reopen'
           @context.reopen_class name
-          read_class_body f
+          read_reopen_body f
         when 'redefine'
           @context.redefine_class name
-          read_class_body f
+          read_reopen_body f
         else
           compile_error "wrong level-1 header", line
         end
       end
+    end
+
+    def read_reopen_body(f)
+      f.skip_blank_lines
+      read_level2_blocks f
     end
 
     def read_class_body(f)
@@ -151,6 +156,10 @@ module BitClust
       end
       f.skip_blank_lines
       @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
+      read_level2_blocks f
+    end
+
+    def read_level2_blocks(f)
       read_entries f
       f.skip_blank_lines
       f.while_match(/\A==[^=]/) do |line|
@@ -224,7 +233,7 @@ module BitClust
         unless sigs[0].fully_qualified?
           compile_error "unqualified signature (#{sigs[0]})", line
         end
-        if sigs.all? {|s| sigs[0].same_type?(s) }
+        unless sigs.all? {|s| sigs[0].same_type?(s) }
           compile_error "alias entries have multiple class/type", line
         end
       end
@@ -334,7 +343,7 @@ module BitClust
 
       def signature
         return nil unless @klass
-        Signature.new(@klass, @type ? typename2mark(@type) : nil, nil)
+        Signature.new(@klass.name, @type ? typename2mark(@type) : nil, nil)
       end
 
       def define_method(chunk)
@@ -354,7 +363,7 @@ module BitClust
       def method_spec(chunk)
         spec = MethodSpec.new
         spec.library = @library
-        spec.klass   = chunk.signature.klass || @klass
+        spec.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : @klass
         spec.type    = chunk.signature.typename || @type
         spec.name    = chunk.names.sort.first
         spec
@@ -373,7 +382,7 @@ module BitClust
       attr_reader :source
 
       def inspect
-        "\#<Chunk #{@signature.klass.name}#{@signature.type}#{@names.join(',')} #{@source.location}>"
+        "\#<Chunk #{@signature.klass}#{@signature.type}#{@names.join(',')} #{@source.location}>"
       end
 
       def alias?(other)
@@ -391,7 +400,7 @@ module BitClust
       include NameUtils
 
       def initialize(c, t, m)
-        @klass = c
+        @klass = c   # String
         @type = t
         @name = m
       end
