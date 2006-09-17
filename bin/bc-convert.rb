@@ -77,15 +77,20 @@ def do_convert(f, out = $stdout)
     when /\A\#/
       out.puts '#@' + line
     when /\A---\s/
-      out.puts '--- ' + convert_signature(line.rstrip)
+      sig = convert_signature(line.sub(/\A---/, '').sub(/\(\(<.*?>\)\)/i, '').strip)
+      out.puts "--- #{sig}"
+      if meta = line.slice(/\(\(<.*?>\)\)/i)
+        out.puts
+        out.puts meta
+        out.puts
+      end
     else
       out.puts convert_link(line.rstrip)
     end
   end
 end
 
-def convert_signature(line)
-  sig = line.sub(/\A(:|---)/, '').sub(/\(\(<ruby.*?feature>\)\)/i, '').strip
+def convert_signature(sig)
   case sig
   when /\A([\w:\.\#]+[?!]?)\s*(?:[\(\{]|--|->|\z)/
        # name(arg), name{}, name,
