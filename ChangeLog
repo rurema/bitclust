@@ -1,3 +1,7 @@
+Sun Sep 17 20:32:48 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: new subcommand "bitclust list".
+
 Sun Sep 17 20:04:57 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb: support special variables.

@@ -66,7 +66,7 @@ Global Options:
     exit 1
   end
   db = BitClust::Database.new(prefix)
-  cmd.exec db
+  cmd.exec db, ARGV
 end
 
 def error(msg)
@@ -89,10 +89,10 @@ class InitCommand
     @parser.parse! argv
   end
 
-  def exec(db)
+  def exec(db, argv)
     db.init
     db.transaction {
-      ARGV.each do |kv|
+      argv.each do |kv|
         k, v = kv.split('=', 2)
         db.propset k, v
       end
@@ -109,7 +109,7 @@ class UpdateCommand
       opt.on('--tree', 'Process RD source directory tree.') {
         @mode = :tree
       }
-      opt.on('--library=NAME', 'Use NAME for library name.') {|name|
+      opt.on('--library-name=NAME', 'Use NAME for library name.') {|name|
         @library = name
       }
       opt.on('--help', 'Prints this message and quit.') {
@@ -121,21 +121,33 @@ class UpdateCommand
 
   def parse!(argv)
     @parser.parse! argv
-    if argv.empty?
-      error "no file given"
+    case @mode
+    when :file
+      if argv.empty?
+        error "no file given"
+      end
+    when :tree
+      unless argv.size == 1
+        error "-tree requires only 1 arg"
+      end
+    else
+      raise "must not happen: @mode=#{@mode.inspect}"
     end
   end
 
-  def exec(db)
+  def exec(db, argv)
     case @mode
     when :file
       db.transaction {
-        ARGV.each do |path|
+        argv.each do |path|
           db.update_by_file path, library_name(path)
         end
       }
     when :tree
-raise 'FIXME'
+     root = ARGV[0]
+     db.transaction {
+       
+     }
     else
       raise 'must not happen'
     end
@@ -181,15 +193,24 @@ class ListCommand
     end
   end
 
-  def exec(db)
+  def exec(db, argv)
     case @mode
     when :library
+      db.libraries.each do |lib|
+        puts lib.name
+      end
     when :class
-raise 'FIXME'
+      db.classes.map {|c| c.name }.sort.each do |name|
+        puts name
+      end
     when :method
-raise 'FIXME'
+      db.classes.sort_by {|c| c.name }.each do |c|
+        c.entries.sort_by {|m| m.id }.each do |m|
+          puts m.label
+        end
+      end
     else
-      raise 'must not happen'
+      raise "must not happen: @mode=#{@mode.inspect}"
     end
   end
 end
@@ -198,7 +219,7 @@ class LookupCommand
   def initialize
     @html_p = false
     @parser = OptionParser.new {|opt|
-      opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method) <key>"
+      opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method) <keys>"
       opt.on('--library', 'Lookup libraries.') {
       }
       opt.on('--class', 'Lookup classes.') {
@@ -220,7 +241,7 @@ raise 'FIXME'
     @parser.parse! argv
   end
 
-  def exec(db)
+  def exec(db, argv)
 raise 'FIXME'
   end
 end
