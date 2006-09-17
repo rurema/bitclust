@@ -8,6 +8,7 @@
 #
 
 require 'bitclust/lineinput'
+require 'bitclust/htmlutils'
 require 'bitclust/textutils'
 require 'stringio'
 
@@ -15,9 +16,11 @@ module BitClust
 
   class RDCompiler
 
+    include HTMLUtils
     include TextUtils
 
-    def initialize(hlevel = 1)
+    def initialize(urlmapper, hlevel = 1)
+      @urlmapper = urlmapper
       @hlevel = hlevel
     end
 
@@ -179,7 +182,7 @@ module BitClust
     NeedESC = /[&"<>]/
 
     def compile_text(str)
-      escape_table = TextUtils::ESC
+      escape_table = HTMLUtils::ESC
       str.gsub(/(#{NeedESC})|(#{BracketLink})/o) {
         if    char = $1 then escape_table[char]
         elsif tok  = $2 then bracket_link(tok[2..-3])
@@ -191,8 +194,16 @@ module BitClust
     end
 
     def bracket_link(link)
-      # FIXME
-      escape_html("[[#{link}]]")
+      type, arg = link.split(':', 2)
+      case type
+      when 'lib'     then library_link(arg)
+      when 'c'       then class_link(arg)
+      when 'm'       then method_link(arg)
+      when 'man'     then escape_html(arg)   # FIXME
+      when 'unknown' then escape_html(arg)
+      else
+        "[[#{escape_html(link)}]]"
+      end
     end
 
     def seems_code(text)

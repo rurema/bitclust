@@ -13,25 +13,6 @@ module BitClust
 
     private
 
-    ESC = {
-      '&' => '&amp;',
-      '"' => '&quot;',
-      '<' => '&lt;',
-      '>' => '&gt;'
-    }
-
-    def escape_html(str)
-      table = ESC   # optimize
-      str.gsub(/[&"<>]/) {|s| table[s] }
-    end
-
-    ESCrev = ESC.invert
-
-    def unescape_html(str)
-      table = ESCrev   # optimize
-      str.gsub(/&\w+;/) {|s| table[s] }
-    end
-
     def detab(str, ts = 8)
       add = 0
       str.gsub(/\t/) {

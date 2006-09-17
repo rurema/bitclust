@@ -188,6 +188,10 @@ module BitClust
     # Libraries
     #
 
+    def sorted_libraries
+      libraries().sort_by {|lib| lib.id }
+    end
+
     def libraries
       librarymap().values
     end
@@ -203,7 +207,7 @@ module BitClust
 
     def fetch_library(name)
       librarymap()[name] or
-          raise EntryNotFound, "library not found: #{name.inspect}"
+          raise LibraryNotFound, "library not found: #{name.inspect}"
     end
 
     def open_library(name, reopen = false)
@@ -222,6 +226,10 @@ module BitClust
     # Classes
     #
 
+    def sorted_classes
+      classes().sort_by {|c| c.id }
+    end
+
     def classes
       classmap().values
     end
@@ -237,7 +245,7 @@ module BitClust
 
     def fetch_class(name)
       classmap()[name] or
-          raise EntryNotFound, "class not found: #{name.inspect}"
+          raise ClassNotFound, "class not found: #{name.inspect}"
     end
 
     def open_class(name)
@@ -523,7 +531,7 @@ module BitClust
       str.split(',').map {|id| klass.load(@db, id) }
     end
 
-    def serialize_Entry(x)
+    def serialize_entry(x)
       x ? x.id : ''
     end
 
@@ -580,6 +588,10 @@ module BitClust
       requires().push lib
     end
 
+    def sorted_classes
+      classes().sort_by {|c| c.id }
+    end
+
     def classnames
       classes().map {|c| c.name }
     end
@@ -599,6 +611,10 @@ module BitClust
           end
     end
     private :classmap
+
+    def sorted_methods
+      methods().sort_by {|m| m.id }
+    end
 
     def methodnames
       methods().map {|m| m.label }
@@ -670,9 +686,70 @@ module BitClust
       property :source,     'String'
     }
 
+    def sorted_entries
+      entries().sort_by {|m| m.id }
+    end
+
     def entries
       @entries ||= @db.entries("method/#{id()}")\
           .map {|ent| MethodEntry.new(@db, "#{id()}/#{ent}") }
+    end
+
+    Parts = Struct.new(:singleton_methods, :private_singleton_methods,
+                       :instance_methods,  :private_instance_methods,
+                       :constants, :special_variables)
+
+    def partitioned_entries
+      s = []; spv = []
+      i = []; ipv = []
+      c = []; v = []
+      entries().each do |m|
+        case m.type
+        when :singleton_method
+          (m.public? ? s : spv).push m
+        when :instance_method
+          (m.public? ? i : ipv).push m
+        when :constant
+          c.push m
+        when :special_variable
+          v.push m
+        else
+          raise "must not happen: m.type=#{m.type.inspect} (#{m.inspect})"
+        end
+      end
+      Parts.new(* [s, spv, i, ipv, c, v].map {|ents| ents.sort_by {|m| m.id } })
+    end
+
+    def public_singleton_methods
+      entries().select {|m| m.public_singleton_method? }.sort_by {|m| m.id }
+    end
+
+    alias singleton_methods public_singleton_methods
+
+    def private_singleton_methods
+      entries().select {|m| m.private_singleton_method? }.sort_by {|m| m.id }
+    end
+
+    def public_instance_methods
+      entries().select {|m| m.public_instance_method? }.sort_by {|m| m.id }
+    end
+
+    alias instance_methods public_instance_methods
+    alias public_methods   public_instance_methods
+    alias methods          public_instance_methods
+
+    def private_instance_methods
+      entries().select {|m| m.private_instance_method? }.sort_by {|m| m.id }
+    end
+
+    alias private_methods   private_instance_methods
+
+    def constants
+      entries().select {|m| m.constant? }.sort_by {|m| m.id }
+    end
+
+    def special_vairables
+      entries().select {|m| m.special_variable? }.sort_by {|m| m.id }
     end
 
     def inspect
@@ -709,6 +786,11 @@ module BitClust
 
     def search_method(spec)
       entries().detect {|m| spec.match?(m) }
+    end
+
+    def fetch_method(spec)
+      search_method(spec) or
+          raise MethodNotFound, "spec=#{spec.inspect}"
     end
 
     def add_method(m)
@@ -758,8 +840,44 @@ module BitClust
       "#{klass().name}#{typemark()}#{name()}"
     end
 
+    def sorted_names
+      names().sort
+    end
+
     def typemark
       typename2mark(type())
+    end
+
+    def really_public?
+      visibility() == :public
+    end
+
+    def public?
+      visibility() != :private
+    end
+
+    def protected?
+      visibility() == :protected
+    end
+
+    def private?
+      visibility() == :private
+    end
+
+    def public_singleton_method?
+      singleton_method? and public?
+    end
+
+    def private_singleton_method?
+      singleton_method? and private?
+    end
+
+    def public_instance_method?
+      instance_method? and public?
+    end
+
+    def private_instance_method?
+      instance_method? and public?
     end
 
     def singleton_method?

@@ -8,7 +8,8 @@
 #
 
 require 'bitclust/rdcompiler'
-require 'bitclust/textutils'
+require 'bitclust/htmlutils'
+require 'bitclust/nameutils'
 require 'erb'
 require 'stringio'
 
@@ -53,6 +54,8 @@ module BitClust
 
 
   class URLMapper
+    include NameUtils
+
     def initialize(h)
       @base_url = h[:base_url]
       @cgi_url = h[:cgi_url]
@@ -69,6 +72,18 @@ module BitClust
     def css_url
       return @css_url if @css_url
       "#{@base_url}/theme/#{@theme}/style.css"
+    end
+
+    def library_url(id)
+      "#{@cgi_url}/library/#{id}"
+    end
+
+    def class_url(id)
+      "#{@cgi_url}/class/#{id.gsub(/::/, '__')}"
+    end
+
+    def method_url(c, t, m)
+      "#{@cgi_url}/method/#{c.gsub(/::/, '__')}/#{typemark2char(t)}/#{fsencode(m)}"
     end
   end
 
@@ -91,14 +106,14 @@ module BitClust
 
 
   class Screen
-    include TextUtils
-
     def Screen.for_entity(entity)
       ::BitClust.const_get("#{entity.type_id.to_s.capitalize}Screen")
     end
   end
 
   class ErrorScreen < Screen
+    include HTMLUtils
+
     def initialize(err)
       @error = err
     end
@@ -122,6 +137,8 @@ module BitClust
   end
 
   class TemplateScreen < Screen
+    include HTMLUtils
+
     def initialize(urlmapper, template_repository)
       @urlmapper = urlmapper
       @template_repository = template_repository
@@ -158,11 +175,15 @@ module BitClust
     end
 
     def headline(str)
-      "<h#{@hlevel}>#{h(str)}</h#{@hlevel}>"
+      "<h#{@hlevel}>#{escape_html(str)}</h#{@hlevel}>"
+    end
+
+    def headline_noescape(str)
+      "<h#{@hlevel}>#{str}</h#{@hlevel}>"
     end
 
     def compile_rd(src)
-      RDCompiler.new(@hlevel).compile(src)
+      RDCompiler.new(@urlmapper, @hlevel).compile(src)
     end
   end
 

@@ -75,6 +75,10 @@ module BitClust
       typename2mark(typechar2name(char))
     end
 
+    def typemark2char(mark)
+      typename2char(typemark2name(mark))
+    end
+
     def fsencode(str)
       str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('%%%02x', ch[0].ord) }
     end

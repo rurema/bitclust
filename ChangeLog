@@ -1,3 +1,43 @@
+Mon Sep 18 04:21:05 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: new method Database#sorted_libraries,
+	  sorted_classes.
+
+	* lib/bitclust/database.rb: new method
+	  LibraryEntry#sorted_classes, sorted_methods.
+
+	* lib/bitclust/database.rb: new method ClassEntry#sorted_entries.
+
+	* lib/bitclust/database.rb: new method
+	  ClassEntry#partitioned_entries.
+
+	* lib/bitclust/database.rb: new method
+	  ClassEntry#(public_|private_)?(singleton_|instance_)?methods.
+
+	* lib/bitclust/database.rb: new method ClassEntry#constants.
+
+	* lib/bitclust/database.rb: new method
+	  ClassEntry#special_variables.
+
+	* lib/bitclust/database.rb: new method
+	  MethodEntry#(public_|private_)?(singleton_|instance_)?method\?.
+
+	* lib/bitclust/database.rb: new method MethodEntry#public?,
+	  protected?, private?, really_public?.
+
+	* lib/bitclust/database.rb: new method MethodEntry#fetch_method.
+
+	* lib/bitclust/screen.rb: new methods URLMapper#library_url,
+	  class_url, method_url.
+
+	* lib/bitclust/rdcompiler.rb: compile links (still incomplete).
+
+	* lib/bitclust/nameutils.rb: new method typemark2char.
+
+	* lib/bitclust/textutils.rb: fork htmlutils.rb.
+
+	* lib/bitclust/htmlutils.rb: new file.
+
 Mon Sep 18 01:04:51 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb: rename: entity -> entry.
