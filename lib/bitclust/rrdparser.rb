@@ -552,17 +552,26 @@ module BitClust
     end
 
     def eval_cond(str)
-      eval_expr(StringScanner.new(str)) ? true : false
+      s = StringScanner.new(str)
+      result = eval_expr(s) ? true : false
+      unless s.eos?
+        scan_error "parse error at: #{s.inspect}"
+      end
+      result
     end
 
     def eval_expr(s)
       paren_open = s.scan(/\s*\(/)
       val = eval_primary(s)
       while op = read_op(s)
-        val = val.__send__(op, eval_primary(s))
+        if op == '!='
+          val = (val != eval_primary(s))
+        else
+          val = val.__send__(op, eval_primary(s))
+        end
       end
       if paren_open
-        unless s.skip(/\s+\)/)
+        unless s.skip(/\s*\)/)
           scan_error "paren opened but not closed"
         end
       end
@@ -571,16 +580,14 @@ module BitClust
 
     def read_op(s)
       s.skip(/\s+/)
-      return nil if s.eos?
-      s.scan(/>=|<=|==|<|>/) or
-          scan_error "unknown op at #{s.rest.inspect}"
+      s.scan(/>=|<=|==|<|>|!=/)
     end
 
     def eval_primary(s)
       s.skip(/\s+/)
       if t = s.scan(/\w+/)
         unless @params.key?(t)
-          scan_error "unknown preproc variable #{t.inspect}"
+          scan_error "unknown preproc variable: #{t.inspect}"
         end
         @params[t]
       elsif t = s.scan(/".*?"/)
