@@ -22,13 +22,48 @@ module BitClust
       id.gsub(/__/, '::')
     end
 
-    def build_method_id(libid, cid, t, name)
-      # FIXME: class-ID is filesystem-safe??
-      "#{cid}/#{typename2char(t)}.#{fsencode(name)}.#{fsencode(libid)}"
+    def split_method_spec(spec)
+      case spec
+      when /\AKernel\$/
+        return 'Kernel', '$', $'
+      else
+        m = /\A([\w\:]+)(\.\#|[\.\#]|::)([^:\s]+)\z/.match(spec) or
+            raise ArgumentError, "wrong method spec: #{spec.inspect}"
+        return *m.captures
+      end
+    end
+
+    def methodid2spec(id)
+      c, t, m, lib = *split_method_id(id)
+      "#{classid2name(c)}#{typechar2mark(t)}#{fsdecode(m)}"
+    end
+
+    def methodid2libid(id)
+      c, t, m, lib = *split_method_id(id)
+      fsdecode(lib)
+    end
+
+    def methodid2classid(id)
+      c, t, m, lib = *split_method_id(id)
+      c
+    end
+
+    def methodid2typename(id)
+      c, t, m, lib = *split_method_id(id)
+      typechar2name(t)
     end
 
     def methodid2mname(id)
-      fsdecode(id.slice(/\.([\w%]+)\./, 1))
+      c, t, m, lib = *split_method_id(id)
+      fsdecode(m)
+    end
+
+    def build_method_id(libid, cid, t, name)
+      "#{cid}/#{typename2char(t)}.#{fsencode(name)}.#{fsencode(libid)}"
+    end
+
+    def split_method_id(id)
+      return *id.split(%r<[/\.]>)
     end
 
     NAME_TO_MARK = {
@@ -80,11 +115,11 @@ module BitClust
     end
 
     def fsencode(str)
-      str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('%%%02x', ch[0].ord) }
+      str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('=%02x', ch[0].ord) }
     end
 
     def fsdecode(str)
-      str.gsub(/%[\da-h]{2}/i) {|s| s[1,2].hex.chr }
+      str.gsub(/=[\da-h]{2}/i) {|s| s[1,2].hex.chr }
     end
 
 =begin

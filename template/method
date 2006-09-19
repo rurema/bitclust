@@ -11,7 +11,9 @@
 <% headline_init %>
 <%= headline("method #{@entry.label}") %>
 <p>
-library: <%= library_link(@entry.library.name) %>
+library: <%= library_link(@entry.library.name) %><br>
+class: <%= class_link(@entry.klass.name) %><br>
+visibility: <%= @entry.visibility %>
 <dl class="methodlist">
 <%= compile_rd(@entry.source) %>
 </dl>

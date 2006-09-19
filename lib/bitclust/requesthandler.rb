@@ -123,7 +123,7 @@ module BitClust
       return nil unless /\A[\w+\:]+\z/ =~ c
       return nil unless /\A[simcv]\z/ =~ t
       # m is going to be encoded
-      SearchPattern.for_ctm(c, typechar2mark(t), m)
+      SearchPattern.for_ctm(c, typechar2mark(t), fsdecode(m))
     end
 
     def type_id

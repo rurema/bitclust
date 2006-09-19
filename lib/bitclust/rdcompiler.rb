@@ -198,11 +198,20 @@ module BitClust
       case type
       when 'lib'     then library_link(arg)
       when 'c'       then class_link(arg)
-      when 'm'       then method_link(arg)
+      when 'm'       then method_link(complete_spec(arg))
       when 'man'     then escape_html(arg)   # FIXME
       when 'unknown' then escape_html(arg)
       else
         "[[#{escape_html(link)}]]"
+      end
+    end
+
+    def complete_spec(spec0)
+      case spec0
+      when /\A\$/
+        "Kernel#{spec0}"
+      else
+        spec0
       end
     end
 

@@ -7,44 +7,36 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/nameutils'
+
 module BitClust
 
   module HTMLUtils
 
+    include NameUtils
+
     private
 
-    def library_link(id, label = nil)
-      a_href(@urlmapper.library_url(id), label || id)
-    rescue LibraryNotFound
-      escape_html(label || id)
+    # make method anchor from MethodEntry
+    def link_to_method(m)
+      a_href(@urlmapper.method_url(methodid2spec(m.id)),
+             (m.instance_method? ? '' : m.typemark) + m.name)
     end
 
-    def class_link(id, label = nil)
-      a_href(@urlmapper.class_url(id), label || id)
-    rescue ClassNotFound
-      escape_html(label || id)
+    def library_link(name, label = nil)
+      a_href(@urlmapper.library_url(name), label || name)
     end
 
-    def method_link_short(m)
-      a_href(@urlmapper.method_url(m.klass.name, m.typemark, m.name), m.name)
-    rescue MethodNotFound
-      escape_html(id)
+    def class_link(name, label = nil)
+      a_href(@urlmapper.class_url(name), label || name)
     end
 
-    def method_link(id, label = nil)
-      if m = /\A([\w\:]+)(\.\#|[\.\#]|::)([^:\s]+)\z/.match(id)
-        a_href(@urlmapper.method_url($1, $2, $3), (label || id))
-      elsif m = /\A\$(\w+|\-.|.)\z/.match(id)
-        a_href(@urlmapper.method_url('Kernel', '$', $1), (label || id))
-      else
-        escape_html(label || id)
-      end
-    rescue MethodNotFound
-      escape_html(id)
+    def method_link(spec, label = nil)
+      a_href(@urlmapper.method_url(spec), label || spec)
     end
 
     def a_href(url, label)
-      %Q(<a href="#{url}">#{escape_html(label)}</a>)
+      %Q(<a href="#{escape_html(url)}">#{escape_html(label)}</a>)
     end
 
     ESC = {

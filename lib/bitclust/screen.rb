@@ -74,16 +74,17 @@ module BitClust
       "#{@base_url}/theme/#{@theme}/style.css"
     end
 
-    def library_url(id)
-      "#{@cgi_url}/library/#{id}"
+    def library_url(name)
+      "#{@cgi_url}/library/#{libname2id(name)}"
     end
 
-    def class_url(id)
-      "#{@cgi_url}/class/#{id.gsub(/::/, '__')}"
+    def class_url(name)
+      "#{@cgi_url}/class/#{classname2id(name)}"
     end
 
-    def method_url(c, t, m)
-      "#{@cgi_url}/method/#{c.gsub(/::/, '__')}/#{typemark2char(t)}/#{fsencode(m)}"
+    def method_url(spec)
+      cname, tmark, mname = *split_method_spec(spec)
+      "#{@cgi_url}/method/#{classname2id(cname)}/#{typemark2char(tmark)}/#{fsencode(mname)}"
     end
   end
 

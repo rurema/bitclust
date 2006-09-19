@@ -34,7 +34,7 @@
 <dd>
 <p><code>
 <%    c.sorted_entries.each do |m| %>
-<%= method_link_short(m) %>
+<%= link_to_method(m) %>
 <%    end %>
 </code></p>
 </dd>

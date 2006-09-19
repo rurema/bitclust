@@ -1,3 +1,30 @@
+Wed Sep 20 02:18:29 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/screen.rb: URLMapper accepts library/class/method
+	  name, not ID.
+
+	* lib/bitclust/requesthandler.rb: A SearchPattern should include
+	  method name, not ID.
+
+	* lib/bitclust/rdcompiler.rb: use method spec to link to method
+	  page.
+
+	* lib/bitclust/database.rb (MethodEntry): extract @type, @library,
+	  @klass from method ID instead of filesystem.
+
+	* lib/bitclust/htmlutils.rb: causes least file loading.
+
+	* lib/bitclust/nameutils.rb: add method ID/spec handling methods.
+
+	* lib/bitclust/nameutils.rb (fsencode, fsdecode): use '=' instead
+	  of '%'.
+
+	* template/library: method_link_short -> link_to_method.
+
+	* template/class-index: ditto.
+
+	* template/method: show class and visibility.
+
 Wed Sep 20 02:03:25 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-preproc.rb: new command.

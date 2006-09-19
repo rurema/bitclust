@@ -73,8 +73,13 @@ module BitClust
     attr_reader :method
 
     def inspect
-      "#<spec #{@library}.#{@klass}#{@type}#{@method}>"
+      "#<spec #{esc(@library)}.#{esc(@klass)}#{@type || ' _ '}#{esc(@method)}>"
     end
+
+    def esc(s)
+      s || '_'
+    end
+    private :esc
 
     def match?(m)
       (not @library or m.library.name == @library) and
@@ -285,7 +290,6 @@ module BitClust
       end
       m.library = spec.library
       m.klass   = spec.klass
-      m.type    = spec.type
       yield m
       dirty_method m
       m
@@ -296,7 +300,8 @@ module BitClust
     end
 
     def fetch_method(spec)
-      fetch_class(spec.klass).search_method(spec)
+      fetch_class(spec.klass).search_method(spec) or
+          raise MethodNotFound, "no such method: #{spec.inspect}"
     end
 
     #
@@ -359,6 +364,8 @@ module BitClust
 
 
   class Entry
+
+    include NameUtils
 
     def self.persistent_properties
       @slots = []
@@ -471,8 +478,6 @@ module BitClust
         end
       end
     end
-
-    include NameUtils
 
     class << self
       alias load new
@@ -822,13 +827,39 @@ module BitClust
       methodid2mname(@id)
     end
 
+    # typename = :singleton_method
+    #          | :instance_method
+    #          | :module_function
+    #          | :constant
+    #          | :special_variable
+    def typename
+      methodid2typename(@id)
+    end
+
+    alias type typename
+
+    def typemark
+      typename2mark(typename())
+    end
+
+    def typechar
+      typename2char(typename())
+    end
+
+    def library
+      @library ||= @db.fetch_library(methodid2libid(@id))
+    end
+
+    attr_writer :library
+
+    def klass
+      @klass ||= @db.fetch_class(methodid2classid(@id))
+    end
+
+    attr_writer :klass
+
     persistent_properties {
       property :names,      '[String]'
-      property :library,    'LibraryEntry'
-      property :klass,      'ClassEntry'
-      property :type,       'Symbol'   # :singleton_method | :instance_method
-                                       #     | :module_function | :constant
-                                       #     | :special_variable
       property :visibility, 'Symbol'   # :public | :private | :protected
       property :kind,       'Symbol'   # :defined | :added | :redefined
       property :source,     'String'
@@ -844,10 +875,6 @@ module BitClust
 
     def sorted_names
       names().sort
-    end
-
-    def typemark
-      typename2mark(type())
     end
 
     def really_public?
@@ -883,21 +910,21 @@ module BitClust
     end
 
     def singleton_method?
-      t = type()
+      t = typename()
       t == :singleton_method or t == :module_function
     end
 
     def instance_method?
-      t = type()
+      t = typename()
       t == :instance_method or t == :module_function
     end
 
     def constant?
-      type() == :constant
+      typename() == :constant
     end
 
     def special_variable?
-      type() == :special_variable
+      typename() == :special_variable
     end
 
   end
