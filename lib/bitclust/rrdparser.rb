@@ -457,7 +457,7 @@ module BitClust
       @params = params
       @f = f
       @buf = []
-      @cond_stack = [true]
+      cond_init
     end
 
     def gets
@@ -482,20 +482,26 @@ module BitClust
           file = $1.strip
           basedir = File.dirname(line.location.file)
           @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
-        when /\A\#@if/
+        when /\A\#@from\b/
           last_if = line
           begin
-            @cond_stack.push(@cond_stack.last && eval_cond(cond_expr(line)))
+            cond_push eval_cond(build_cond_by_value(line, 'version >='))
           rescue ScanError => err
             compile_error err.message, line
           end
-        when /\A\#@else/
-          compile_error "no matching #@if", line  if @cond_stack.size == 1
-          b = @cond_stack.pop
-          @cond_stack.push(!b && @cond_stack.last)
+        when /\A\#@if\b/
+          last_if = line
+          begin
+            cond_push eval_cond(line.sub(/\A\#@if/, '').strip)
+          rescue ScanError => err
+            compile_error err.message, line
+          end
+        when /\A\#@else\s*\z/
+          compile_error "no matching #@if", line  if cond_toplevel?
+          cond_invert
         when /\A\#@end\s*\z/
-          compile_error "no matching #@if", line  if @cond_stack.size == 1
-          @cond_stack.pop
+          compile_error "no matching #@if", line  if cond_toplevel?
+          cond_pop
         when /\A\#@/
           compile_error "unknown preprocessor directive", line
         else
@@ -506,16 +512,43 @@ module BitClust
         end
       end
       if @buf.empty?
-        unless @cond_stack.size == 1
+        unless cond_toplevel?
           compile_error "unterminated \#@if", line
         end
       end
       @buf.shift
     end
 
-    def cond_expr(line)
-      line.slice(/\A\#@if\s*\((.*)\)\s*\z/, 1) or
-          compile_error "syntax error: wrong #@if/#@elsif", line
+    def build_cond_by_value(line, left)
+      case ver = line.sub(/\A\#@from/, '').strip
+      when /\A[\d\.]+\z/
+        %Q(#{left} "#{ver}")
+      when /\A"[\d\.]+"\z/
+        "#{left} #{ver}"
+      else
+        compile_error "wrong #@from line", line
+      end
+    end
+
+    def cond_init
+      @cond_stack = [true]
+    end
+
+    def cond_toplevel?
+      @cond_stack.size == 1
+    end
+
+    def cond_push(bool)
+      @cond_stack.push(@cond_stack.last && bool)
+    end
+
+    def cond_invert
+      b = @cond_stack.pop
+      @cond_stack.push(!b && @cond_stack.last)
+    end
+
+    def cond_pop
+      @cond_stack.pop
     end
 
     def eval_cond(str)
@@ -523,9 +556,15 @@ module BitClust
     end
 
     def eval_expr(s)
+      paren_open = s.scan(/\s*\(/)
       val = eval_primary(s)
       while op = read_op(s)
         val = val.__send__(op, eval_primary(s))
+      end
+      if paren_open
+        unless s.skip(/\s+\)/)
+          scan_error "paren opened but not closed"
+        end
       end
       val
     end

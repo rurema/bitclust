@@ -1,3 +1,9 @@
+Wed Sep 20 02:03:25 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-preproc.rb: new command.
+
+	* lib/bitclust/rrdparser.rb (Preprocessor): new syntax "#@from".
+
 Mon Sep 18 05:10:31 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb: new method Entry#synopsis_source.
