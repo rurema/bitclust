@@ -482,7 +482,7 @@ module BitClust
           file = $1.strip
           basedir = File.dirname(line.location.file)
           @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
-        when /\A\#@from\b/
+        when /\A\#@since\b/
           last_if = line
           begin
             cond_push eval_cond(build_cond_by_value(line, 'version >='))
@@ -520,13 +520,13 @@ module BitClust
     end
 
     def build_cond_by_value(line, left)
-      case ver = line.sub(/\A\#@from/, '').strip
+      case ver = line.sub(/\A\#@since/, '').strip
       when /\A[\d\.]+\z/
         %Q(#{left} "#{ver}")
       when /\A"[\d\.]+"\z/
         "#{left} #{ver}"
       else
-        compile_error "wrong #@from line", line
+        compile_error "wrong #@since line", line
       end
     end
 
