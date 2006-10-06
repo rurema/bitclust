@@ -1,3 +1,9 @@
+Sat Oct  7 04:13:40 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb (Preprocessor): last_if must be an
+	  ivar, because #@if/#@since block is consist of multiple lines
+	  (requires multiple next_line call).
+
 Wed Sep 20 23:21:09 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (Preprocessor): change syntax: #@from

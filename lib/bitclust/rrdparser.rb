@@ -457,6 +457,7 @@ module BitClust
       @params = params
       @f = f
       @buf = []
+      @last_if = nil
       cond_init
     end
 
@@ -473,7 +474,6 @@ module BitClust
     private
 
     def next_line(f)
-      last_if = nil
       while line = f.gets
         case line
         when /\A\#@\#/   # preprocessor comment
@@ -483,14 +483,14 @@ module BitClust
           basedir = File.dirname(line.location.file)
           @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
         when /\A\#@since\b/
-          last_if = line
+          @last_if = line
           begin
             cond_push eval_cond(build_cond_by_value(line, 'version >='))
           rescue ScanError => err
             compile_error err.message, line
           end
         when /\A\#@if\b/
-          last_if = line
+          @last_if = line
           begin
             cond_push eval_cond(line.sub(/\A\#@if/, '').strip)
           rescue ScanError => err
@@ -513,7 +513,7 @@ module BitClust
       end
       if @buf.empty?
         unless cond_toplevel?
-          compile_error "unterminated \#@if", line
+          compile_error "unterminated \#@if", @last_if
         end
       end
       @buf.shift
