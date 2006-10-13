@@ -47,15 +47,15 @@ end
 def show_library(lib)
   puts "= Library #{lib.name}"
   lib.classes.each do |c|
-    puts c.inspect
+    puts "#{c.type} #{c.name}"
     c.each do |m|
-      puts "\t#{m.inspect}"
+      puts "\t* #{m.klass.name}#{m.typemark}#{m.names.join(',')}"
     end
   end
   unless lib.methods.empty?
     puts "Additional Methods:"
     lib.methods.each do |m|
-      puts "\t#{m.inspect}"
+      puts "\t* #{m.klass.name}#{m.typemark}#{m.names.join(',')}"
     end
   end
 end
