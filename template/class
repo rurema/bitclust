@@ -35,6 +35,7 @@ library: <%= library_link(@entry.library.name) %>
      ['Instance Methods',          ents.instance_methods],
      ['Private Singleton Methods', ents.private_singleton_methods],
      ['Private Instance Methods',  ents.private_instance_methods],
+     ['Module Functions',          ents.module_functions],
      ['Constants',                 ents.constants],
      ['Special Variables',         ents.special_variables]]\
     .each do |(label, entries)|
@@ -49,10 +50,10 @@ library: <%= library_link(@entry.library.name) %>
 <%
         end
         headline_pop
-      end
 %>
 </dl>
 <%
+      end
     end
     headline_pop
 %>

@@ -1,3 +1,36 @@
+Fri Oct 13 20:28:49 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-tohtml.rb: implement --target command line option.
+
+	* lib/bitclust/database.rb: new method LibraryEntry#fetch_class.
+
+	* lib/bitclust/database.rb: new method LibraryEntry#fetch_method.
+
+	* lib/bitclust/database.rb: new method MethodSpec.parse.
+
+	* lib/bitclust/nameutils.rb: new method seems_class_name?.
+
+	* lib/bitclust/nameutils.rb: new method seems_method_spec?.
+
+	* lib/bitclust/nameutils.rb: all methods are module function.
+
+	* lib/bitclust/exception.rb: new exception KeyError.
+
+	* template/class: show module functions.
+
+	* lib/bitclust/database.rb (ClassEntry#partitioned_entries):
+	  should handle module functions.
+
+	* lib/bitclust/database.rb (Database#get_library): argument is a
+	  library name, not an ID.
+
+	* lib/bitclust/database.rb (Database#get_class): argument is a
+	  class name, not an ID.
+
+	* lib/bitclust/database.rb (Entry): we must check @loaded to check
+	  properties are loaded, should not see property ivar (e.g.
+	  @superclass) because @superclass may be nil.
+
 Fri Oct 13 20:21:09 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (RRDParser.libname): .off extension is

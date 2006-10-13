@@ -16,6 +16,10 @@ module BitClust
   class MethodSpec
     include NameUtils
 
+    def MethodSpec.parse(str)
+      new(nil, *NameUtils.split_method_spec(str))
+    end
+
     def initialize(library = nil, klass = nil, type = nil, name = nil)
       @library = library
       @klass = klass
@@ -190,7 +194,7 @@ module BitClust
     end
 
     #
-    # Libraries
+    # Library Entry
     #
 
     def sorted_libraries
@@ -207,28 +211,30 @@ module BitClust
     private :librarymap
 
     def get_library(name)
-      librarymap()[name] ||= LibraryEntry.new(self, libname2id(name))
+      id = libname2id(name)
+      librarymap()[id] ||= LibraryEntry.new(self, id)
     end
 
     def fetch_library(name)
-      librarymap()[name] or
+      librarymap()[libname2id(name)] or
           raise LibraryNotFound, "library not found: #{name.inspect}"
     end
 
     def open_library(name, reopen = false)
       check_transaction
-      table = librarymap()
-      if lib = table[name]
+      map = librarymap()
+      id = libname2id(name)
+      if lib = map[id]
         lib.clear unless reopen
       else
-        table[name] = lib = LibraryEntry.new(self, libname2id(name))
+        map[id] = lib = LibraryEntry.new(self, id)
       end
       dirty_library lib
       lib
     end
 
     #
-    # Classes
+    # Classe Entry
     #
 
     def sorted_classes
@@ -245,38 +251,40 @@ module BitClust
     private :classmap
 
     def get_class(name)
-      classmap()[name] ||= ClassEntry.new(self, classname2id(name))
+      id = classname2id(name)
+      classmap()[id] ||= ClassEntry.new(self, id)
     end
 
     def fetch_class(name)
-      classmap()[name] or
+      classmap()[classname2id(name)] or
           raise ClassNotFound, "class not found: #{name.inspect}"
     end
 
     def open_class(name)
       check_transaction
-      table = classmap()
-      if c = table[name]
+      map = classmap()
+      id = classname2id(name)
+      if c = map[id]
         c.clear
       else
-        table[name] = c = ClassEntry.new(self, classname2id(name))
+        map[id] = c = ClassEntry.new(self, id)
       end
       yield c
       dirty_class c
       c
     end
 
-    def load_extent(klass)
+    def load_extent(entry_class)
       h = {}
-      entries(klass.type_id).each do |ent|
-        h[ent] = klass.new(self, ent)
+      entries(entry_class.type_id).each do |id|
+        h[id] = entry_class.new(self, id)
       end
       h
     end
     private :load_extent
 
     #
-    # Methods
+    # Method Entry
     #
 
     # FIXME: see kind
@@ -309,13 +317,14 @@ module BitClust
     #
 
     def exist?(rel)
+      return false unless @prefix
       File.exist?(realpath(rel))
     end
 
     def entries(rel)
       Dir.entries(realpath(rel)).reject {|ent| ent[0,1] == '.' }
     rescue Errno::ENOENT
-      []
+      return []
     end
 
     def makepath(rel)
@@ -333,6 +342,8 @@ module BitClust
         h['source'] = f.read
       }
       h
+    rescue Errno::ENOENT
+      return {}
     end
 
     def save_properties(rel, h)
@@ -386,11 +397,11 @@ module BitClust
           @loaded = true
         end
 
-        def _load_properties(h)
+        def _set_properties(h)
           #{@slots.map {|s| "@#{s.name} = #{s.deserializer}" }.join(sep)}
         end
 
-        def _hashize_properties
+        def _get_properties
           h = {}
           #{@slots.map {|s| "h['#{s.name}'] = #{s.serializer}" }.join(sep)}
           h
@@ -399,17 +410,16 @@ module BitClust
       @slots.each do |slot|
         module_eval(<<-End, __FILE__, __LINE__ + 1)
           def #{slot.name}
-            @#{slot.name} or
-                begin
-                  _load_properties @db.load_properties(objpath())
-                  @loaded = true
-                  @#{slot.name}
-                end
+            unless @loaded
+              _set_properties @db.load_properties(objpath())
+              @loaded = true
+            end
+            @#{slot.name}
           end
 
           def #{slot.name}=(value)
             unless @loaded
-              _load_properties @db.load_properties(objpath())
+              _set_properties @db.load_properties(objpath())
               @loaded = true
             end
             @#{slot.name} = value
@@ -595,6 +605,11 @@ module BitClust
       requires().push lib
     end
 
+    def fetch_class(name)
+      classes().detect {|c| c.name == name } or
+          raise ClassNotFound, "no such class in the library #{name()}: #{name}"
+    end
+
     def sorted_classes
       classes().sort_by {|c| c.id }
     end
@@ -618,6 +633,12 @@ module BitClust
           end
     end
     private :classmap
+
+    def fetch_method(spec)
+      classes().detect {|c| c.search_method(spec) } or
+      methods().detect {|m| spec.match?(m) } or
+        raise MethodNotFound, "no such method in the library #{name()}: #{name}"
+    end
 
     def sorted_methods
       methods().sort_by {|m| m.id }
@@ -662,7 +683,7 @@ module BitClust
   end
 
 
-  # Represents classes, modules and singleton objects.
+  # Represents a class, a module and a singleton object.
   class ClassEntry < Entry
 
     include Enumerable
@@ -698,17 +719,19 @@ module BitClust
     end
 
     def entries
-      @entries ||= @db.entries("method/#{id()}")\
-          .map {|ent| MethodEntry.new(@db, "#{id()}/#{ent}") }
+      @entries ||= @db.entries("method/#{@id}")\
+          .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
     end
 
     Parts = Struct.new(:singleton_methods, :private_singleton_methods,
                        :instance_methods,  :private_instance_methods,
+                       :module_functions,
                        :constants, :special_variables)
 
     def partitioned_entries
       s = []; spv = []
       i = []; ipv = []
+      mf = []
       c = []; v = []
       entries().each do |m|
         case m.type
@@ -716,6 +739,8 @@ module BitClust
           (m.public? ? s : spv).push m
         when :instance_method
           (m.public? ? i : ipv).push m
+        when :module_function
+          mf.push m
         when :constant
           c.push m
         when :special_variable
@@ -724,7 +749,7 @@ module BitClust
           raise "must not happen: m.type=#{m.type.inspect} (#{m.inspect})"
         end
       end
-      Parts.new(* [s, spv, i, ipv, c, v].map {|ents| ents.sort_by {|m| m.id } })
+      Parts.new(*[s,spv, i,ipv, mf, c, v].map {|ents| ents.sort_by{|m|m.id} })
     end
 
     def public_singleton_methods
@@ -808,7 +833,7 @@ module BitClust
   end
 
 
-  # Represents methods, constants, and special variables.
+  # Represents a method, a constant, and a special variable.
   class MethodEntry < Entry
 
     def MethodEntry.type_id

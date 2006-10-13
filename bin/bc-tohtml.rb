@@ -49,16 +49,26 @@ def main
   end
 
   lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0])
-  entity = lookup(lib, target)
+  entry = target ? lookup(lib, target) : lib
   manager = BitClust::ScreenManager.new(
     :baseurl => 'http://example.com/',
     :templatedir => templatedir)
-  puts manager.entity_screen(entity).body
+  puts manager.entry_screen(entry).body
+rescue BitClust::UserError => err
+  $stderr.puts err.message
+  exit 1
 end
 
 def lookup(lib, key)
-  return lib unless key
-  raise 'FIXME'
+  case
+  when BitClust::NameUtils.seems_method_spec?(key)
+    spec = BitClust::MethodSpec.parse(key)
+    lib.fetch_method(spec)
+  when BitClust::NameUtils.seems_class_name?(key)
+    lib.fetch_class(key)
+  else
+    raise BitClust::KeyError, "wrong search key: #{key.inspect}"
+  end
 end
 
 main

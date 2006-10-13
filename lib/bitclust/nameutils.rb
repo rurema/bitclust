@@ -4,12 +4,18 @@ module BitClust
 
   module NameUtils
 
+    module_function
+
     def libname2id(name)
       name.split('/').map {|ent| fsencode(ent) }.join('.')
     end
 
     def libid2name(id)
       id.split('.').map {|ent| fsdecode(ent) }.join('/')
+    end
+
+    def seems_class_name?(str)
+      /\A[A-Z]\w*(::[A-Z]\w*)*/ =~ str
     end
 
     # A constant name must be composed by fs-safe characters.
@@ -20,6 +26,10 @@ module BitClust
     # A class name must not include '__'.
     def classid2name(id)
       id.gsub(/__/, '::')
+    end
+
+    def seems_method_spec?(str)
+      /\A([\w\:]+)(\.\#|[\.\#]|::)([^:\s]+)\z/ =~ str
     end
 
     def split_method_spec(spec)
