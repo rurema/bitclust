@@ -1,3 +1,7 @@
+Fri Oct 13 20:39:40 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: method chain is better.
+
 Fri Oct 13 20:38:04 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb: _hashize_properties ->

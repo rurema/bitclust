@@ -11,7 +11,7 @@
 require 'pathname'
 
 def srcdir_root
-  (Pathname.new(__FILE__).realpath.dirname + '..').cleanpath
+  Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
 end
 
 $LOAD_PATH.unshift srcdir_root() + 'lib'
