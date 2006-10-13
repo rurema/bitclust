@@ -37,7 +37,8 @@ module BitClust
     private
 
     def _handle(req)
-      mid = "handle_#{req.type_id || :library}"
+      return library_index() unless req.type_id
+      mid = "handle_#{req.type_id}"
       unless respond_to?(mid, true)
         raise RequestError, "wrong request: type_id=#{req.type_id}"
       end
@@ -55,13 +56,11 @@ module BitClust
     end
 
     def handle_class(req)
-      return class_index() unless req.class_name
       c = @db.fetch_class(req.class_name)
       @screenmanager.class_screen(c).response
     end
 
     def handle_method(req)
-      return class_index() unless req.method_spec
       m = @db.fetch_method(req.method_spec)
       @screenmanager.method_screen(m).response
     end
@@ -102,28 +101,48 @@ module BitClust
     end
 
     def library_name
-      return nil unless library?
-      type_param()
+      raise '#library_name called but not library request' unless library?
+      id = type_param()
+      raise InvalidKey, 'missing library name' unless id
+      name = libid2name(id)
+      unless libname?(name)
+        raise InvalidKey, "invalid library name: #{name.inspect}"
+      end
+      name
     end
 
     def class_name
-      return nil unless class?
-      type_param()
+      raise '#class_name called but not class request' unless class?
+      id = type_param()
+      raise InvalidKey, 'missing class name' unless id
+      name = classid2name(id)
+      unless classname?(name)
+        raise InvalidKey, "invalid class name: #{name.inspect}"
+      end
+      name
     end
 
     def method_spec
       return nil unless method?
       param = type_param()
       return nil unless param
-      c, t, m = param.split('/', 3)
-      return nil unless c
-      return nil unless t
-      return nil unless m
-      c = c.gsub(/__/, '::')
-      return nil unless /\A[\w+\:]+\z/ =~ c
-      return nil unless /\A[simcv]\z/ =~ t
-      # m is going to be encoded
-      SearchPattern.for_ctm(c, typechar2mark(t), fsdecode(m))
+      cid, typechar, mencoded = param.split('/', 3)
+      raise InvalidKey, 'missing class name' unless cid
+      raise InvalidKey, 'missing type name' unless typechar
+      raise InvalidKey, 'missing method name' unless mencoded
+      unless typechar?(typechar)
+        raise InvalidKey, "invalid method-type ID: #{typechar.inspect}"
+      end
+      cname = classid2name(cid)
+      tmark = typechar2mark(typechar)
+      mname = fsdecode(mencoded)
+      unless classname?(cname)
+        raise InvalidKey, "invalid class name: #{cname.inspect}"
+      end
+      unless methodname?(mname)
+        raise InvalidKey, "invalid method name: #{mname.inspect}"
+      end
+      SearchPattern.for_ctm(cname, tmark, mname)
     end
 
     def type_id

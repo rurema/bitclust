@@ -61,13 +61,13 @@ end
 
 def lookup(lib, key)
   case
-  when BitClust::NameUtils.seems_method_spec?(key)
+  when BitClust::NameUtils.method_spec?(key)
     spec = BitClust::SearchPattern.parse_spec(key)
     lib.fetch_method(spec)
-  when BitClust::NameUtils.seems_class_name?(key)
+  when BitClust::NameUtils.classname?(key)
     lib.fetch_class(key)
   else
-    raise BitClust::KeyError, "wrong search key: #{key.inspect}"
+    raise BitClust::InvalidKey, "wrong search key: #{key.inspect}"
   end
 end
 

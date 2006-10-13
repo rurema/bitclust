@@ -14,7 +14,7 @@ module BitClust
   class ScanError               < Error; end
   class CompileError            < Error; end
   class UserError               < Error; end
-  class KeyError                < UserError; end
+  class InvalidKey              < UserError; end
   class LibraryNotFound         < UserError; end
   class ClassNotFound           < UserError; end
   class MethodNotFound          < UserError; end

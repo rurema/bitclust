@@ -6,6 +6,10 @@ module BitClust
 
     module_function
 
+    def libname?(str)
+      /\A\w+(\/\w+)*\z/ =~ str
+    end
+
     def libname2id(name)
       name.split('/').map {|ent| fsencode(ent) }.join('.')
     end
@@ -14,7 +18,7 @@ module BitClust
       id.split('.').map {|ent| fsdecode(ent) }.join('/')
     end
 
-    def seems_class_name?(str)
+    def classname?(str)
       /\A[A-Z]\w*(::[A-Z]\w*)*/ =~ str
     end
 
@@ -28,7 +32,7 @@ module BitClust
       id.gsub(/__/, '::')
     end
 
-    def seems_method_spec?(str)
+    def method_spec?(str)
       /\A([\w\:]+)(\.\#|[\.\#]|::)([^:\s]+)\z/ =~ str
     end
 
