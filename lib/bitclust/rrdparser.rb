@@ -72,7 +72,7 @@ module BitClust
       when %r<(\A|/)_builtin/>
         '_builtin'
       else
-        path.sub(%r<\A(.*/)?src/>, '').sub(/\.rd(\.off)\z/, '')
+        path.sub(%r<\A(.*/)?src/>, '').sub(/\.rd(\.off)?\z/, '')
       end
     end
     private_class_method :libname

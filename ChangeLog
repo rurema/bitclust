@@ -1,3 +1,8 @@
+Fri Oct 13 20:21:09 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb (RRDParser.libname): .off extension is
+	  optional.
+
 Fri Oct 13 20:18:08 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-list.rb: show method details.
