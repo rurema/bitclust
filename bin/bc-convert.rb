@@ -74,6 +74,8 @@ end
 def do_convert(f, out = $stdout)
   f.each do |line|
     case line
+    when /\A\#@/
+      out.puts line
     when /\A\#/
       out.puts '#@' + line
     when /\A---\s/

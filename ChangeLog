@@ -1,3 +1,7 @@
+Fri Oct 13 20:13:15 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-convert.rb: ignore bitclust preprocessor directives.
+
 Sat Oct  7 04:13:40 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (Preprocessor): last_if must be an
