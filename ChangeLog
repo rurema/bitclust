@@ -1,3 +1,22 @@
+Sat Oct 14 01:50:12 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/requesthandler.rb: allow no class/library.
+
+	* lib/bitclust/requesthandler.rb: show class index for path
+	  "/class/".
+
+	* lib/bitclust/database.rb: new method Database#fetch_library_id.
+
+	* lib/bitclust/database.rb: new method Database#fetch_class_id.
+
+	* lib/bitclust/nameutils.rb: new method methodname?.
+
+	* lib/bitclust/nameutils.rb: new method typename?.
+
+	* lib/bitclust/nameutils.rb: new method typechar?.
+
+	* lib/bitclust/nameutils.rb: new method typemark?.
+
 Sat Oct 14 01:30:38 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: support [[url:...]] syntax.

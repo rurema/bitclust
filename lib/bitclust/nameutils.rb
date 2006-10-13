@@ -72,6 +72,10 @@ module BitClust
       fsdecode(m)
     end
 
+    def methodname?(str)
+      true   # FIXME
+    end
+
     def build_method_id(libid, cid, t, name)
       "#{cid}/#{typename2char(t)}.#{fsencode(name)}.#{fsencode(libid)}"
     end
@@ -89,6 +93,14 @@ module BitClust
     }
 
     MARK_TO_NAME = NAME_TO_MARK.invert
+
+    def typename?(n)
+      NAME_TO_MARK.key?(n)
+    end
+
+    def typemark?(m)
+      MARK_TO_NAME.key?(m)
+    end
 
     def typename2mark(name)
       NAME_TO_MARK[name] or
@@ -109,6 +121,10 @@ module BitClust
     }
 
     CHAR_TO_NAME = NAME_TO_CHAR.invert
+
+    def typechar?(c)
+      CHAR_TO_NAME.key?(c)
+    end
 
     def typename2char(name)
       NAME_TO_CHAR[name] or

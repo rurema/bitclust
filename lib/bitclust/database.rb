@@ -220,6 +220,11 @@ module BitClust
           raise LibraryNotFound, "library not found: #{name.inspect}"
     end
 
+    def fetch_library_id(id)
+      librarymap()[id] or
+          raise LibraryNotFound, "library not found: #{id.inspect}"
+    end
+
     def open_library(name, reopen = false)
       check_transaction
       map = librarymap()
@@ -258,6 +263,11 @@ module BitClust
     def fetch_class(name)
       classmap()[classname2id(name)] or
           raise ClassNotFound, "class not found: #{name.inspect}"
+    end
+
+    def fetch_class_id(id)
+      classmap()[id] or
+          raise ClassNotFound, "class not found: #{id.inspect}"
     end
 
     def open_class(name)
@@ -872,13 +882,13 @@ module BitClust
     end
 
     def library
-      @library ||= @db.fetch_library(methodid2libid(@id))
+      @library ||= @db.fetch_library_id(methodid2libid(@id))
     end
 
     attr_writer :library
 
     def klass
-      @klass ||= @db.fetch_class(methodid2classid(@id))
+      @klass ||= @db.fetch_class_id(methodid2classid(@id))
     end
 
     attr_writer :klass

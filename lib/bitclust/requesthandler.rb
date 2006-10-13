@@ -56,6 +56,7 @@ module BitClust
     end
 
     def handle_class(req)
+      return class_index() unless req.class_name
       c = @db.fetch_class(req.class_name)
       @screenmanager.class_screen(c).response
     end
@@ -103,7 +104,7 @@ module BitClust
     def library_name
       raise '#library_name called but not library request' unless library?
       id = type_param()
-      raise InvalidKey, 'missing library name' unless id
+      return nil unless id
       name = libid2name(id)
       unless libname?(name)
         raise InvalidKey, "invalid library name: #{name.inspect}"
@@ -114,7 +115,7 @@ module BitClust
     def class_name
       raise '#class_name called but not class request' unless class?
       id = type_param()
-      raise InvalidKey, 'missing class name' unless id
+      return nil unless id
       name = classid2name(id)
       unless classname?(name)
         raise InvalidKey, "invalid class name: #{name.inspect}"
