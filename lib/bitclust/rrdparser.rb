@@ -478,6 +478,8 @@ module BitClust
         case line
         when /\A\#@\#/   # preprocessor comment
           ;
+        when /\A\#@todo/i
+          ;
         when /\A\#@include\s*\((.*?)\)/
           file = $1.strip
           basedir = File.dirname(line.location.file)
