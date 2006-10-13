@@ -21,8 +21,8 @@
 <p>
 classes/modules:
 <%  lib.sorted_classes.each do |c| %>
-<%= class_link(c.name) %>
-<%    end %>
+<%=   class_link(c.name) %>
+<%  end %>
 </p>
 <%
     @entries.each do |lib|
@@ -33,7 +33,7 @@ classes/modules:
 <p>
 classes/modules:
 <%    lib.sorted_classes.each do |c| %>
-<%= class_link(c.name) %>
+<%=     class_link(c.name) %>
 <%    end %>
 </p>
 <%
