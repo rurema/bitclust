@@ -1,3 +1,23 @@
+Sat Oct 14 01:08:30 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/requesthandler.rb: check method name strictly.
+
+	* lib/bitclust/requesthandler.rb: check class name strictly.
+
+	* lib/bitclust/requesthandler.rb: check library name strictly.
+
+	* lib/bitclust/nameutils.rb: new method #libname?.
+
+	* lib/bitclust/nameutils.rb: rename method: seems_class_name? ->
+	  classname?.
+
+	* lib/bitclust/nameutils.rb: rename method: seems_method_spec? ->
+	  method_spec?.
+
+	* lib/bitclust/exception.rb: rename class: KeyError -> InvalidKey.
+
+	* bin/bc-tohtml.rb: ditto.
+
 Sat Oct 14 00:13:22 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (Preprocessor): new directive #@todo.
