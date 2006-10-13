@@ -1,3 +1,8 @@
+Fri Oct 13 20:38:04 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: _hashize_properties ->
+	  _get_properties.
+
 Fri Oct 13 20:28:49 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-tohtml.rb: implement --target command line option.

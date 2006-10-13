@@ -515,7 +515,7 @@ module BitClust
 
     def save
       @db.makepath File.dirname(objpath())
-      @db.save_properties objpath(), _hashize_properties()
+      @db.save_properties objpath(), _get_properties()
     end
 
     private
