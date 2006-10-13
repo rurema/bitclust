@@ -199,6 +199,7 @@ module BitClust
       when 'lib'     then library_link(arg)
       when 'c'       then class_link(arg)
       when 'm'       then method_link(complete_spec(arg))
+      when 'url'     then direct_url(arg)
       when 'man'     then man_link(arg)
       when 'rfc', 'RFC'
         rfc_link(arg)
@@ -207,6 +208,10 @@ module BitClust
       else
         "[[#{escape_html(link)}]]"
       end
+    end
+
+    def direct_url(url)
+      %Q(<a href="#{escape_html(url)}">#{escape_html(url)}</a>)
     end
 
     BLADE_URL = 'http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/%s/%s'

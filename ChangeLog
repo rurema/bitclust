@@ -1,3 +1,7 @@
+Sat Oct 14 01:30:38 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: support [[url:...]] syntax.
+
 Sat Oct 14 01:08:30 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/requesthandler.rb: check method name strictly.
