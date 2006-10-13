@@ -11,7 +11,7 @@ module BitClust
 
   module TextUtils
 
-    private
+    module_function
 
     def detab(str, ts = 8)
       add = 0

@@ -19,6 +19,7 @@ $LOAD_PATH.unshift srcdir_root() + 'lib'
 $KCODE = 'EUC'
 
 require 'bitclust'
+require 'erb'
 require 'find'
 require 'optparse'
 
@@ -68,6 +69,9 @@ Global Options:
   end
   db = BitClust::Database.new(prefix)
   cmd.exec db, ARGV
+rescue BitClust::UserError => err
+  $stderr.puts err.message
+  exit 1
 end
 
 def error(msg)
@@ -75,7 +79,9 @@ def error(msg)
   exit 1
 end
 
+
 class InitCommand
+
   def initialize
     @parser = OptionParser.new {|opt|
       opt.banner = "Usage: #{File.basename($0, '.*')} init [KEY=VALUE ...]"
@@ -99,9 +105,12 @@ class InitCommand
       end
     }
   end
+
 end
 
+
 class UpdateCommand
+
   def initialize
     @root = nil
     @library = nil
@@ -159,9 +168,12 @@ class UpdateCommand
       path
     end
   end
+
 end
 
+
 class ListCommand
+
   def initialize
     @mode = nil
     @parser = OptionParser.new {|opt|
@@ -209,21 +221,32 @@ class ListCommand
       raise "must not happen: @mode=#{@mode.inspect}"
     end
   end
+
 end
 
+
 class LookupCommand
+
   def initialize
-    @html_p = false
+    @format = :text
+    @type = nil
+    @key = nil
     @parser = OptionParser.new {|opt|
-      opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method) <keys>"
-      opt.on('--library', 'Lookup libraries.') {
+      opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method) [--html] <key>"
+      opt.on('--library=NAME', 'Lookup library.') {|name|
+        @type = :library
+        @key = name
       }
-      opt.on('--class', 'Lookup classes.') {
+      opt.on('--class=NAME', 'Lookup class.') {|name|
+        @type = :class
+        @key = name
       }
-      opt.on('--method', 'Lookup methods.') {
+      opt.on('--method=NAME', 'Lookup method.') {|name|
+        @type = :method
+        @key = name
       }
       opt.on('--html', 'Show result in HTML.') {
-        @html_p = true
+        @format = :html
       }
       opt.on('--help', 'Prints this message and quit.') {
         puts opt.help
@@ -234,12 +257,116 @@ class LookupCommand
 
   def parse(argv)
     @parser.parse! argv
-raise 'FIXME'
+    unless @type
+      error "one of --library/--class/--method is required"
+    end
+    unless argv.empty?
+      error "too many arguments"
+    end
   end
 
   def exec(db, argv)
-raise 'FIXME'
+    entry = fetch_entry(db, @type, @key)
+    puts fill_template(get_template(@type, @format), entry)
   end
+
+  def fetch_entry(db, type, key)
+    case type
+    when :library
+      db.fetch_library(key)
+    when :class
+      db.fetch_class(key)
+    when :method
+      db.fetch_method(BitClust::SearchPattern.parse_spec(key))
+    else
+      raise "must not happen: #{type.inspect}"
+    end
+  end
+
+  def fill_template(template, entry)
+    ERB.new(template).result(binding())
+  end
+
+  def get_template(type, format)
+    template = TEMPLATE[type][format]
+    BitClust::TextUtils.unindent_block(template).join('')
+  end
+
+  TEMPLATE = {
+    :library => {
+       :text => <<-End,
+           type: library
+           name: <%= entry.name %>
+           classes: <%= entry.classes.map {|c| c.name }.sort.join(', ') %>
+           methods: <%= entry.methods.map {|m| m.name }.sort.join(', ') %>
+
+           <%= entry.source %>
+           End
+       :html => <<-End
+           <dl>
+           <dt>type</dt><dd>library</dd>
+           <dt>name</dt><dd><%= entry.name %></dd>
+           <dt>classes</dt><dd><%= entry.classes.map {|c| c.name }.sort.join(', ') %></dd>
+           <dt>methods</dt><dd><%= entry.methods.map {|m| m.name }.sort.join(', ') %></dd>
+           </dl>
+           <%= compile_rd(entry.source) %>
+           End
+    },
+    :class   => {
+       :text => <<-End,
+           type: class
+           name: <%= entry.name %>
+           library: <%= entry.library.name %>
+           singleton_methods: <%= entry.singleton_methods.map {|m| m.name }.sort.join(', ') %>
+           instance_methods: <%= entry.instance_methods.map {|m| m.name }.sort.join(', ') %>
+           constants: <%= entry.constants.map {|m| m.name }.sort.join(', ') %>
+           special_variables: <%= entry.special_variables.map {|m| '$' + m.name }.sort.join(', ') %>
+
+           <%= entry.source %>
+           End
+       :html => <<-End
+           <dl>
+           <dt>type</dt><dd>class</dd>
+           <dt>name</dt><dd><%= entry.name %></dd>
+           <dt>library</dt><dd><%= entry.library.name %></dd>
+           <dt>singleton_methods</dt><dd><%= entry.singleton_methods.map {|m| m.name }.sort.join(', ') %></dd>
+           <dt>instance_methods</dt><dd><%= entry.instance_methods.map {|m| m.name }.sort.join(', ') %></dd>
+           </dl>
+           <%= compile_rd(entry.source) %>
+           End
+    },
+    :method  => {
+       :text => <<-End,
+           type: <%= entry.type %>
+           name: <%= entry.name %>
+           names: <%= entry.names.sort.join(', ') %>
+           visibility: <%= entry.visibility %>
+           kind: <%= entry.kind %>
+           library: <%= entry.library.name %>
+
+           <%= entry.source %>
+           End
+       :html => <<-End
+           <dl>
+           <dt>type</dt><dd><%= entry.type %></dd>
+           <dt>name</dt><dd><%= entry.name %></dd>
+           <dt>names</dt><dd><%= entry.names.sort.join(', ') %></dd>
+           <dt>visibility</dt><dd><%= entry.visibility %></dd>
+           <dt>kind</dt><dd><%= entry.kind %></dd>
+           <dt>library</dt><dd><%= entry.library.name %></dd>
+           </dl>
+           <%= compile_rd(entry.source) %>
+           End
+    }
+  }
+
+  def compile_rd(src)
+    umap = BitClust::URLMapper.new(:base_url => 'http://example.com',
+                                   :cgi_url  => 'http://example.com/view')
+    compiler = BitClust::RDCompiler.new(umap, 2)
+    compiler.compile(src)
+  end
+
 end
 
 main

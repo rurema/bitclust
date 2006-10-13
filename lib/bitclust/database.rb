@@ -16,10 +16,6 @@ module BitClust
   class MethodSpec
     include NameUtils
 
-    def MethodSpec.parse(str)
-      new(nil, *NameUtils.split_method_spec(str))
-    end
-
     def initialize(library = nil, klass = nil, type = nil, name = nil)
       @library = library
       @klass = klass
@@ -59,6 +55,10 @@ module BitClust
 
 
   class SearchPattern
+
+    def SearchPattern.parse_spec(str)
+      new(nil, *NameUtils.split_method_spec(str))
+    end
 
     def SearchPattern.for_ctm(c, t, m)
       new(nil, c, t, m)
@@ -780,7 +780,7 @@ module BitClust
       entries().select {|m| m.constant? }.sort_by {|m| m.id }
     end
 
-    def special_vairables
+    def special_variables
       entries().select {|m| m.special_variable? }.sort_by {|m| m.id }
     end
 

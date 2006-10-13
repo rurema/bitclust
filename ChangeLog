@@ -1,3 +1,18 @@
+Fri Oct 13 23:48:08 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: implement "bitclust lookup".
+
+	* lib/bitclust/database.rb: remove MethodSpec.parse.
+
+	* lib/bitclust/database.rb: new method SearchPattern.parse_spec.
+
+	* lib/bitclust/database.rb (ClassEntry#special_variables): fix
+	  typo.
+
+	* lib/bitclust/textutils.rb: all methods are module function.
+
+	* bin/bc-tohtml.rb: follow change.
+
 Fri Oct 13 21:11:23 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: new link syntax [[man:tr(1)]],
