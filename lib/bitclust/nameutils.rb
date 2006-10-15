@@ -19,7 +19,7 @@ module BitClust
     end
 
     def classname?(str)
-      /\A[A-Z]\w*(::[A-Z]\w*)*/ =~ str
+      /\A[A-Z]\w*(::[A-Z]\w*)*/ =~ str or str == 'fatal'
     end
 
     # A constant name must be composed by fs-safe characters.

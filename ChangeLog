@@ -1,3 +1,7 @@
+Mon Oct 16 02:24:10 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/nameutils.rb (classname?): allow 'fatal'
+
 Sat Oct 14 01:50:12 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/requesthandler.rb: allow no class/library.
