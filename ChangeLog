@@ -1,3 +1,7 @@
+Wed Oct 18 23:49:00 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-rdoc.rb: new file.
+
 Mon Oct 16 02:24:10 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/nameutils.rb (classname?): allow 'fatal'
