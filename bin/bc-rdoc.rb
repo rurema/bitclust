@@ -10,6 +10,9 @@ require 'optparse'
 class ApplicationError < StandardError; end
 
 def main
+  Signal.trap(:PIPE, 'EXIT')
+  Signal.trap(:INT, 'EXIT')
+
   mode = :listcontent
   parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0)} <classname>"
@@ -49,6 +52,8 @@ def main
   else
     raise "must not happen: #{mode.inspect}"
   end
+rescue Errno::EPIPE
+  exit 1
 rescue ApplicationError => err
   $stderr.puts err.message
   exit 1
