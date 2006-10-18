@@ -770,6 +770,8 @@ module BitClust
           .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
     end
 
+    alias methods entries
+
     Parts = Struct.new(:singleton_methods, :private_singleton_methods,
                        :instance_methods,  :private_instance_methods,
                        :module_functions,
@@ -799,11 +801,17 @@ module BitClust
       Parts.new(*[s,spv, i,ipv, mf, c, v].map {|ents| ents.sort_by{|m|m.id} })
     end
 
+    def singleton_methods(inherit = true)
+      entries().select {|m| m.singleton_method? }.sort_by {|m| m.id }
+    end
+
     def public_singleton_methods(inherit = true)
       entries().select {|m| m.public_singleton_method? }.sort_by {|m| m.id }
     end
 
-    alias singleton_methods public_singleton_methods
+    def instance_methods(inherit = true)
+      entries().select {|m| m.instance_method? }.sort_by {|m| m.id }
+    end
 
     def private_singleton_methods(inherit = true)
       entries().select {|m| m.private_singleton_method? }.sort_by {|m| m.id }
@@ -812,10 +820,6 @@ module BitClust
     def public_instance_methods(inherit = true)
       entries().select {|m| m.public_instance_method? }.sort_by {|m| m.id }
     end
-
-    alias instance_methods public_instance_methods
-    alias public_methods   public_instance_methods
-    alias methods          public_instance_methods
 
     def private_instance_methods(inherit = true)
       entries().select {|m| m.private_instance_method? }.sort_by {|m| m.id }
