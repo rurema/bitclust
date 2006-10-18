@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rdoc/ri/ri_reader'
 require 'rdoc/ri/ri_cache'
 require 'rdoc/ri/ri_paths'
