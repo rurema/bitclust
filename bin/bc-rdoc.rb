@@ -110,9 +110,12 @@ rescue ApplicationError, BitClust::UserError => err
 end
 
 def ri_lookup_class(reader, name)
-  nss = reader.lookup_namespace_in(name, reader.top_level_namespace)
-  nss.detect {|ns| ns.full_name == name } or
-      raise ApplicationError, "no such class: #{name}"
+  ns = reader.top_level_namespace.first
+  name.split('::').each do |const|
+    ns = ns.contained_class_named(const) or
+        raise ApplicationError, "no such class in RDoc database: #{name}"
+  end
+  ns
 end
 
 def diff_class(bc, ri, reader)
