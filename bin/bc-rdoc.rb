@@ -1,10 +1,17 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
+
+srcdir_root = Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
+$LOAD_PATH.unshift srcdir_root + 'lib'
+
+require 'bitclust'
 require 'rdoc/ri/ri_reader'
 require 'rdoc/ri/ri_cache'
 require 'rdoc/ri/ri_paths'
 require 'rdoc/markup/simple_markup/fragments'
 require 'stringio'
+require 'pp'
 require 'optparse'
 
 class ApplicationError < StandardError; end
@@ -13,11 +20,19 @@ def main
   Signal.trap(:PIPE, 'EXIT')
   Signal.trap(:INT, 'EXIT')
 
-  mode = :listcontent
+  prefix = nil
+  mode = :list
+  type = :name
   parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0)} <classname>"
-  parser.on('-l', '--list', 'list method names.'){
-    mode = :listname
+  parser.on('-d', '--database=PREFIX', 'BitClust database path') {|path|
+    prefix = path
+  }
+  parser.on('--diff', 'Show difference between RD and RDoc') {
+    mode = :diff
+  }
+  parser.on('-c', '--content', 'Prints method description') {
+    type = :content
   }
   parser.on('--help', 'Prints this message and quit.') {
     puts parser.help
@@ -30,45 +45,187 @@ def main
     $stderr.puts parser.help
     exit 1
   end
-  unless ARGV.size == 1
-    $stderr.puts "arg must be 1"
-    exit 1
-  end
-  target_class = ARGV[0]
 
+  # use only system database
   path = RI::Paths.path(true, false, false, false)
   reader = RI::RiReader.new(RI::RiCache.new(path))
-  c = lookup_class(reader, target_class)
   case mode
-  when :listname
-    c.method_entries.each do |m|
-      puts m.fullname
+  when :list
+    ARGV.each do |name|
+      c = ri_lookup_class(reader, name)
+      case type
+      when :name
+        c.method_entries.each do |m|
+          puts m.fullname
+        end
+      when :content
+        fmt = Formatter.new
+        c.method_entries.each do |m|
+          puts fmt.method_info(reader.get_method(m))
+        end
+      end
     end
-  when :listcontent
-    fmt = Formatter.new
-    c.method_entries.each do |m|
-      puts fmt.method_info(reader.get_method(m))
+  when :diff
+    unless prefix
+      $stderr.puts 'missing database prefix.  Use -d option'
+      exit 1
+    end
+    unless ARGV.size == 1
+      $stderr.puts "Usage: #{$0} --diff -d DBPATH <classname>"
+      exit 1
+    end
+    cname = ARGV[0]
+    db = BitClust::Database.new(prefix)
+    begin
+      bc_class = db.fetch_class(cname)
+    rescue BitClust::ClassNotFound
+      $stderr.puts "warning: class #{cname} not exist in BitClust database"
+      bc_class = db.get_class(cname)
+    end
+    ri_class = ri_lookup_class(reader, cname)
+    win, lose = *diff_class(bc_class, ri_class, reader)
+    case type
+    when :name
+      win.each do |m|
+        puts "+ #{m.fullname}"
+      end
+      lose.each do |m|
+        puts "- #{m.fullname}"
+      end
+    when :content
+      fmt = Formatter.new
+      lose.each do |m|
+        puts "\#@\# bc-rdoc: detected missing name: #{m.name}"
+        puts fmt.method_info(m.entry)
+      end
     end
   else
     raise "must not happen: #{mode.inspect}"
   end
 rescue Errno::EPIPE
   exit 1
-rescue ApplicationError => err
+rescue ApplicationError, BitClust::UserError => err
   $stderr.puts err.message
   exit 1
 end
 
-def lookup_class(reader, name)
+def ri_lookup_class(reader, name)
   nss = reader.lookup_namespace_in(name, reader.top_level_namespace)
   nss.detect {|ns| ns.full_name == name } or
       raise ApplicationError, "no such class: #{name}"
 end
 
+def diff_class(bc, ri, reader)
+  unzip(diff_entries(bc, bc.singleton_methods, reader.singleton_methods(ri)),
+        diff_entries(bc, bc.instance_methods,  reader.instance_methods(ri)))\
+      .map {|list| list.flatten }
+end
+
+def unzip(*tuples)
+  [tuples.map {|s, i| s }, tuples.map {|s, i| i }]
+end
+
+def diff_entries(bc_class, _bc, _ri)
+  bc = _bc.map {|m| m.names.map {|name| BCMethodEntry.new(name, m) } }.flatten.uniq.sort
+  ri = _ri.map {|m|
+         [RiMethodEntry.new(m.name, m)] +
+             m.aliases.map {|a| RiMethodEntry.new(a.name, m) }
+       }.flatten.uniq.sort
+  win = bc - ri
+  lose0 = ri - bc
+  lose = lose0.reject {|m| true_exist?(bc_class, m) }
+  [win, lose]
+end
+
+def true_exist?(klass, m)
+  if m.singleton_method?
+    klass.singleton_method?(m.name, true)
+  else
+    klass.instance_method?(m.name, true)
+  end
+end
+
+def uncapsule(list)
+  list.map {|m| m.entry }.uniq.sort_by {|ent| ent.name }
+end
+
+class Ent
+  def initialize(name, ent)
+    @name = name
+    @entry = ent
+  end
+
+  attr_reader :name
+  attr_reader :entry
+
+  def ==(other)
+    @name == other.name
+  end
+
+  alias eql? ==
+
+  def hash
+    @name.hash
+  end
+
+  def <=>(other)
+    @name <=> other.name
+  end
+end
+
+class BCMethodEntry < Ent
+  def bitclust?
+    true
+  end
+
+  def inspect
+    "\#<BitClust #{@name} #{@entry.inspect}>"
+  end
+
+  def fullname
+    "#{@entry.klass.name}#{@entry.typemark}#{@name}"
+  end
+end
+
+class RiMethodEntry < Ent
+  def bitclust?
+    false
+  end
+
+  def inspect
+    "\#<RDoc #{@name} #{@entry.fullname}>"
+  end
+
+  def singleton_method?
+    @entry.singleton_method?
+  end
+
+  def fullname
+    c, t, m = @entry.fullname.split(/([\.\#])/, 2)
+    "#{c}#{t}#{@name}"
+  end
+end
+
 
 module RI
 
+  class RiReader   # reopen
+    def singleton_methods(c)
+      c.singleton_methods.map {|ent| get_method(ent) }
+    end
+
+    def instance_methods(c)
+      c.instance_methods.map {|ent| get_method(ent) }
+    end
+  end
+
   class ClassEntry   # reopen
+    def singleton_methods
+      @class_methods
+    end
+
+    attr_reader :instance_methods
+
     def method_entries
       @class_methods.sort_by {|m| m.name } +
       @instance_methods.sort_by {|m| m.name }
@@ -78,6 +235,27 @@ module RI
   class MethodEntry   # reopen
     def fullname
       "#{@in_class.full_name}#{@is_class_method ? '.' : '#'}#{@name}"
+    end
+
+    def singleton_method?
+      @is_class_method
+    end
+  end
+
+  class MethodDescription   # reopen
+    def fullname
+      name = full_name()
+      unless /\#/ =~ name
+        components = name.split('::')
+        m = components.pop
+        components.join('::') + '.' + m
+      else
+        name
+      end
+    end
+
+    def singleton_method?
+      @is_class_method
     end
   end
 

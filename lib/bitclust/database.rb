@@ -300,7 +300,7 @@ module BitClust
     # FIXME: see kind
     def open_method(spec)
       check_transaction
-      if m = spec.klass.search_method(spec)
+      if m = spec.klass.search_method(spec, false)
         m.clear
       else
         m = MethodEntry.new(self, spec.id)
@@ -314,11 +314,11 @@ module BitClust
     end
 
     def fetch_methods(spec)
-      fetch_class(spec.klass).search_methods(spec)
+      fetch_class(spec.klass).search_methods(spec, false)
     end
 
     def fetch_method(spec)
-      fetch_class(spec.klass).search_method(spec) or
+      fetch_class(spec.klass).search_method(spec, false) or
           raise MethodNotFound, "no such method: #{spec.inspect}"
     end
 
@@ -645,7 +645,7 @@ module BitClust
     private :classmap
 
     def fetch_method(spec)
-      classes().detect {|c| c.search_method(spec) } or
+      classes().detect {|c| c.search_method(spec, false) } or
       methods().detect {|m| spec.match?(m) } or
         raise MethodNotFound, "no such method in the library #{name()}: #{name}"
     end
@@ -724,6 +724,43 @@ module BitClust
       property :source,     'String'
     }
 
+    def ancestors
+      @ancestors ||=
+          begin
+            list = [self, included().map {|m| m.ancestors }]
+            list.push superclass().ancestors  if superclass()
+            list.flatten
+          end
+    end
+
+    def singleton_method?(name, inherit = true)
+      if inherit
+        ancestors().any? {|c| c.singleton_method?(name, false) }
+      else
+        singleton_methods(false).detect {|m| m.named?(name) }
+      end
+    end
+
+    def instance_method?(name, inherit = true)
+      if inherit
+        ancestors().any? {|c| c.instance_method?(name, false) }
+      else
+        instance_methods(false).detect {|m| m.named?(name) }
+      end
+    end
+
+    def constant?(name, inherit = true)
+      if inherit
+        ancestors().any? {|c| c.constant?(name, false) }
+      else
+        constants(false).detect {|m| m.named?(name) }
+      end
+    end
+
+    def special_variable?(name)
+      special_variables().detect {|m| m.named?(name) }
+    end
+
     def sorted_entries
       entries().sort_by {|m| m.id }
     end
@@ -762,17 +799,17 @@ module BitClust
       Parts.new(*[s,spv, i,ipv, mf, c, v].map {|ents| ents.sort_by{|m|m.id} })
     end
 
-    def public_singleton_methods
+    def public_singleton_methods(inherit = true)
       entries().select {|m| m.public_singleton_method? }.sort_by {|m| m.id }
     end
 
     alias singleton_methods public_singleton_methods
 
-    def private_singleton_methods
+    def private_singleton_methods(inherit = true)
       entries().select {|m| m.private_singleton_method? }.sort_by {|m| m.id }
     end
 
-    def public_instance_methods
+    def public_instance_methods(inherit = true)
       entries().select {|m| m.public_instance_method? }.sort_by {|m| m.id }
     end
 
@@ -780,13 +817,13 @@ module BitClust
     alias public_methods   public_instance_methods
     alias methods          public_instance_methods
 
-    def private_instance_methods
+    def private_instance_methods(inherit = true)
       entries().select {|m| m.private_instance_method? }.sort_by {|m| m.id }
     end
 
     alias private_methods   private_instance_methods
 
-    def constants
+    def constants(inherit = true)
       entries().select {|m| m.constant? }.sort_by {|m| m.id }
     end
 
@@ -822,16 +859,16 @@ module BitClust
       entries().each(&block)
     end
 
-    def search_methods(spec)
+    def search_methods(spec, inherit = true)
       entries().select {|m| spec.match?(m) }
     end
 
-    def search_method(spec)
+    def search_method(spec, inherit = true)
       entries().detect {|m| spec.match?(m) }
     end
 
-    def fetch_method(spec)
-      search_method(spec) or
+    def fetch_method(spec, inherit = true)
+      search_method(spec, inherit) or
           raise MethodNotFound, "spec=#{spec.inspect}"
     end
 
@@ -906,6 +943,10 @@ module BitClust
 
     def label
       "#{klass().name}#{typemark()}#{name()}"
+    end
+
+    def named?(name)
+      names().include?(name)
     end
 
     def sorted_names

@@ -1,3 +1,29 @@
+Thu Oct 19 02:32:58 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-rdoc.rb: new option --diff (and -d/--database).
+
+	* lib/bitclust/database.rb: new method
+	  ClassEntry#singleton_method?.
+
+	* lib/bitclust/database.rb: new method ClassEntry#instance_method?
+
+	* lib/bitclust/database.rb: new method ClassEntry#constant?
+
+	* lib/bitclust/database.rb: new method
+	  ClassEntry#special_variable?
+
+	* lib/bitclust/database.rb: ClassEntry#singleton_method?,
+	  #instance_method, #constant?, #special_variable?, #search_method,
+	  #search_methods, #fetch_method have optional 2nd argument,
+	  inherit.
+
+	* lib/bitclust/database.rb: new method MethodEntry#named?.
+
+	* lib/bitclust/rrdparser.rb: "<=>" method did not detected.
+
+	* lib/bitclust/rrdparser.rb: does not provide superclass for
+	  Object.
+
 Wed Oct 18 23:53:52 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-rdoc.rb: ignore EPIPE.

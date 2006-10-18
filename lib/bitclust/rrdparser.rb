@@ -241,7 +241,7 @@ module BitClust
 
     const = /[A-Z]\w*/
     cpath = /#{const}(?:::#{const})*/
-    mid = /\w+[?!=]?|===|==|=~|<=|=>|<=>|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
+    mid = /\w+[?!=]?|===|==|=~|<=>|<=|=>|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
     SIGNATURE = /\A---\s*(?:(#{cpath})([\.\#]|::))?(#{mid})/
     SVAR = /\A---\s*\$(\w+|-.|\S)/
 
@@ -275,7 +275,8 @@ module BitClust
       end
 
       def define_class(name, supername)
-        register_class :class, name, @db.get_class(supername)
+        superclass = (name == 'Object' ? nil : @db.get_class(supername))
+        register_class :class, name, superclass
       end
 
       def define_module(name)
