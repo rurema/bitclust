@@ -59,44 +59,52 @@ module BitClust
         $stderr.puts "too many arguments (#{argv.size} for 2)"
         exit 1
       end
+      # FIXME
+      #compiler = RDCompiler::Text.new
+      compiler = Plain.new
+      @view = TerminalView.new(compiler,
+                              {:describe_all => @describe_all, :line => @linep})
     end
 
     def exec(db, argv)
-      #compiler = RDCompiler::Text.new
       db ||= Database.new(@dbpath || dbpath())
-      compiler = Plain.new   # FIXME
-      view = TerminalView.new(compiler,
-                              {:describe_all => @describe_all, :line => @linep})
       case argv.size
       when 0
-        view.show_class db.classes
+        @view.show_class db.classes
       when 1
         _m, _t, _c = argv[0].reverse.split(/(\#[\.,]|[\.,]\#|[\#\.\,]|::)/, 2)
         if _t
           c = _c.reverse
           t = _t.tr(',', '.').sub(/\#\./, '.#')
           m = _m.reverse
+          search_methods db, c, t, m
         else
-          c = nil
-          t = nil
-          m = argv[0]
+          if /\A[A-Z]/ =~ argv[0]
+            begin
+              @view.show_class db.search_classes(argv[0])
+            rescue ClassNotFound
+              search_methods db, nil, nil, argv[0]
+            end
+          else
+            search_methods db, nil, nil, argv[0]
+          end
         end
-        pattern = SearchPattern.for_ctm(c, t, m)
-        view.show_method db.search_methods(pattern)
       when 2
         c, m = *argv
-        pattern = SearchPattern.for_ctm(c, nil, m)
-        view.show_method db.search_methods(pattern)
+        search_methods db, c, nil, m
       when 3
         c, t, m = *argv
         unless typemark?(t)
           raise InvalidSearchPattern, "unknown method type: #{t.inspect}"
         end
-        pattern = SearchPattern.for_ctm(c, t, m)
-        view.show_method db.search_methods(pattern)
+        search_methods db, c, t, m
       else
         raise "must not happen: #{argv.size}"
       end
+    end
+
+    def search_methods(db, c, t, m)
+      @view.show_method db.search_methods(SearchPattern.new(c, t, m))
     end
 
     private
@@ -166,20 +174,20 @@ module BitClust
       end
     end
 
-    def show_method(ms)
-      if ms.size == 1
+    def show_method(result)
+      if result.determined?
         if @line
-          print_names [ms.first.label]
+          print_names [result.name]
         else
-          describe_method ms.first
+          describe_method result.record
         end
       else
         if @describe_all
-          ms.sort_by {|m| m.id }.each do |m|
-            describe_method m
+          result.records.sort.each do |rec|
+            describe_method rec
           end
         else
-          print_names ms.map {|m| m.labels }.flatten.sort
+          print_names result.names
         end
       end
     end
@@ -218,6 +226,10 @@ module BitClust
     end
 
     def describe_class(c)
+      unless c.library.name == '_builtin'
+        puts "require '#{c.library.name}'"
+        puts
+      end
       puts "#{c.type} #{c.name}#{c.superclass ? " < #{c.superclass.name}" : ''}"
       unless c.included.empty?
         puts
@@ -225,22 +237,23 @@ module BitClust
           puts "include #{mod.name}"
         end
       end
-      unless c.library.name == '_builtin'
-        puts
-        puts "require '#{c.library.name}'"
-      end
       unless c.source.strip.empty?
         puts
         puts @compiler.compile(c.source.strip)
       end
     end
 
-    def describe_method(m)
-      unless m.library.name == '_builtin'
-        puts "require '#{m.library.name}'"
+    def describe_method(rec)
+      unless rec.entry.library.name == '_builtin'
+        puts "require '#{rec.entry.library.name}'"
       end
-      puts m.label   # FIXME: replace method signature by method spec
-      puts @compiler.compile(m.source.strip)
+      # FIXME: replace method signature by method spec
+      if rec.original_class == rec.entry.klass
+        puts rec.name
+      else
+        puts "#{rec.original_class.name} < #{rec.name}"
+      end
+      puts @compiler.compile(rec.entry.source.strip)
       puts
     end
 

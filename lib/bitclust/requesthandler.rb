@@ -7,15 +7,10 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/compat'
 require 'bitclust/screen'
-require 'bitclust/database'
+require 'bitclust/methodid'
 require 'bitclust/nameutils'
-
-unless Object.method_defined?(:funcall)
-  class Object
-    alias funcall __send__
-  end
-end
 
 module BitClust
 
@@ -67,11 +62,11 @@ module BitClust
     end
 
     def library_index
-      @screenmanager.library_index_screen(@db.sorted_libraries).response
+      @screenmanager.library_index_screen(@db.libraries.sort).response
     end
 
     def class_index
-      @screenmanager.class_index_screen(@db.sorted_classes).response
+      @screenmanager.class_index_screen(@db.classes.sort).response
     end
 
     def handle_search(key)
@@ -143,7 +138,7 @@ module BitClust
       unless methodname?(mname)
         raise InvalidKey, "invalid method name: #{mname.inspect}"
       end
-      SearchPattern.for_ctm(cname, tmark, mname)
+      MethodSpec.new(cname, tmark, mname)
     end
 
     def type_id

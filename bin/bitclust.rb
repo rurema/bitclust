@@ -24,8 +24,10 @@ require 'find'
 require 'optparse'
 
 def main
-  prefix = nil
+  Signal.trap(:PIPE) { exit 1 }
+  Signal.trap(:INT) { exit 1 }
 
+  prefix = nil
   parser = OptionParser.new
   parser.banner = <<-EndBanner
 Usage: #{File.basename($0, '.*')} [global options] <subcommand> [options] [args]
@@ -279,7 +281,7 @@ class LookupCommand
     when :class
       db.fetch_class(key)
     when :method
-      db.fetch_method(BitClust::SearchPattern.parse_spec(key))
+      db.fetch_method(BitClust::MethodSpec.parse(key))
     else
       raise "must not happen: #{type.inspect}"
     end

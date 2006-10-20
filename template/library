@@ -14,7 +14,7 @@
 <%= headline("library #{@entry.name}") %>
 <%
     headline_push
-    classes = @entry.sorted_classes
+    classes = @entry.classes.sort
 %>
 <%= compile_rd(@entry.source) %>
 <%= headline("Classes, Modules, and Objects") %>
@@ -33,7 +33,7 @@
 <dt><%=h c.type.to_s %> <%= class_link(c.name) %></dt>
 <dd>
 <p><code>
-<%    c.sorted_entries.each do |m| %>
+<%    c.entries.sort.each do |m| %>
 <%= link_to_method(m) %>
 <%    end %>
 </code></p>

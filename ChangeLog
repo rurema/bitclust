@@ -1,3 +1,53 @@
+Sat Oct 21 04:22:20 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/searcher.rb: search class if pattern begins with
+	  capital letter.
+
+	* lib/bitclust/searcher.rb: search class if pattern begins with
+	  capital letter.
+
+	* lib/bitclust/database.rb: Database#search_methods now returns a
+	  SearchResult object.
+
+	* lib/bitclust/methodid.rb: new method
+	  SearchPattern#search_methods.
+
+	* lib/bitclust/database.rb: fork methodid.rb and entry.rb.
+
+	* lib/bitclust/methodid.rb: new file.
+
+	* lib/bitclust/methodid.rb: rename class: MethodSpec -> MethodID.
+
+	* lib/bitclust/rrdparser.rb: ditto.
+
+	* lib/bitclust/methodid.rb: new class MethodSpec.
+
+	* bin/bitclust.rb: use it.
+
+	* bin/bc-tohtml.rb: ditto.
+
+	* lib/bitclust/entry.rb: new file.
+
+	* lib/bitclust/entry.rb: provide *Entry#<=>.
+
+	* lib/bitclust/requesthandler.rb: now *Entry has <=>, simply use
+	  sort.
+
+	* template/library: ditto.
+
+	* template/library-index: ditto.
+
+	* template/class-index: ditto.
+
+	* bin/bitclust.rb: trap(..., 'EXIT') causes success-exit, use
+	  "exit 1" explicitly.
+
+	* bin/refe.rb: ditto.
+
+	* lib/bitclust/compat.rb: provide Object#__send.
+
+	* lib/bitclust/compat.rb: provide Object#funcall.
+
 Sat Oct 21 04:11:20 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/nameutils.rb: use '=' for class ID escaping,

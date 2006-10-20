@@ -62,7 +62,7 @@ end
 def lookup(lib, key)
   case
   when BitClust::NameUtils.method_spec?(key)
-    spec = BitClust::SearchPattern.parse_spec(key)
+    spec = BitClust::MethodSpec.parse(key)
     lib.fetch_method(spec)
   when BitClust::NameUtils.classname?(key)
     lib.fetch_class(key)

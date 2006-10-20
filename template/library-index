@@ -20,7 +20,7 @@
 <%= compile_rd(lib.synopsis_source) %>
 <p>
 classes/modules:
-<%  lib.sorted_classes.each do |c| %>
+<%  lib.classes.sort.each do |c| %>
 <%=   class_link(c.name) %>
 <%  end %>
 </p>
@@ -32,7 +32,7 @@ classes/modules:
 <%= compile_rd(lib.synopsis_source) %>
 <p>
 classes/modules:
-<%    lib.sorted_classes.each do |c| %>
+<%    lib.classes.sort.each do |c| %>
 <%=     class_link(c.name) %>
 <%    end %>
 </p>

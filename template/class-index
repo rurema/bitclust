@@ -22,7 +22,7 @@
 <%= headline_noescape("#{c.type} #{class_link(c.name)}") %>
 <p>
 <%
-      c.sorted_entries {|m| m.id }.each do |m| %>
+      c.entries.sort.each do |m| %>
 <%= link_to_method(m) %>
 <%    end %>
 </p>

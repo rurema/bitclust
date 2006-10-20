@@ -3,8 +3,8 @@
 require 'bitclust'
 
 def main
-  Signal.trap(:PIPE, "EXIT")
-  Signal.trap(:INT, "EXIT")
+  Signal.trap(:PIPE) { exit 1 }
+  Signal.trap(:INT) { exit 1 }
 
   refe = BitClust::Searcher.new
   refe.parse ARGV

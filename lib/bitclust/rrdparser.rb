@@ -7,6 +7,8 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/compat'
+require 'bitclust/methodid'
 require 'bitclust/lineinput'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
@@ -348,8 +350,8 @@ module BitClust
       end
 
       def define_method(chunk)
-        spec = method_spec(chunk)
-        @db.open_method(spec) {|m|
+        id = method_id(chunk)
+        @db.open_method(id) {|m|
           m.names      = chunk.names.sort
           m.kind       = @kind
           m.visibility = @visibility || :public
@@ -361,13 +363,13 @@ module BitClust
         }
       end
 
-      def method_spec(chunk)
-        spec = MethodSpec.new
-        spec.library = @library
-        spec.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : @klass
-        spec.type    = chunk.signature.typename || @type
-        spec.name    = chunk.names.sort.first
-        spec
+      def method_id(chunk)
+        id = MethodID.new
+        id.library = @library
+        id.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : @klass
+        id.type    = chunk.signature.typename || @type
+        id.name    = chunk.names.sort.first
+        id
       end
     end
 
@@ -570,7 +572,7 @@ module BitClust
         if op == '!='
           val = (val != eval_primary(s))
         else
-          val = val.__send__(op, eval_primary(s))
+          val = val.__send(op, eval_primary(s))
         end
       end
       if paren_open

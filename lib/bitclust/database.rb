@@ -7,136 +7,12 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/entry'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
 
-unless Object.method_defined?(:__send)
-  class Object
-    alias __send __send__
-  end
-end
-
 module BitClust
-
-  class MethodSpec
-    include NameUtils
-
-    def initialize(library = nil, klass = nil, type = nil, name = nil)
-      @library = library
-      @klass = klass
-      @type = type
-      @name = name
-    end
-
-    attr_accessor :library
-    attr_accessor :klass
-    attr_accessor :type
-    attr_accessor :name
-
-    def inspect
-      "#<spec #{@library.name}.#{@klass.name}#{typemark()}#{@name}>"
-    end
-
-    def match?(m)
-      m.library == @library and
-      m.type == @type and
-      m.name == @name
-    end
-
-    alias typename type
-
-    def typechar
-      typename2char(@type)
-    end
-
-    def typemark
-      typename2mark(@type)
-    end
-
-    def id
-      build_method_id(@library.id, @klass.id, @type, @name)
-    end
-  end
-
-
-  class SearchPattern
-
-    def SearchPattern.parse_spec(str)
-      new(nil, *NameUtils.split_method_spec(str))
-    end
-
-    def SearchPattern.for_ctm(c, t, m)
-      new(nil, c, t, m)
-    end
-
-    def initialize(lib = nil, c = nil, t = nil, m = nil)
-      @library = library
-      @klass = c
-      @type = t
-      @method = m
-    end
-
-    attr_reader :library
-    attr_reader :klass
-    attr_reader :type
-    attr_reader :method
-
-    def inspect
-      "#<spec #{esc(@library)}.#{esc(@klass)}#{@type || ' _ '}#{esc(@method)}>"
-    end
-
-    def esc(s)
-      s || '_'
-    end
-    private :esc
-
-    def match?(m)
-      (not @library or m.library.name == @library) and
-      (not @type    or m.typemark     == @type)    and
-      (not @method  or m.names.include?(@method))
-    end
-
-    def select_classes(cs)
-      return cs unless @klass
-      completion_search(cs, @klass)
-    end
-
-    TYPE_TO_METHOD = {
-      nil  => :methods,
-      '.'  => :singleton_methods,
-      '#'  => :instance_methods,
-      '.#' => :module_functions,
-      '::' => :constants,
-      '$'  => :special_variables
-    }
-
-    def select_methods(c)
-      type_mid = TYPE_TO_METHOD[@type]
-      return c.__send(type_mid) unless @method
-      completion_search(c.__send(type_mid), @method)
-    end
-
-    private
-
-    def completion_search(xs, pattern)
-      re_i = /\A#{Regexp.quote(pattern)}/i
-      result1 = xs.select {|x| x.name_match?(re_i) }
-      if result1.size > 1
-        re = /\A#{Regexp.quote(pattern)}/
-        result2 = result1.select {|x| x.name_match?(re) }
-        return result1 if result2.empty?
-        if result2.size > 1
-          result3 = result2.select {|x| x.name?(pattern) }
-          return result2 if result3.empty?
-          return result3
-        end
-      end
-      result1
-    end
-
-  end
-
 
   class Database
 
@@ -158,6 +34,7 @@ module BitClust
       @in_transaction = false
       @properties_dirty = false
       @dirty_entries = {}
+      @dirty_classes = {}
     end
 
     def dummy?
@@ -185,10 +62,14 @@ module BitClust
         save_properties 'properties', @properties
         @properties_dirty = false
       end
-      @dirty_entries.each_key do |x|
+      @dirty_classes.each_key do |c|
+        c.clear_cache
+      end
+      (@dirty_classes.keys + @dirty_entries.keys).each do |x|
         x.save
       end
       @dirty_entries.clear
+      @dirty_classes.clear
     ensure
       @in_transaction = false
     end
@@ -206,8 +87,11 @@ module BitClust
     end
 
     alias dirty_library dirty
-    alias dirty_class   dirty
     alias dirty_method  dirty
+
+    def dirty_class(c)
+      @dirty_classes[c] = true
+    end
 
     def update_by_file(path, libname)
       check_transaction
@@ -244,10 +128,6 @@ module BitClust
     #
     # Library Entry
     #
-
-    def sorted_libraries
-      libraries().sort_by {|lib| lib.id }
-    end
 
     def libraries
       librarymap().values
@@ -290,10 +170,6 @@ module BitClust
     # Classe Entry
     #
 
-    def sorted_classes
-      classes().sort_by {|c| c.id }
-    end
-
     def classes
       classmap().values
     end
@@ -316,6 +192,14 @@ module BitClust
     def fetch_class_id(id)
       classmap()[id] or
           raise ClassNotFound, "class not found: #{id.inspect}"
+    end
+
+    def search_classes(pattern)
+      cs = SearchPattern.new(pattern, nil, nil).select_classes(classes())
+      if cs.empty?
+        raise ClassNotFound, "no such class: #{pattern}"
+      end
+      cs
     end
 
     def open_class(name)
@@ -346,41 +230,44 @@ module BitClust
     #
 
     # FIXME: see kind
-    def open_method(spec)
+    def open_method(id)
       check_transaction
-      if m = spec.klass.search_method(spec, false)
+      if m = id.klass.get_method(id)
         m.clear
       else
-        m = MethodEntry.new(self, spec.id)
-        spec.klass.add_method m
+        m = MethodEntry.new(self, id.idstring)
+        id.klass.add_method m
       end
-      m.library = spec.library
-      m.klass   = spec.klass
+      m.library = id.library
+      m.klass   = id.klass
       yield m
       dirty_method m
       m
     end
 
-    def fetch_methods(spec)
-      fetch_class(spec.klass).search_methods(spec, false)
+    def get_method(spec)
+      get_class(spec.klass).get_method(spec)
     end
 
     def fetch_method(spec)
-      fetch_class(spec.klass).search_method(spec, false) or
-          raise MethodNotFound, "no such method: #{spec.inspect}"
+      fetch_class(spec.klass).fetch_method(spec)
+    end
+
+    def search_method(pattern)
+      search_methods(pattern).first
     end
 
     def search_methods(pattern)
-      cs = pattern.select_classes(classes())
-      if cs.empty?
-        raise MethodNotFound, "no such class: #{pattern.klass}"
+      result = pattern.search_methods(self)
+      if result.fail?
+        if result.classes.size <= 5
+          loc = result.classes.map {|c| c.label }.join(', ')
+        else
+          loc = "#{result.classes.size} classes"
+        end
+        raise MethodNotFound, "no such method in #{loc}: #{pattern.method}"
       end
-      ms = cs.map {|c| pattern.select_methods(c) }.flatten
-      if ms.empty?
-        r = (cs.size <= 5) ? cs.map {|c| c.label }.join(', ') : "#{cs.size} classes"
-        raise MethodNotFound, "no such method in #{r}: #{pattern.method}"
-      end
-      ms
+      result
     end
 
     #
@@ -428,9 +315,12 @@ module BitClust
       }
     end
 
-    private
+    def read(rel)
+      File.read(realpath(rel))
+    end
 
     def atomic_write_open(rel, &block)
+      FileUtils.mkdir_p File.dirname(realpath(rel))
       tmppath = realpath(rel) + '.writing'
       File.open(tmppath, 'w', &block)
       File.rename tmppath, realpath(rel)
@@ -438,657 +328,10 @@ module BitClust
       File.unlink tmppath  rescue nil
     end
 
-    def realpath(rel)
-      "#{@prefix}/#{rel}"
-    end
-
-  end
-
-
-  class Entry
-
-    include NameUtils
-
-    def self.persistent_properties
-      @slots = []
-      yield
-      sep = ";"
-      module_eval(src = <<-End, __FILE__, __LINE__ + 1)
-        def init_properties
-          if saved?
-            #{@slots.map {|s| "@#{s.name} = nil" }.join(sep)}
-            @loaded = false
-          else
-            clear
-          end
-        end
-
-        def clear
-          #{@slots.map {|s| "@#{s.name} = #{s.initial_value}" }.join(sep)}
-          @loaded = true
-        end
-
-        def _set_properties(h)
-          #{@slots.map {|s| "@#{s.name} = #{s.deserializer}" }.join(sep)}
-        end
-
-        def _get_properties
-          h = {}
-          #{@slots.map {|s| "h['#{s.name}'] = #{s.serializer}" }.join(sep)}
-          h
-        end
-      End
-      @slots.each do |slot|
-        module_eval(<<-End, __FILE__, __LINE__ + 1)
-          def #{slot.name}
-            unless @loaded
-              _set_properties @db.load_properties(objpath())
-              @loaded = true
-            end
-            @#{slot.name}
-          end
-
-          def #{slot.name}=(value)
-            unless @loaded
-              _set_properties @db.load_properties(objpath())
-              @loaded = true
-            end
-            @#{slot.name} = value
-          end
-        End
-      end
-    end
-
-    def self.property(name, type)
-      @slots.push Property.new(name, type)
-    end
-
-    class Property
-      def initialize(name, type)
-        @name = name
-        @type = type
-      end
-
-      attr_reader :name
-
-      def initial_value
-        case @type
-        when 'String'         then "'(uninitialized)'"
-        when 'Symbol'         then ":unknown"
-        when 'LibraryEntry'   then ":unknown"
-        when 'ClassEntry'     then ":unknown"
-        when 'MethodEntry'    then ":unknown"
-        when '[String]'       then "[]"
-        when '[LibraryEntry]' then "[]"
-        when '[ClassEntry]'   then "[]"
-        when '[MethodEntry]'  then "[]"
-        else
-          raise "must not happen: @type=#{@type.inspect}"
-        end
-      end
-
-      def deserializer
-        case @type
-        when 'String'         then "h['#{@name}']"
-        when 'Symbol'         then "h['#{@name}'].intern"
-        when 'LibraryEntry'   then "restore_library(h['#{@name}'])"
-        when 'ClassEntry'     then "restore_class(h['#{@name}'])"
-        when 'MethodEntry'    then "restore_method(h['#{@name}'])"
-        when '[String]'       then "h['#{@name}'].split(',')"
-        when '[LibraryEntry]' then "restore_libraries(h['#{@name}'])"
-        when '[ClassEntry]'   then "restore_classes(h['#{@name}'])"
-        when '[MethodEntry]'  then "restore_methods(h['#{@name}'])"
-        else
-          raise "must not happen: @type=#{@type.inspect}"
-        end
-      end
-
-      def serializer
-        case @type
-        when 'String'         then "@#{@name}"
-        when 'Symbol'         then "@#{@name}.to_s"
-        when 'LibraryEntry'   then "serialize_entry(@#{@name})"
-        when 'ClassEntry'     then "serialize_entry(@#{@name})"
-        when 'MethodEntry'    then "serialize_entry(@#{@name})"
-        when '[String]'       then "@#{@name}.join(',')"
-        when '[LibraryEntry]' then "serialize_entries(@#{@name})"
-        when '[ClassEntry]'   then "serialize_entries(@#{@name})"
-        when '[MethodEntry]'  then "serialize_entries(@#{@name})"
-        else
-          raise "must not happen: @type=#{@type.inspect}"
-        end
-      end
-    end
-
-    class << self
-      alias load new
-    end
-
-    def initialize(db)
-      @db = db
-    end
-
-    def type_id
-      self.class.type_id
-    end
-
-    def loaded?
-      @loaded
-    end
-
-    def encoding
-      @db.encoding
-    end
-
-    def synopsis_source
-      source().split(/\n\n/, 2).first
-    end
-
-    def save
-      @db.makepath File.dirname(objpath())
-      @db.save_properties objpath(), _get_properties()
-    end
-
     private
 
-    def saved?
-      @db.exist?(objpath())
-    end
-
-    def restore_library(id)
-      LibraryEntry.load(@db, id)
-    end
-
-    def restore_class(id)
-      id.empty? ? nil : ClassEntry.load(@db, id)
-    end
-
-    def restore_libraries(str)
-      restore_entries(str, LibraryEntry)
-    end
-
-    def restore_classes(str)
-      restore_entries(str, ClassEntry)
-    end
-
-    def restore_methods(str)
-      restore_entries(str, MethodEntry)
-    end
-
-    def restore_entries(str, klass)
-      str.split(',').map {|id| klass.load(@db, id) }
-    end
-
-    def serialize_entry(x)
-      x ? x.id : ''
-    end
-
-    def serialize_entries(xs)
-      xs.map {|x| x.id }.join(',')
-    end
-
-    def objpath
-      "#{type_id()}/#{id()}"
-    end
-
-  end
-
-
-  class LibraryEntry < Entry
-
-    include Enumerable
-
-    def LibraryEntry.type_id
-      :library
-    end
-
-    def initialize(db, id)
-      super db
-      @id = id
-      if saved?
-        @classmap = nil
-        @methodmap = nil
-      else
-        @classmap = {}
-        @methodmap = {}
-      end
-      init_properties
-    end
-
-    attr_reader :id
-
-    def name
-      libid2name(@id)
-    end
-
-    persistent_properties {
-      property :requires, '[LibraryEntry]'
-      property :classes,  '[ClassEntry]'   # :defined classes
-      property :methods,  '[MethodEntry]'  # :added/:redefined entries
-      property :source,   'String'
-    }
-
-    def inspect
-      "#<library #{@id}>"
-    end
-
-    def require(lib)
-      requires().push lib
-    end
-
-    def fetch_class(name)
-      classes().detect {|c| c.name == name } or
-          raise ClassNotFound, "no such class in the library #{name()}: #{name}"
-    end
-
-    def sorted_classes
-      classes().sort_by {|c| c.id }
-    end
-
-    def classnames
-      classes().map {|c| c.name }
-    end
-
-    def each_class(&block)
-      classes().each(&block)
-    end
-
-    def classmap
-      @classmap ||=
-          begin
-            h = {}
-            classes().each do |c|
-              h[c.name] = c
-            end
-            h
-          end
-    end
-    private :classmap
-
-    def fetch_method(spec)
-      classes().detect {|c| c.search_method(spec, false) } or
-      methods().detect {|m| spec.match?(m) } or
-        raise MethodNotFound, "no such method in the library #{name()}: #{name}"
-    end
-
-    def sorted_methods
-      methods().sort_by {|m| m.id }
-    end
-
-    def methodnames
-      methods().map {|m| m.label }
-    end
-
-    def each_method(&block)
-      methods().each(&block)
-    end
-
-    def methodmap
-      @methodmap ||=
-          begin
-            h = {}
-            methods().each do |m|
-              h[m] = m
-            end
-            h
-          end
-    end
-    private :methodmap
-
-    def add_class(c)
-      unless classmap()[c.name]
-        classes().push c
-        classmap()[c.name] = c
-        @db.dirty_class self
-      end
-    end
-
-    def add_method(m)
-      unless methodmap()[m]
-        methods().push m
-        methodmap()[m] = m
-        @db.dirty_method self
-      end
-    end
-
-  end
-
-
-  # Represents a class, a module and a singleton object.
-  class ClassEntry < Entry
-
-    include Enumerable
-
-    def ClassEntry.type_id
-      :class
-    end
-
-    def initialize(db, id)
-      super db
-      @id = id
-      @entries = saved? ? nil : []
-      init_properties
-    end
-
-    attr_reader :id
-
-    def name
-      classid2name(@id)
-    end
-
-    alias label name
-
-    # FIXME: implement class alias
-    def labels
-      [label()]
-    end
-
-    def name?(n)
-      name() == n
-    end
-
-    def name_match?(re)
-      re =~ name()
-    end
-
-    persistent_properties {
-      property :type,       'Symbol'         # :class | :module | :object
-      property :superclass, 'ClassEntry'
-      property :included,   '[ClassEntry]'
-      property :extended,   '[ClassEntry]'
-      property :library,    'LibraryEntry'
-      property :source,     'String'
-    }
-
-    def ancestors
-      @ancestors ||=
-          begin
-            list = [self, included().map {|m| m.ancestors }]
-            list.push superclass().ancestors  if superclass()
-            list.flatten
-          end
-    end
-
-    def singleton_method?(name, inherit = true)
-      if inherit
-        ancestors().any? {|c| c.singleton_method?(name, false) }
-      else
-        singleton_methods(false).detect {|m| m.name?(name) }
-      end
-    end
-
-    def instance_method?(name, inherit = true)
-      if inherit
-        ancestors().any? {|c| c.instance_method?(name, false) }
-      else
-        instance_methods(false).detect {|m| m.name?(name) }
-      end
-    end
-
-    def constant?(name, inherit = true)
-      if inherit
-        ancestors().any? {|c| c.constant?(name, false) }
-      else
-        constants(false).detect {|m| m.name?(name) }
-      end
-    end
-
-    def special_variable?(name)
-      special_variables().detect {|m| m.name?(name) }
-    end
-
-    def sorted_entries
-      entries().sort_by {|m| m.id }
-    end
-
-    def entries
-      @entries ||= @db.entries("method/#{@id}")\
-          .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
-    end
-
-    alias methods entries
-
-    Parts = Struct.new(:singleton_methods, :private_singleton_methods,
-                       :instance_methods,  :private_instance_methods,
-                       :module_functions,
-                       :constants, :special_variables)
-
-    def partitioned_entries
-      s = []; spv = []
-      i = []; ipv = []
-      mf = []
-      c = []; v = []
-      entries().each do |m|
-        case m.type
-        when :singleton_method
-          (m.public? ? s : spv).push m
-        when :instance_method
-          (m.public? ? i : ipv).push m
-        when :module_function
-          mf.push m
-        when :constant
-          c.push m
-        when :special_variable
-          v.push m
-        else
-          raise "must not happen: m.type=#{m.type.inspect} (#{m.inspect})"
-        end
-      end
-      Parts.new(*[s,spv, i,ipv, mf, c, v].map {|ents| ents.sort_by{|m|m.id} })
-    end
-
-    def singleton_methods(inherit = true)
-      entries().select {|m| m.singleton_method? }.sort_by {|m| m.id }
-    end
-
-    def public_singleton_methods(inherit = true)
-      entries().select {|m| m.public_singleton_method? }.sort_by {|m| m.id }
-    end
-
-    def instance_methods(inherit = true)
-      entries().select {|m| m.instance_method? }.sort_by {|m| m.id }
-    end
-
-    def private_singleton_methods(inherit = true)
-      entries().select {|m| m.private_singleton_method? }.sort_by {|m| m.id }
-    end
-
-    def public_instance_methods(inherit = true)
-      entries().select {|m| m.public_instance_method? }.sort_by {|m| m.id }
-    end
-
-    def private_instance_methods(inherit = true)
-      entries().select {|m| m.private_instance_method? }.sort_by {|m| m.id }
-    end
-
-    alias private_methods   private_instance_methods
-
-    def constants(inherit = true)
-      entries().select {|m| m.constant? }.sort_by {|m| m.id }
-    end
-
-    def special_variables
-      entries().select {|m| m.special_variable? }.sort_by {|m| m.id }
-    end
-
-    def inspect
-      "\#<#{type()} #{@id}>"
-    end
-
-    def class?
-      type() == :class
-    end
-
-    def module?
-      type() == :module
-    end
-
-    def object?
-      type() == :object
-    end
-
-    def include(m)
-      included().push m
-    end
-
-    def extend(m)
-      extended().push m
-    end
-
-    def each(&block)
-      entries().each(&block)
-    end
-
-    def search_methods(spec, inherit = true)
-      entries().select {|m| spec.match?(m) }
-    end
-
-    def search_method(spec, inherit = true)
-      entries().detect {|m| spec.match?(m) }
-    end
-
-    def fetch_method(spec, inherit = true)
-      search_method(spec, inherit) or
-          raise MethodNotFound, "spec=#{spec.inspect}"
-    end
-
-    def add_method(m)
-      # FIXME: check duplication?
-      entries().push m
-    end
-
-  end
-
-
-  # Represents a method, a constant, and a special variable.
-  class MethodEntry < Entry
-
-    def MethodEntry.type_id
-      :method
-    end
-
-    def initialize(db, id)
-      super db
-      @id = id
-      init_properties
-    end
-
-    attr_reader :id
-
-    def name
-      methodid2mname(@id)
-    end
-
-    # typename = :singleton_method
-    #          | :instance_method
-    #          | :module_function
-    #          | :constant
-    #          | :special_variable
-    def typename
-      methodid2typename(@id)
-    end
-
-    alias type typename
-
-    def typemark
-      typename2mark(typename())
-    end
-
-    def typechar
-      typename2char(typename())
-    end
-
-    def library
-      @library ||= @db.fetch_library_id(methodid2libid(@id))
-    end
-
-    attr_writer :library
-
-    def klass
-      @klass ||= @db.fetch_class_id(methodid2classid(@id))
-    end
-
-    attr_writer :klass
-
-    persistent_properties {
-      property :names,      '[String]'
-      property :visibility, 'Symbol'   # :public | :private | :protected
-      property :kind,       'Symbol'   # :defined | :added | :redefined
-      property :source,     'String'
-    }
-
-    def inspect
-      "\#<method #{klass().name}#{typemark()}#{names().join(',')}>"
-    end
-
-    def label
-      "#{klass().name}#{typemark()}#{name()}"
-    end
-
-    def labels
-      names().map {|name| "#{klass().name}#{typemark()}#{name}" }
-    end
-
-    def name?(name)
-      names().include?(name)
-    end
-
-    def name_match?(re)
-      names().any? {|n| re =~ n }
-    end
-
-    def sorted_names
-      names().sort
-    end
-
-    def really_public?
-      visibility() == :public
-    end
-
-    def public?
-      visibility() != :private
-    end
-
-    def protected?
-      visibility() == :protected
-    end
-
-    def private?
-      visibility() == :private
-    end
-
-    def public_singleton_method?
-      singleton_method? and public?
-    end
-
-    def private_singleton_method?
-      singleton_method? and private?
-    end
-
-    def public_instance_method?
-      instance_method? and public?
-    end
-
-    def private_instance_method?
-      instance_method? and public?
-    end
-
-    def singleton_method?
-      t = typename()
-      t == :singleton_method or t == :module_function
-    end
-
-    def instance_method?
-      t = typename()
-      t == :instance_method or t == :module_function
-    end
-
-    def constant?
-      typename() == :constant
-    end
-
-    def special_variable?
-      typename() == :special_variable
+    def realpath(rel)
+      "#{@prefix}/#{rel}"
     end
 
   end
