@@ -1,3 +1,8 @@
+Sat Oct 21 04:11:20 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/nameutils.rb: use '=' for class ID escaping,
+	  instead of '__'.
+
 Fri Oct 20 21:26:33 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/refe.rb: new file.

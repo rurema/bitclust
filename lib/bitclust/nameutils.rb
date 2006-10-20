@@ -22,14 +22,12 @@ module BitClust
       /\A[A-Z]\w*(::[A-Z]\w*)*/ =~ str or str == 'fatal'
     end
 
-    # A constant name must be composed by fs-safe characters.
     def classname2id(name)
-      name.gsub(/::/, '__')
+      name.gsub(/::/, '=')
     end
 
-    # A class name must not include '__'.
     def classid2name(id)
-      id.gsub(/__/, '::')
+      id.gsub(/=/, '::')
     end
 
     def method_spec?(str)
