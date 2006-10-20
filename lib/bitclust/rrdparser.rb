@@ -124,8 +124,8 @@ module BitClust
           compile_error "superclass given for object", line  if superclass
           @context.define_object name
           f.skip_blank_lines
-          f.while_match(/\Aextend\s/) do |line|
-            @context.extend line.split[1]
+          f.while_match(/\Aextend\s/) do |ex|
+            @context.extend ex.split[1]
           end
           f.skip_blank_lines
           @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
@@ -226,8 +226,8 @@ module BitClust
         unless cxt.fully_qualified?
           compile_error "unqualified signature (#{cxt})", line
         end
-        if sig = sigs.detect {|sig| not cxt.compatible?(sig) }
-          compile_error "incompatible signature: #{cxt} <-> #{sig}", line
+        if _sig = sigs.detect {|sig| not cxt.compatible?(sig) }
+          compile_error "incompatible signature: #{cxt} <-> #{_sig}", line
         end
       else
         unless sigs[0].fully_qualified?

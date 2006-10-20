@@ -1,3 +1,7 @@
+Fri Oct 20 21:22:56 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: suppress warning on -w.
+
 Thu Oct 19 04:41:21 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb (ClassEntry#singleton_methods): returns
