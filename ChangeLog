@@ -1,3 +1,41 @@
+Fri Oct 20 21:26:33 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/refe.rb: new file.
+
+	* bin/bitclust.rb: new subcommand `search'.
+
+	* lib/bitclust.rb: require 'bitclust/searcher'.
+
+	* lib/bitclust/searcher.rb: new file.
+
+	* lib/bitclust/database.rb: new method Database.datadir?.
+
+	* lib/bitclust/database.rb: new method Database#search_method.
+
+	* lib/bitclust/database.rb: new method SearchPattern#select_class.
+
+	* lib/bitclust/database.rb: new method
+	  SearchPattern#select_method.
+
+	* lib/bitclust/database.rb: new method ClassEntry#name?.
+
+	* lib/bitclust/database.rb: new method ClassEntry#name_match?.
+
+	* lib/bitclust/database.rb: new method ClassEntry#label.
+
+	* lib/bitclust/database.rb: new method ClassEntry#labels.
+
+	* lib/bitclust/database.rb: rename method: MethodEntry#named? ->
+	  name?.
+
+	* lib/bitclust/database.rb: new method MethodEntry#name_match?.
+
+	* lib/bitclust/database.rb: new method MethodEntry#labels.
+
+	* lib/bitclust/database.rb: provide Object#__send if not exist.
+
+	* lib/bitclust/exception.rb: new exception InvalidDatabase.
+
 Fri Oct 20 21:22:56 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb: suppress warning on -w.

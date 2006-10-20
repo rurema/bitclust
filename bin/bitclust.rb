@@ -32,10 +32,11 @@ Usage: #{File.basename($0, '.*')} [global options] <subcommand> [options] [args]
 
 Subcommands:
     init        Initialize database.
-    update      Update database.
     list        List libraries/classes/methods in database.
-    lookup      Lookup libraries/classes/methods from database.
+    lookup      Lookup a library/class/method from database.
+    search      Search classes/methods from database.
     property    Handle database properties.
+    update      Update database.
 
 Global Options:
   EndBanner
@@ -52,6 +53,7 @@ Global Options:
   subcommands['update'] = UpdateCommand.new
   subcommands['list'] = ListCommand.new
   subcommands['lookup'] = LookupCommand.new
+  subcommands['search'] = BitClust::Searcher.new
   begin
     parser.order!
     error 'no sub-command given' if ARGV.empty?

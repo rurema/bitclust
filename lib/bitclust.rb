@@ -1,5 +1,6 @@
 require 'bitclust/requesthandler'
 require 'bitclust/screen'
 require 'bitclust/database'
+require 'bitclust/searcher'
 require 'bitclust/rrdparser'
 require 'bitclust/exception'

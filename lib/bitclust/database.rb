@@ -11,6 +11,12 @@ require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
 
+unless Object.method_defined?(:__send)
+  class Object
+    alias __send __send__
+  end
+end
+
 module BitClust
 
   class MethodSpec
@@ -91,6 +97,44 @@ module BitClust
       (not @method  or m.names.include?(@method))
     end
 
+    def select_classes(cs)
+      return cs unless @klass
+      completion_search(cs, @klass)
+    end
+
+    TYPE_TO_METHOD = {
+      nil  => :methods,
+      '.'  => :singleton_methods,
+      '#'  => :instance_methods,
+      '.#' => :module_functions,
+      '::' => :constants,
+      '$'  => :special_variables
+    }
+
+    def select_methods(c)
+      type_mid = TYPE_TO_METHOD[@type]
+      return c.__send(type_mid) unless @method
+      completion_search(c.__send(type_mid), @method)
+    end
+
+    private
+
+    def completion_search(xs, pattern)
+      re_i = /\A#{Regexp.quote(pattern)}/i
+      result1 = xs.select {|x| x.name_match?(re_i) }
+      if result1.size > 1
+        re = /\A#{Regexp.quote(pattern)}/
+        result2 = result1.select {|x| x.name_match?(re) }
+        return result1 if result2.empty?
+        if result2.size > 1
+          result3 = result2.select {|x| x.name?(pattern) }
+          return result2 if result3.empty?
+          return result3
+        end
+      end
+      result1
+    end
+
   end
 
 
@@ -100,6 +144,10 @@ module BitClust
 
     def Database.dummy
       new(nil)
+    end
+
+    def Database.datadir?(dir)
+      File.file?("#{dir}/properties")
     end
 
     def initialize(prefix)
@@ -320,6 +368,19 @@ module BitClust
     def fetch_method(spec)
       fetch_class(spec.klass).search_method(spec, false) or
           raise MethodNotFound, "no such method: #{spec.inspect}"
+    end
+
+    def search_methods(pattern)
+      cs = pattern.select_classes(classes())
+      if cs.empty?
+        raise MethodNotFound, "no such class: #{pattern.klass}"
+      end
+      ms = cs.map {|c| pattern.select_methods(c) }.flatten
+      if ms.empty?
+        r = (cs.size <= 5) ? cs.map {|c| c.label }.join(', ') : "#{cs.size} classes"
+        raise MethodNotFound, "no such method in #{r}: #{pattern.method}"
+      end
+      ms
     end
 
     #
@@ -715,6 +776,21 @@ module BitClust
       classid2name(@id)
     end
 
+    alias label name
+
+    # FIXME: implement class alias
+    def labels
+      [label()]
+    end
+
+    def name?(n)
+      name() == n
+    end
+
+    def name_match?(re)
+      re =~ name()
+    end
+
     persistent_properties {
       property :type,       'Symbol'         # :class | :module | :object
       property :superclass, 'ClassEntry'
@@ -737,7 +813,7 @@ module BitClust
       if inherit
         ancestors().any? {|c| c.singleton_method?(name, false) }
       else
-        singleton_methods(false).detect {|m| m.named?(name) }
+        singleton_methods(false).detect {|m| m.name?(name) }
       end
     end
 
@@ -745,7 +821,7 @@ module BitClust
       if inherit
         ancestors().any? {|c| c.instance_method?(name, false) }
       else
-        instance_methods(false).detect {|m| m.named?(name) }
+        instance_methods(false).detect {|m| m.name?(name) }
       end
     end
 
@@ -753,12 +829,12 @@ module BitClust
       if inherit
         ancestors().any? {|c| c.constant?(name, false) }
       else
-        constants(false).detect {|m| m.named?(name) }
+        constants(false).detect {|m| m.name?(name) }
       end
     end
 
     def special_variable?(name)
-      special_variables().detect {|m| m.named?(name) }
+      special_variables().detect {|m| m.name?(name) }
     end
 
     def sorted_entries
@@ -949,8 +1025,16 @@ module BitClust
       "#{klass().name}#{typemark()}#{name()}"
     end
 
-    def named?(name)
+    def labels
+      names().map {|name| "#{klass().name}#{typemark()}#{name}" }
+    end
+
+    def name?(name)
       names().include?(name)
+    end
+
+    def name_match?(re)
+      names().any? {|n| re =~ n }
     end
 
     def sorted_names
