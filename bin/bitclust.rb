@@ -58,13 +58,23 @@ Global Options:
   subcommands['search'] = BitClust::Searcher.new
   begin
     parser.order!
-    error 'no sub-command given' if ARGV.empty?
+    if ARGV.empty?
+      $stderr.puts 'no sub-command given'
+      $stderr.puts parser.help
+      exit 1
+    end
     name = ARGV.shift
     cmd = subcommands[name] or error "no such sub-command: #{name}"
-    cmd.parse(ARGV)
   rescue OptionParser::ParseError => err
     $stderr.puts err.message
     $stderr.puts parser.help
+    exit 1
+  end
+  begin
+    cmd.parse(ARGV)
+  rescue OptionParser::ParseError => err
+    $stderr.puts err.message
+    $stderr.puts cmd.parser.help
     exit 1
   end
   unless prefix
@@ -133,6 +143,8 @@ class UpdateCommand
     }
   end
 
+  attr_reader :parser
+
   def parse(argv)
     @parser.parse! argv
     if not @root and argv.empty?
@@ -198,6 +210,8 @@ class ListCommand
     }
   end
 
+  attr_reader :parser
+
   def parse(argv)
     @parser.parse! argv
     unless @mode
@@ -208,8 +222,8 @@ class ListCommand
   def exec(db, argv)
     case @mode
     when :library
-      db.libraries.each do |lib|
-        puts lib.name
+      db.libraries.map {|lib| lib.name }.sort.each do |name|
+        puts name
       end
     when :class
       db.classes.map {|c| c.name }.sort.each do |name|
@@ -259,6 +273,8 @@ class LookupCommand
     }
   end
 
+  attr_reader :parser
+
   def parse(argv)
     @parser.parse! argv
     unless @type
@@ -293,7 +309,7 @@ class LookupCommand
 
   def get_template(type, format)
     template = TEMPLATE[type][format]
-    BitClust::TextUtils.unindent_block(template).join('')
+    BitClust::TextUtils.unindent_block(template.lines).join('')
   end
 
   TEMPLATE = {

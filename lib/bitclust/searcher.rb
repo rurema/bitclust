@@ -53,6 +53,8 @@ module BitClust
       }
     end
 
+    attr_reader :parser
+
     def parse(argv)
       @parser.parse! argv
       if argv.size > 3

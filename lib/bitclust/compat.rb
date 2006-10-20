@@ -17,3 +17,9 @@ unless Fixnum.method_defined?(:ord)
     end
   end
 end
+
+unless String.method_defined?(:lines)
+  class String
+    alias lines to_a
+  end
+end

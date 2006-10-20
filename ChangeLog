@@ -1,3 +1,21 @@
+Sat Oct 21 04:36:41 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb (ListCommand): "bitclust list --library" output
+	  was not sorted.
+
+	* bin/bitclust.rb (LookupCommand): Ruby 1.9 does not have
+	  String#map.
+
+	* bin/bitclust.rb: print subcommand's help message when
+	  subcommands failed.
+
+	* lib/bitclust/searcher.rb: provide Searcher#parser for help
+	  message.
+
+	* lib/bitclust.rb: require 'bitclust/compat'.
+
+	* lib/bitclust/compat.rb: provide String#lines.
+
 Sat Oct 21 04:22:20 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/searcher.rb: search class if pattern begins with

@@ -1,3 +1,4 @@
+require 'bitclust/compat'
 require 'bitclust/requesthandler'
 require 'bitclust/screen'
 require 'bitclust/database'
