@@ -3,7 +3,7 @@
 require 'bitclust'
 
 def main
-  Signal.trap(:PIPE) { exit 1 }
+  Signal.trap(:PIPE) { exit 1 } rescue nil  # Win32 does not have SIGPIPE
   Signal.trap(:INT) { exit 1 }
 
   refe = BitClust::Searcher.new

@@ -1,3 +1,11 @@
+Mon Oct 23 06:20:48 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: Win32 system does not have SIGPIPE.
+
+	* bin/bc-rdoc.rb: ditto.
+
+	* lib/bitclust/entry.rb: fix NoMethodError.
+
 Sat Oct 21 04:36:41 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb (ListCommand): "bitclust list --library" output

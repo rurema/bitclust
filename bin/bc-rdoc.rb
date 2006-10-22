@@ -17,8 +17,8 @@ require 'optparse'
 class ApplicationError < StandardError; end
 
 def main
-  Signal.trap(:PIPE, 'EXIT')
-  Signal.trap(:INT, 'EXIT')
+  Signal.trap(:PIPE) { exit 1 } rescue nil   # Win32 does not have SIGPIPE
+  Signal.trap(:INT) { exit 1 }
 
   prefix = nil
   mode = :list

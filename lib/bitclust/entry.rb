@@ -554,7 +554,7 @@ module BitClust
 
     def instance_method?(name, inherit = true)
       if inherit
-        imethodmap().key?(name)
+        imap().key?(name)
       else
         instance_methods(false).detect {|m| m.name?(name) }
       end
