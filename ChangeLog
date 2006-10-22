@@ -1,3 +1,7 @@
+Mon Oct 23 06:25:33 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-rdoc.rb: #list did not return right result.
+
 Mon Oct 23 06:20:48 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: Win32 system does not have SIGPIPE.

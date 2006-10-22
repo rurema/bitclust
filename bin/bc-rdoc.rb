@@ -258,6 +258,7 @@ module RI
     end
 
     def singleton_method?
+      @is_class_method ||= false
       @is_class_method
     end
   end
@@ -375,9 +376,7 @@ class Formatter
   def list(e)
     case e.type
     when SM::ListBase::BULLET
-      e.contents.each do |item|
-        "* #{format_element(e)}"
-      end
+      e.contents.map {|item| "* #{format_element(e)}" }.join("\n")
     when SM::ListBase::NUMBER,
          SM::ListBase::LOWERALPHA,
          SM::ListBase::UPPERALPHA
@@ -386,18 +385,15 @@ class Formatter
             when SM::ListBase::LOWERALPHA then 'a'
             when SM::ListBase::UPPERALPHA then 'A'
             end
-      e.contents.each do |item|
-        "#{num}. #{format_element(e)}"
+      e.contents.map {|item|
+        str = "#{num}. #{format_element(e)}"
         num = num.succ
-      end
+        str
+      }.join("\n")
     when SM::ListBase::LABELED
-      e.contents.each do |item|
-        "#{item.label} #{format_element(e)}"
-      end
+      e.contents.map {|item| "#{item.label} #{format_element(e)}" }.join("\n")
     when SM::ListBase::NOTE
-      e.contents.each do |item|
-        "#{item.label}\t#{format_element(e)}"
-      end
+      e.contents.map {|item| "#{item.label}\t#{format_element(e)}" }.join("\n")
     else
       raise "unknown list type: #{e.type.inspect}"
     end
