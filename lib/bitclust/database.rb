@@ -105,7 +105,6 @@ module BitClust
     def properties
       @properties ||= load_properties('properties')
     end
-    private :properties
 
     def propkeys
       properties().keys

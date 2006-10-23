@@ -166,15 +166,15 @@ class UpdateCommand
   private
 
   def process_stdlib_tree(db, root)
-    Dir.glob("#{root}/_builtin/*.rd") do |path|
-      db.update_by_file path, '_builtin'
+    parse_LIBRARIES("#{root}/LIBRARIES", db.properties).each do |libname|
+      db.update_by_file "#{root}/#{libname}.rd", libname
     end
-    re = %r<\A#{Regexp.quote(root)}/>
-    Dir.glob("#{root}/**/*.rd").each do |path|
-      libname = path.sub(re, '').sub(/\.rd\z/, '')
-      next if %r<\A_builtin/> =~ libname
-      db.update_by_file path, libname
-    end
+  end
+
+  def parse_LIBRARIES(path, properties)
+    File.open(path) {|f|
+      BitClust::Preprocessor.wrap(f, properties).map {|line| line.strip }
+    }
   end
 
   def guess_library_name(path)
