@@ -11,12 +11,12 @@
 <%
     headline_init
 %>
-<%= headline("Library Index") %>
+<%= headline("ライブラリ一覧") %>
 <%
     headline_push
     lib = @entries.detect {|lib| lib.id == '_builtin' }
 %>
-<%= headline_noescape(library_link(lib.name, 'Builtin Library')) %>
+<%= headline_noescape(library_link(lib.name, '組み込みライブラリ')) %>
 <%= compile_rd(lib.synopsis_source) %>
 <p>
 classes/modules:
