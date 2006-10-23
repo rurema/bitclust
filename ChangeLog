@@ -1,3 +1,13 @@
+Mon Oct 23 19:45:25 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-rdoc.rb: now have subcommands instead of options.
+
+	* bin/bc-rdoc.rb: --list option -> list subcommand.
+
+	* bin/bc-rdoc.rb: --diff option -> diff subcommand.
+
+	* bin/bc-rdoc.rb: new subcommand history.
+
 Mon Oct 23 06:25:33 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-rdoc.rb: #list did not return right result.
