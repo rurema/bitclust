@@ -168,11 +168,11 @@ module BitClust
         end
       else
         if @describe_all
-          cs.sort_by {|c| c.name }.each do |c|
+          cs.sort.each do |c|
             describe_class c
           end
         else
-          print_names cs.map {|c| c.labels }.flatten.sort
+          print_names cs.map {|c| c.labels }.flatten
         end
       end
     end
@@ -180,7 +180,7 @@ module BitClust
     def show_method(result)
       if result.determined?
         if @line
-          print_names [result.name]
+          print_names result.names
         else
           describe_method result.record
         end
@@ -199,11 +199,11 @@ module BitClust
 
     def print_names(names)
       if @line
-        names.each do |n|
+        names.sort.each do |n|
           puts n
         end
       else
-        print_packed_names names
+        print_packed_names names.sort
       end
     end
 
@@ -254,7 +254,7 @@ module BitClust
       unless rec.inherited_method?
         puts rec.name
       else
-        puts "#{rec.origin_classes.map {|c| c.name }.join(',')} < #{rec.name}"
+        puts "#{rec.names.join(',')} < #{rec.original_name}"
       end
       puts @compiler.compile(rec.entry.source.strip)
       puts

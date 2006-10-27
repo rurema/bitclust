@@ -1,3 +1,48 @@
+Fri Oct 27 22:27:47 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/searcher.rb (show_methods): found name may be
+	  multiple.
+
+	* lib/bitclust/searcher.rb (describe_method): show all found
+	  names.
+
+	* lib/bitclust/searcher.rb (print_names): sort name list.
+
+	* lib/bitclust/methodnamepattern.rb (MethodNamePattern): use
+	  method name index.
+
+	* lib/bitclust/methodnamepattern.rb (SearchResult::Record):
+	  preserve found name and original name.
+
+	* lib/bitclust/methodid.rb: now #type and #method is optional.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#to_s.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#==.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#eql?.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#hash.
+
+	* lib/bitclust/database.rb: store method name index.
+
+	* lib/bitclust/database.rb: new method Database#methods.
+
+	* lib/bitclust/database.rb: new method Database#foreach_line
+	  (internal use only).
+
+	* lib/bitclust/database.rb (Database#entries): reject entry begin
+	  with '='.
+
+	* lib/bitclust/entry.rb: new method ClassEntry#get_methods.
+
+	* lib/bitclust/entry.rb: #smap -> #_smap, #imap -> #_imap, and so
+	  on.
+
+	* lib/bitclust/entry.rb: new method MethodEntry#spec.
+
+	* lib/bitclust/entry.rb: new method MethodEntry#spec_string.
+
 Fri Oct 27 17:41:25 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/methodnamepattern.rb (select_classes): 'f' should

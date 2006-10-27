@@ -401,21 +401,21 @@ module BitClust
     def save
       super
       @db.atomic_write_open("method/#{@id}/=smap") {|f|
-        write_mmap smap(), f
+        write_mmap _smap(), f
       }
       @db.atomic_write_open("method/#{@id}/=imap") {|f|
-        write_mmap imap(), f
+        write_mmap _imap(), f
       }
       @db.atomic_write_open("method/#{@id}/=cmap") {|f|
-        write_mmap cmap(), f
+        write_mmap _cmap(), f
       }
     end
 
     def load
       super
-      @smap = parse_mmap(@db.read("method/#{@id}/=smap"))
-      @imap = parse_mmap(@db.read("method/#{@id}/=imap"))
-      @cmap = parse_mmap(@db.read("method/#{@id}/=cmap"))
+      @smap = load_mmap("method/#{@id}/=smap")
+      @imap = load_mmap("method/#{@id}/=imap")
+      @cmap = load_mmap("method/#{@id}/=cmap")
     end
 
     def inspect
@@ -460,7 +460,6 @@ module BitClust
 
     def entries
       @entries ||= @db.entries("method/#{@id}")\
-          .reject {|ent| /\A=/ =~ ent }\
           .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
     end
 
@@ -572,6 +571,10 @@ module BitClust
       special_variables().detect {|m| m.name?(name) }
     end
 
+    def get_methods(spec)
+      entries().select {|m| spec.match?(m) }
+    end
+
     def get_method(spec)
       entries().detect {|m| spec.match?(m) }
     end
@@ -583,15 +586,15 @@ module BitClust
 
     def singleton_method_names
       # should remove module functions?
-      smap().keys
+      _smap().keys
     end
 
     def instance_method_names
-      imap().keys
+      _imap().keys
     end
 
     def constant_names
-      cmap().keys
+      _cmap().keys
     end
 
     def special_variable_names
@@ -599,17 +602,17 @@ module BitClust
     end
 
     # internal use only
-    def smap
+    def _smap
       @smap ||= makemmap('s', extended_modules(), singleton_methods())
     end
 
     # internal use only
-    def imap
+    def _imap
       @imap ||= makemmap('i', included_modules(), instance_methods())
     end
 
     # internal use only
-    def cmap
+    def _cmap
       @cmap ||= makemmap('c', included_modules(), constants())
     end
 
@@ -617,20 +620,20 @@ module BitClust
 
     def makemmap(typechar, inherited_modules, ents)
       s = superclass()
-      map = s ? s.__send("#{typechar}map").dup : {}
+      map = s ? s.__send("_#{typechar}map").dup : {}
       if typechar == 'c'
         inherited_modules.each do |mod|
-          map.update mod.cmap
+          map.update mod._cmap
         end
       else
         inherited_modules.each do |mod|
-          map.update mod.imap
+          map.update mod._imap
         end
       end
       defined, undefined = *ents.partition {|m| m.defined? }
       (undefined + defined).each do |m|
         m.names.each do |name|
-          map[name] = m.spec
+          map[name] = m.spec_string
         end
       end
       map
@@ -642,9 +645,9 @@ module BitClust
       end
     end
 
-    def parse_mmap(str)
+    def load_mmap(rel)
       map = {}
-      str.each_line do |line|
+      @db.foreach_line(rel) do |line|
         name, spec = *line.split
         map[name] = spec
       end
@@ -730,10 +733,14 @@ module BitClust
     end
 
     def spec
+      MethodSpec.new(klass().name, typemark(), name())
+    end
+
+    def spec_string
       "#{klass().name}#{typemark()}#{name()}"
     end
 
-    alias label spec
+    alias label spec_string
 
     def labels
       names().map {|name| "#{klass().name}#{typemark()}#{name}" }

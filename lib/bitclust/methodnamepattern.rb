@@ -8,7 +8,6 @@
 #
 
 require 'bitclust/methodid'
-require 'bitclust/exception'
 
 module BitClust
 
@@ -58,69 +57,74 @@ module BitClust
       (not @method  or m.name?(@method))
     end
 
-    def search_methods(db)
+    def select_classes(cs)
+      return cs unless @klass
+      expand_ic(cs, @klass, @crecache)
+    end
+
+    # internal use only
+    def _search_methods(db)
       if @type == '$'
         return search_svars(db.fetch_class('Kernel'))
       end
-      cs = select_classes(db.classes)
-      if cs.empty?
-        raise ClassNotFound, "no such class: #{@klass}"
-      end
-      if @method and /\A[A-Z]/ =~ @method   # seems constant
-        records = cs.map {|c| search_methods_in(c, '::') }.flatten
-        if records.empty?
-          records = cs.map {|c| search_methods_in(c, nil) }.flatten
+      recordclass = SearchResult::Record
+      case
+      when (@klass and @method)
+        cs = select_classes(db.classes)
+        return SearchResult.empty(db, self) if cs.empty?
+        names = expand_name_wide(db._method_index.keys, @method, @mrecache)
+        if @type
+          records = cs.map {|c| search_methods_in(c, @type, names) }.flatten
+        else
+          ((/\A[A-Z]/ =~ @method) ? ['::', nil] : [nil, '::']).each do |t|
+            records = cs.map {|c| search_methods_in(c, t, names) }.flatten
+            break unless records.empty?
+          end
         end
+        SearchResult.new(db, self, cs, unify(squeeze(records, @method)))
+      when @klass
+        cs = select_classes(db.classes)
+        return SearchResult.empty(db, self) if cs.empty?
+        records = cs.map {|c|
+          c.entries.map {|m|
+            s = m.spec
+            recordclass.new(s, s, m)
+          }
+        }.flatten
+        SearchResult.new(db, self, cs, records)
+      when @method
+        mindex = db._method_index
+        names = expand_name_narrow(mindex.keys, @method, @mrecache)
+        classes = names.map {|name| mindex[name] }.flatten.uniq
+        records = names.map {|name|
+          spec = MethodSpec.new(nil, @type, name)
+          mindex[name].map {|c|
+            c.get_methods(spec).map {|m|
+              recordclass.new(MethodSpec.new(c.name, m.typemark, name), m.spec, m)
+            }
+          }
+        }.flatten
+        SearchResult.new(db, self, classes, records)
       else
-        records = cs.map {|c| search_methods_in(c, @type) }.flatten
+        SearchResult.new(db, self, db.classes,
+            db.methods.map {|m| s = m.spec; recordclass.new(s, s, m) })
       end
-      objectify(db, cs, unify(records))
-    end
-
-    def select_classes(cs)
-      return cs unless @klass
-      completion_search_ic(cs, @klass, @crecache)
     end
 
     private
 
     def search_svars(c)
-      completion_search(c.special_variables, @method, @mrecache)
+      expand(c.special_variables, @method, @mrecache)
     end
 
-    # Case-ignore search.  Optimized for constant search.
-    def completion_search_ic(xs, pattern, cache)
-      re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
-      result1 = xs.select {|x| x.name_match?(re1) }
-      return [] if result1.empty?
-      return result1 if result1.size == 1
-      re2 = (cache[4] ||= /\A#{Regexp.quote(pattern)}\z/i)
-      result2 = result1.select {|x| x.name_match?(re2) }
-      return result1 if result2.empty?
-      return result2 if result2.size == 1   # no mean
-      result2
-    end
-
-    def completion_search(xs, pattern, cache)
-      re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
-      result1 = xs.select {|x| x.name_match?(re1) }
-      return [] if result1.empty?
-      return result1 if result1.size == 1
-      re2 = (cache[1] ||= /\A#{Regexp.quote(pattern)}/)
-      result2 = result1.select {|x| x.name_match?(re2) }
-      return result1 if result2.empty?
-      return result2 if result2.size == 1
-      result3 = result2.select {|x| x.name?(pattern) }
-      return result2 if result3.empty?
-      return result3 if result3.size == 1   # no mean
-      result3
-    end
-
-    def objectify(db, cs, records)
-      records.each do |rec|
-        rec.entry = db.get_method(MethodSpec.parse(rec.name))
-      end
-      SearchResult.new(db, self, cs, records)
+    def squeeze(ents, pat)
+      return ents if ents.size < 2
+      result3 = ents.select {|ent| ent.method_name == pat }
+      return result3 unless result3.empty?
+      re = /\A#{Regexp.quote(pat)}\z/i
+      result4 = ents.select {|ent| re =~ ent.method_name }
+      return result4 unless result4.empty?
+      ents
     end
 
     def unify(ents)
@@ -135,43 +139,85 @@ module BitClust
       h.values
     end
 
-    def search_methods_in(c, type)
+    def search_methods_in(c, type, names)
       case type
+      when nil
+        mlookup(c, '.', c._smap, names) + mlookup(c, '#', c._imap, names)
       when '.'
-        search_tbl(c, c.smap)
+        mlookup(c, '.', c._smap, names)
       when '#'
-        search_tbl(c, c.imap)
+        mlookup(c, '#', c._imap, names)
       when '.#'
-        search_tbl(c, c.smap)
+        mlookup(c, '.', c._smap, names)
       when '::'
-        search_tbl(c, c.cmap)
+        mlookup(c, '::', c._cmap, names)
       when '$'
         return [] unless c.name == 'Kernel'
-        search_svars(c)
-      when nil
-        search_tbl(c, c.smap) + search_tbl(c, c.imap)
+        search_svars(c).map {|m| SearchResult::Records.new(m.spec, m.spec, m) }
       else
         raise "must not happen: #{pattern.type.inspect}"
       end
     end
 
-    def search_tbl(c, tbl)
-      m = tbl[@method]
-      return [SearchResult::Record.new(c, m)] if m
-      select_names(tbl.keys, @method, @mrecache)\
-          .map {|name| SearchResult::Record.new(c, tbl[name]) }
+    def mlookup(c, type, tbl, names)
+      recordclass = SearchResult::Record
+      list = []
+      names.each do |name|
+        spec = tbl[name]
+        list.push recordclass.new(MethodSpec.new(c.name, type, name),
+                                  MethodSpec.parse(spec)) if spec
+      end
+      list
     end
 
-    def select_names(names, pattern, cache)
+    # Case-ignore search.  Optimized for constant search.
+    def expand_ic(xs, pattern, cache)
       re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
-      result1 = names.select {|name| re1 =~ name }
-      return []      if result1.empty?
+      result1 = xs.select {|x| x.name_match?(re1) }
+      return [] if result1.empty?
       return result1 if result1.size == 1
       re2 = (cache[1] ||= /\A#{Regexp.quote(pattern)}\z/i)
-      result2 = names.select {|name| re2 =~ name }
+      result2 = result1.select {|x| x.name_match?(re2) }
       return result1 if result2.empty?
       return result2 if result2.size == 1   # no mean
       result2
+    end
+
+    def expand(xs, pattern, cache)
+      re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
+      result1 = xs.select {|x| x.name_match?(re1) }
+      return [] if result1.empty?
+      return result1 if result1.size == 1
+      re2 = (cache[1] ||= /\A#{Regexp.quote(pattern)}\z/i)
+      result2 = result1.select {|x| x.name_match?(re2) }
+      return result1 if result2.empty?
+      return result2 if result2.size == 1
+      result3 = result2.select {|x| x.name?(pattern) }
+      return result2 if result3.empty?
+      return result3 if result3.size == 1   # no mean
+      result3
+    end
+
+    # list up all candidates (no squeezing)
+    def expand_name_wide(names, pattern, cache)
+      re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
+      names.select {|name| re1 =~ name }
+    end
+
+    # list up candidates (already squeezed)
+    def expand_name_narrow(names, pattern, cache)
+      re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
+      result1 = names.select {|name| re1 =~ name }
+      return [] if result1.empty?
+      return result1 if result1.size == 1
+      re2 = (cache[1] ||= /\A#{Regexp.quote(pattern)}\z/i)
+      result2 = result1.select {|name| re2 =~ name }
+      return result1 if result2.empty?
+      return result2 if result2.size == 1
+      result3 = result2.select {|name| pattern == name }
+      return result2 if result3.empty?
+      return result3 if result3.size == 1   # no mean
+      result3
     end
 
   end
@@ -179,11 +225,18 @@ module BitClust
 
   class SearchResult
 
+    def SearchResult.empty(db, pattern)
+      new(db, pattern, [], [])
+    end
+
     def initialize(db, pattern, classes, records)
       @database = db
       @pattern = pattern
       @classes = classes
       @records = records
+      @records.each do |rec|
+        rec.db = db
+      end
     end
 
     attr_reader :database
@@ -208,7 +261,7 @@ module BitClust
     end
 
     def names
-      @records.map {|rec| rec.name }
+      @records.map {|rec| rec.names }.flatten
     end
 
     def record
@@ -216,43 +269,59 @@ module BitClust
     end
 
     class Record
-      def initialize(c, name)
-        @origin = [c]
-        @name = name
-        @entry = nil
+      def initialize(spec, origin, entry = nil)
+        @db = nil
+        @specs = [spec]
+        @origin = origin
+        @idstring = origin.to_s
+        @entry = entry
       end
 
+      attr_writer :db
+      attr_reader :specs
       attr_reader :origin
-      attr_reader :name
-      attr_accessor :entry
+      attr_reader :idstring
+
+      def entry
+        @entry ||= @db.get_method(@origin)
+      end
+
+      def name
+        @specs.first.to_s
+      end
+
+      def names
+        @specs.map {|spec| spec.to_s }
+      end
+
+      def method_name
+        @specs.first.method
+      end
+
+      def original_name
+        @idstring
+      end
 
       def ==(other)
-        @name == other.name
+        @idstring == other.idstring
       end
 
       alias eql? ==
 
       def hash
-        @name.hash
+        @idstring.hash
       end
 
       def <=>(other)
-        @entry <=> other.entry
+        entry() <=> other.entry
       end
 
       def merge(other)
-        @origin |= other.origin
+        @specs |= other.specs
       end
-
-      def origin_class
-        # FIXME
-        @orgin.first
-      end
-
-      alias origin_classes origin
 
       def inherited_method?
-        not @origin.include?(@entry.klass)
+        not @specs.any? {|spec| spec.klass == @origin.klass }
       end
     end
 

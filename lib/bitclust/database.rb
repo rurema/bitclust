@@ -71,6 +71,7 @@ module BitClust
       end
       @dirty_entries.clear
       @dirty_classes.clear
+      save_method_index
     ensure
       @in_transaction = false
     end
@@ -78,7 +79,7 @@ module BitClust
     def check_transaction
       return if dummy?
       unless @in_transaction
-        raise NotInTransaction, "data written without transaction"
+        raise NotInTransaction, "database changed without transaction"
       end
     end
     private :check_transaction
@@ -245,6 +246,10 @@ module BitClust
       m
     end
 
+    def methods
+      classes().map {|c| c.entries }.flatten
+    end
+
     def get_method(spec)
       get_class(spec.klass).get_method(spec)
     end
@@ -258,8 +263,11 @@ module BitClust
     end
 
     def search_methods(pattern)
-      result = pattern.search_methods(self)
+      result = pattern._search_methods(self)
       if result.fail?
+        if result.classes.empty?
+          raise MethodNotFound, "no such class: #{pattern.klass}"
+        end
         if result.classes.size <= 5
           loc = result.classes.map {|c| c.label }.join(', ')
         else
@@ -268,6 +276,50 @@ module BitClust
         raise MethodNotFound, "no such method in #{loc}: #{pattern.method}"
       end
       result
+    end
+
+    def save_method_index
+      atomic_write_open('method/=mindex') {|f|
+        h = make_method_index()
+        h.keys.sort.each do |name|
+          f.puts "#{name}\t#{h[name].map {|c| c.id }.uniq.join(' ')}"
+        end
+      }
+    end
+    private :save_method_index
+
+    def make_method_index
+      h = {}
+      classes().each do |c|
+        c.entries.each do |m|
+          m.names.each do |name|
+            (h[name] ||= []).push c
+          end
+        end
+      end
+      libraries().each do |lib|
+        lib.methods.each do |m|
+          m.names.each do |name|
+            (h[name] ||= []).push m.klass
+          end
+        end
+      end
+      h
+    end
+    private :make_method_index
+
+    # internal use only
+    def _method_index
+      @method_index ||=
+          begin
+            h = {}
+            cmap = classmap()
+            foreach_line('method/=mindex') do |line|
+              name, *cids = *line.split
+              h[name] = cids.map {|cid| cmap[cid] }
+            end
+            h
+          end
     end
 
     #
@@ -280,7 +332,7 @@ module BitClust
     end
 
     def entries(rel)
-      Dir.entries(realpath(rel)).reject {|ent| ent[0,1] == '.' }
+      Dir.entries(realpath(rel)).reject {|ent| /\A[\.=]/ =~ ent }
     rescue Errno::ENOENT
       return []
     end
@@ -317,6 +369,10 @@ module BitClust
 
     def read(rel)
       File.read(realpath(rel))
+    end
+
+    def foreach_line(rel, &block)
+      File.foreach(realpath(rel), &block)
     end
 
     def atomic_write_open(rel, &block)

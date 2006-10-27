@@ -65,7 +65,7 @@ module BitClust
       new(*NameUtils.split_method_spec(str))
     end
 
-    def initialize(c = nil, t = nil, m = nil, library = nil)
+    def initialize(c, t, m, library = nil)
       @klass = c
       @type = t
       @method = m
@@ -81,8 +81,25 @@ module BitClust
       "#<spec #{@klass}#{@type}#{@method}>"
     end
 
+    def to_s
+      "#{@klass}#{@type}#{@method}"
+    end
+
+    def ==(other)
+      @klass == other.klass and
+      @type == other.type and
+      @method == other.method
+    end
+
+    alias eql? ==
+
+    def hash
+      to_s().hash
+    end
+
     def match?(m)
-      m.typemark == @type and m.name?(@method)
+      (not @type or @type == m.typemark) and
+      (not @method or m.name?(@method))
     end
 
   end
