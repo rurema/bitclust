@@ -1,3 +1,19 @@
+Fri Oct 27 17:41:25 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/methodnamepattern.rb (select_classes): 'f' should
+	  not be expanded to ['fatal'].
+
+	* lib/bitclust/methodnamepattern.rb (Record): new method
+	  #inherited_method?.
+
+	* lib/bitclust/methodnamepattern.rb (Record): new method
+	  #origin_classes.
+
+	* lib/bitclust/searcher.rb: use Record's new methods.
+
+	* lib/bitclust/searcher.rb: ',' means instance method, not
+	  singleton.
+
 Fri Oct 27 17:38:51 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/refe.rb: rescue errors on option parsing.

@@ -75,10 +75,10 @@ module BitClust
       when 0
         @view.show_class db.classes
       when 1
-        _m, _t, _c = argv[0].reverse.split(/(\#[\.,]|[\.,]\#|[\#\.\,]|::)/, 2)
+        _m, _t, _c = argv[0].reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,]|::)/, 2)
         if _t
           c = _c.reverse
-          t = _t.tr(',', '.').sub(/\#\./, '.#')
+          t = _t.tr(',', '#').sub(/\#\./, '.#')
           m = _m.reverse
           search_methods db, c, t, m
         else
@@ -251,10 +251,10 @@ module BitClust
         puts "require '#{rec.entry.library.name}'"
       end
       # FIXME: replace method signature by method spec
-      if rec.original_class == rec.entry.klass
+      unless rec.inherited_method?
         puts rec.name
       else
-        puts "#{rec.original_class.name} < #{rec.name}"
+        puts "#{rec.origin_classes.map {|c| c.name }.join(',')} < #{rec.name}"
       end
       puts @compiler.compile(rec.entry.source.strip)
       puts

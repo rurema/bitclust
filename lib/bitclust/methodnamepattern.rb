@@ -79,13 +79,26 @@ module BitClust
 
     def select_classes(cs)
       return cs unless @klass
-      completion_search(cs, @klass, @crecache)
+      completion_search_ic(cs, @klass, @crecache)
     end
 
     private
 
     def search_svars(c)
       completion_search(c.special_variables, @method, @mrecache)
+    end
+
+    # Case-ignore search.  Optimized for constant search.
+    def completion_search_ic(xs, pattern, cache)
+      re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
+      result1 = xs.select {|x| x.name_match?(re1) }
+      return [] if result1.empty?
+      return result1 if result1.size == 1
+      re2 = (cache[4] ||= /\A#{Regexp.quote(pattern)}\z/i)
+      result2 = result1.select {|x| x.name_match?(re2) }
+      return result1 if result2.empty?
+      return result2 if result2.size == 1   # no mean
+      result2
     end
 
     def completion_search(xs, pattern, cache)
@@ -204,12 +217,12 @@ module BitClust
 
     class Record
       def initialize(c, name)
-        @org = [c]
+        @origin = [c]
         @name = name
         @entry = nil
       end
 
-      attr_reader :org
+      attr_reader :origin
       attr_reader :name
       attr_accessor :entry
 
@@ -228,12 +241,18 @@ module BitClust
       end
 
       def merge(other)
-        @org |= other.org
+        @origin |= other.origin
       end
 
-      def original_class
+      def origin_class
         # FIXME
-        @org.first
+        @orgin.first
+      end
+
+      alias origin_classes origin
+
+      def inherited_method?
+        not @origin.include?(@entry.klass)
       end
     end
 
