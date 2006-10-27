@@ -8,6 +8,7 @@
 #
 
 require 'bitclust/entry'
+require 'bitclust/methodnamepattern'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
@@ -194,7 +195,7 @@ module BitClust
     end
 
     def search_classes(pattern)
-      cs = SearchPattern.new(pattern, nil, nil).select_classes(classes())
+      cs = MethodNamePattern.new(pattern, nil, nil).select_classes(classes())
       if cs.empty?
         raise ClassNotFound, "no such class: #{pattern}"
       end

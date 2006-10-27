@@ -1,3 +1,13 @@
+Fri Oct 27 17:17:44 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/methodid.rb: fork methodnamepattern.rb.
+
+	* lib/bitclust/methodnamepattern.rb: new file.
+
+	* lib/bitclust/database.rb: SearchPattern -> MethodNamePattern.
+
+	* lib/bitclust/searcher.rb: ditto.
+
 Mon Oct 23 21:35:22 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: update --stdlibtree process tree by LIBRARIES

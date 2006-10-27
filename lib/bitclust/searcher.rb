@@ -7,6 +7,7 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/methodnamepattern'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'rbconfig'
@@ -97,7 +98,7 @@ module BitClust
       when 3
         c, t, m = *argv
         unless typemark?(t)
-          raise InvalidSearchPattern, "unknown method type: #{t.inspect}"
+          raise InvalidKey, "unknown method type: #{t.inspect}"
         end
         search_methods db, c, t, m
       else
@@ -106,7 +107,7 @@ module BitClust
     end
 
     def search_methods(db, c, t, m)
-      @view.show_method db.search_methods(SearchPattern.new(c, t, m))
+      @view.show_method db.search_methods(MethodNamePattern.new(c, t, m))
     end
 
     private
