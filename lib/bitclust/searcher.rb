@@ -259,9 +259,13 @@ module BitClust
       end
       # FIXME: replace method signature by method spec
       unless rec.inherited_method?
-        puts rec.name
+        rec.names.each do |name|
+          puts name
+        end
       else
-        puts "#{rec.names.join(',')} < #{rec.original_name}"
+        rec.specs.each do |spec|
+          puts "#{spec.klass}\t< #{rec.origin.klass}#{rec.origin.type}#{spec.method}"
+        end
       end
       puts @compiler.compile(rec.entry.source.strip)
       puts
