@@ -1,3 +1,8 @@
+Sat Oct 28 01:12:41 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: "=>" -> ">=".
+	  [ruby-reference-manual:161]
+
 Sat Oct 28 00:57:43 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/searcher.rb (describe_method): show all found
