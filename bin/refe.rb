@@ -9,6 +9,10 @@ def main
   refe = BitClust::Searcher.new
   refe.parse ARGV
   refe.exec nil, ARGV
+rescue OptionParser::ParseError => err
+  $stderr.puts err.message
+  $stderr.puts refe.parser.help
+  exit 1
 rescue BitClust::UserError => err
   $stderr.puts err.message
   exit 1
