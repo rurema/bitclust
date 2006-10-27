@@ -65,7 +65,8 @@ module BitClust
     # internal use only
     def _search_methods(db)
       if @type == '$'
-        return search_svars(db.fetch_class('Kernel'))
+        c = db.fetch_class('Kernel')
+        return SearchResult.new(db, self, [c], search_svars(c))
       end
       recordclass = SearchResult::Record
       case
@@ -114,7 +115,8 @@ module BitClust
     private
 
     def search_svars(c)
-      expand(c.special_variables, @method, @mrecache)
+      expand(c.special_variables, @method, @mrecache)\
+          .map {|m| SearchResult::Record.new(m.spec, m.spec, m) }
     end
 
     def squeeze(ents, pat)
@@ -151,9 +153,6 @@ module BitClust
         mlookup(c, '.', c._smap, names)
       when '::'
         mlookup(c, '::', c._cmap, names)
-      when '$'
-        return [] unless c.name == 'Kernel'
-        search_svars(c).map {|m| SearchResult::Records.new(m.spec, m.spec, m) }
       else
         raise "must not happen: #{pattern.type.inspect}"
       end
@@ -287,11 +286,11 @@ module BitClust
       end
 
       def name
-        @specs.first.to_s
+        names().first
       end
 
       def names
-        @specs.map {|spec| spec.to_s }
+        @specs.map {|spec| spec.display_name }
       end
 
       def method_name

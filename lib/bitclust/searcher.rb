@@ -75,6 +75,10 @@ module BitClust
       when 0
         @view.show_class db.classes
       when 1
+        if /\A\$/ =~ argv[0]
+          search_methods db, 'Kernel', '$', argv[0].sub(/\A\$/, '')
+          return
+        end
         _m, _t, _c = argv[0].reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,]|::)/, 2)
         if _t
           c = _c.reverse
@@ -97,6 +101,9 @@ module BitClust
         search_methods db, c, nil, m
       when 3
         c, t, m = *argv
+        if t == '$'
+          raise InvalidKey, "'$' cannot be used as method type"
+        end
         unless typemark?(t)
           raise InvalidKey, "unknown method type: #{t.inspect}"
         end

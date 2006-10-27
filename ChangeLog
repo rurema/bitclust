@@ -1,3 +1,13 @@
+Fri Oct 27 22:54:35 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/searcher.rb: special variables must be searched by
+	  "$...".
+
+	* lib/bitclust/methodnamepattern.rb: support searching special
+	  variable.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#display_name.
+
 Fri Oct 27 22:27:47 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/searcher.rb (show_methods): found name may be

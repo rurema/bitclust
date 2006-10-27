@@ -85,6 +85,10 @@ module BitClust
       "#{@klass}#{@type}#{@method}"
     end
 
+    def display_name
+      @type == '$' ? "$#{@method}" : to_s()
+    end
+
     def ==(other)
       @klass == other.klass and
       @type == other.type and
