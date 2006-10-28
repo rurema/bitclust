@@ -6,7 +6,15 @@
 # [ruby-reference-manual:160] by sheepman.
 #
 
+require 'pathname'
+
+bindir = Pathname.new(__FILE__).realpath.dirname
+$LOAD_PATH.unshift((bindir + '../lib').realpath)
+
+require 'bitclust/crossrubyutils'
 require 'optparse'
+
+include BitClust::CrossRubyUtils
 
 def main
   @requires = []
@@ -34,54 +42,22 @@ def main
     $stderr.puts opts.help
     exit 1
   end
-  vers, table = *get_method_table(ARGV[0])
-  print_table vers, table
+  classname = ARGV[0]
+  print_crossruby_table {|ruby| defined_methods(ruby, classname) }
 end
 
-def get_method_table(classname)
-  ENV.delete 'RUBYOPT'
-  ENV.delete 'RUBYLIB'
-  vers = []
-  table = {}
-  forall_ruby(ENV['PATH']) do |ruby, ver|
-    puts "#{version_id(ver)}: #{ver}" if @verbose
-    vers.push ver
-    list_methods(ruby, classname).each do |m|
-      (table[m] ||= {})[ver] = true
-    end
-  end
-  return vers, table
+def crossrubyutils_sort_entries(ents)
+  ents.sort_by {|m| m_order(m) }
 end
 
-def print_table(vers, table)
-  thcols = [30, table.keys.map {|s| s.size }.max].max
-  print_record thcols, '', vers.map {|ver| version_id(ver) }
-  table.keys.sort_by {|m| m_order(m) }.each do |m|
-    print_record thcols, m, vers.map {|ver| table[m][ver] ? 'o' : '-' }
-  end
-end
-
-def print_record(thcols, th, tds)
-  printf "%-#{thcols}s ", th
-  puts tds.map {|td| '%4s' % td }.join('')
-end
-
-def version_id(ver)
-  ver.split[1].tr('.', '')
-end
-
-ORDER = {
-  '.'  => 1,
-  '#'  => 2,
-  '::' => 3
-}
+ORDER = { '.' => 1, '#' => 2, '::' => 3 }
 
 def m_order(m)
   m, t, c = *m.reverse.split(/(\#|\.|::)/, 2)
   [ORDER[t], m.reverse]
 end
 
-def list_methods(ruby, classname)
+def defined_methods(ruby, classname)
   req = @requires.map {|lib| "-r#{lib}" }.join(' ')
   `#{ruby} #{req} -e '
     #{classname}.singleton_methods(false).each do |m|
@@ -94,24 +70,6 @@ def list_methods(ruby, classname)
       puts "#{classname}::\#{m}"
     end
   '`.split
-end
-
-def forall_ruby(path, &block)
-  rubys(path)\
-      .map {|ruby| [ruby, `#{ruby} --version`] }\
-      .sort_by {|ruby, verstr| verstr }\
-      .each(&block)
-end
-
-def rubys(path)
-  parse_PATH(path).map {|bindir|
-    Dir.glob("#{bindir}/ruby-[12]*").map {|path| File.basename(path) }
-  }\
-  .flatten.uniq + ['ruby']
-end
-
-def parse_PATH(str)
-  str.split(':').map {|path| path.empty? ? '.' : path }
 end
 
 main

@@ -1,6 +1,14 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
+
+bindir = Pathname.new(__FILE__).realpath.dirname
+$LOAD_PATH.unshift((bindir + '../lib').realpath)
+
+require 'bitclust/crossrubyutils'
 require 'optparse'
+
+include BitClust::CrossRubyUtils
 
 def main
   rejects = []
@@ -29,41 +37,7 @@ def main
     exit 1
   end
   lib = ARGV[0]
-
-  vers, table = *get_class_table(lib, rejects)
-  print_table vers, table
-end
-
-def print_table(vers, table)
-  thcols = ([20] + table.keys.map {|s| s.size }).max
-  print_record thcols, '', vers.map {|ver| version_id(ver) }
-  table.keys.sort.each do |c|
-    print_record thcols, c, vers.map {|ver| table[c][ver] ? 'o' : '-' }
-  end
-end
-
-def print_record(thcols, th, tds)
-  printf "%-#{thcols}s ", th
-  puts tds.map {|td| '%4s' % td }.join('')
-end
-
-def version_id(ver)
-  ver.split[1].tr('.', '')
-end
-
-def get_class_table(lib, rejects)
-  ENV.delete 'RUBYOPT'
-  ENV.delete 'RUBYLIB'
-  vers = []
-  table = {}
-  forall_ruby(ENV['PATH']) do |ruby, ver|
-    puts "#{version_id(ver)}: #{ver}" if @verbose
-    vers.push ver
-    defined_classes(ruby, lib, rejects).each do |c|
-      (table[c] ||= {})[ver] = true
-    end
-  end
-  return vers, table
+  print_crossruby_table {|ruby| defined_classes(ruby, lib, rejects) }
 end
 
 def defined_classes(ruby, lib, rejects)
@@ -101,24 +75,6 @@ def defined_classes(ruby, lib, rejects)
     end
   '`
   output.split
-end
-
-def forall_ruby(path, &block)
-  rubys(path)\
-      .map {|ruby| [ruby, `#{ruby} --version`] }\
-      .sort_by {|ruby, verstr| verstr }\
-      .each(&block)
-end
-
-def rubys(path)
-  parse_PATH(path).map {|bindir|
-    Dir.glob("#{bindir}/ruby-[12]*").map {|path| File.basename(path) }
-  }\
-  .flatten.uniq + ['ruby']
-end
-
-def parse_PATH(str)
-  str.split(':').map {|path| path.empty? ? '.' : path }
 end
 
 main
