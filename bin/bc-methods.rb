@@ -34,30 +34,37 @@ def main
     $stderr.puts opts.help
     exit 1
   end
-  classname = ARGV[0]
+  vers, table = *get_method_table(ARGV[0])
+  print_table vers, table
+end
 
+def get_method_table(classname)
   ENV.delete 'RUBYOPT'
   ENV.delete 'RUBYLIB'
-
-  table = {}
   vers = []
+  table = {}
   forall_ruby(ENV['PATH']) do |ruby, ver|
-    if @verbose
-      print "#{ver}: "
-      system "#{ruby} --version"
-    end
+    puts "#{version_id(ver)}: #{ver}" if @verbose
     vers.push ver
     list_methods(ruby, classname).each do |m|
       (table[m] ||= {})[ver] = true
     end
   end
+  return vers, table
+end
+
+def print_table(vers, table)
   hcols = [30, table.keys.map {|s| s.size }.max].max
   printf "%-#{hcols}s ", ''
-  puts vers.join(' ')
+  puts vers.map {|ver| version_id(ver) }.join(' ')
   table.keys.sort_by {|m| m_order(m) }.each do |m|
     printf "%-#{hcols}s ", m
     puts vers.map {|ver| table[m][ver] ? '  o' : '  -' }.join(' ')
   end
+end
+
+def version_id(ver)
+  ver.split[1].tr('.', '')
 end
 
 ORDER = {
@@ -90,17 +97,12 @@ def forall_ruby(path, &block)
   rubys(path)\
       .map {|ruby| [ruby, `#{ruby} --version`] }\
       .sort_by {|ruby, verstr| verstr }\
-      .map {|ruby, verstr| [ruby, version_id(verstr)] }\
       .each(&block)
-end
-
-def version_id(verstr)
-  verstr.split[1].tr('.', '')
 end
 
 def rubys(path)
   parse_PATH(path).map {|bindir|
-    Dir.glob("#{bindir}/ruby-[12]*").map {|path| File.basename(path) }
+    Dir.glob("#{bindir}/ruby-[12].*").map {|path| File.basename(path) }
   }\
   .flatten.uniq + ['ruby']
 end
