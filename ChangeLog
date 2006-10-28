@@ -1,3 +1,13 @@
+Sat Oct 28 23:56:45 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-classes.rb: new option -v/--verbose.
+
+	* bin/bc-classes.rb: should not raise exception on empty table.
+
+	* bin/bc-classes.rb: add shebang line.
+
+	* bin/bc-classes.rb: report if library does not exist.
+
 Sat Oct 28 01:12:41 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb: "=>" -> ">=".

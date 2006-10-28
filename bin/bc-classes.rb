@@ -1,11 +1,17 @@
+#!/usr/bin/env ruby
+
 require 'optparse'
 
 def main
   rejects = []
+  @verbose = false
   opts = OptionParser.new
   opts.banner = "Usage: #{File.basename($0, '.*')} [-r<lib>] <lib>"
   opts.on('-r', '--reject=LIB', 'Reject library LIB') {|lib|
     rejects.concat lib.split(',')
+  }
+  opts.on('-v', '--verbose', 'Show all ruby version.') {
+    @verbose = true
   }
   opts.on('--help', 'Prints this message and quit.') {
     puts opts.help
@@ -29,7 +35,7 @@ def main
 end
 
 def print_table(vers, table)
-  thcols = [20, table.keys.map {|s| s.size }.max].max
+  thcols = ([20] + table.keys.map {|s| s.size }).max
   print_record thcols, '', vers.map {|ver| version_id(ver) }
   table.keys.sort.each do |c|
     print_record thcols, c, vers.map {|ver| table[c][ver] ? 'o' : '-' }
@@ -82,7 +88,12 @@ def defined_classes(ruby, lib, rejects)
       end
     else
       before = class_extent()
-      require "#{lib}"
+      begin
+        require "#{lib}"
+      rescue LoadError
+        $stderr.puts "\#{RUBY_VERSION} (\#{RUBY_RELEASE_DATE}): library not exist: #{lib}"
+        exit
+      end
       after = class_extent()
       (after - before).each do |c|
         puts c
