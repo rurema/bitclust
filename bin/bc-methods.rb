@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
+#
+# bc-methods.rb -- list all methods of existing rubys.
+#
+# This program is derived from bc-vdtb.rb, posted in
+# [ruby-reference-manual:160] by sheepman.
+#
 
 require 'optparse'
 

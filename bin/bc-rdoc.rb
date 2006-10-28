@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
+#
+# bc-rdoc.rb -- handle rdoc (ri) database.
+#
+# "bc-rdoc history" code is derived from bc-history.rb, posted in
+# [ruby-reference-manual:150] by moriq.
+#
 
 require 'pathname'
 
