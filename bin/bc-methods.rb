@@ -54,13 +54,16 @@ def get_method_table(classname)
 end
 
 def print_table(vers, table)
-  hcols = [30, table.keys.map {|s| s.size }.max].max
-  printf "%-#{hcols}s ", ''
-  puts vers.map {|ver| version_id(ver) }.join(' ')
+  thcols = [30, table.keys.map {|s| s.size }.max].max
+  print_record thcols, '', vers.map {|ver| version_id(ver) }
   table.keys.sort_by {|m| m_order(m) }.each do |m|
-    printf "%-#{hcols}s ", m
-    puts vers.map {|ver| table[m][ver] ? '  o' : '  -' }.join(' ')
+    print_record thcols, m, vers.map {|ver| table[m][ver] ? 'o' : '-' }
   end
+end
+
+def print_record(thcols, th, tds)
+  printf "%-#{thcols}s ", th
+  puts tds.map {|td| '%4s' % td }.join('')
 end
 
 def version_id(ver)
@@ -102,7 +105,7 @@ end
 
 def rubys(path)
   parse_PATH(path).map {|bindir|
-    Dir.glob("#{bindir}/ruby-[12].*").map {|path| File.basename(path) }
+    Dir.glob("#{bindir}/ruby-[12]*").map {|path| File.basename(path) }
   }\
   .flatten.uniq + ['ruby']
 end
