@@ -1,3 +1,30 @@
+Sat Nov  4 21:07:22 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/nameutils.rb: support case-insensitive file
+	  systems. [ruby-reference-manual:177]
+
+	* lib/bitclust/nameutils.rb: fsencode -> encodename_url,
+	  encodename_fs.
+
+	* lib/bitclust/nameutils.rb: fsdecode -> decodename_url,
+	  decodename_fs.
+
+	* lib/bitclust/nameutils.rb: new method encodeid.
+
+	* lib/bitclust/nameutils.rb: new method decodeid.
+
+	* lib/bitclust/screen.rb: follow changes.
+
+	* lib/bitclust/requesthandler.rb: ditto.
+
+	* lib/bitclust/database.rb: ditto.
+
+	* lib/bitclust/database.rb (realpath): encode ID before writing to
+	  file system.
+
+	* lib/bitclust/database.rb (entries): decode ID after reading from
+	  file system.
+
 Sat Nov  4 20:33:19 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-methods.rb (defined_methods): refactoring: extract

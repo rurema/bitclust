@@ -84,7 +84,7 @@ module BitClust
 
     def method_url(spec)
       cname, tmark, mname = *split_method_spec(spec)
-      "#{@cgi_url}/method/#{classname2id(cname)}/#{typemark2char(tmark)}/#{fsencode(mname)}"
+      "#{@cgi_url}/method/#{classname2id(cname)}/#{typemark2char(tmark)}/#{encodename_url(mname)}"
     end
   end
 

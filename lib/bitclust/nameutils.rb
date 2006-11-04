@@ -11,11 +11,11 @@ module BitClust
     end
 
     def libname2id(name)
-      name.split('/').map {|ent| fsencode(ent) }.join('.')
+      name.split('/').map {|ent| encodename_url(ent) }.join('.')
     end
 
     def libid2name(id)
-      id.split('.').map {|ent| fsdecode(ent) }.join('/')
+      id.split('.').map {|ent| decodename_url(ent) }.join('/')
     end
 
     def classname?(str)
@@ -47,12 +47,12 @@ module BitClust
 
     def methodid2spec(id)
       c, t, m, lib = *split_method_id(id)
-      "#{classid2name(c)}#{typechar2mark(t)}#{fsdecode(m)}"
+      "#{classid2name(c)}#{typechar2mark(t)}#{decodename_url(m)}"
     end
 
     def methodid2libid(id)
       c, t, m, lib = *split_method_id(id)
-      fsdecode(lib)
+      decodename_url(lib)
     end
 
     def methodid2classid(id)
@@ -67,7 +67,7 @@ module BitClust
 
     def methodid2mname(id)
       c, t, m, lib = *split_method_id(id)
-      fsdecode(m)
+      decodename_url(m)
     end
 
     def methodname?(str)
@@ -75,7 +75,7 @@ module BitClust
     end
 
     def build_method_id(libid, cid, t, name)
-      "#{cid}/#{typename2char(t)}.#{fsencode(name)}.#{fsencode(libid)}"
+      "#{cid}/#{typename2char(t)}.#{encodename_url(name)}.#{libid}"
     end
 
     def split_method_id(id)
@@ -142,28 +142,37 @@ module BitClust
       typename2char(typemark2name(mark))
     end
 
-    def fsencode(str)
+    # string -> case-sensitive ID
+    def encodename_url(str)
       str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('=%02x', ch[0].ord) }
     end
 
-    def fsdecode(str)
-      str.gsub(/=[\da-h]{2}/i) {|s| s[1,2].hex.chr }
+    # case-sensitive ID -> string
+    def decodename_url(str)
+      str.gsub(/=[\da-h]{2}/ni) {|s| s[1,2].hex.chr }
     end
 
-=begin
-    # ReFe version (supports case-insensitive filesystems)
-    def fsencode(str)
+    # case-sensitive ID -> encoded string (encode only [A-Z])
+    def encodeid(str)
+      str.gsub(/[A-Z]/n) {|ch| "-#{ch}" }.downcase
+    end
+
+    # encoded string -> case-sensitive ID (decode only [A-Z])
+    def decodeid(str)
+      str.gsub(/-[a-z]/ni) {|s| s[1,1].upcase }
+    end
+
+    def encodename_fs(str)
       str.gsub(/[^a-z0-9_]/n) {|ch|
-        (/[A-Z]/n === ch) ? "-#{ch}" : sprintf('%%%02x', ch[0])
+        (/[A-Z]/n === ch) ? "-#{ch}" : sprintf('=%02x', ch[0].ord)
       }.downcase
     end
 
-    def fsdecode(str)
-      str.gsub(/%[\da-h]{2}|-[a-z]/i) {|s|
-        (s[0] == ?-) ? s[1,1].upcase : s[1,2].hex.chr
+    def decodename_fs(str)
+      str.gsub(/=[\da-h]{2}|-[a-z]/ni) {|s|
+        (/\A-/ =~ s) ? s[1,1].upcase : s[1,2].hex.chr
       }
     end
-=end
 
   end
 

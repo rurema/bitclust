@@ -131,7 +131,7 @@ module BitClust
       end
       cname = classid2name(cid)
       tmark = typechar2mark(typechar)
-      mname = fsdecode(mencoded)
+      mname = decodename_url(mencoded)
       unless classname?(cname)
         raise InvalidKey, "invalid class name: #{cname.inspect}"
       end

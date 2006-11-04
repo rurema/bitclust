@@ -332,7 +332,9 @@ module BitClust
     end
 
     def entries(rel)
-      Dir.entries(realpath(rel)).reject {|ent| /\A[\.=]/ =~ ent }
+      Dir.entries(realpath(rel))\
+          .reject {|ent| /\A[\.=]/ =~ ent }\
+          .map {|ent| decodeid(ent) }
     rescue Errno::ENOENT
       return []
     end
@@ -387,7 +389,7 @@ module BitClust
     private
 
     def realpath(rel)
-      "#{@prefix}/#{rel}"
+      "#{@prefix}/#{encodeid(rel)}"
     end
 
   end
