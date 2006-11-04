@@ -192,7 +192,7 @@ class DiffCommand < Subcommand
     case @type
     when :name
       win.each do |m|
-        puts "+ #{m.fullname}"
+        puts "+ #{m.id}"
       end
       lose.each do |m|
         puts "- #{m.fullname}"
@@ -428,6 +428,14 @@ class BCMethodEntry < Ent
 
   def fullname
     "#{@entry.klass.name}#{@entry.typemark}#{@name}"
+  end
+
+  def id
+    if @entry.defined?
+      fullname()
+    else
+      "#{fullname()}.#{@entry.library.name}"
+    end
   end
 end
 

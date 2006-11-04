@@ -1,3 +1,8 @@
+Sat Nov  4 20:31:46 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-rdoc.rb: show library ID for redefined/added methods.
+	  [ruby-reference-manual:176]
+
 Sat Nov  4 20:31:01 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/entry.rb: fix typo. [ruby-reference-manual:178]
