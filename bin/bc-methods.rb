@@ -60,13 +60,14 @@ end
 def defined_methods(ruby, classname)
   req = @requires.map {|lib| "-r#{lib}" }.join(' ')
   `#{ruby} #{req} -e '
-    #{classname}.singleton_methods(false).each do |m|
+    c = #{classname}
+    c.singleton_methods(false).each do |m|
       puts "#{classname}.\#{m}"
     end
-    #{classname}.instance_methods(false).each do |m|
+    c.instance_methods(false).each do |m|
       puts "#{classname}\\#\#{m}"
     end
-    (#{classname}.constants - #{classname}.ancestors[1..-1].map {|c| c.constants }.flatten).each do |m|
+    c.ancestors.map {|mod| mod.constants }.inject {|r,n| r-n }.each do |m|
       puts "#{classname}::\#{m}"
     end
   '`.split
