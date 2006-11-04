@@ -545,7 +545,7 @@ module BitClust
 
     def singleton_method?(name, inherit = true)
       if inherit
-        smap().key?(name)
+        _smap().key?(name)
       else
         singleton_methods(false).detect {|m| m.name?(name) }
       end
@@ -553,7 +553,7 @@ module BitClust
 
     def instance_method?(name, inherit = true)
       if inherit
-        imap().key?(name)
+        _imap().key?(name)
       else
         instance_methods(false).detect {|m| m.name?(name) }
       end
