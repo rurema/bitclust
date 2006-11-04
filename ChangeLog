@@ -1,3 +1,8 @@
+Sat Nov  4 22:22:29 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb (load_extent): argument must be a
+	  String. [ruby-reference-manual:184]
+
 Sat Nov  4 21:07:22 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/nameutils.rb: support case-insensitive file

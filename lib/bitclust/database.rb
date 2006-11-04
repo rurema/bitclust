@@ -219,7 +219,7 @@ module BitClust
 
     def load_extent(entry_class)
       h = {}
-      entries(entry_class.type_id).each do |id|
+      entries(entry_class.type_id.to_s).each do |id|
         h[id] = entry_class.new(self, id)
       end
       h
