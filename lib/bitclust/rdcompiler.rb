@@ -22,6 +22,16 @@ module BitClust
     def initialize(urlmapper, hlevel = 1)
       @urlmapper = urlmapper
       @hlevel = hlevel
+      @type = nil
+      @library = nil
+      @class = nil
+      @method = nil
+    end
+
+    def compile_method(m)
+      @type = :method
+      @method = m
+      compile(m.source)
     end
 
     def compile(src)
@@ -175,7 +185,11 @@ module BitClust
       # FIXME: check parameters, types, etc.
       string '<dt><code>'
       string escape_html(sig.sub(/\A---/, '').strip)
-      line '</code></dt>'
+      string '</code>'
+      if @method and not @method.defined?
+        line %Q( <span class="kindinfo">[#{@method.kind} by #{library_link(@method.library.name)}]</span>)
+      end
+      line '</dt>'
     end
 
     BracketLink = /\[\[[!-~]+?\]\]/n

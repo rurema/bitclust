@@ -8,6 +8,10 @@
 </head>
 <body>
 
+<p>
+<a href="<%= library_index_url() %>">All Libraries</a>
+&gt; library <%= @entry.name %>
+</p>
 <%
     headline_init
 %>
@@ -16,16 +20,18 @@
     headline_push
     classes = @entry.classes.sort
 %>
-<%= compile_rd(@entry.source) %>
-<%= headline("Classes, Modules, and Objects") %>
-<p><code>
+
+<!--
+<p>Classes/Modules: <code>
 <%
     classes.each do |c| %>
 <%= class_link(c.name) %>
 <%  end
 %>
 </code></p>
-<%= headline("with Methods") %>
+-->
+
+<%= headline("Provided Classes/Modules") %>
 <dl>
 <%
     classes.each do |c|
@@ -40,9 +46,12 @@
 </dd>
 <%
     end
-    headline_pop
 %>
 </dl>
+
+<%= headline("Abstract") %>
+<%= compile_rd(@entry.source) %>
+<% headline_pop %>
 
 </body>
 </html>

@@ -74,6 +74,10 @@ module BitClust
       "#{@base_url}/theme/#{@theme}/style.css"
     end
 
+    def library_index_url
+      "#{@cgi_url}/library/"
+    end
+
     def library_url(name)
       "#{@cgi_url}/library/#{libname2id(name)}"
     end
@@ -163,6 +167,10 @@ module BitClust
       @urlmapper.css_url
     end
 
+    def library_index_url
+      @urlmapper.library_index_url
+    end
+
     def headline_init
       @hlevel = 1
     end
@@ -183,8 +191,16 @@ module BitClust
       "<h#{@hlevel}>#{str}</h#{@hlevel}>"
     end
 
+    def compile_method(m)
+      rdcompiler().compile_method(m)
+    end
+
     def compile_rd(src)
-      RDCompiler.new(@urlmapper, @hlevel).compile(src)
+      rdcompiler().compile(src)
+    end
+
+    def rdcompiler
+      RDCompiler.new(@urlmapper, @hlevel)
     end
   end
 

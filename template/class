@@ -8,25 +8,32 @@
 </head>
 <body>
 
+<p>
+<a href="<%= library_index_url() %>">All Libraries</a>
+&gt; library <%= library_link(@entry.library.name) %>
+&gt; <%= @entry.type %> <%= @entry.name %>
+</p>
 <%
     headline_init
 %>
 <%= headline("#{@entry.type} #{@entry.name}") %>
 <p>
-library: <%= library_link(@entry.library.name) %>
-<% if @entry.superclass %>
-<br>superclass: <%= class_link(@entry.superclass.name) %>
-<% end %>
+<%
+    myself, *supers = @entry.ancestors
+%>
+ancestors: <%= escape_html(myself.name) %>
+<%  supers.each do |c| %>
+      &lt; <%= class_link(c.name) %>
+<%  end %>
+
 <% unless @entry.extended.empty? %>
 <br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
-<% end %>
-<% unless @entry.included.empty? %>
-<br>include: <%= @entry.included.map {|c| class_link(c.name) }.join(', ') %>
 <% end %>
 </p>
 <%
     headline_push
 %>
+<%= headline("Abstract") %>
 <%= compile_rd(@entry.source) %>
 
 <%
@@ -46,7 +53,7 @@ library: <%= library_link(@entry.library.name) %>
         headline_push
         entries.each do |m|
 %>
-<%=       compile_rd(m.source) %>
+<%=       compile_method(m) %>
 <%
         end
         headline_pop

@@ -1,3 +1,30 @@
+Sat Nov  4 22:35:37 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* template/library-index: show topic path.
+
+	* template/library: ditto.
+
+	* template/class: ditto.
+
+	* template/method: ditto.
+
+	* template/method: show method kind (redefined/added).
+
+	* lib/bitclust/rdcompiler.rb: new method compile_method, to show
+	  kind.
+
+	* lib/bitclust/screen.rb: new method
+	  TemplateScreen#compile_method.
+
+	* lib/bitclust/screen.rb: new method
+	  TemplateScreen#library_index_url.
+
+	* lib/bitclust/screen.rb: new method URLMapper#library_index_url.
+
+	* theme/default/style.css: add kindinfo style.
+
+	* theme/default/style.css: give more margin for <h2>, <dd>.
+
 Sat Nov  4 22:22:29 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb (load_extent): argument must be a
