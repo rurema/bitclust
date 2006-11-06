@@ -106,6 +106,30 @@ module BitClust
       (not @method or m.name?(@method))
     end
 
+    def singleton_method?
+      @type == '.' or @type == '.#'
+    end
+
+    def instance_method?
+      @type == '#' or @type == '.#'
+    end
+
+    def module_function?
+      @type == '.#'
+    end
+
+    def method?
+      singleton_method? or instance_method?
+    end
+
+    def constant?
+      @type == '::'
+    end
+
+    def special_variable?
+      @type == '$'
+    end
+
   end
 
 end

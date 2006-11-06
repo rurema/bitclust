@@ -45,7 +45,7 @@ ancestors: <%= escape_html(myself.name) %>
      ['Module Functions',          ents.module_functions],
      ['Constants',                 ents.constants],
      ['Special Variables',         ents.special_variables]]\
-    .each do |(label, entries)|
+    .each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
 <dl>

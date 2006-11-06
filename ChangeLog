@@ -1,3 +1,26 @@
+Tue Nov  7 00:08:12 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bc-tohtml.rb: check class for constant target.
+	  [ruby-reference-manual:188]
+
+	* lib/bitclust/methodid.rb: new method
+	  MethodSpec#singleton_method?.
+
+	* lib/bitclust/methodid.rb: new method
+	  MethodSpec#instance_method?.
+
+	* lib/bitclust/methodid.rb: new method
+	  MethodSpec#module_function?.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#method?.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#constant?.
+
+	* lib/bitclust/methodid.rb: new method
+	  MethodSpec#special_variable?.
+
+	* template/class: use block parameter |a,b| to expand [a,b].
+
 Sat Nov  4 22:35:37 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* template/library-index: show topic path.
