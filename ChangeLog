@@ -1,3 +1,10 @@
+Tue Nov  7 00:19:56 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: give better error message for wrong
+	  #@include.
+
+	* lib/bitclust/exception.rb: new execption class WrongInclude.
+
 Tue Nov  7 00:08:12 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-tohtml.rb: check class for constant target.

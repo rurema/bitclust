@@ -484,9 +484,13 @@ module BitClust
         when /\A\#@todo/i
           ;
         when /\A\#@include\s*\((.*?)\)/
-          file = $1.strip
-          basedir = File.dirname(line.location.file)
-          @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
+          begin
+            file = $1.strip
+            basedir = File.dirname(line.location.file)
+            @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
+          rescue Errno::ENOENT => err
+            raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
+          end
         when /\A\#@since\b/
           @last_if = line
           begin

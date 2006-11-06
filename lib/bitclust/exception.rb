@@ -13,6 +13,7 @@ module BitClust
   class NotInTransaction        < Error; end
   class ScanError               < Error; end
   class CompileError            < Error; end
+  class WrongInclude            < CompileError; end
   class UserError               < Error; end
   class InvalidDatabase         < UserError; end
   class InvalidKey              < UserError; end
