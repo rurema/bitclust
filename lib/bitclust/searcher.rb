@@ -22,9 +22,10 @@ module BitClust
     def initialize
       cmd = File.basename($0, '.*')
       @dbpath = nil
-      @name = (cmd == 'bitclust' ? 'bitclust search' : 'refe')
+      @name = (/\Abitclust/ =~ cmd ? 'bitclust search' : 'refe')
       @describe_all = false
       @linep = false
+      @target_type = nil
       @parser = OptionParser.new {|opt|
         opt.banner = "Usage: #{@name} <pattern>"
         unless cmd == 'bitclust'
@@ -37,6 +38,9 @@ module BitClust
         }
         opt.on('-l', '--line', 'Prints one entry in one line.') {
           @linep = true
+        }
+        opt.on('--class', 'Search class or module.') {
+          @target_type = :class
         }
         opt.on('--version', 'Prints version and quit.') {
           if cmd == 'bitclust'
@@ -58,9 +62,17 @@ module BitClust
 
     def parse(argv)
       @parser.parse! argv
-      if argv.size > 3
-        $stderr.puts "too many arguments (#{argv.size} for 2)"
-        exit 1
+      case @target_type
+      when :class
+        unless argv.size == 1
+          $stderr.puts "--class option requires only 1 argument"
+          exit 1
+        end
+      else
+        if argv.size > 3
+          $stderr.puts "too many arguments (#{argv.size} for 2)"
+          exit 1
+        end
       end
       # FIXME
       #compiler = RDCompiler::Text.new
@@ -71,53 +83,90 @@ module BitClust
 
     def exec(db, argv)
       db ||= Database.new(@dbpath || dbpath())
-      case argv.size
-      when 0
-        @view.show_class db.classes
-      when 1
-        if /\A\$/ =~ argv[0]
-          search_methods db, 'Kernel', '$', argv[0].sub(/\A\$/, '')
-          return
-        end
-        _m, _t, _c = argv[0].reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,]|::)/, 2)
-        if _t
-          c = _c.reverse
-          t = _t.tr(',', '#').sub(/\#\./, '.#')
-          m = _m.reverse
-          search_methods db, c, t, m
-        else
-          if /\A[A-Z]/ =~ argv[0]
-            begin
-              @view.show_class db.search_classes(argv[0])
-            rescue ClassNotFound
-              search_methods db, nil, nil, argv[0]
-            end
-          else
-            search_methods db, nil, nil, argv[0]
-          end
-        end
-      when 2
-        c, m = *argv
-        search_methods db, c, nil, m
-      when 3
-        c, t, m = *argv
-        if t == '$'
-          raise InvalidKey, "'$' cannot be used as method type"
-        end
-        unless typemark?(t)
-          raise InvalidKey, "unknown method type: #{t.inspect}"
-        end
-        search_methods db, c, t, m
+      case @target_type
+      when :class
+        find_class db, argv[0]
       else
-        raise "must not happen: #{argv.size}"
+        case argv.size
+        when 0
+          show_all_classes db
+        when 1
+          find_class_or_method db, argv[0]
+        when 2
+          c, m = *argv
+          find_method db, c, nil, m
+        when 3
+          c, t, m = *argv
+          check_method_type t
+          find_method db, c, t, m
+        else
+          raise "must not happen: #{argv.size}"
+        end
       end
     end
 
-    def search_methods(db, c, t, m)
+    private
+
+    def show_all_classes(db)
+      @view.show_class db.classes
+    end
+
+    def find_class(db, c)
+      @view.show_class db.search_classes(c)
+    end
+
+    def find_method(db, c, t, m)
       @view.show_method db.search_methods(MethodNamePattern.new(c, t, m))
     end
 
-    private
+    def check_method_type(t)
+      if t == '$'
+        raise InvalidKey, "'$' cannot be used as method type"
+      end
+      unless typemark?(t)
+        raise InvalidKey, "unknown method type: #{t.inspect}"
+      end
+    end
+
+    def find_class_or_method(db, pattern)
+      case pattern
+      when /\A\$/   # Special variable.
+        find_method db, 'Kernel', '$', pattern.sub(/\A\$/, '')
+      when /[\#,]\.|\.[\#,]|[\#\.\,]/   # method spec
+        find_method db, *parse_method_spec_pattern(pattern)
+      when /::/   # Class name or constant name.
+        find_constant db, pattern
+      when /\A[A-Z]/   # Method name or class name, but class name is better.
+        begin
+          find_class db, pattern
+        rescue ClassNotFound
+          find_method db, nil, nil, pattern
+        end
+      else   # No hint.  Method name or class name.
+        begin
+          find_method db, nil, nil, pattern
+        rescue MethodNotFound
+          find_class db, pattern
+        end
+      end
+    end
+
+    def find_constant(db, pattern)
+      # class lookup is faster
+      find_class db, pattern
+    rescue ClassNotFound
+      cnames = pattern.split(/::/)
+      name = cnames.pop
+      find_method db, cnames.join('::'), '::', name
+    end
+
+    def parse_method_spec_pattern(pat)
+      _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,])/, 2)
+      c = _c.reverse
+      t = _t.tr(',', '#').sub(/\#\./, '.#')
+      m = _m.reverse
+      return c, t, m
+    end
 
     def dbpath_name
       env_dbpath() or default_dbpath() or '(none)'
