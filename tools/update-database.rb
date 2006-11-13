@@ -25,11 +25,11 @@ def main
   to = nil
 
   parser = OptionParser.new
-  parser.banner = "Usage: #{File.basename($0, '.*')}"
-  parser.on('--from=ADDR', 'SMTP host to send mail.') {|addr|
+  parser.banner = "Usage: #{File.basename($0, '.*')} --from=ADDR --to=ADDR --smtp-host=NAME [--smtp-port-NUM] <refm-api-dir>"
+  parser.on('--from=ADDR', 'From: address of error report.') {|addr|
     from = addr
   }
-  parser.on('--to=ADDR', 'SMTP host to send mail.') {|addr|
+  parser.on('--to=ADDR', 'To: address of error report.') {|addr|
     to = addr
   }
   parser.on('--smtp-host=NAME', 'SMTP host to send mail.') {|name|
@@ -130,7 +130,7 @@ class SMTPReporter
 
   def send_message(subject, body)
     Net::SMTP.start(@host, @port, Socket.gethostname) {|smtp|
-      smtp.send_mail(<<-End, from, to)
+      smtp.send_mail(<<-End, @from, @to)
 Date: #{Time.now.rfc2822}
 From: #{@from}
 To: #{@to}
