@@ -1,3 +1,22 @@
+Mon Nov 13 21:03:12 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: should rescue errors caused by manual
+	  reader/writer.
+
+	* bin/bc-list.rb: ditto.
+
+	* bin/bc-tohtml.rb: ditto.
+
+	* bin/bc-preproc.rb: ditto.
+
+	* lib/bitclust/exception.rb: new exception category WriterError.
+
+	* lib/bitclust/exception.rb: rename class: CompileError ->
+	  ParseError.
+
+	* lib/bitclust/rrdparser.rb: rename method: #compile_error ->
+	  #parse_error.
+
 Mon Nov 13 17:31:28 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* config: introduce instance variables.
