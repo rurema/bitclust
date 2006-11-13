@@ -54,7 +54,7 @@ def main
     :baseurl => 'http://example.com/',
     :templatedir => templatedir)
   puts manager.entry_screen(entry).body
-rescue BitClust::UserError => err
+rescue BitClust::WriterError => err
   $stderr.puts err.message
   exit 1
 end

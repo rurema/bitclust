@@ -74,7 +74,7 @@ Global Options:
     cmd.parse(ARGV)
   rescue OptionParser::ParseError => err
     $stderr.puts err.message
-    $stderr.puts cmd.parser.help
+    $stderr.puts cmd.help
     exit 1
   end
   unless prefix
@@ -83,7 +83,7 @@ Global Options:
   end
   db = BitClust::Database.new(prefix)
   cmd.exec db, ARGV
-rescue BitClust::UserError => err
+rescue BitClust::WriterError => err
   $stderr.puts err.message
   exit 1
 end
@@ -94,7 +94,18 @@ def error(msg)
 end
 
 
-class InitCommand
+class Subcommand
+  def parse(argv)
+    @parser.parse! argv
+  end
+
+  def help
+    @parser.help
+  end
+end
+
+
+class InitCommand < Subcommand
 
   def initialize
     @parser = OptionParser.new {|opt|
@@ -104,10 +115,6 @@ class InitCommand
         exit 0
       }
     }
-  end
-
-  def parse(argv)
-    @parser.parse! argv
   end
 
   def exec(db, argv)
@@ -123,7 +130,7 @@ class InitCommand
 end
 
 
-class UpdateCommand
+class UpdateCommand < Subcommand
 
   def initialize
     @root = nil
@@ -143,10 +150,8 @@ class UpdateCommand
     }
   end
 
-  attr_reader :parser
-
   def parse(argv)
-    @parser.parse! argv
+    super
     if not @root and argv.empty?
       error "no file given"
     end
@@ -188,7 +193,7 @@ class UpdateCommand
 end
 
 
-class ListCommand
+class ListCommand < Subcommand
 
   def initialize
     @mode = nil
@@ -210,10 +215,8 @@ class ListCommand
     }
   end
 
-  attr_reader :parser
-
   def parse(argv)
-    @parser.parse! argv
+    super
     unless @mode
       error 'one of (--library|--class|--method) is required'
     end
@@ -243,7 +246,7 @@ class ListCommand
 end
 
 
-class LookupCommand
+class LookupCommand < Subcommand
 
   def initialize
     @format = :text
@@ -273,10 +276,8 @@ class LookupCommand
     }
   end
 
-  attr_reader :parser
-
   def parse(argv)
-    @parser.parse! argv
+    super
     unless @type
       error "one of --library/--class/--method is required"
     end

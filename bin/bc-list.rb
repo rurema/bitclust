@@ -35,7 +35,7 @@ def main
       else
         show_library lib
       end
-    rescue BitClust::CompileError => err
+    rescue BitClust::WriterError => err
       raise if $DEBUG
       $stderr.puts "#{File.basename($0, '.*')}: FAIL: #{err.message}"
       success = false

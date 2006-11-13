@@ -53,16 +53,16 @@ module BitClust
   end
 
 
-  module CompileUtils
-    def compile_error(msg, line)
-      raise CompileError, "#{line.location}: #{msg}: #{line.inspect}"
+  module ParseUtils
+    def parse_error(msg, line)
+      raise ParseError, "#{line.location}: #{msg}: #{line.inspect}"
     end
   end
 
 
   class RRDParser
 
-    include CompileUtils
+    include ParseUtils
 
     def RRDParser.parse_stdlib_file(path)
       parser = new(Database.dummy)
@@ -107,7 +107,7 @@ module BitClust
       @context.library.source = f.break(/\A=[^=]/).join('').rstrip
       read_classes f
       unless f.eof?
-        compile_error "syntax error", f.gets
+        parse_error "unexpected line", f.gets
       end
     end
 
@@ -119,11 +119,11 @@ module BitClust
           @context.define_class name, (superclass || 'Object')
           read_class_body f
         when 'module'
-          compile_error "superclass given for module", line  if superclass
+          parse_error "superclass given for module", line  if superclass
           @context.define_module name
           read_class_body f
         when 'object'
-          compile_error "superclass given for object", line  if superclass
+          parse_error "superclass given for object", line  if superclass
           @context.define_object name
           f.skip_blank_lines
           f.while_match(/\Aextend\s/) do |ex|
@@ -141,7 +141,7 @@ module BitClust
           @context.redefine_class name
           read_reopen_body f
         else
-          compile_error "wrong level-1 header", line
+          parse_error "wrong level-1 header", line
         end
       end
     end
@@ -177,7 +177,7 @@ module BitClust
         when /\ASpecial\s+Variables?\z/i
           @context.special_variable
         else
-          compile_error "unknown level-2 header", line
+          parse_error "unknown level-2 header", line
         end
         read_entries f
       end
@@ -226,17 +226,17 @@ module BitClust
     def check_chunk_signatures(sigs, line)
       if cxt = @context.signature
         unless cxt.fully_qualified?
-          compile_error "unqualified signature (#{cxt})", line
+          parse_error "unqualified signature (#{cxt})", line
         end
         if _sig = sigs.detect {|sig| not cxt.compatible?(sig) }
-          compile_error "incompatible signature: #{cxt} <-> #{_sig}", line
+          parse_error "incompatible signature: #{cxt} <-> #{_sig}", line
         end
       else
         unless sigs[0].fully_qualified?
-          compile_error "unqualified signature (#{sigs[0]})", line
+          parse_error "unqualified signature (#{sigs[0]})", line
         end
         unless sigs.all? {|s| sigs[0].same_type?(s) }
-          compile_error "alias entries have multiple class/type", line
+          parse_error "alias entries have multiple class/type", line
         end
       end
     end
@@ -253,7 +253,7 @@ module BitClust
       elsif m = SVAR.match(line)
         Signature.new(nil, '$', m[1])
       else
-        compile_error "failed to parse method signature", line
+        parse_error "wrong method signature", line
       end
     end
 
@@ -443,7 +443,7 @@ module BitClust
 
   class Preprocessor
 
-    include CompileUtils
+    include ParseUtils
     include Enumerable
 
     def Preprocessor.process(path, params = {})
@@ -496,23 +496,23 @@ module BitClust
           begin
             cond_push eval_cond(build_cond_by_value(line, 'version >='))
           rescue ScanError => err
-            compile_error err.message, line
+            parse_error err.message, line
           end
         when /\A\#@if\b/
           @last_if = line
           begin
             cond_push eval_cond(line.sub(/\A\#@if/, '').strip)
           rescue ScanError => err
-            compile_error err.message, line
+            parse_error err.message, line
           end
         when /\A\#@else\s*\z/
-          compile_error "no matching #@if", line  if cond_toplevel?
+          parse_error "no matching #@if", line  if cond_toplevel?
           cond_invert
         when /\A\#@end\s*\z/
-          compile_error "no matching #@if", line  if cond_toplevel?
+          parse_error "no matching #@if", line  if cond_toplevel?
           cond_pop
         when /\A\#@/
-          compile_error "unknown preprocessor directive", line
+          parse_error "unknown preprocessor directive", line
         else
           if @cond_stack.last
             @buf.push line
@@ -522,7 +522,7 @@ module BitClust
       end
       if @buf.empty?
         unless cond_toplevel?
-          compile_error "unterminated \#@if", @last_if
+          parse_error "unterminated \#@if", @last_if
         end
       end
       @buf.shift
@@ -535,7 +535,7 @@ module BitClust
       when /\A"[\d\.]+"\z/
         "#{left} #{ver}"
       else
-        compile_error "wrong #@since line", line
+        parse_error "wrong #@since line", line
       end
     end
 
