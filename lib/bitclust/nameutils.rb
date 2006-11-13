@@ -79,7 +79,7 @@ module BitClust
     end
 
     def split_method_id(id)
-      return *id.split(%r<[/\.]>)
+      return *id.split(%r<[/\.]>, 4)
     end
 
     NAME_TO_MARK = {
