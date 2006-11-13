@@ -1,3 +1,7 @@
+Tue Nov 14 00:36:05 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: new method #update_by_stdlibtree.
+
 Tue Nov 14 00:35:30 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/update-database.rb: old dbdir may not exist.

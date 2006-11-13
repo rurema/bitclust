@@ -95,6 +95,19 @@ module BitClust
       @dirty_classes[c] = true
     end
 
+    def update_by_stdlibtree(root)
+      parse_LIBRARIES("#{root}/LIBRARIES", properties()).each do |libname|
+        update_by_file "#{root}/#{libname}.rd", libname
+      end
+    end
+
+    def parse_LIBRARIES(path, properties)
+      File.open(path) {|f|
+        BitClust::Preprocessor.wrap(f, properties).map {|line| line.strip }
+      }
+    end
+    private :parse_LIBRARIES
+
     def update_by_file(path, libname)
       check_transaction
       RRDParser.new(self).parse_file(path, libname, properties())
