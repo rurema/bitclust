@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
+
+def srcdir_root
+  (Pathname.new(__FILE__).realpath.dirname + '..').cleanpath
+end
+
+$LOAD_PATH.unshift srcdir_root() + 'lib'
+
 require 'bitclust'
 require 'fileutils'
 require 'net/smtp'
