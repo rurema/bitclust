@@ -1,3 +1,9 @@
+Tue Nov 14 00:35:30 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/update-database.rb: old dbdir may not exist.
+
+	* tools/update-database.rb: parents of dbdir may not exist.
+
 Tue Nov 14 00:22:50 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/update-database.rb: new file.

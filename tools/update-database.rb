@@ -60,8 +60,12 @@ end
 def update_database(dbdir, doctree, version)
   tmpdir = 'db.tmp'
   build_database tmpdir, doctree, version
-  mv datadir, 'db.old'
-  mv tmp, dbdir
+  begin
+    File.rename dbdir, 'db.old'
+  rescue Errno::ENOENT
+  end
+  mkdir_p File.dirname(dbdir)
+  File.rename tmpdir, dbdir
 ensure
   rm_rf 'db.old'
   rm_rf tmpdir
@@ -100,21 +104,6 @@ def serialize_error(err)
   msgline = "#{err.message} (#{err.class})"
   backtraces = err.backtrace.map {|s| "\t#{s}" }
   ([msgline] + backtraces).join("\n")
-end
-
-def cmd(*args)
-  st = cmd_f(*args)
-  unless st.exitstatus == 0
-    raise CommandFailed, "command failed: #{args.map {|a| a.inspect }.join(' ')"
-  end
-end
-
-def cmd_f(*args)
-  pid = Process.fork {
-    Process.exec(*args)
-  }
-  _, st = *Process.waitpid2(pid)
-  st
 end
 
 class SMTPReporter
