@@ -1,3 +1,7 @@
+Tue Nov 14 00:22:50 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/update-database.rb: new file.
+
 Mon Nov 13 21:03:12 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: should rescue errors caused by manual
