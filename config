@@ -1,17 +1,24 @@
+# BitClust config sample file.
+# Edit this file and rename "config".
+
+@bc_urlroot = 'http://doc.loveruby.net'
+@bc_cgidir = File.dirname(File.expand_path(__FILE__))
+@bc_vardir = @bc_cgidir
+@bc_srcdir = @bc_cgidir
+
+# called only once per process.
 def setup_environment
   $KCODE = 'EUC'
-  $LOAD_PATH.unshift './lib'
+  $LOAD_PATH.unshift "#{@bc_srcdir}/lib"
   require 'bitclust'
 end
 
+# called many times per process.
 def bitclust_context
-  cgidir = File.dirname(File.expand_path(__FILE__))
-  vardir = "#{cgidir}/var"
-  srcdir = cgidir
-  db = BitClust::Database.new(nil)
+  db = BitClust::Database.new("#{@bc_vardir}/db")
   manager = BitClust::ScreenManager.new(
-    :baseurl     => 'http://doc.loveruby.net/refm/api/view',
-    :templatedir => srcdir
+    :baseurl     => "#{@bc_urlroot}/refm/api/view",
+    :templatedir => "#{@bc_srcdir}/template"
   )
   BitClust::RequestHandler.new(db, manager)
 end
