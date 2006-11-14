@@ -63,15 +63,17 @@ module BitClust
         save_properties 'properties', @properties
         @properties_dirty = false
       end
-      @dirty_classes.each_key do |c|
-        c.clear_cache
+      unless @dirty_classes.empty? and @dirty_entries.empty?
+        @dirty_classes.each_key do |c|
+          c.clear_cache
+        end
+        (@dirty_classes.keys + @dirty_entries.keys).each do |x|
+          x.save
+        end
+        @dirty_entries.clear
+        @dirty_classes.clear
+        save_method_index
       end
-      (@dirty_classes.keys + @dirty_entries.keys).each do |x|
-        x.save
-      end
-      @dirty_entries.clear
-      @dirty_classes.clear
-      save_method_index
     ensure
       @in_transaction = false
     end
@@ -118,7 +120,12 @@ module BitClust
     #
 
     def properties
-      @properties ||= load_properties('properties')
+      @properties ||=
+          begin
+            h = load_properties('properties')
+            h.delete 'source' if h['source'].strip.empty?
+            h
+          end
     end
 
     def propkeys
