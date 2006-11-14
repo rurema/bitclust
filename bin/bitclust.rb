@@ -160,7 +160,7 @@ class UpdateCommand < Subcommand
   def exec(db, argv)
     db.transaction {
       if @root
-        process_stdlib_tree db, @root
+        db.update_by_stdlibtree @root
       end
       argv.each do |path|
         db.update_by_file path, @library || guess_library_name(path)
@@ -169,18 +169,6 @@ class UpdateCommand < Subcommand
   end
 
   private
-
-  def process_stdlib_tree(db, root)
-    parse_LIBRARIES("#{root}/LIBRARIES", db.properties).each do |libname|
-      db.update_by_file "#{root}/#{libname}.rd", libname
-    end
-  end
-
-  def parse_LIBRARIES(path, properties)
-    File.open(path) {|f|
-      BitClust::Preprocessor.wrap(f, properties).map {|line| line.strip }
-    }
-  end
 
   def guess_library_name(path)
     if %r<(\A|/)src/> =~ path

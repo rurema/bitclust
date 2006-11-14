@@ -1,3 +1,8 @@
+Tue Nov 14 21:31:23 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb (UpdateCommand#exec): use
+	  Database#update_by_stdlibtree.
+
 Tue Nov 14 00:53:14 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/update-database.rb (main): better help message.
