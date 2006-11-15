@@ -96,9 +96,10 @@ class TestNameUtils < Test::Unit::TestCase
   end
 
   def test_methodid2libid
-    assert_equal "_builtin", methodid2libid("String/i.index._builtin")
-    assert_equal "cgi", methodid2libid("CGI/i.accept.cgi")
-    assert_equal "net.http", methodid2libid("Net=HTTP/i.ca_path.net.http")
+    assert_equal "_builtin",   methodid2libid("String/i.index._builtin")
+    assert_equal "cgi",        methodid2libid("CGI/i.accept.cgi")
+    assert_equal "net.http",   methodid2libid("Net=HTTP/i.ca_path.net.http")
+    assert_equal "open=2duri", methodid2libid("OpenURI/m.open.open=2duri")
   end
 
   def test_methodid2classid

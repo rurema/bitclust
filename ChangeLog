@@ -1,3 +1,8 @@
+Wed Nov 15 14:53:35 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* test/test_nameutils.rb (test_methodid2libid): should not decode
+	  library ID.
+
 Wed Nov 15 14:51:01 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb: raise all exception on debugging.
