@@ -1,6 +1,7 @@
 Wed Nov 15 12:20:45 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/nameutils.rb (libname?): should allow '-'.
+	  [ruby-reference-manual:205]
 
 Tue Nov 14 21:45:41 2006  Minero Aoki  <aamine@loveruby.net>
 
