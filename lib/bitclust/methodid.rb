@@ -35,9 +35,9 @@ module BitClust
     end
 
     def match?(m)
-      m.library == @library and
+      m.name == @name and
       m.type == @type and
-      m.name == @name
+      m.library == @library
     end
 
     alias typename type

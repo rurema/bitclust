@@ -62,6 +62,7 @@ module BitClust
 
   class RRDParser
 
+    include NameUtils
     include ParseUtils
 
     def RRDParser.parse_stdlib_file(path)
@@ -241,23 +242,23 @@ module BitClust
       end
     end
 
-    const = /[A-Z]\w*/
-    cpath = /#{const}(?:::#{const})*/
-    mid = /\w+[?!=]?|===|==|=~|<=>|<=|>=|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
-    SIGNATURE = /\A---\s*(?:(#{cpath})([\.\#]|::))?(#{mid})/
-    SVAR = /\A---\s*\$(\w+|-.|\S)/
+    SIGNATURE = /\A---\s*(?:(#{CLASS_PATH_RE})(#{TYPEMARK_RE}))?(#{METHOD_NAME_RE})/
+    GVAR = /\A---\s*(#{GVAR_RE})/
 
     def method_signature(line)
-      if m = SIGNATURE.match(line)
-        Signature.new(m[1], m[2], m[3])
-      elsif m = SVAR.match(line)
-        Signature.new(nil, '$', m[1])
+      case
+      when m = SIGNATURE.match(line)
+        Signature.new(*m.captures)
+      when m = GVAR.match(line)
+        Signature.new(nil, '$', m[1][1..-1])
       else
         parse_error "wrong method signature", line
       end
     end
 
     class Context
+      include NameUtils
+
       def initialize(db, libname)
         @db = db
         #@library = @db.open_library(libname)
@@ -341,8 +342,6 @@ module BitClust
         end
         @type = :special_variable
       end
-
-      include NameUtils
 
       def signature
         return nil unless @klass

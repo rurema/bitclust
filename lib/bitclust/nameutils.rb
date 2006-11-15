@@ -6,8 +6,18 @@ module BitClust
 
     module_function
 
+    LIBNAME_RE     = %r<[\w\-]+(/[\w\-]+)*>
+    CONST_RE       = /[A-Z]\w*/
+    CONST_PATH_RE  = /#{CONST_RE}(?:::#{CONST_RE})*/
+    CLASS_NAME_RE  = /(?:#{CONST_RE}|fatal)/
+    CLASS_PATH_RE  = /(?:#{CONST_PATH_RE}|fatal)/
+    METHOD_NAME_RE = /\w+[?!=]?|===|==|=~|<=>|<=|>=|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
+    TYPEMARK_RE    = /(?:\.|\#|\.\#|::|\$)/
+    METHOD_SPEC_RE = /#{CLASS_PATH_RE}#{TYPEMARK_RE}#{METHOD_NAME_RE}/
+    GVAR_RE        = /\$(?:\w+|-.|\S)/
+
     def libname?(str)
-      %r<\A[\w\-]+(/[\w\-]+)*\z> =~ str
+      (/\A#{LIBNAME_RE}\z/o =~ str) ? true : false
     end
 
     def libname2id(name)
@@ -19,7 +29,7 @@ module BitClust
     end
 
     def classname?(str)
-      /\A[A-Z]\w*(::[A-Z]\w*)*/ =~ str or str == 'fatal'
+      (/\A#{CLASS_PATH_RE}\z/o =~ str) ? true : false
     end
 
     def classname2id(name)
@@ -31,7 +41,7 @@ module BitClust
     end
 
     def method_spec?(str)
-      /\A([\w\:]+)(\.\#|[\.\#]|::)([^:\s]+)\z/ =~ str
+      (/\A#{METHOD_SPEC_RE}\z/o =~ str) ? true : false
     end
 
     def split_method_spec(spec)
@@ -39,7 +49,7 @@ module BitClust
       when /\AKernel\$/
         return 'Kernel', '$', $'
       else
-        m = /\A([\w\:]+)(\.\#|[\.\#]|::)([^:\s]+)\z/.match(spec) or
+        m = /\A(#{CLASS_PATH_RE})(#{TYPEMARK_RE})(#{METHOD_NAME_RE})\z/o.match(spec) or
             raise ArgumentError, "wrong method spec: #{spec.inspect}"
         return *m.captures
       end
@@ -52,7 +62,7 @@ module BitClust
 
     def methodid2libid(id)
       c, t, m, lib = *split_method_id(id)
-      decodename_url(lib)
+      lib
     end
 
     def methodid2classid(id)
@@ -70,14 +80,17 @@ module BitClust
       decodename_url(m)
     end
 
+    MID = /\A#{METHOD_NAME_RE}\z/
+
     def methodname?(str)
-      true   # FIXME
+      (MID =~ str) ? true : false
     end
 
     def build_method_id(libid, cid, t, name)
       "#{cid}/#{typename2char(t)}.#{encodename_url(name)}.#{libid}"
     end
 
+    # private module function
     def split_method_id(id)
       return *id.split(%r<[/\.]>, 4)
     end
@@ -164,7 +177,7 @@ module BitClust
 
     def encodename_fs(str)
       str.gsub(/[^a-z0-9_]/n) {|ch|
-        (/[A-Z]/n === ch) ? "-#{ch}" : sprintf('=%02x', ch[0].ord)
+        (/[A-Z]/n =~ ch) ? "-#{ch}" : sprintf('=%02x', ch[0].ord)
       }.downcase
     end
 

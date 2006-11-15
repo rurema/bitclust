@@ -1,3 +1,22 @@
+Wed Nov 15 14:51:01 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: raise all exception on debugging.
+
+	* lib/bitclust/methodnamepattern.rb: supress Ruby 1.9 warning.
+
+	* lib/bitclust/methodid.rb (MethodID#match?): optimized.
+
+	* lib/bitclust/nameutils.rb: define name regexps.
+
+	* lib/bitclust/nameutils.rb (methodid2libid): should not decode
+	  library ID.  [ruby-reference-manual:205]
+
+	* lib/bitclust/rrdparser.rb: use regexps defined in nameutils.rb.
+
+	* test: new directory.
+
+	* test/test_nameutils.rb: new test.
+
 Wed Nov 15 12:20:45 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/nameutils.rb (libname?): should allow '-'.

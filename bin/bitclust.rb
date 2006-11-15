@@ -85,6 +85,7 @@ Global Options:
   db = BitClust::Database.new(prefix)
   cmd.exec db, ARGV
 rescue BitClust::WriterError => err
+  raise if $DEBUG
   $stderr.puts err.message
   exit 1
 end

@@ -65,8 +65,8 @@ module BitClust
     # internal use only
     def _search_methods(db)
       if @type == '$'
-        c = db.fetch_class('Kernel')
-        return SearchResult.new(db, self, [c], search_svars(c))
+        c0 = db.fetch_class('Kernel')
+        return SearchResult.new(db, self, [c0], search_svars(c0))
       end
       recordclass = SearchResult::Record
       case
