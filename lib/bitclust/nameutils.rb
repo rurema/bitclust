@@ -7,7 +7,7 @@ module BitClust
     module_function
 
     def libname?(str)
-      /\A\w+(\/\w+)*\z/ =~ str
+      %r<\A[\w\-]+(/[\w\-]+)*\z> =~ str
     end
 
     def libname2id(name)
