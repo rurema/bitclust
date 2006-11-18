@@ -1,3 +1,9 @@
+Sat Nov 18 18:55:23 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: surround an error message by <span>.
+
+	* theme/default/style.css: show error message by red, bold font.
+
 Sat Nov 18 18:48:02 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb (blacket_link): protect compile

@@ -227,7 +227,7 @@ module BitClust
     def protect(src)
       yield
     rescue => err
-      "[[compile_error: #{escape_html(err.message)}: #{escape_html(src)}]]"
+      %Q(<span class="compileerror">[[compile error: #{escape_html(err.message)}: #{escape_html(src)}]]</span>)
     end
 
     def direct_url(url)

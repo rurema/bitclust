@@ -108,6 +108,11 @@ span.kindinfo {
     margin-left: 8em;
 }
 
+span.compileerror {
+    color: red;
+    font-weight: bold;
+}
+
 pre {
     line-height: 1.1;
     background-color: #eee;
