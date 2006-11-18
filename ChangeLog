@@ -1,3 +1,8 @@
+Sat Nov 18 18:48:02 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb (blacket_link): protect compile
+	  errors caused by wrong description.
+
 Wed Nov 15 14:53:35 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* test/test_nameutils.rb (test_methodid2libid): should not decode

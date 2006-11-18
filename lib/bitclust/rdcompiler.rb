@@ -210,9 +210,9 @@ module BitClust
     def bracket_link(link)
       type, arg = link.split(':', 2)
       case type
-      when 'lib'     then library_link(arg)
-      when 'c'       then class_link(arg)
-      when 'm'       then method_link(complete_spec(arg))
+      when 'lib'     then protect(link) { library_link(arg) }
+      when 'c'       then protect(link) { class_link(arg) }
+      when 'm'       then protect(link) { method_link(complete_spec(arg)) }
       when 'url'     then direct_url(arg)
       when 'man'     then man_link(arg)
       when 'rfc', 'RFC'
@@ -222,6 +222,12 @@ module BitClust
       else
         "[[#{escape_html(link)}]]"
       end
+    end
+
+    def protect(src)
+      yield
+    rescue => err
+      "[[compile_error: #{escape_html(err.message)}: #{escape_html(src)}]]"
     end
 
     def direct_url(url)
