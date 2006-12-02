@@ -595,7 +595,7 @@ module BitClust
       s.skip(/\s+/)
       if t = s.scan(/\w+/)
         unless @params.key?(t)
-          scan_error "unknown preproc variable: #{t.inspect}"
+          scan_error "database property `#{t}' not exist"
         end
         @params[t]
       elsif t = s.scan(/".*?"/)

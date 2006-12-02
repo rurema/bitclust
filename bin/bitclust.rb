@@ -119,6 +119,8 @@ class InitCommand < Subcommand
     }
   end
 
+  STANDARD_PROPERTIES = %w( encoding version )
+
   def exec(db, argv)
     db.init
     db.transaction {
@@ -127,6 +129,19 @@ class InitCommand < Subcommand
         db.propset k, v
       end
     }
+    fail = false
+    STANDARD_PROPERTIES.each do |key|
+      unless db.propget(key)
+        $stderr.puts "#{File.basename($0, '.*')}: warning: standard property `#{key}' not given"
+        fail = true
+      end
+    end
+    if fail
+      $stderr.puts "---- Current Properties ----"
+      db.properties.each do |key, value|
+        $stderr.puts "#{key}=#{value}"
+      end
+    end
   end
 
 end
