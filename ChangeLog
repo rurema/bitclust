@@ -1,3 +1,7 @@
+Sat Dec  2 21:40:48 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/statrefm.rb: new file.
+
 Sat Dec  2 20:41:05 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb (InitCommand#exec): warn if standard properties
