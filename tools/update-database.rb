@@ -59,7 +59,7 @@ def main
   begin
     update_database "#{cwd}/var/#{version}", "#{cwd}/src", version
     clear_error
-  rescue BitClust::Error => err
+  rescue BitClust::Error, Errno::ENOENT => err
     reporter.report_error err if new_error?(err)
     save_error err
   end

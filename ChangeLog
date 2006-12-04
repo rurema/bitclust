@@ -1,3 +1,7 @@
+Mon Dec  4 21:56:40 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/update-database.rb (main): report Errno::ENOENT.
+
 Sat Dec  2 21:40:48 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/statrefm.rb: new file.
