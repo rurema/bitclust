@@ -50,7 +50,7 @@ end
 def ranking_table(entries)
   h = Hash.new(0)
   entries.each do |ent|
-    h[ent.owner] += yield(ent)
+    h[ent.done? ? ent.owner : nil] += yield(ent)
   end
   h.to_a.sort_by {|owner, n| -n }
 end
