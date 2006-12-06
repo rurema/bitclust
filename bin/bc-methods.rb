@@ -11,6 +11,7 @@ require 'pathname'
 bindir = Pathname.new(__FILE__).realpath.dirname
 $LOAD_PATH.unshift((bindir + '../lib').realpath)
 
+require 'bitclust'
 require 'bitclust/crossrubyutils'
 require 'optparse'
 
@@ -19,6 +20,8 @@ include BitClust::CrossRubyUtils
 def main
   @requires = []
   @verbose = false
+  mode = :list
+  target = nil
   opts = OptionParser.new
   opts.banner = "Usage: #{File.basename($0, '.*')} [-r<lib>] <classname>"
   opts.on('-r LIB', 'Requires library LIB') {|lib|
@@ -26,6 +29,10 @@ def main
   }
   opts.on('-v', '--verbose', "Prints each ruby's version") {
     @verbose = true
+  }
+  opts.on('--diff=RDFILE', '') {|path|
+    mode = :diff
+    target = path
   }
   opts.on('--help', 'Prints this message and quit.') {
     puts opts.help
@@ -43,7 +50,24 @@ def main
     exit 1
   end
   classname = ARGV[0]
-  print_crossruby_table {|ruby| defined_methods(ruby, classname) }
+
+  case mode
+  when :list
+    print_crossruby_table {|ruby| defined_methods(ruby, classname) }
+  when :diff
+    _, table = build_crossruby_table {|ruby| defined_methods(ruby, classname) }
+    lib = BitClust::RRDParser.parse_stdlib_file(target)
+    c = lib.fetch_class(classname)
+    list = c.entries.map {|ent| ent.labels }.flatten
+    (table.keys - list).sort.each do |name|
+      puts "-#{name}"
+    end
+    (list - table.keys).sort.each do |name|
+      puts "+#{name}"
+    end
+  else
+    raise "must not happen: #{mode.inspect}"
+  end
 end
 
 def crossrubyutils_sort_entries(ents)
