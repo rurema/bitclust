@@ -49,6 +49,8 @@ module BitClust
           olist
         when %r<\A//emlist\{>
           emlist
+        when /\A:\s/
+          dlist
         when /\A\s+\S/
           list
         else

@@ -1,3 +1,7 @@
+Tue Dec 19 08:27:14 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: allow <dl> out of method list.
+
 Tue Dec 19 08:26:40 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bc-methods.rb: expand module functions to instance/singleton
