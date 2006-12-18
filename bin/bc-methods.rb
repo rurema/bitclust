@@ -58,7 +58,7 @@ def main
     _, table = build_crossruby_table {|ruby| defined_methods(ruby, classname) }
     lib = BitClust::RRDParser.parse_stdlib_file(target)
     c = lib.fetch_class(classname)
-    list = c.entries.map {|ent| ent.labels }.flatten
+    list = c.entries.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
     (table.keys - list).sort.each do |name|
       puts "-#{name}"
     end
@@ -67,6 +67,14 @@ def main
     end
   else
     raise "must not happen: #{mode.inspect}"
+  end
+end
+
+def expand_mf(n)
+  if /\.\#/ =~ n
+    [n.sub(/\.\#/, '.'), n.sub(/\.\#/, '#')]
+  else
+    n
   end
 end
 
