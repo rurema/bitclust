@@ -84,6 +84,8 @@ class Entry
 
   def size
     File.size(path())
+  rescue Error
+    0
   end
 
   def path

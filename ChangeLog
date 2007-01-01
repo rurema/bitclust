@@ -1,3 +1,7 @@
+Tue Jan  2 06:09:00 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/statrefm.rb: ignore not found files.
+
 Tue Dec 19 08:27:14 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: allow <dl> out of method list.
