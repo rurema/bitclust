@@ -219,26 +219,31 @@ module BitClust
       src = (header + body).join('')
       src.location = header[0].location
       sigs = header.map {|line| method_signature(line) }
-      check_chunk_signatures sigs, header[0]
+      mainsig = check_chunk_signatures(sigs, header[0])
       names = sigs.map {|s| s.name }.uniq.sort
-      Chunk.new((@context.signature || sigs.first), names, src)
+      Chunk.new(mainsig, names, src)
     end
 
     def check_chunk_signatures(sigs, line)
-      if cxt = @context.signature
-        unless cxt.fully_qualified?
-          parse_error "unqualified signature (#{cxt})", line
-        end
+      cxt = @context.signature
+      if cxt and cxt.fully_qualified?
         if _sig = sigs.detect {|sig| not cxt.compatible?(sig) }
           parse_error "incompatible signature: #{cxt} <-> #{_sig}", line
         end
+        cxt
       else
         unless sigs[0].fully_qualified?
           parse_error "unqualified signature (#{sigs[0]})", line
         end
+        if cxt
+          unless sigs[0].compatible?(cxt)
+            parse_error "incompatible signature: #{cxt} <-> #{sigs[0]}", line
+          end
+        end
         unless sigs.all? {|s| sigs[0].same_type?(s) }
           parse_error "alias entries have multiple class/type", line
         end
+        sigs.first
       end
     end
 

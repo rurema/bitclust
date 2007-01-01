@@ -1,3 +1,9 @@
+Tue Jan  2 06:10:17 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb (check_chunk_signatures): allow not
+	  qualified signature if method's signature is qualified and
+	  compatible.
+
 Tue Jan  2 06:09:00 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/statrefm.rb: ignore not found files.
