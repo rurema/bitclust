@@ -127,9 +127,7 @@ module BitClust
           parse_error "superclass given for object", line  if superclass
           @context.define_object name
           f.skip_blank_lines
-          f.while_match(/\Aextend\s/) do |ex|
-            @context.extend ex.split[1]
-          end
+          read_extends f
           f.skip_blank_lines
           @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
           @context.visibility = :public
@@ -149,18 +147,38 @@ module BitClust
 
     def read_reopen_body(f)
       f.skip_blank_lines
+      read_extends f, true
+      read_includes f, true
+      f.skip_blank_lines
       read_level2_blocks f
     end
 
     def read_class_body(f)
       f.skip_blank_lines
-      f.while_match(/\Ainclude\s/) do |line|
-        @context.include line.split[1]
-      end
+      read_extends f
+      read_includes f
       f.skip_blank_lines
       @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       read_level2_blocks f
     end
+
+    def read_includes(f, reopen = false)
+      f.while_match(/\Ainclude\s/) do |line|
+tty_warn "#{line.location}: dynamic include is not implemented yet" if reopen
+        @context.include line.split[1]          unless reopen # FIXME
+      end
+    end
+
+    def read_extends(f, reopen = false)
+      f.while_match(/\Aextend\s/) do |line|
+tty_warn "#{line.location}: dynamic extend is not implemented yet" if reopen
+        @context.extend line.split[1]           unless reopen # FIXME
+      end
+    end
+
+def tty_warn(msg)
+  $stderr.puts msg if $stderr.tty?
+end
 
     def read_level2_blocks(f)
       read_entries f

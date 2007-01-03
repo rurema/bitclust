@@ -1,3 +1,11 @@
+Wed Jan  3 10:18:19 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb (read_classes): allow dynamic include
+	  (not implemented yet). [ruby-reference-manual:240]
+
+	* lib/bitclust/rrdparser.rb (read_classes): allow extend for
+	  modules/classes. [ruby-reference-manual:244]
+
 Tue Jan  2 06:10:17 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (check_chunk_signatures): allow not
