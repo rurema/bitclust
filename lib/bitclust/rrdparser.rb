@@ -1,7 +1,7 @@
 #
 # bitclust/rrdparser.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -101,7 +101,7 @@ module BitClust
 
     def do_parse(f)
       f.skip_blank_lines
-      f.while_match(/\Arequire /) do |line|
+      f.while_match(/\Arequire\s/) do |line|
         @context.require line.split[1]
       end
       f.skip_blank_lines
@@ -126,13 +126,7 @@ module BitClust
         when 'object'
           parse_error "superclass given for object", line  if superclass
           @context.define_object name
-          f.skip_blank_lines
-          read_extends f
-          f.skip_blank_lines
-          @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
-          @context.visibility = :public
-          @context.type = :singleton_method
-          read_entries f
+          read_object_body f
         when 'reopen'
           @context.reopen_class name
           read_reopen_body f
@@ -145,6 +139,15 @@ module BitClust
       end
     end
 
+    def read_class_body(f)
+      f.skip_blank_lines
+      read_extends f
+      read_includes f
+      f.skip_blank_lines
+      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
+      read_level2_blocks f
+    end
+
     def read_reopen_body(f)
       f.skip_blank_lines
       read_extends f, true
@@ -153,13 +156,14 @@ module BitClust
       read_level2_blocks f
     end
 
-    def read_class_body(f)
+    def read_object_body(f)
       f.skip_blank_lines
       read_extends f
-      read_includes f
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
-      read_level2_blocks f
+      @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
+      @context.visibility = :public
+      @context.type = :singleton_method
+      read_entries f
     end
 
     def read_includes(f, reopen = false)
