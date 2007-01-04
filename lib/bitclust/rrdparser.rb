@@ -105,16 +105,23 @@ module BitClust
         @context.require line.split[1]
       end
       f.skip_blank_lines
-      @context.library.source = f.break(/\A=[^=]/).join('').rstrip
+      @context.library.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       read_classes f
-      unless f.eof?
-        parse_error "unexpected line", f.gets
+      if line = f.gets   # error
+        case line
+        when /\A==[^=]/
+          parse_error "met level-2 header in library document; maybe you forgot level-1 header", line
+        when /\A---/
+          parse_error "met bare method entry in library document; maybe you forgot reopen/redefine level-1 header", line
+        else
+          parse_error "unexpected line in library document", line
+        end
       end
     end
 
     def read_classes(f)
       f.while_match(/\A=[^=]/) do |line|
-        type, name, _, superclass, = *line.sub(/\A=/, '').split
+        type, name, superclass = *parse_level1_header(line)
         case type
         when 'class'
           @context.define_class name, (superclass || 'Object')
@@ -140,6 +147,22 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
           parse_error "wrong level-1 header", line
         end
       end
+    end
+
+    def parse_level1_header(line)
+      m = /\A(\S+)\s*([^\s<]+)(?:\s*<\s*(\S+))?\z/.match(line.sub(/\A=/, '').strip)
+      unless m
+        parse_error "level-1 header syntax error", line
+      end
+      return m[1], isconst(m[2], line), isconst(m[3], line)
+    end
+
+    def isconst(name, line)
+      return nil unless name
+      unless /\A#{CLASS_PATH_RE}\z/o =~ name
+        raise ParseError, "#{line.location}: not a constant: #{name.inspect}"
+      end
+      name
     end
 
     def read_class_body(f)
@@ -252,23 +275,32 @@ end
     def check_chunk_signatures(sigs, line)
       cxt = @context.signature
       if cxt and cxt.fully_qualified?
-        if _sig = sigs.detect {|sig| not cxt.compatible?(sig) }
-          parse_error "incompatible signature: #{cxt} <-> #{_sig}", line
+        if bad = sigs.detect {|sig| not cxt.compatible?(sig) }
+          parse_error "signature crash: `#{cxt}' given by level-1/2 header but method entry has a signature `#{bad}'; remove level-1/2 header or modify method entry", line
         end
         cxt
       else
-        unless sigs[0].fully_qualified?
-          parse_error "unqualified signature (#{sigs[0]})", line
-        end
-        if cxt
-          unless sigs[0].compatible?(cxt)
-            parse_error "incompatible signature: #{cxt} <-> #{sigs[0]}", line
+        sig = sigs[0]
+        unless sig.fully_qualified?
+          if not cxt
+            parse_error "missing class and type; give full signature for method entry", line
+          elsif not cxt.type
+            parse_error "missing type: write level-2 header", line
+          elsif not cxt.klass
+            raise "must not happen: type given but class not exist: context=#{cxt}, entry=#{sig}"
+          else
+            raise "must not happen: context=#{cxt}, entry=#{sig}"
           end
         end
-        unless sigs.all? {|s| sigs[0].same_type?(s) }
-          parse_error "alias entries have multiple class/type", line
+        if cxt
+          unless sig.compatible?(cxt)
+            parse_error "signature crash: #{cxt} given by level-1/2 but method entry has a signature #{sig}; remove level-1/2 header or modify method entry", line
+          end
         end
-        sigs.first
+        unless sigs.all? {|s| sig.same_type?(s) }
+          parse_error "alias entries have different class/type", line
+        end
+        sig
       end
     end
 
@@ -463,7 +495,7 @@ end
       end
 
       def fully_qualified?
-        not not (@klass and @type)
+        (@klass and @type) ? true : false
       end
     end
   

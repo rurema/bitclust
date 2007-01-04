@@ -1,3 +1,10 @@
+Fri Jan  5 08:47:50 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: produce better error message.
+
+	* lib/bitclust/rrdparser.rb (read_classes): parse level-1 header
+	  more strictly.
+
 Fri Jan  5 07:12:14 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb (read_classes): allow superclass for
