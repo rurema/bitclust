@@ -1,3 +1,8 @@
+Fri Jan  5 07:12:14 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb (read_classes): allow superclass for
+	  level-1 object header.
+
 Wed Jan  3 17:12:19 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb: refactoring: extract method:

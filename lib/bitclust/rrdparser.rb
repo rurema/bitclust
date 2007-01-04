@@ -124,7 +124,10 @@ module BitClust
           @context.define_module name
           read_class_body f
         when 'object'
-          parse_error "superclass given for object", line  if superclass
+          if superclass
+            # FIXME
+tty_warn "#{line.location}: singleton object class not implemented yet"
+          end
           @context.define_object name
           read_object_body f
         when 'reopen'
