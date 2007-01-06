@@ -166,6 +166,7 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
     end
 
     def read_class_body(f)
+      read_aliases f
       f.skip_blank_lines
       read_extends f
       read_includes f
@@ -183,6 +184,7 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
     end
 
     def read_object_body(f)
+      read_aliases f
       f.skip_blank_lines
       read_extends f
       f.skip_blank_lines
@@ -190,6 +192,13 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
       @context.visibility = :public
       @context.type = :singleton_method
       read_entries f
+    end
+
+    def read_aliases(f)
+      f.while_match(/\Aalias\s/) do |line|
+tty_warn "#{line.location}: class alias is not implemented yet"
+        # FIXME
+      end
     end
 
     def read_includes(f, reopen = false)

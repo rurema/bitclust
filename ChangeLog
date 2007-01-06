@@ -1,3 +1,8 @@
+Sat Jan  6 20:00:01 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rrdparser.rb: allow to write class alias (support
+	  is still incomplete).
+
 Fri Jan  5 08:47:50 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rrdparser.rb: produce better error message.
