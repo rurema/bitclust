@@ -123,7 +123,7 @@ module BitClust
       @properties ||=
           begin
             h = load_properties('properties')
-            h.delete 'source' if h['source'].strip.empty?
+            h.delete 'source' if h['source'] and h['source'].strip.empty?
             h
           end
     end
