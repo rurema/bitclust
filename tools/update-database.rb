@@ -53,9 +53,10 @@ def main
     $stderr.puts "wrong number of argument (expected 1)"
     exit 1
   end
-  cwd = ARGV[0]
   reporter = SMTPReporter.new(:host => host, :port => port,
                               :from => from, :to   => to)
+  cwd = ARGV[0]
+  Dir.chdir cwd
   begin
     update_database "#{cwd}/var/#{version}", "#{cwd}/src", version
     clear_error

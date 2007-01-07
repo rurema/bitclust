@@ -1,3 +1,7 @@
+Sun Jan  7 16:47:14 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/update-database.rb: chdir to document directory.
+
 Sun Jan  7 14:45:04 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb (dlist): <dl></dl> location was wrong
