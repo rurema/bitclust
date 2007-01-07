@@ -1,3 +1,9 @@
+Sun Jan  7 14:45:04 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb (dlist): <dl></dl> location was wrong
+	  (This patch is contributed by sheepman).
+	  [ruby-reference-manual:289]
+
 Sun Jan  7 14:43:49 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb (properties): h['source'] may become

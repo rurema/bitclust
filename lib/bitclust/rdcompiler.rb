@@ -138,15 +138,17 @@ module BitClust
 
     def dlist
       line '<dl>'
-      @f.while_match(/\A:/) do |line|
-        line dt(compile_text(line.sub(/\A:/, '').strip))
+      while @f.next? and /\A:/ =~ @f.peek
+        @f.while_match(/\A:/) do |line|
+          line dt(compile_text(line.sub(/\A:/, '').strip))
+        end
+        line '<dd>'
+        # FIXME: allow nested pre??
+        @f.while_match(/\A(?:\s|\z)/) do |line|
+          line compile_text(line.strip)
+        end
+        line '</dd>'
       end
-      line '<dd>'
-# FIXME: allow nested pre??
-      @f.while_match(/\A(?:\s|\z)/) do |line|
-        line compile_text(line.strip)
-      end
-      line '</dd>'
       line '</dl>'
     end
 
