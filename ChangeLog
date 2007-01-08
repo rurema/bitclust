@@ -1,3 +1,16 @@
+Tue Jan  9 00:21:02 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb: show program name in error message.
+
+	* lib/bitclust/database.rb (transaction): check looped ancestors,
+	  requires. [ruby-reference-manual:305]
+
+	* lib/bitclust/entry.rb: ditto.
+
+	* lib/bitclust/exception.rb: new exception InvalidLink.
+
+	* lib/bitclust/exception.rb: new exception InvalidAncestor.
+
 Sun Jan  7 16:47:14 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/update-database.rb: chdir to document directory.

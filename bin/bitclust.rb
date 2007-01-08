@@ -86,12 +86,11 @@ Global Options:
   cmd.exec db, ARGV
 rescue BitClust::WriterError => err
   raise if $DEBUG
-  $stderr.puts err.message
-  exit 1
+  error err.message
 end
 
 def error(msg)
-  $stderr.puts "#{File.basename($0, '.*')}: #{msg}"
+  $stderr.puts "#{File.basename($0, '.*')}: error: #{msg}"
   exit 1
 end
 

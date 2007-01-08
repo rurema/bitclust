@@ -198,6 +198,12 @@ module BitClust
       "#{type_id()}/#{id()}"
     end
 
+    def path_string(path)
+      i = path.index(name())
+      (path[i..-1] + [name()]).join(' -> ')
+    end
+    private :path_string
+
   end
 
 
@@ -215,9 +221,11 @@ module BitClust
       if saved?
         @classmap = nil
         @methodmap = nil
+        @link_checked = true
       else
         @classmap = {}
         @methodmap = {}
+        @link_checked = false
       end
       init_properties
     end
@@ -255,6 +263,19 @@ module BitClust
 
     def inspect
       "#<library #{@id}>"
+    end
+
+    def check_link(path = [])
+      return if @link_checked
+      if path.include?(name())
+        raise InvalidLink, "looped require: #{path_string(path)}"
+      end
+      path.push name()
+      requires().each do |lib|
+        lib.check_link path
+      end
+      path.pop
+      @link_checked = true
     end
 
     def require(lib)
@@ -346,7 +367,15 @@ module BitClust
     def initialize(db, id)
       super db
       @id = id
-      @entries = saved? ? nil : []
+      if saved?
+        @entries = nil
+        @ancestors_checked = true
+        @s_ancestors_checked = true
+      else
+        @entries = []
+        @ancestors_checked = false
+        @s_ancestors_checked = false
+      end
       init_properties
     end
 
@@ -422,6 +451,10 @@ module BitClust
       "\#<#{type()} #{@id}>"
     end
 
+    def dummy?
+      not type()
+    end
+
     def class?
       type() == :class
     end
@@ -440,6 +473,46 @@ module BitClust
 
     def extend(m)
       extended().push m
+    end
+
+    def check_ancestor_type
+      c = superclass()
+      if c and not c.class? and not c.dummy?
+        raise InvalidAncestor, "#{name()} inherits #{c.name} but it is a #{c.type} (class expected)"
+      end
+      included().each do |c|
+        unless c.module? or c.dummy?
+          raise InvalidAncestor, "#{name()} includes #{c.name} but it is a #{c.type} (module expected)"
+        end
+      end
+      extended().each do |c|
+        unless c.module? or c.dummy?
+          raise InvalidAncestor, "#{name()} extends #{c.name} but it is a #{c.type} (module expected)"
+        end
+      end
+    end
+
+    def check_ancestors_link(path = [])
+      return if @ancestors_checked
+      if path.include?(name())
+        raise InvalidLink, "ancestor link looped: #{path_string(path)}"
+      end
+      ([superclass()] + included()).compact.each do |c|
+        path.push name()
+        c.check_ancestors_link path
+        path.pop
+      end
+      @ancestors_checked = true
+    end
+
+    def check_singleton_ancestors_link(path = [])
+      return if @s_ancestors_checked
+      extended().each do |c|
+        path.push name()
+        c.check_singleton_ancestors_link path
+        path.pop
+      end
+      @s_ancestors_checked = true
     end
 
     def ancestors
@@ -620,15 +693,9 @@ module BitClust
 
     def makemmap(typechar, inherited_modules, ents)
       s = superclass()
-      map = s ? s.__send("_#{typechar}map").dup : {}
-      if typechar == 'c'
-        inherited_modules.each do |mod|
-          map.update mod._cmap
-        end
-      else
-        inherited_modules.each do |mod|
-          map.update mod._imap
-        end
+      map = s ? s.__send__("_#{typechar}map").dup : {}
+      inherited_modules.each do |mod|
+        map.update mod.__send__("_#{typechar == 'c' ? 'c' : 'i'}map")
       end
       defined, undefined = *ents.partition {|m| m.defined? }
       (undefined + defined).each do |m|

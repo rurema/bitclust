@@ -15,6 +15,8 @@ module BitClust
   class ScanError               < DocumentError; end
   class ParseError              < DocumentError; end
   class WrongInclude            < DocumentError; end
+  class InvalidLink             < DocumentError; end
+  class InvalidAncestor         < DocumentError; end
   class UserError               < Error; end
   class InvalidDatabase         < UserError; end
   class InvalidKey              < UserError; end

@@ -34,8 +34,9 @@ module BitClust
       @classmap = nil
       @in_transaction = false
       @properties_dirty = false
-      @dirty_entries = {}
+      @dirty_libraries = {}
       @dirty_classes = {}
+      @dirty_methods = {}
     end
 
     def dummy?
@@ -63,15 +64,21 @@ module BitClust
         save_properties 'properties', @properties
         @properties_dirty = false
       end
-      unless @dirty_classes.empty? and @dirty_entries.empty?
-        @dirty_classes.each_key do |c|
-          c.clear_cache
+      if dirty?
+        each_dirty_library do |lib|
+          lib.check_link
         end
-        (@dirty_classes.keys + @dirty_entries.keys).each do |x|
+        each_dirty_class do |c|
+          c.clear_cache
+          c.check_ancestor_type
+        end
+        each_dirty_class do |c|
+          c.check_ancestors_link
+        end
+        each_dirty_entry do |x|
           x.save
         end
-        @dirty_entries.clear
-        @dirty_classes.clear
+        clear_dirty
         save_method_index
       end
     ensure
@@ -86,15 +93,46 @@ module BitClust
     end
     private :check_transaction
 
-    def dirty(x)
-      @dirty_entries[x] = true
+    def dirty?
+      not @dirty_libraries.empty? or
+      not @dirty_classes.empty? or
+      not @dirty_methods.empty?
     end
 
-    alias dirty_library dirty
-    alias dirty_method  dirty
+    def each_dirty_entry(&block)
+      (@dirty_libraries.keys +
+       @dirty_classes.keys +
+       @dirty_methods.keys).each(&block)
+    end
+
+    def dirty_library(lib)
+      @dirty_libraries[lib] = true
+    end
+
+    def each_dirty_library(&block)
+      @dirty_libraries.each_key(&block)
+    end
 
     def dirty_class(c)
       @dirty_classes[c] = true
+    end
+
+    def each_dirty_class(&block)
+      @dirty_classes.each_key(&block)
+    end
+
+    def dirty_method(m)
+      @dirty_methods[m] = true
+    end
+
+    def each_dirty_method(&block)
+      @dirty_methods.each_key(&block)
+    end
+
+    def clear_dirty
+      @dirty_libraries.clear
+      @dirty_classes.clear
+      @dirty_methods.clear
     end
 
     def update_by_stdlibtree(root)
