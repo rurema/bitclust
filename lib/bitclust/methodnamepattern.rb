@@ -71,9 +71,16 @@ module BitClust
       recordclass = SearchResult::Record
       case
       when (@klass and @method)
-        cs = select_classes(db.classes)
-        return SearchResult.empty(db, self) if cs.empty?
-        names = expand_name_wide(db._method_index.keys, @method, @mrecache)
+#t0=Time.now
+        mindex = db._method_index
+        names = expand_name_wide(mindex.keys, @method, @mrecache)
+        return SearchResult.empty(db, self) if names.empty?
+#t1=Time.now
+        cnames = expand_name_narrow(mnames2cnames(db, mindex, names),
+                                    @klass, @crecache)
+        return SearchResult.empty(db, self) if cnames.empty?
+        cs = cnames.map {|n| db.fetch_class(n) }.uniq
+#t2=Time.now
         if @type
           records = cs.map {|c| search_methods_in(c, @type, names) }.flatten
         else
@@ -82,6 +89,10 @@ module BitClust
             break unless records.empty?
           end
         end
+#t3=Time.now
+#$stderr.puts "method expand: #{"%.3f" % (t1 - t0)}"
+#$stderr.puts "class  expand: #{"%.3f" % (t2 - t1)}"
+#$stderr.puts "type   expand: #{"%.3f" % (t3 - t2)}"
         SearchResult.new(db, self, cs, unify(squeeze(records, @method)))
       when @klass
         cs = select_classes(db.classes)
@@ -96,16 +107,17 @@ module BitClust
       when @method
         mindex = db._method_index
         names = expand_name_narrow(mindex.keys, @method, @mrecache)
-        classes = names.map {|name| mindex[name] }.flatten.uniq
+        cs = names.map {|n| mindex[n] }.flatten.uniq.map {|n| db.fetch_class_id(n) }
         records = names.map {|name|
           spec = MethodSpec.new(nil, @type, name)
-          mindex[name].map {|c|
+          mindex[name].map {|cid|
+            c = db.fetch_class_id(cid)
             c.get_methods(spec).map {|m|
               recordclass.new(MethodSpec.new(c.name, m.typemark, name), m.spec, m)
             }
           }
         }.flatten
-        SearchResult.new(db, self, classes, records)
+        SearchResult.new(db, self, cs, records)
       else
         SearchResult.new(db, self, db.classes,
             db.methods.map {|m| s = m.spec; recordclass.new(s, s, m) })
@@ -113,6 +125,12 @@ module BitClust
     end
 
     private
+
+    def mnames2cnames(db, mindex, names)
+      names.map {|n|
+        mindex[n].map {|cid| db._expand_class_id(cid) }
+      }.flatten.uniq
+    end
 
     def search_svars(c)
       expand(c.special_variables, @method, @mrecache)\
@@ -169,7 +187,7 @@ module BitClust
       list
     end
 
-    # Case-ignore search.  Optimized for constant search.
+    # Case-insensitive search.  Optimized for constant search.
     def expand_ic(xs, pattern, cache)
       re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
       result1 = xs.select {|x| x.name_match?(re1) }
@@ -197,13 +215,13 @@ module BitClust
       result3
     end
 
-    # list up all candidates (no squeezing)
+    # list up all matched items (without squeezing)
     def expand_name_wide(names, pattern, cache)
       re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
       names.select {|name| re1 =~ name }
     end
 
-    # list up candidates (already squeezed)
+    # list up matched items (with squeezing)
     def expand_name_narrow(names, pattern, cache)
       re1 = (cache[0] ||= /\A#{Regexp.quote(pattern)}/i)
       result1 = names.select {|name| re1 =~ name }

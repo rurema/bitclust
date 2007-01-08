@@ -31,7 +31,8 @@ module BitClust
       @prefix = prefix
       @properties = nil
       @librarymap = nil
-      @classmap = nil
+      @classmap = {}
+      @class_extent_loaded = false
       @in_transaction = false
       @properties_dirty = false
       @dirty_libraries = {}
@@ -80,6 +81,7 @@ module BitClust
           x.save
         end
         clear_dirty
+        save_class_index
         save_method_index
       end
     ensure
@@ -235,22 +237,34 @@ module BitClust
     end
 
     def classmap
-      @classmap ||= load_extent(ClassEntry)
+      return @classmap if @class_extent_loaded
+      id_extent(ClassEntry).each do |id|
+        @classmap[id] ||= ClassEntry.new(self, id)
+      end
+      @class_extent_loaded = true
+      @classmap
     end
     private :classmap
 
     def get_class(name)
-      id = classname2id(name)
-      classmap()[id] ||= ClassEntry.new(self, id)
+      if id = intern_classname(name)
+        (@classmap[id] ||= load_class(id)) or
+            raise "must not happen: #{name.inspect}, #{id.inspect}"
+      else
+        @classmap[id] = ent = ClassEntry.new(self, id)
+        ent
+      end
     end
 
     def fetch_class(name)
-      classmap()[classname2id(name)] or
+      id = intern_classname(name) or
           raise ClassNotFound, "class not found: #{name.inspect}"
+      @classmap[id] ||= load_class(id) or
+          raise "must not happen: #{name.inspect}, #{id.inspect}"
     end
 
     def fetch_class_id(id)
-      classmap()[id] or
+      @classmap[id] ||= load_class(id) or
           raise ClassNotFound, "class not found: #{id.inspect}"
     end
 
@@ -264,26 +278,36 @@ module BitClust
 
     def open_class(name)
       check_transaction
-      map = classmap()
       id = classname2id(name)
-      if c = map[id]
+      if c = (@classmap[id] ||= load_class(id))
         c.clear
       else
-        map[id] = c = ClassEntry.new(self, id)
+        @classmap[id] = c = ClassEntry.new(self, id)
       end
       yield c
       dirty_class c
       c
     end
 
+    def load_class(id)
+      return nil unless exist?("class/#{id}")
+      ClassEntry.new(self, id)
+    end
+    private :load_class
+
     def load_extent(entry_class)
       h = {}
-      entries(entry_class.type_id.to_s).each do |id|
+      id_extent(entry_class).each do |id|
         h[id] = entry_class.new(self, id)
       end
       h
     end
     private :load_extent
+
+    def id_extent(entry_class)
+      entries(entry_class.type_id.to_s)
+    end
+    private :id_extent
 
     #
     # Method Entry
@@ -337,11 +361,64 @@ module BitClust
       result
     end
 
+    #
+    # Search Index
+    #
+
+    def save_class_index
+      atomic_write_open('class/=index') {|f|
+        classes().each do |c|
+          #f.puts "#{c.id}\t#{c.names.join(' ')}"
+          f.puts "#{c.id}\t#{c.name}"
+        end
+      }
+    end
+    private :save_class_index
+
+    def intern_classname(name)
+      intern_table()[name]
+    end
+    private :intern_classname
+
+    def intern_table
+      @intern_table ||= 
+          begin
+            h = {}
+            classnametable().each do |id, names|
+              names.each do |n|
+                h[n] = id
+              end
+            end
+            h
+          end
+    end
+    private :intern_table
+
+    # internal use only
+    def _expand_class_id(id)
+      classnametable()[id]
+    end
+
+    def classnametable
+      @classnametable ||=
+          begin
+            h = {}
+            foreach_line('class/=index') do |line|
+              id, *names = *line.split
+              h[id] = names
+            end
+            h
+          rescue Errno::ENOENT
+            {}
+          end
+    end
+    private :classnametable
+
     def save_method_index
-      atomic_write_open('method/=mindex') {|f|
-        h = make_method_index()
-        h.keys.sort.each do |name|
-          f.puts "#{name}\t#{h[name].map {|c| c.id }.uniq.join(' ')}"
+      index = make_method_index()
+      atomic_write_open('method/=index') {|f|
+        index.keys.sort.each do |name|
+          f.puts "#{name}\t#{index[name].map {|c| c.id }.uniq.join(' ')}"
         end
       }
     end
@@ -372,10 +449,9 @@ module BitClust
       @method_index ||=
           begin
             h = {}
-            cmap = classmap()
-            foreach_line('method/=mindex') do |line|
-              name, *cids = *line.split
-              h[name] = cids.map {|cid| cmap[cid] }
+            foreach_line('method/=index') do |line|
+              name, *cnames = *line.split
+              h[name] = cnames
             end
             h
           end

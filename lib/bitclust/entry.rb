@@ -476,9 +476,9 @@ module BitClust
     end
 
     def check_ancestor_type
-      c = superclass()
-      if c and not c.class? and not c.dummy?
-        raise InvalidAncestor, "#{name()} inherits #{c.name} but it is a #{c.type} (class expected)"
+      s = superclass()
+      if s and not s.class? and not s.dummy?
+        raise InvalidAncestor, "#{name()} inherits #{s.name} but it is a #{s.type} (class expected)"
       end
       included().each do |c|
         unless c.module? or c.dummy?
