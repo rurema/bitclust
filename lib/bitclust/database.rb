@@ -65,9 +65,10 @@ module BitClust
         @properties_dirty = false
       end
       if dirty?
-        each_dirty_library do |lib|
-          lib.check_link
-        end
+        # FIXME: many require loops in tk
+        #each_dirty_library do |lib|
+        #  lib.check_link
+        #end
         each_dirty_class do |c|
           c.clear_cache
           c.check_ancestor_type

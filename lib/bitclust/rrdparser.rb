@@ -166,6 +166,7 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
     end
 
     def read_class_body(f)
+      f.skip_blank_lines
       read_aliases f
       f.skip_blank_lines
       read_extends f
@@ -184,6 +185,7 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
     end
 
     def read_object_body(f)
+      f.skip_blank_lines
       read_aliases f
       f.skip_blank_lines
       read_extends f
