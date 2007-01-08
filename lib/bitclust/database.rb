@@ -251,11 +251,12 @@ module BitClust
         load_class(id) or
             raise "must not happen: #{name.inspect}, #{id.inspect}"
       else
-        @classmap[id] = ent = ClassEntry.new(self, classname2id(name))
-        ent
+        id = classname2id(name)
+        @classmap[id] ||= ClassEntry.new(self, id)
       end
     end
 
+    # This method does not work in transaction.
     def fetch_class(name)
       id = intern_classname(name) or
           raise ClassNotFound, "class not found: #{name.inspect}"
@@ -279,7 +280,8 @@ module BitClust
     def open_class(name)
       check_transaction
       id = classname2id(name)
-      if c = load_class(id)
+      if exist?("class/#{id}")
+        c = load_class(id)
         c.clear
       else
         @classmap[id] = c = ClassEntry.new(self, id)
@@ -516,7 +518,6 @@ module BitClust
     end
 
     def atomic_write_open(rel, &block)
-      FileUtils.mkdir_p File.dirname(realpath(rel))
       tmppath = realpath(rel) + '.writing'
       File.open(tmppath, 'w', &block)
       File.rename tmppath, realpath(rel)

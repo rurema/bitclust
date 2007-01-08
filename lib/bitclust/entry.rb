@@ -147,8 +147,10 @@ module BitClust
     end
 
     def save
-      @db.makepath File.dirname(objpath())
       @db.save_properties objpath(), _get_properties()
+    rescue Errno::ENOENT
+      @db.makepath File.dirname(objpath())
+      retry
     end
 
     private
@@ -429,6 +431,7 @@ module BitClust
 
     def save
       super
+      @db.makepath "method/#{@id}"
       @db.atomic_write_open("method/#{@id}/=smap") {|f|
         write_mmap _smap(), f
       }

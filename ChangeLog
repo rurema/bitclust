@@ -1,3 +1,14 @@
+Tue Jan  9 04:07:54 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb (get_class, open_class): logic fix
+	  again.
+
+	* lib/bitclust/database.rb: reduce redundant system calls.
+
+	* lib/bitclust/entry.rb: ditto.
+
+	* lib/bitclust/rrdparser.rb: supress warning on class alias.
+
 Tue Jan  9 03:21:57 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb (get_class): id is nil in else clause.

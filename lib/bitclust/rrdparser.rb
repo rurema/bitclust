@@ -198,7 +198,7 @@ tty_warn "#{line.location}: singleton object class not implemented yet"
 
     def read_aliases(f)
       f.while_match(/\Aalias\s/) do |line|
-tty_warn "#{line.location}: class alias is not implemented yet"
+#tty_warn "#{line.location}: class alias is not implemented yet"
         # FIXME
       end
     end
