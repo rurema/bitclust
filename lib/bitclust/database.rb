@@ -248,10 +248,10 @@ module BitClust
 
     def get_class(name)
       if id = intern_classname(name)
-        (@classmap[id] ||= load_class(id)) or
+        load_class(id) or
             raise "must not happen: #{name.inspect}, #{id.inspect}"
       else
-        @classmap[id] = ent = ClassEntry.new(self, id)
+        @classmap[id] = ent = ClassEntry.new(self, classname2id(name))
         ent
       end
     end
@@ -259,12 +259,12 @@ module BitClust
     def fetch_class(name)
       id = intern_classname(name) or
           raise ClassNotFound, "class not found: #{name.inspect}"
-      @classmap[id] ||= load_class(id) or
+      load_class(id) or
           raise "must not happen: #{name.inspect}, #{id.inspect}"
     end
 
     def fetch_class_id(id)
-      @classmap[id] ||= load_class(id) or
+      load_class(id) or
           raise ClassNotFound, "class not found: #{id.inspect}"
     end
 
@@ -279,7 +279,7 @@ module BitClust
     def open_class(name)
       check_transaction
       id = classname2id(name)
-      if c = (@classmap[id] ||= load_class(id))
+      if c = load_class(id)
         c.clear
       else
         @classmap[id] = c = ClassEntry.new(self, id)
@@ -290,8 +290,11 @@ module BitClust
     end
 
     def load_class(id)
-      return nil unless exist?("class/#{id}")
-      ClassEntry.new(self, id)
+      @classmap[id] ||=
+          begin
+            return nil unless exist?("class/#{id}")
+            ClassEntry.new(self, id)
+          end
     end
     private :load_class
 
