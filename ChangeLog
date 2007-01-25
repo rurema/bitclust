@@ -1,3 +1,14 @@
+Fri Jan 26 06:39:46 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb (make_method_index): should be
+	  inheritance-sensitive. (refe failed to search inherited methods)
+
+	* lib/bitclust/database.rb (open_class): should overwrite existing
+	  object.
+
+	* lib/bitclust/database.rb (open_library): ditto (but not
+	  validated).
+
 Tue Jan  9 04:07:54 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb (get_class, open_class): logic fix

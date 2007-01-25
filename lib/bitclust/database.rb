@@ -222,7 +222,7 @@ module BitClust
       if lib = map[id]
         lib.clear unless reopen
       else
-        map[id] = lib = LibraryEntry.new(self, id)
+        lib = (map[id] ||= LibraryEntry.new(self, id))
       end
       dirty_library lib
       lib
@@ -284,7 +284,7 @@ module BitClust
         c = load_class(id)
         c.clear
       else
-        @classmap[id] = c = ClassEntry.new(self, id)
+        c = (@classmap[id] ||= ClassEntry.new(self, id))
       end
       yield c
       dirty_class c
@@ -423,7 +423,7 @@ module BitClust
       index = make_method_index()
       atomic_write_open('method/=index') {|f|
         index.keys.sort.each do |name|
-          f.puts "#{name}\t#{index[name].map {|c| c.id }.uniq.join(' ')}"
+          f.puts "#{name}\t#{index[name].join(' ')}"
         end
       }
     end
@@ -432,17 +432,8 @@ module BitClust
     def make_method_index
       h = {}
       classes().each do |c|
-        c.entries.each do |m|
-          m.names.each do |name|
-            (h[name] ||= []).push c
-          end
-        end
-      end
-      libraries().each do |lib|
-        lib.methods.each do |m|
-          m.names.each do |name|
-            (h[name] ||= []).push m.klass
-          end
+        (c._imap.keys + c._smap.keys + c._cmap.keys).uniq.each do |name|
+          (h[name] ||= []).push c.id
         end
       end
       h
