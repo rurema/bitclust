@@ -2,7 +2,7 @@
 #
 # bitclust.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -24,9 +24,14 @@ require 'find'
 require 'optparse'
 
 def main
-  Signal.trap(:PIPE) { exit 1 } rescue nil   # Win32 does not have SIGPIPE
-  Signal.trap(:INT) { exit 1 }
+  Signal.trap(:PIPE, 'IGNORE') rescue nil   # Win32 does not have SIGPIPE
+  Signal.trap(:INT) { exit 3 }
+  _main
+rescue Errno::EPIPE
+  exit 0
+end
 
+def _main
   prefix = nil
   parser = OptionParser.new
   parser.banner = <<-EndBanner
