@@ -1,3 +1,7 @@
+Tue Feb 20 09:44:39 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/bitclust.rb (main): just ignore SIGPIPE (and rescue EPIPE).
+
 Wed Feb  7 22:05:12 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* move bin/bc-*.rb and forall-ruby.rb to tools/.
