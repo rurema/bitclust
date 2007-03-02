@@ -1,3 +1,12 @@
+Sat Mar  3 00:16:46 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* tools/bc-tohtml.rb: new option --baseurl.
+
+	* tools/bc-tohtml.rb: pass base_url and default_encoding to a
+	  ScreenManager. [ruby-reference-manual:358]
+
+	* lib/bitclust/screen.rb: accept new option default_encoding.
+
 Tue Feb 20 09:44:39 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/bitclust.rb (main): just ignore SIGPIPE (and rescue EPIPE).

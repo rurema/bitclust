@@ -2,7 +2,7 @@
 #
 # bc-tohtml.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -24,10 +24,14 @@ require 'optparse'
 def main
   templatedir = srcdir_root() + 'template'
   target = nil
+  baseurl = '.'
   parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0, '.*')} rdfile"
   parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
     target = name
+  }
+  parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
+    baseurl = url
   }
   parser.on('--templatedir=PATH', 'Template directory') {|path|
     templatedir = path
@@ -51,8 +55,10 @@ def main
   lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0])
   entry = target ? lookup(lib, target) : lib
   manager = BitClust::ScreenManager.new(
-    :baseurl => 'http://example.com/',
-    :templatedir => templatedir)
+    :templatedir => templatedir,
+    :base_url => baseurl,
+    :cgi_url => baseurl,
+    :default_encoding => 'euc-jp')
   puts manager.entry_screen(entry).body
 rescue BitClust::WriterError => err
   $stderr.puts err.message

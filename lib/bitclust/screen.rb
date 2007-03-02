@@ -1,7 +1,7 @@
 #
 # bitclust/screen.rb
 #
-# Copyright (C) 2006 Minero Aoki
+# Copyright (C) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -18,6 +18,7 @@ module BitClust
   class ScreenManager
     def initialize(h)
       @template = TemplateRepository.new(h.delete(:templatedir))
+      @default_encoding = h.delete(:default_encoding)
       @urlmapper = URLMapper.new(h)
     end
 
@@ -48,7 +49,7 @@ module BitClust
     private
 
     def new_screen(c, *args)
-      c.new(@urlmapper, @template, *args)
+      c.new(@urlmapper, @template, @default_encoding, *args)
     end
   end
 
@@ -123,10 +124,6 @@ module BitClust
       @error = err
     end
 
-    def content_type
-      'text/html'
-    end
-
     def body
       <<-EndHTML
 <html>
@@ -144,16 +141,25 @@ module BitClust
   class TemplateScreen < Screen
     include HTMLUtils
 
-    def initialize(urlmapper, template_repository)
+    def initialize(urlmapper, template_repository, default_encoding)
       @urlmapper = urlmapper
       @template_repository = template_repository
+      @default_encoding = default_encoding
     end
 
     def content_type
       "text/html; charset=#{encoding()}"
     end
 
+    def encoding
+      default_encoding()
+    end
+
     private
+
+    def default_encoding
+      @default_encoding || 'us-ascii'
+    end
 
     def run_template(id)
       erb = ERB.new(@template_repository.load(id))
@@ -205,13 +211,13 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
-    def initialize(u, t, entries)
-      super u, t
+    def initialize(u, t, e, entries)
+      super u, t, e
       @entries = entries
     end
 
     def encoding
-      return 'us-ascii' if @entries.empty?
+      return default_encoding() if @entries.empty?
       @entries.first.encoding
     end
 
@@ -219,13 +225,13 @@ module BitClust
   end
 
   class EntryBoundScreen < TemplateScreen
-    def initialize(u, t, entry)
-      super u, t
+    def initialize(u, t, e, entry)
+      super u, t, e
       @entry = entry
     end
 
     def encoding
-      @entry.encoding || 'us-ascii'
+      @entry.encoding || default_encoding()
     end
 
     alias charset encoding
