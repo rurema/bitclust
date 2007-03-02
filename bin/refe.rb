@@ -3,9 +3,14 @@
 require 'bitclust'
 
 def main
-  Signal.trap(:PIPE) { exit 1 } rescue nil  # Win32 does not have SIGPIPE
+  Signal.trap(:PIPE, 'IGNORE') rescue nil  # Win32 does not have SIGPIPE
   Signal.trap(:INT) { exit 1 }
+  _main
+rescue Errno::EPIPE
+  exit 0
+end
 
+def _main
   refe = BitClust::Searcher.new
   refe.parse ARGV
   refe.exec nil, ARGV

@@ -1,7 +1,7 @@
 #
 # bitclust/database.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -12,19 +12,32 @@ require 'bitclust/methodnamepattern'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
+require 'drb'
 
 module BitClust
 
   class Database
 
     include NameUtils
-
-    def Database.dummy
-      new(nil)
-    end
+    include DRb::DRbUndumped
 
     def Database.datadir?(dir)
       File.file?("#{dir}/properties")
+    end
+
+    def Database.connect(uri)
+      case uri.scheme
+      when 'file'
+        new(uri.path)
+      when 'druby'
+        DRbObject.new_with_uri(uri.to_s)
+      else
+        raise InvalidScheme, "unknown database scheme: #{uri.scheme}"
+      end
+    end
+
+    def Database.dummy
+      new(nil)
     end
 
     def initialize(prefix)

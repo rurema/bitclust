@@ -1,3 +1,19 @@
+Sat Mar  3 02:43:14 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/searcher.rb: support remote database.
+
+	* lib/bitclust/database.rb: new method Database.connect to connect
+	  to remote database.
+
+	* lib/bitclust/server.rb: new file.
+
+	* lib/bitclust/exception.rb: new exception class InvalidScheme.
+
+	* lib/bitclust.rb: require bitclust/server.
+
+	* bin/refe.rb: do not exit in SIGPIPE signal handler not to stop
+	  druby server.
+
 Sat Mar  3 00:16:46 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/bc-tohtml.rb: new option --baseurl.

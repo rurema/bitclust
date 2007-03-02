@@ -1,7 +1,7 @@
 #
 # bitclust/exception.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -23,6 +23,7 @@ module BitClust
   class LibraryNotFound         < UserError; end
   class ClassNotFound           < UserError; end
   class MethodNotFound          < UserError; end
+  class InvalidScheme           < UserError; end
 
   module WriterError; end
   class DocumentError

@@ -1,15 +1,18 @@
 #
 # bitclust/searcher.rb
 #
-# Copyright (C) 2006 Minero Aoki
+# Copyright (C) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/database'
+require 'bitclust/server'
 require 'bitclust/methodnamepattern'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
+require 'uri'
 require 'rbconfig'
 require 'optparse'
 
@@ -21,16 +24,24 @@ module BitClust
 
     def initialize
       cmd = File.basename($0, '.*')
-      @dbpath = nil
+      @dblocation = nil
       @name = (/\Abitclust/ =~ cmd ? 'bitclust search' : 'refe')
       @describe_all = false
       @linep = false
       @target_type = nil
+      @listen_url = nil
+      @foreground = false
       @parser = OptionParser.new {|opt|
         opt.banner = "Usage: #{@name} <pattern>"
         unless cmd == 'bitclust'
-          opt.on('-d', '--database=PATH', "Database location (default: #{dbpath_name()})") {|prefix|
-            @dbpath = prefix
+          opt.on('-d', '--database=URL', "Database location (default: #{dblocation_name()})") {|url|
+            @dblocation = URI.parse(url)
+          }
+          opt.on('--server=URL', 'Spawns BitClust database server and listen URL.  Requires --database option with local path.') {|url|
+            @listen_url = url
+          }
+          opt.on('--foreground', 'Do not become daemon (for debug)') {
+            @foreground = true
           }
         end
         opt.on('-a', '--all', 'Prints descriptions for all matched entries.') {
@@ -62,6 +73,42 @@ module BitClust
 
     def parse(argv)
       @parser.parse! argv
+      if @listen_url   # server mode
+        server_mode_check argv
+      else
+        refe_mode_check argv
+      end
+    end
+
+    def exec(db, argv)
+      if @listen_url
+        spawn_server db
+      else
+        search_pattern db, argv
+      end
+    end
+
+    private
+
+    def server_mode_check(argv)
+      if @dblocation
+        unless @dblocation.scheme == 'file'
+          $stderr.puts "Give local path to --database option on server mode"
+          exit 1
+        end
+      else
+        unless dbpath()
+          $stderr.puts "no local database given; use --database option with local database path"
+          exit 1
+        end
+      end
+      unless argv.empty?
+        $stderr.puts "too many arguments"
+        exit 1
+      end
+    end
+
+    def refe_mode_check(argv)
       case @target_type
       when :class
         unless argv.size == 1
@@ -81,8 +128,66 @@ module BitClust
                               {:describe_all => @describe_all, :line => @linep})
     end
 
-    def exec(db, argv)
-      db ||= Database.new(@dbpath || dbpath())
+    def spawn_server(db)
+      Server.new(new_local_database(db)).listen @listen_url, @foreground
+    end
+
+    def new_local_database(db)
+      return db if db
+      path = @dblocation ? @dblocation.path : dbpath()
+      Database.new(path)
+    end
+
+    def new_database
+      Database.connect(@dblocation || dblocation())
+    end
+
+    def dblocation_name
+      _dblocation() or 'NONE'
+    end
+
+    def dblocation
+      _dblocation() or
+          raise InvalidDatabase, "database not exist or invalid database"
+    end
+
+    def _dblocation
+      %w( REFE2_SERVER BITCLUST_SERVER ).each do |key|
+        return URI.parse(ENV[key]) if ENV[key]
+      end
+      if path = dbpath()
+        URI.parse("file://#{path}")
+      else
+        nil
+      end
+    end
+
+    def dbpath
+      env_dbpath() || default_dbpath()
+    end
+
+    def env_dbpath
+      [ 'REFE2_DATADIR', 'BITCLUST_DATADIR' ].each do |key|
+        if ENV.key?(key)
+          unless Database.datadir?(ENV[key])
+            raise InvalidDatabase, "environment variable #{key} given but #{ENV[key]} is not a valid BitClust database"
+          end
+          return ENV[key]
+        end
+      end
+      nil
+    end
+
+    def default_dbpath
+      datadir = ::Config::CONFIG['datadir']
+      [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
+        return path if Database.datadir?(path)
+      end
+      nil
+    end
+
+    def search_pattern(db, argv)
+      db ||= new_database()
       case @target_type
       when :class
         find_class db, argv[0]
@@ -104,8 +209,6 @@ module BitClust
         end
       end
     end
-
-    private
 
     def show_all_classes(db)
       @view.show_class db.classes
@@ -166,35 +269,6 @@ module BitClust
       t = _t.tr(',', '#').sub(/\#\./, '.#')
       m = _m.reverse
       return c, t, m
-    end
-
-    def dbpath_name
-      env_dbpath() or default_dbpath() or '(none)'
-    end
-
-    def dbpath
-      env_dbpath() or default_dbpath() or
-          raise InvalidDatabase, "database not found"
-    end
-
-    def env_dbpath
-      [ 'REFE2_DATADIR', 'BITCLUST_DATADIR' ].each do |key|
-        if ENV.key?(key)
-          unless Database.datadir?(ENV[key])
-            raise InvalidDatabase, "environment variable #{key} given but #{ENV[key]} is not a valid BitClust database"
-          end
-          return ENV[key]
-        end
-      end
-      nil
-    end
-
-    def default_dbpath
-      [ "#{::Config::CONFIG['datadir']}/refe2",
-        "#{::Config::CONFIG['datadir']}/bitclust" ].each do |prefix|
-        return prefix if Database.datadir?(prefix)
-      end
-      nil
     end
 
   end
