@@ -1,7 +1,7 @@
 #
 # bitclust/rdcompiler.rb
 #
-# Copyright (C) 2006 Minero Aoki
+# Copyright (C) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -69,6 +69,9 @@ module BitClust
     def method_list
       @f.while_match(/\A---/) do |line|
         compile_signature(line)
+      end
+      @f.while_match(/\A:/) do |line|
+        # process property
       end
       @out.puts '<dd>'
       while @f.next?

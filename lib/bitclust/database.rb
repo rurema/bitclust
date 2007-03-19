@@ -8,7 +8,7 @@
 #
 
 require 'bitclust/entry'
-require 'bitclust/methodnamepattern'
+require 'bitclust/completion'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
@@ -18,6 +18,7 @@ module BitClust
 
   class Database
 
+    include Completion
     include NameUtils
     include DRb::DRbUndumped
 
@@ -94,8 +95,7 @@ module BitClust
           x.save
         end
         clear_dirty
-        save_class_index
-        save_method_index
+        save_completion_index
       end
     ensure
       @in_transaction = false
@@ -364,11 +364,8 @@ module BitClust
     end
 
     def search_methods(pattern)
-      result = pattern._search_methods(self)
+      result = _search_methods(pattern)
       if result.fail?
-        if result.classes.empty?
-          raise MethodNotFound, "no such class: #{pattern.klass}"
-        end
         if result.classes.size <= 5
           loc = result.classes.map {|c| c.label }.join(', ')
         else
@@ -377,93 +374,6 @@ module BitClust
         raise MethodNotFound, "no such method in #{loc}: #{pattern.method}"
       end
       result
-    end
-
-    #
-    # Search Index
-    #
-
-    def save_class_index
-      atomic_write_open('class/=index') {|f|
-        classes().each do |c|
-          #f.puts "#{c.id}\t#{c.names.join(' ')}"
-          f.puts "#{c.id}\t#{c.name}"
-        end
-      }
-    end
-    private :save_class_index
-
-    def intern_classname(name)
-      intern_table()[name]
-    end
-    private :intern_classname
-
-    def intern_table
-      @intern_table ||= 
-          begin
-            h = {}
-            classnametable().each do |id, names|
-              names.each do |n|
-                h[n] = id
-              end
-            end
-            h
-          end
-    end
-    private :intern_table
-
-    # internal use only
-    def _expand_class_id(id)
-      classnametable()[id]
-    end
-
-    def classnametable
-      @classnametable ||=
-          begin
-            h = {}
-            foreach_line('class/=index') do |line|
-              id, *names = *line.split
-              h[id] = names
-            end
-            h
-          rescue Errno::ENOENT
-            {}
-          end
-    end
-    private :classnametable
-
-    def save_method_index
-      index = make_method_index()
-      atomic_write_open('method/=index') {|f|
-        index.keys.sort.each do |name|
-          f.puts "#{name}\t#{index[name].join(' ')}"
-        end
-      }
-    end
-    private :save_method_index
-
-    def make_method_index
-      h = {}
-      classes().each do |c|
-        (c._imap.keys + c._smap.keys + c._cmap.keys).uniq.each do |name|
-          (h[name] ||= []).push c.id
-        end
-      end
-      h
-    end
-    private :make_method_index
-
-    # internal use only
-    def _method_index
-      @method_index ||=
-          begin
-            h = {}
-            foreach_line('method/=index') do |line|
-              name, *cnames = *line.split
-              h[name] = cnames
-            end
-            h
-          end
     end
 
     #
@@ -529,11 +439,10 @@ module BitClust
       File.unlink tmppath  rescue nil
     end
 
-    private
-
     def realpath(rel)
       "#{@prefix}/#{encodeid(rel)}"
     end
+    private :realpath
 
   end
 

@@ -1,7 +1,7 @@
 #
 # bitclust/entry.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -10,11 +10,13 @@
 require 'bitclust/compat'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
+require 'drb'
 
 module BitClust
 
   class Entry
 
+    include DRb::DRbUndumped
     include NameUtils
 
     def self.persistent_properties
@@ -425,29 +427,9 @@ module BitClust
       property :source,     'String'
     }
 
-    def clear_cache
-      @smap = @imap = @cmap = nil
-    end
-
     def save
       super
-      @db.makepath "method/#{@id}"
-      @db.atomic_write_open("method/#{@id}/=smap") {|f|
-        write_mmap _smap(), f
-      }
-      @db.atomic_write_open("method/#{@id}/=imap") {|f|
-        write_mmap _imap(), f
-      }
-      @db.atomic_write_open("method/#{@id}/=cmap") {|f|
-        write_mmap _cmap(), f
-      }
-    end
-
-    def load
-      super
-      @smap = load_mmap("method/#{@id}/=smap")
-      @imap = load_mmap("method/#{@id}/=imap")
-      @cmap = load_mmap("method/#{@id}/=cmap")
+      save_index
     end
 
     def inspect
@@ -660,41 +642,50 @@ module BitClust
           raise MethodNotFound, "spec=#{spec.inspect}"
     end
 
+    # internal use only
+    def match_entry(t, mname)
+      _index()[t + mname]
+    end
+
     def singleton_method_names
       # should remove module functions?
-      _smap().keys
+      _index().keys.select {|name| /\A\./ =~ name }.map {|name| name[1..-1] }
     end
 
     def instance_method_names
-      _imap().keys
+      _index().keys.select {|name| /\A\#/ =~ name }.map {|name| name[1..-1] }
     end
 
     def constant_names
-      _cmap().keys
+      _index().keys.select {|name| /\A\:/ =~ name }.map {|name| name[1..-1] }
     end
 
     def special_variable_names
       special_variables().map {|m| m.names }.flatten
     end
 
+    def clear_cache
+      @_smap = @_imap = @_cmap = nil
+    end
+
     # internal use only
     def _smap
-      @smap ||= makemmap('s', extended_modules(), singleton_methods())
+      @_smap ||= makemap('s', extended_modules(), singleton_methods())
     end
 
     # internal use only
     def _imap
-      @imap ||= makemmap('i', included_modules(), instance_methods())
+      @_imap ||= makemap('i', included_modules(), instance_methods())
     end
 
     # internal use only
     def _cmap
-      @cmap ||= makemmap('c', included_modules(), constants())
+      @_cmap ||= makemap('c', included_modules(), constants())
     end
 
     private
 
-    def makemmap(typechar, inherited_modules, ents)
+    def makemap(typechar, inherited_modules, ents)
       s = superclass()
       map = s ? s.__send__("_#{typechar}map").dup : {}
       inherited_modules.each do |mod|
@@ -709,19 +700,31 @@ module BitClust
       map
     end
 
-    def write_mmap(map, f)
+    def save_index
+      @db.makepath "method/#{@id}"
+      @db.atomic_write_open("method/#{@id}/=index") {|f|
+        writemap _smap(), '.', f
+        writemap _imap(), '#', f
+        writemap _cmap(), ':', f
+      }
+    end
+
+    def writemap(map, mark, f)
       map.to_a.sort_by {|k,v| k }.each do |name, m|
-        f.puts "#{name}\t#{m}"
+        f.puts "#{mark}#{name}\t#{m}"
       end
     end
 
-    def load_mmap(rel)
-      map = {}
-      @db.foreach_line(rel) do |line|
-        name, spec = *line.split
-        map[name] = spec
-      end
-      map
+    def _index
+      @_index ||=
+          begin
+            h = {}
+            @db.foreach_line("method/#{@id}/=index") do |line|
+              name, spec = line.split
+              h[name] = spec
+            end
+            h
+          end
     end
 
   end

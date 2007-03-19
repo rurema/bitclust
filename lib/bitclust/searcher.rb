@@ -9,7 +9,6 @@
 
 require 'bitclust/database'
 require 'bitclust/server'
-require 'bitclust/methodnamepattern'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'uri'
@@ -34,7 +33,8 @@ module BitClust
       @parser = OptionParser.new {|opt|
         opt.banner = "Usage: #{@name} <pattern>"
         unless cmd == 'bitclust'
-          opt.on('-d', '--database=URL', "Database location (default: #{dblocation_name()})") {|url|
+          opt.on('-d', '--database=URL', "Database location (default: #{dblocation_name()})") {|loc|
+            url = (/:/ =~ loc) ? loc : "file://#{File.expand_path(loc)}"
             @dblocation = URI.parse(url)
           }
           opt.on('--server=URL', 'Spawns BitClust database server and listen URL.  Requires --database option with local path.') {|url|
@@ -143,15 +143,15 @@ module BitClust
     end
 
     def dblocation_name
-      _dblocation() or 'NONE'
+      find_dblocation() or 'NONE'
     end
 
     def dblocation
-      _dblocation() or
+      find_dblocation() or
           raise InvalidDatabase, "database not exist or invalid database"
     end
 
-    def _dblocation
+    def find_dblocation
       %w( REFE2_SERVER BITCLUST_SERVER ).each do |key|
         return URI.parse(ENV[key]) if ENV[key]
       end
@@ -316,7 +316,7 @@ module BitClust
         end
       else
         if @describe_all
-          result.records.sort.each do |rec|
+          result.each_record do |rec|
             describe_method rec
           end
         else

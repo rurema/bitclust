@@ -1,7 +1,7 @@
 #
 # bitclust/methodid.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -124,6 +124,76 @@ module BitClust
 
     def constant?
       @type == '::'
+    end
+
+    def special_variable?
+      @type == '$'
+    end
+
+  end
+
+
+  # A MethodNamePattern has #klass, #type, #method and #library.
+  # All attributes are string.
+  # All attributes are optional.
+  class MethodNamePattern
+
+    def initialize(c = nil, t = nil, m = nil, lib = nil)
+      @klass = c
+      if c and c.empty?
+        @klass = nil
+      end
+      @type = t
+      @method = m
+      if m and m.empty?
+        @method = nil
+      end
+      @library = library
+      @crecache = []
+      @mrecache = []
+    end
+
+    attr_reader :klass
+    attr_reader :type
+    attr_reader :method
+    attr_reader :library
+
+    def inspect
+      "#<pattern #{esc(@library)}.#{esc(@klass)}#{tesc(@type)}#{esc(@method)}>"
+    end
+
+    def esc(s)
+      s || '_'
+    end
+    private :esc
+
+    def tesc(s)
+      s || ' _ '
+    end
+    private :esc
+
+    def match?(m)
+      (not @library or m.library.name?(@library)) and
+      (not @klass   or m.klass.name?(@klass)) and
+      (not @type    or m.typemark == @type) and
+      (not @method  or m.name?(@method))
+    end
+
+    def select_classes(cs)
+      return cs unless @klass
+      expand_ic(cs, @klass, @crecache)
+    end
+
+    def empty?
+      not @klass and not @type and not @method
+    end
+
+    def class?
+      @klass and (not @type and not @method)
+    end
+
+    def method?
+      @method or (@type and @type != '$')
     end
 
     def special_variable?
