@@ -10,13 +10,11 @@
 require 'bitclust/compat'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
-require 'drb'
 
 module BitClust
 
   class Entry
 
-    include DRb::DRbUndumped
     include NameUtils
 
     def self.persistent_properties

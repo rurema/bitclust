@@ -8,8 +8,8 @@
 #
 
 require 'bitclust/database'
-require 'bitclust/server'
 require 'bitclust/nameutils'
+require 'bitclust/methodid'
 require 'bitclust/exception'
 require 'uri'
 require 'rbconfig'
@@ -38,6 +38,7 @@ module BitClust
             @dblocation = URI.parse(url)
           }
           opt.on('--server=URL', 'Spawns BitClust database server and listen URL.  Requires --database option with local path.') {|url|
+            require 'bitclust/server'   # require here for speed
             @listen_url = url
           }
           opt.on('--foreground', 'Do not become daemon (for debug)') {

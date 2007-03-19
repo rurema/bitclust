@@ -1,3 +1,18 @@
+Mon Mar 19 22:50:51 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/completion.rb: never load MethoEntry until needed.
+
+	* bin/refe.rb: require specific library for speed.
+
+	* lib/bitclust/searcher.rb: do not require bitclust/server
+	  (webrick/config) until needed.
+
+	* lib/bitclust/server.rb: include DRbUndumped to all classes here.
+
+	* lib/bitclust/entry.rb: ditto.
+
+	* lib/bitclust/database.rb: ditto.
+
 Mon Mar 19 17:38:26 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/searcher.rb: reduce remote call.

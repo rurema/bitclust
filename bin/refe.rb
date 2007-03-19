@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'bitclust'
+require 'bitclust/searcher'
 
 def main
   Signal.trap(:PIPE, 'IGNORE') rescue nil  # Win32 does not have SIGPIPE

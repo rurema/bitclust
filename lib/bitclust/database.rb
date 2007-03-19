@@ -12,7 +12,6 @@ require 'bitclust/completion'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
-require 'drb'
 
 module BitClust
 
@@ -20,7 +19,6 @@ module BitClust
 
     include Completion
     include NameUtils
-    include DRb::DRbUndumped
 
     def Database.datadir?(dir)
       File.file?("#{dir}/properties")
@@ -283,7 +281,7 @@ module BitClust
     end
 
     def search_classes(pattern)
-      cs = MethodNamePattern.new(pattern, nil, nil).select_classes(classes())
+      cs = _search_classes(pattern)
       if cs.empty?
         raise ClassNotFound, "no such class: #{pattern}"
       end
