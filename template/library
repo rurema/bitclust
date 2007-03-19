@@ -15,48 +15,39 @@
 <%
     headline_init
 %>
-<%= headline("library #{@entry.name}") %>
+<%= headline(@entry.id == '_builtin' ? '組み込みライブラリ' : "library #{@entry.name}") %>
+
 <%
     headline_push
     classes = @entry.classes.sort
 %>
 
 <%= headline("Abstract") %>
-<%= compile_rd(@entry.synopsis_source) %>
+<%= compile_rd(@entry.source) %>
 
 <%  unless classes.empty? %>
-<%= headline("Provided Classes/Modules") %>
-<dl>
+<%= headline("Classes/Modules") %>
+<table>
 <%
-    classes.each do |c|
+      classes.each do |c|
 %>
-<dt><%=h c.type.to_s %> <%= class_link(c.name) %></dt>
-<dd>
-<p><code>
-<%    c.entries.sort.each do |m| %>
-<%= link_to_method(m) %>
+<tr>
+<td class="signature"><%=h c.type.to_s %> <%= class_link(c.name) %></td>
+<td class="description"><%= compile_rd(c.synopsis_source) %></td>
 <%    end %>
-</code></p>
-</dd>
-<%
-    end
-%>
-</dl>
+</table>
 <%  end %>
 
-<%  ents = @entry.methods.sort
+<%
+    ents = @entry.methods.sort
     unless ents.empty? %>
-<%= headline("Added Methods") %>
+<%= headline("Added/Redefined Methods") %>
 <p><code>
 <%    ents.each do |m| %>
 <%= link_to_method(m, true) %>
 <%    end %>
 </code></p>
 <%  end %>
-
-<%= headline("Description") %>
-<%= compile_rd(@entry.detail_source) %>
-<% headline_pop %>
 
 </body>
 </html>

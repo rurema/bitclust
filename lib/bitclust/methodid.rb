@@ -101,6 +101,10 @@ module BitClust
       to_s().hash
     end
 
+    def <=>(other)
+      [@klass, @type, @method] <=> [other.klass, other.type, other.method]
+    end
+
     def match?(m)
       (not @type or @type == m.typemark) and
       (not @method or m.name?(@method))

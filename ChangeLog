@@ -1,3 +1,27 @@
+Tue Mar 20 02:04:38 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/library-index: show abstract of each entries.
+
+	* template/library: ditto.
+
+	* template/class: ditto.
+
+	* lib/bitclust/screen.rb: new method Screen#foreach_method_chunk.
+
+	* lib/bitclust/methodid.rb: new method MethodSpec#<=>.
+
+	* lib/bitclust/rdcompiler.rb: $VAR should be rendered as "$VAR",
+	  not "Kernel$VAR".
+
+	* lib/bitclust/entry.rb (synopsis_source): might be nil.
+
+	* lib/bitclust/entry.rb (partitioned_entries): separate added
+	  entries.
+
+	* lib/bitclust/lineinput.rb: new method LineInput.for_string.
+
+	* theme/default/style.css: add table/tr/th/td rules.
+
 Mon Mar 19 23:44:04 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/library: show added/redefined methods.

@@ -208,6 +208,15 @@ module BitClust
     def rdcompiler
       RDCompiler.new(@urlmapper, @hlevel)
     end
+
+    def foreach_method_chunk(src)
+      f = LineInput.for_string(src)
+      while f.next?
+        sigs = f.span(/\A---/).map {|line| line.sub(/\A---\s+/, '') }
+        body = f.break(/\A---/).join.split(/\n\n/, 2).first || ''
+        yield sigs, body
+      end
+    end
   end
 
   class IndexScreen < TemplateScreen

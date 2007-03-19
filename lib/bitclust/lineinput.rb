@@ -8,7 +8,13 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
+require 'stringio'
+
 class LineInput
+
+  def LineInput.for_string(s)
+    new(StringIO.new(s))
+  end
 
   def initialize(f)
     @input = f

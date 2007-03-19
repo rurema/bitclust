@@ -219,7 +219,7 @@ module BitClust
       case type
       when 'lib'     then protect(link) { library_link(arg) }
       when 'c'       then protect(link) { class_link(arg) }
-      when 'm'       then protect(link) { method_link(complete_spec(arg)) }
+      when 'm'       then protect(link) { method_link(complete_spec(arg), arg) }
       when 'url'     then direct_url(arg)
       when 'man'     then man_link(arg)
       when 'rfc', 'RFC'

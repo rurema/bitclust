@@ -48,17 +48,72 @@ ancestors: <%= escape_html(myself.name) %>
     .each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
-<dl>
+<table class="entries">
+<tr><th>signature</th><th colspan="2">description</th></tr>
 <%
         headline_push
         entries.each do |m|
-%>
-<%=       compile_method(m) %>
+          foreach_method_chunk(m.source) do |sigs, src| %>
+<tr>
+<td class="signature"><%=
+              sigs.map {|sig|
+              name, params = sig.split(/(?=\(|\z)/, 2)
+              method_link(m.spec_string, name) + escape_html(params)
+            }.join("<br>") %></td>
+<%          if m.redefined? %>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= library_link(m.library.name) %></td>
+<%          else %>
+<td class="description" colspan="2"><%= compile_rd(src) %></td>
+<%          end %>
+</tr>
 <%
+          end
         end
         headline_pop
 %>
-</dl>
+</table>
+<%
+      end
+    end
+%>
+
+<%  specs = @entry.inherited_method_specs.sort
+    unless specs.empty?  %>
+<%= headline('Inherited Methods') %>
+<p><code>
+<%    specs.each do |s| %>
+<%=     method_link(s.to_s, (s.type == '#' ? s.method : s.type + s.method)) %>
+<%    end %>
+</code></p>
+<%  end %>
+
+<%
+    [['Added Methods',          ents.added]]\
+    .each do |label, entries|
+      unless entries.empty?  %>
+<%=     headline(label) %>
+<table class="entries">
+<tr><th>signature</th><th>description</th><th>library</th></tr>
+<%
+        headline_push
+        entries.each do |m|
+          foreach_method_chunk(m.source) do |sigs, src| %>
+<tr>
+<td class="signature"><%=
+            sigs.map {|sig|
+              name, params = sig.split(/(?=\(|\z)/, 2)
+              method_link(m.spec_string, name) + escape_html(params)
+            }.join("<br>") %></td>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= library_link(m.library.name) %></td>
+</tr>
+<%
+          end
+        end
+        headline_pop
+%>
+</table>
 <%
       end
     end

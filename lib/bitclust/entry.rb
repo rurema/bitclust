@@ -143,7 +143,7 @@ module BitClust
     end
 
     def synopsis_source
-      source().split(/\n\n/, 2).first
+      source().split(/\n\n/, 2).first || ''
     end
 
     def detail_source
@@ -537,30 +537,37 @@ module BitClust
     Parts = Struct.new(:singleton_methods, :private_singleton_methods,
                        :instance_methods,  :private_instance_methods,
                        :module_functions,
-                       :constants, :special_variables)
+                       :constants, :special_variables,
+                       :added)
 
     def partitioned_entries
       s = []; spv = []
       i = []; ipv = []
       mf = []
       c = []; v = []
-      entries().each do |m|
-        case m.type
-        when :singleton_method
-          (m.public? ? s : spv).push m
-        when :instance_method
-          (m.public? ? i : ipv).push m
-        when :module_function
-          mf.push m
-        when :constant
-          c.push m
-        when :special_variable
-          v.push m
-        else
-          raise "must not happen: m.type=#{m.type.inspect} (#{m.inspect})"
+      added = []
+      entries().sort.each do |m|
+        case m.kind
+        when :defined, :redefined
+          case m.type
+          when :singleton_method
+            (m.public? ? s : spv).push m
+          when :instance_method
+            (m.public? ? i : ipv).push m
+          when :module_function
+            mf.push m
+          when :constant
+            c.push m
+          when :special_variable
+            v.push m
+          else
+            raise "must not happen: m.type=#{m.type.inspect} (#{m.inspect})"
+          end
+        when :added
+          added.push m
         end
       end
-      Parts.new(*[s,spv, i,ipv, mf, c, v].map {|ents| ents.sort })
+      Parts.new(s,spv, i,ipv, mf, c, v, added)
     end
 
     def singleton_methods(inherit = true)
@@ -664,6 +671,12 @@ module BitClust
 
     def special_variable_names
       special_variables().map {|m| m.names }.flatten
+    end
+
+    def inherited_method_specs
+      name = name()
+      _index().map {|name, spec| MethodSpec.parse(spec) }\
+          .reject {|s| s.klass == name }
     end
 
     def clear_cache

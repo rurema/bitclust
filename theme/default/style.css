@@ -153,6 +153,53 @@ dd {
     margin: 0.3em 0em 1em 4em;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+th {
+    align: left;
+    valign: top;
+    text-align: left;
+    vertical-align: top;
+}
+
+td {
+    align: left;
+    valign: top;
+    text-align: left;
+    vertical-align: top;
+}
+
+table.entries tr {
+    /* border: 1px solid gray; */
+    align: left;
+    valign: top;
+    text-align: left;
+    vertical-align: top;
+}
+
+td.signature {
+    padding: 0.5em;
+    background-color: #DDD;
+    border: 3px solid white;
+    width: 20em;
+}
+
+td.description {
+    padding: 0.5em;
+    background-color: #EEE;
+    border: 3px solid white;
+}
+
+td.library {
+    width: 6em;
+    padding: 0.5em;
+    background-color: #DDD;
+    border: 3px solid white;
+}
+
+
 a {
     font-weight: bold;
     text-decoration: none;
