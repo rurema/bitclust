@@ -146,6 +146,10 @@ module BitClust
       source().split(/\n\n/, 2).first
     end
 
+    def detail_source
+      source().split(/\n\n/, 2)[1] || ''
+    end
+
     def save
       @db.save_properties objpath(), _get_properties()
     rescue Errno::ENOENT

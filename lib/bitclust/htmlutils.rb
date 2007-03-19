@@ -18,9 +18,13 @@ module BitClust
     private
 
     # make method anchor from MethodEntry
-    def link_to_method(m)
-      a_href(@urlmapper.method_url(methodid2spec(m.id)),
-             (m.instance_method? ? '' : m.typemark) + m.name)
+    def link_to_method(m, specp = false)
+      if specp and not m.special_variable?
+        label = m.label
+      else
+        label = (m.instance_method? ? '' : m.typemark) + m.name
+      end
+      a_href(@urlmapper.method_url(methodid2spec(m.id)), label)
     end
 
     def library_link(name, label = nil)

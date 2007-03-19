@@ -21,16 +21,10 @@
     classes = @entry.classes.sort
 %>
 
-<!--
-<p>Classes/Modules: <code>
-<%
-    classes.each do |c| %>
-<%= class_link(c.name) %>
-<%  end
-%>
-</code></p>
--->
+<%= headline("Abstract") %>
+<%= compile_rd(@entry.synopsis_source) %>
 
+<%  unless classes.empty? %>
 <%= headline("Provided Classes/Modules") %>
 <dl>
 <%
@@ -48,9 +42,20 @@
     end
 %>
 </dl>
+<%  end %>
 
-<%= headline("Abstract") %>
-<%= compile_rd(@entry.source) %>
+<%  ents = @entry.methods.sort
+    unless ents.empty? %>
+<%= headline("Added Methods") %>
+<p><code>
+<%    ents.each do |m| %>
+<%= link_to_method(m, true) %>
+<%    end %>
+</code></p>
+<%  end %>
+
+<%= headline("Description") %>
+<%= compile_rd(@entry.detail_source) %>
 <% headline_pop %>
 
 </body>

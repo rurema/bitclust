@@ -1,3 +1,12 @@
+Mon Mar 19 23:44:04 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/library: show added/redefined methods.
+
+	* lib/bitclust/htmlutils.rb (link_to_method): add 2nd parameter
+	  "specp".
+
+	* lib/bitclust/entry.rb: new method Entry#detail_source.
+
 Mon Mar 19 22:50:51 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/completion.rb: never load MethoEntry until needed.
