@@ -71,7 +71,7 @@ GC.enable; GC.start; x
         crefs = mname2crefs_narrow(name)
 #split_time "c expand  (#{crefs.size})"
         crefs.map {|cref|
-          spec = MethodSpec.new(cref.chop, cref[-1,1], name)
+          spec = MethodSpec.new(classid2name(cref.chop), cref[-1,1], name)
           SearchResult::Record.new(self, spec, spec)
         }
       }.flatten
@@ -133,7 +133,7 @@ $cm_comb_m = 0
         next if crefs.empty?
 $cm_comb_m += 1
         crefs.each do |ref|
-          spec = MethodSpec.new(ref.chop, ref[-1,1], m)
+          spec = MethodSpec.new(classid2name(ref.chop), ref[-1,1], m)
           result.push SearchResult::Record.new(self, spec)
         end
       end
