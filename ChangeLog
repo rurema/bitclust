@@ -1,3 +1,7 @@
+Tue Mar 20 16:38:28 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/method: show visibility on topic path.
+
 Tue Mar 20 16:19:06 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/completion.rb: cref includes class ID, not class

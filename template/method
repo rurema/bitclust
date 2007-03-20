@@ -13,15 +13,11 @@
 &gt; library <%= library_link(@entry.library.name) %>
 &gt; <%= @entry.klass.type %> <%= class_link(@entry.klass.name) %>
 &gt; <%= @entry.name %>
+<% unless @entry.really_public? %>(<%= @entry.visibility %>)<% end %>
 </p>
 
 <% headline_init %>
 <%= headline("method #{@entry.label}") %>
-<p>
-library: <%= library_link(@entry.library.name) %><br>
-class: <%= class_link(@entry.klass.name) %><br>
-visibility: <%= @entry.visibility %>
-</p>
 <dl class="methodlist">
 <%= compile_method(@entry) %>
 </dl>
