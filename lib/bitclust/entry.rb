@@ -249,7 +249,7 @@ module BitClust
     end
 
     def <=>(other)
-      @id <=> other.id
+      @id.casecmp(other.id)
     end
 
     def name
@@ -771,7 +771,13 @@ module BitClust
     end
 
     def <=>(other)
-      @id <=> other.id
+      sort_key() <=> other.sort_key
+    end
+
+    KIND_NUM = {:defined => 0, :redefined => 1, :added => 2}
+
+    def sort_key
+      [label(), KIND_NUM[kind()]]
     end
 
     def name
@@ -790,11 +796,11 @@ module BitClust
     alias type typename
 
     def typemark
-      typename2mark(typename())
+      methodid2typemark(@id)
     end
 
     def typechar
-      typename2char(typename())
+      methodid2typechar(@id)
     end
 
     def library
@@ -817,21 +823,23 @@ module BitClust
     }
 
     def inspect
-      "\#<method #{klass().name}#{typemark()}#{names().join(',')}>"
+      c, t, m, lib = methodid2specparts(@id)
+      "\#<method #{c}#{t}#{names().join(',')}>"
     end
 
     def spec
-      MethodSpec.new(klass().name, typemark(), name())
+      MethodSpec.new(*methodid2specparts(@id))
     end
 
     def spec_string
-      "#{klass().name}#{typemark()}#{name()}"
+      methodid2specstring(@id)
     end
 
     alias label spec_string
 
     def labels
-      names().map {|name| "#{klass().name}#{typemark()}#{name}" }
+      c, t, m, lib = methodid2specparts(@id)
+      names().map {|name| "#{c}#{t}#{name}" }
     end
 
     def name?(name)

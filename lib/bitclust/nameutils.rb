@@ -1,3 +1,12 @@
+#
+# bitclust/nameutils.rb
+#
+# Copyright (c) 2006-2007 Minero Aoki
+#
+# This program is free software.
+# You can distribute/modify this program under the Ruby License.
+#
+
 require 'bitclust/compat'
 
 module BitClust
@@ -55,9 +64,14 @@ module BitClust
       end
     end
 
-    def methodid2spec(id)
+    def methodid2specstring(id)
       c, t, m, lib = *split_method_id(id)
-      "#{classid2name(c)}#{typechar2mark(t)}#{decodename_url(m)}"
+      classid2name(c) + typechar2mark(t) + decodename_url(m)
+    end
+
+    def methodid2specparts(id)
+      c, t, m, lib = *split_method_id(id)
+      return classid2name(c), typechar2mark(t), decodename_url(m), libid2name(lib)
     end
 
     def methodid2libid(id)
@@ -70,9 +84,19 @@ module BitClust
       c
     end
 
+    def methodid2typechar(id)
+      c, t, m, lib = *split_method_id(id)
+      t
+    end
+
     def methodid2typename(id)
       c, t, m, lib = *split_method_id(id)
       typechar2name(t)
+    end
+
+    def methodid2typemark(id)
+      c, t, m, lib = *split_method_id(id)
+      typechar2mark(t)
     end
 
     def methodid2mname(id)
@@ -109,10 +133,6 @@ module BitClust
       NAME_TO_MARK.key?(n)
     end
 
-    def typemark?(m)
-      MARK_TO_NAME.key?(m)
-    end
-
     def typename2mark(name)
       NAME_TO_MARK[name] or
           raise "must not happen: #{name.inspect}"
@@ -147,12 +167,28 @@ module BitClust
           raise "must not happen: #{char.inspect}"
     end
 
+    MARK_TO_CHAR = {
+      '.'  => 's',
+      '#'  => 'i',
+      '.#' => 'm',
+      '::' => 'c',
+      '$'  => 'v'
+    }
+
+    CHAR_TO_MARK = MARK_TO_CHAR.invert
+
+    def typemark?(m)
+      MARK_TO_CHAR.key?(m)
+    end
+
     def typechar2mark(char)
-      typename2mark(typechar2name(char))
+      CHAR_TO_MARK[char] or
+          raise "must not happen: #{char.inspect}"
     end
 
     def typemark2char(mark)
-      typename2char(typemark2name(mark))
+      MARK_TO_CHAR[mark] or
+          raise "must not happen: #{mark.inspect}"
     end
 
     # string -> case-sensitive ID

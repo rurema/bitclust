@@ -1,3 +1,27 @@
+Tue Mar 20 16:11:54 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/entry.rb (LibraryEntry#<=>): case-insensitive.
+
+	* lib/bitclust/entry.rb (MethodEntry#<=>): defined entry preceeds
+	  other entries.
+
+	* lib/bitclust/entry.rb (MethodEntry#spec, spec_string, typemark,
+	  typechar): optimize.
+
+	* lib/bitclust/nameutils.rb: new method methodid2typechar.
+
+	* lib/bitclust/nameutils.rb: new method methodid2typemark.
+
+	* lib/bitclust/nameutils.rb: new method methodid2specparts.
+
+	* lib/bitclust/nameutils.rb: rename methodid2spec ->
+	  methodid2specstring.
+
+	* lib/bitclust/htmlutils.rb: ditto.
+
+	* lib/bitclust/nameutils.rb (typechar2mark, typemark2char):
+	  optimize.
+
 Tue Mar 20 02:04:38 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/library-index: show abstract of each entries.
