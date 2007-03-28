@@ -1,7 +1,7 @@
 #
-# $Id: lineinput.rb,v 1.7 2005/03/26 11:44:28 aamine Exp $
+# $Id: lineinput.rb 3723 2007-03-28 21:34:13Z aamine $
 #
-# Copyright (c) 2002-2005 Minero Aoki
+# Copyright (c) 2002-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -24,11 +24,15 @@ class LineInput
   end
 
   def inspect
-    "\#<#{self.class} file=#{@f.inspect} line=#{lineno()}>"
+    "\#<#{self.class} file=#{@input.inspect} line=#{lineno()}>"
   end
 
   def eof?
     @eof_p
+  end
+
+  def path
+    @input.path
   end
 
   def lineno

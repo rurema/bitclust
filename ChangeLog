@@ -1,3 +1,7 @@
+Thu Mar 29 06:34:49 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/lineinput.rb: import latest version.
+
 Tue Mar 20 16:38:28 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/method: show visibility on topic path.
