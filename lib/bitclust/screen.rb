@@ -124,6 +124,10 @@ module BitClust
       @error = err
     end
 
+    def content_type
+      'text/html'
+    end
+
     def body
       <<-EndHTML
 <html>

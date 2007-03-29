@@ -1,3 +1,7 @@
+Thu Mar 29 11:49:54 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/screen.rb: new method ErrorScreen#content_type.
+
 Thu Mar 29 06:34:49 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/lineinput.rb: import latest version.
