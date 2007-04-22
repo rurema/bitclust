@@ -21,6 +21,7 @@ $KCODE = 'EUC'
 require 'bitclust'
 require 'erb'
 require 'find'
+require 'pp'
 require 'optparse'
 
 def main
@@ -42,6 +43,7 @@ Subcommands:
     list        List libraries/classes/methods in database.
     lookup      Lookup a library/class/method from database.
     search      Search classes/methods from database.
+    query       Dispatch arbitrary query.
     update      Update database.
     property    Handle database properties.
 
@@ -60,6 +62,7 @@ Global Options:
   subcommands['list'] = ListCommand.new
   subcommands['lookup'] = LookupCommand.new
   subcommands['search'] = BitClust::Searcher.new
+  subcommands['query'] = QueryCommand.new
   subcommands['update'] = UpdateCommand.new
   subcommands['property'] = PropertyCommand.new
   begin
@@ -397,6 +400,30 @@ class LookupCommand < Subcommand
     compiler.compile(src)
   end
 
+end
+
+
+class QueryCommand < Subcommand
+
+  def initialize
+    @parser = OptionParser.new {|opt|
+      opt.banner = "Usage: #{File.basename($0, '.*')} query <ruby-script>"
+      opt.on('--help', 'Prints this message and quit.') {
+        puts opt.help
+        exit 0
+      }
+    }
+  end
+
+  def parse(argv)
+  end
+
+  def exec(db, argv)
+    argv.each do |query|
+      #pp eval(query)   # FIXME: causes ArgumentError
+      p eval(query)
+    end
+  end
 end
 
 

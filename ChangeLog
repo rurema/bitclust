@@ -1,3 +1,11 @@
+Sun Apr 22 14:55:03 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/entry.rb (inherited_method_specs): did not reject
+	  methods of the current class (Local variable was wrongly
+	  overwritten).
+
+	* bin/bitclust.rb: new subcommand "query".
+
 Sun Apr 22 14:35:19 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/method: show all method entries.
