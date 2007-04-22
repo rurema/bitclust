@@ -104,6 +104,10 @@ module BitClust
       decodename_url(m)
     end
 
+    def gvarname?(str)
+      GVAR_RE =~ str ? true : false
+    end
+
     MID = /\A#{METHOD_NAME_RE}\z/
 
     def methodname?(str)

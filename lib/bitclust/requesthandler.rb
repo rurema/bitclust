@@ -1,7 +1,7 @@
 #
 # bitclust/requesthandler.rb
 #
-# Copyright (c) 2006 Minero Aoki
+# Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -135,8 +135,15 @@ module BitClust
       unless classname?(cname)
         raise InvalidKey, "invalid class name: #{cname.inspect}"
       end
-      unless methodname?(mname)
-        raise InvalidKey, "invalid method name: #{mname.inspect}"
+      case tmark
+      when '$'
+        unless gvarname?('$' + mname)
+          raise InvalidKey, "invalid variable name: #{('$' + mname).inspect}"
+        end
+      when '.', '#', '.#', '::'
+        unless methodname?(mname)
+          raise InvalidKey, "invalid method name: #{mname.inspect}"
+        end
       end
       MethodSpec.new(cname, tmark, mname)
     end

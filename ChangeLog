@@ -1,3 +1,10 @@
+Sun Apr 22 13:10:56 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/requesthandler.rb (handle_method): check gvar name
+	  indivisually.
+
+	* lib/bitclust/nameutils.rb: new method #gvarname?.
+
 Thu Mar 29 11:49:54 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/screen.rb: new method ErrorScreen#content_type.
