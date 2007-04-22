@@ -1,3 +1,22 @@
+Sun Apr 22 14:35:19 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/method: show all method entries.
+
+	* lib/bitclust/screen.rb (MethodScreen): accept multiple entries.
+
+	* lib/bitclust/requesthandler.rb: search all methods.
+
+	* lib/bitclust/database.rb: new method Database#fetch_methods.
+
+	* lib/bitclust/entry.rb: new method ClassEntry#fetch_methods.
+
+	* template/class: parameterize entry type name.
+
+	* lib/bitclust/screen.rb (h): call to_s for argument.
+
+	* lib/bitclust/entry.rb (ClassEntry#inherited_method_specs): names
+	  must be unique.
+
 Sun Apr 22 13:35:14 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/method: parameterize method entry type label (instance

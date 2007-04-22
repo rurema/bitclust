@@ -57,8 +57,8 @@ module BitClust
     end
 
     def handle_method(req)
-      m = @db.fetch_method(req.method_spec)
-      @screenmanager.method_screen(m).response
+      ms = @db.fetch_methods(req.method_spec)
+      @screenmanager.method_screen(ms).response
     end
 
     def library_index

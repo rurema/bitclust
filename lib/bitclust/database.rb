@@ -353,6 +353,10 @@ module BitClust
       get_class(spec.klass).get_method(spec)
     end
 
+    def fetch_methods(spec)
+      fetch_class(spec.klass).fetch_methods(spec)
+    end
+
     def fetch_method(spec)
       fetch_class(spec.klass).fetch_method(spec)
     end

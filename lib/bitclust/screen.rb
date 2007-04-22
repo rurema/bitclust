@@ -42,8 +42,8 @@ module BitClust
       new_screen(ClassScreen, c)
     end
 
-    def method_screen(m)
-      new_screen(MethodScreen, m)
+    def method_screen(ms)
+      new_screen(MethodScreen, ms)
     end
 
     private
@@ -171,7 +171,9 @@ module BitClust
       erb.result(binding())
     end
 
-    alias h escape_html
+    def h(str)
+      escape_html(str.to_s)
+    end
 
     def css_url
       @urlmapper.css_url
@@ -274,7 +276,18 @@ module BitClust
     end
   end
 
-  class MethodScreen < EntryBoundScreen
+  class MethodScreen < TemplateScreen
+    def initialize(u, t, e, entries)
+      super u, t, e
+      @entries = entries
+    end
+
+    def encoding
+      @entries.first.encoding || default_encoding()
+    end
+
+    alias charset encoding
+
     def body
       run_template('method')
     end

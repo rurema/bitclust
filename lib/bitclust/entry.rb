@@ -642,6 +642,11 @@ module BitClust
       entries().detect {|m| spec.match?(m) }
     end
 
+    def fetch_methods(spec)
+      get_methods(spec) or
+          raise MethodNotFound, "spec=#{spec.inspect}"
+    end
+
     def fetch_method(spec)
       get_method(spec) or
           raise MethodNotFound, "spec=#{spec.inspect}"
@@ -672,7 +677,7 @@ module BitClust
     def inherited_method_specs
       name = name()
       _index().map {|name, spec| MethodSpec.parse(spec) }\
-          .reject {|s| s.klass == name }
+          .reject {|s| s.klass == name }.uniq
     end
 
     def clear_cache
