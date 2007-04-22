@@ -17,7 +17,7 @@
 </p>
 
 <% headline_init %>
-<%= headline("method #{@entry.label}") %>
+<%= headline("#{@entry.type_label} #{@entry.label}") %>
 <dl class="methodlist">
 <%= compile_method(@entry) %>
 </dl>

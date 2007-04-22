@@ -19,11 +19,7 @@ module BitClust
 
     # make method anchor from MethodEntry
     def link_to_method(m, specp = false)
-      if specp and not m.special_variable?
-        label = m.label
-      else
-        label = (m.instance_method? ? '' : m.typemark) + m.name
-      end
+      label = specp ? m.label : m.short_label
       a_href(@urlmapper.method_url(methodid2specstring(m.id)), label)
     end
 

@@ -322,10 +322,6 @@ module BitClust
         raise MethodNotFound, "no such method in the library #{name()}: #{name}"
     end
 
-    def methodnames
-      methods().map {|m| m.label }
-    end
-
     def each_method(&block)
       methods().each(&block)
     end
@@ -803,6 +799,16 @@ module BitClust
       methodid2typechar(@id)
     end
 
+    def type_label
+      case typemark()
+      when '.'  then 'singleton method'
+      when '#'  then 'instance method'
+      when '.#' then 'module function'
+      when '::' then 'constant'
+      when '$'  then 'variable'
+      end
+    end
+
     def library
       @library ||= @db.fetch_library_id(methodid2libid(@id))
     end
@@ -835,7 +841,15 @@ module BitClust
       methodid2specstring(@id)
     end
 
-    alias label spec_string
+    def label
+      c, t, m, lib = methodid2specparts(@id)
+      "#{t == '$' ? '' : c}#{t}#{m}"
+    end
+
+    def short_label
+      c, t, m, lib = methodid2specparts(@id)
+      "#{t == '#' ? '' : t}#{m}"
+    end
 
     def labels
       c, t, m, lib = methodid2specparts(@id)

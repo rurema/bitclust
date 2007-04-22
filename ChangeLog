@@ -1,7 +1,21 @@
+Sun Apr 22 13:35:14 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/method: parameterize method entry type label (instance
+	  method, ...)
+
+	* lib/bitclust/entry.rb: new method MethodEntry#type_label.
+
+	* lib/bitclust/entry.rb: new method MethodEntry#short_label.
+
+	* lib/bitclust/entry.rb (label): do not include class name for
+	  variables.
+
+	* lib/bitclust/htmlutils.rb (link_to_method): use #short_label.
+
 Sun Apr 22 13:10:56 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/requesthandler.rb (handle_method): check gvar name
-	  indivisually.
+	  indivisually. [ruby-reference-manual:398]
 
 	* lib/bitclust/nameutils.rb: new method #gvarname?.
 
