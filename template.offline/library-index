@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <title>Library Index</title>
+</head>
+<body id="libraryindex">
+
+<p>
+All Libraries
+</p>
+<%
+    headline_init
+%>
+<%= headline("ライブラリ一覧") %>
+<table>
+<%
+    headline_push
+    lib = @entries.detect {|lib| lib.id == '_builtin' }
+%>
+<tr>
+<td class="signature"><%= library_link(lib.name, '組み込みライブラリ') %></td>
+<td class="description"><%= compile_rd(lib.synopsis_source) %></td>
+</tr>
+<%
+    currroot = nil
+    @entries.each do |lib|
+      next if lib.id == '_builtin'
+      if currroot and lib.id[0, currroot.size] == currroot
+        next
+      else
+        currroot = lib.id
+      end
+%>
+<tr>
+<td class="signature"><%= library_link(lib.name) %></td>
+<td class="description"><%= compile_rd(lib.synopsis_source) %></td>
+</tr>
+<%
+    end
+    headline_pop
+%>
+</table>
+
+</body>
+</html>

@@ -22,7 +22,7 @@ require 'bitclust'
 require 'optparse'
 
 def main
-  templatedir = srcdir_root() + 'template'
+  templatedir = srcdir_root() + 'template.offline'
   target = nil
   baseurl = '.'
   parser = OptionParser.new
@@ -73,10 +73,10 @@ def lookup(lib, key)
       begin
         lib.fetch_class(key)
       rescue BitClust::UserError
-        lib.fetch_method(spec)
+        lib.fetch_methods(spec)
       end
     else
-      lib.fetch_method(spec)
+      lib.fetch_methods(spec)
     end
   when BitClust::NameUtils.classname?(key)
     lib.fetch_class(key)

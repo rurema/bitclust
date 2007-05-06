@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<%
+    entry = @entries.sort.first
+%>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
+  <title><%=h entry.type_label %> <%=h entry.label %></title>
+</head>
+<body>
+
+<p>
+<a href="<%= library_index_url() %>">All Libraries</a>
+&gt; library <%= library_link(entry.library.name) %>
+&gt; <%= entry.klass.type %> <%= class_link(entry.klass.name) %>
+&gt; <%= entry.name %>
+<% unless entry.really_public? %>(<%= entry.visibility %>)<% end %>
+</p>
+
+<% headline_init %>
+<%= headline("#{entry.type_label} #{entry.label}") %>
+<dl class="methodlist">
+<% @entries.sort.each do |ent| %>
+<%= compile_method(ent) %>
+<% end %>
+</dl>
+
+</body>
+</html>

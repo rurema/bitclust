@@ -28,21 +28,36 @@ module BitClust
       @method = nil
     end
 
+    def compile(src)
+      setup(src) {
+        library_file
+      }
+    end
+
     def compile_method(m)
       @type = :method
       @method = m
-      compile(m.source)
+      setup(m.source) {
+        method_entry
+      }
     end
 
-    def compile(src)
-      @f = f = LineInput.new(StringIO.new(src))
+    private
+
+    def setup(src)
+      @f = LineInput.new(StringIO.new(src))
       @out = StringIO.new
-      while f.next?
-        case f.peek
+      yield
+      @out.string
+    end
+
+    def library_file
+      while @f.next?
+        case @f.peek
         when /\A---/
-          method_list
+          method_list_chunk
         when /\A=+/
-          headline f.gets
+          headline @f.gets
         when /\A\s+\*\s/
           ulist
         when /\A\s+\(\d+\)\s/
@@ -54,31 +69,38 @@ module BitClust
         when /\A\s+\S/
           list
         else
-          if f.peek.strip.empty?
-            f.gets
+          if @f.peek.strip.empty?
+            @f.gets
           else
             paragraph
           end
         end
       end
-      @out.string
     end
 
-    private
+    def method_entry
+      while @f.next?
+        method_entry_chunk
+      end
+    end
 
-    def method_list
+    def method_entry_chunk
       @f.while_match(/\A---/) do |line|
         compile_signature(line)
       end
+      props = {}
       @f.while_match(/\A:/) do |line|
-        # process property
+        k, v = line.sub(/\A:/, '').split(':', 2)
+        props[k.strip] = v.strip
       end
       @out.puts '<dd>'
       while @f.next?
         case @f.peek
         when /\A===+/
           headline @f.gets
-        when /\A=/, /\A---/
+        when /\A==?/
+          raise "method entry includes headline: #{@f.peek.inspect}"
+        when /\A---/
           break
         when /\A\s+\*\s/
           ulist
@@ -94,7 +116,7 @@ module BitClust
           if @f.peek.strip.empty?
             @f.gets
           else
-            paragraph
+            method_entry_paragraph
           end
         end
       end
@@ -155,6 +177,10 @@ module BitClust
       line '</dl>'
     end
 
+    def dt(s)
+      "<dt>#{s}</dt>"
+    end
+
     def emlist
       @f.gets   # discard "//emlist{"
       line '<pre>'
@@ -182,10 +208,18 @@ module BitClust
 
     def paragraph
       line '<p>'
-      @f.while_match(%r<\A(?!---|=|//\w)\S>) do |line|
+      read_paragraph(@f).each do |line|
         line compile_text(line.strip)
       end
       line '</p>'
+    end
+
+    def method_entry_paragraph
+      read_paragraph(@f)
+    end
+
+    def read_paragraph(f)
+      f.span(%r<\A(?!---|=|//\w)\S>)
     end
 
     def compile_signature(sig)
@@ -199,7 +233,7 @@ module BitClust
       line '</dt>'
     end
 
-    BracketLink = /\[\[[!-~]+?\]\]/n
+    BracketLink = /\[\[[!-~]+?(?:\[\] )?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)
@@ -215,7 +249,8 @@ module BitClust
     end
 
     def bracket_link(link)
-      type, arg = link.split(':', 2)
+      type, _arg = link.split(':', 2)
+      arg = _arg.rstrip
       case type
       when 'lib'     then protect(link) { library_link(arg) }
       when 'c'       then protect(link) { class_link(arg) }
@@ -277,10 +312,6 @@ module BitClust
     def seems_code(text)
       # FIXME
       escape_html(text)
-    end
-
-    def dt(s)
-      "<dt>#{s}</dt>"
     end
 
     def string(str)

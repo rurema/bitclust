@@ -113,7 +113,8 @@ module BitClust
 
   class Screen
     def Screen.for_entry(entry)
-      ::BitClust.const_get("#{entry.type_id.to_s.capitalize}Screen")
+      ent = entry.kind_of?(Array) ? entry.first : entry
+      ::BitClust.const_get("#{ent.type_id.to_s.capitalize}Screen")
     end
   end
 
@@ -218,7 +219,7 @@ module BitClust
     def foreach_method_chunk(src)
       f = LineInput.for_string(src)
       while f.next?
-        sigs = f.span(/\A---/).map {|line| line.sub(/\A---\s+/, '') }
+        sigs = f.span(/\A---/).map {|line| line.sub(/\A---\s+/, '').rstrip }
         body = f.break(/\A---/).join.split(/\n\n/, 2).first || ''
         yield sigs, body
       end

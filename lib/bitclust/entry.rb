@@ -289,8 +289,12 @@ module BitClust
     end
 
     def fetch_class(name)
-      classes().detect {|c| c.name == name } or
+      get_class(name) or
           raise ClassNotFound, "no such class in the library #{name()}: #{name}"
+    end
+
+    def get_class(name)
+      classes().detect {|c| c.name == name }
     end
 
     def classnames
@@ -312,6 +316,18 @@ module BitClust
           end
     end
     private :classmap
+
+    def fetch_methods(spec)
+      ms = if c = get_class(spec.klass)
+           then c.fetch_methods(spec)
+           else []
+           end +
+           methods().select {|m| spec.match?(m) }
+      if ms.empty?
+        raise MethodNotFound, "no such method in the library #{name()}: #{name}"
+      end
+      ms
+    end
 
     def fetch_method(spec)
       classes().each do |c|

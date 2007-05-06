@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <title><%=h @entry.type %> <%=h @entry.name %></title>
+</head>
+<body>
+
+<p>
+<a href="<%= library_index_url() %>">All Libraries</a>
+&gt; library <%= library_link(@entry.library.name) %>
+&gt; <%=h @entry.type %> <%=h @entry.name %>
+</p>
+<%
+    headline_init
+%>
+<%= headline("#{@entry.type} #{@entry.name}") %>
+<%
+    headline_push
+%>
+<%= headline("Abstract") %>
+<%= compile_rd(@entry.source) %>
+
+<%
+    ents = @entry.partitioned_entries
+    [['Singleton Methods',         ents.singleton_methods],
+     ['Instance Methods',          ents.instance_methods],
+     ['Private Singleton Methods', ents.private_singleton_methods],
+     ['Private Instance Methods',  ents.private_instance_methods],
+     ['Module Functions',          ents.module_functions],
+     ['Constants',                 ents.constants],
+     ['Special Variables',         ents.special_variables]]\
+    .each do |label, entries|
+      unless entries.empty? %>
+<%=     headline(label) %>
+<table class="entries">
+<tr><th>signature</th><th colspan="2">description</th></tr>
+<%
+        headline_push
+        entries.each do |m|
+          foreach_method_chunk(m.source) do |sigs, src| %>
+<tr>
+<td class="signature"><%=
+              sigs.map {|sig|
+              name, params = sig.split(/(?=\(|\z)/, 2)
+              method_link(m.spec_string, name) + escape_html(params)
+            }.join("<br>") %></td>
+<%          if m.redefined? %>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= library_link(m.library.name) %></td>
+<%          else %>
+<td class="description" colspan="2"><%= compile_rd(src) %></td>
+<%          end %>
+</tr>
+<%
+          end
+        end
+        headline_pop
+%>
+</table>
+<%
+      end
+    end
+%>
+
+<%
+    [['Added Methods',          ents.added]]\
+    .each do |label, entries|
+      unless entries.empty?  %>
+<%=     headline(label) %>
+<table class="entries">
+<tr><th>signature</th><th>description</th><th>library</th></tr>
+<%
+        headline_push
+        entries.each do |m|
+          foreach_method_chunk(m.source) do |sigs, src| %>
+<tr>
+<td class="signature"><%=
+            sigs.map {|sig|
+              name, params = sig.split(/(?=\(|\z)/, 2)
+              method_link(m.spec_string, name) + escape_html(params)
+            }.join("<br>") %></td>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= library_link(m.library.name) %></td>
+</tr>
+<%
+          end
+        end
+        headline_pop
+%>
+</table>
+<%
+      end
+    end
+    headline_pop
+%>
+
+</body>
+</html>

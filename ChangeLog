@@ -1,3 +1,16 @@
+Sun May  6 19:48:40 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: support [[m:Array#[] ]].
+	  [ruby-reference-manual:405]
+
+	* tools/bc-tohtml.rb: --target=C did not work.
+
+	* lib/bitclust/screen.rb: accept multiple method entries.
+
+	* lib/bitclust/entry.rb: new method LibraryEntry#get_class.
+
+	* lib/bitclust/entry.rb: new method LibraryEntry#fetch_methods.
+
 Sun Apr 22 14:55:03 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/entry.rb (inherited_method_specs): did not reject
