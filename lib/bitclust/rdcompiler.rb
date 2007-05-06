@@ -55,7 +55,7 @@ module BitClust
       while @f.next?
         case @f.peek
         when /\A---/
-          method_list_chunk
+          method_entry_chunk
         when /\A=+/
           headline @f.gets
         when /\A\s+\*\s/
@@ -86,7 +86,7 @@ module BitClust
 
     def method_entry_chunk
       @f.while_match(/\A---/) do |line|
-        compile_signature(line)
+        method_signature line
       end
       props = {}
       @f.while_match(/\A:/) do |line|
@@ -214,15 +214,20 @@ module BitClust
       line '</p>'
     end
 
+    # FIXME: parse @param, @return, ...
     def method_entry_paragraph
-      read_paragraph(@f)
+      line '<p>'
+      read_paragraph(@f).each do |line|
+        line compile_text(line.strip)
+      end
+      line '</p>'
     end
 
     def read_paragraph(f)
       f.span(%r<\A(?!---|=|//\w)\S>)
     end
 
-    def compile_signature(sig)
+    def method_signature(sig)
       # FIXME: check parameters, types, etc.
       string '<dt><code>'
       string escape_html(sig.sub(/\A---/, '').strip)
