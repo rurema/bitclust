@@ -69,8 +69,18 @@ module BitClust
       @screenmanager.class_index_screen(@db.classes.sort).response
     end
 
-    def handle_search(key)
+    def handle_search(req)
       # FIXME
+    end
+
+    def handle_function(req)
+      return function_index() unless req.function_name
+      f = @db.fetch_function(req.function_name)
+      @screenmanager.function_screen(f).response
+    end
+
+    def function_index
+      @screenmanager.function_index_screen(@db.functions.sort).response
     end
 
   end
@@ -151,11 +161,26 @@ module BitClust
     def type_id
       type, param = parse_path_info()
       case type
-      when 'library', 'class', 'method'
+      when 'library', 'class', 'method', 'function'
         type.intern
       else
         nil
       end
+    end
+
+    def function?
+      type_id() == :function
+    end
+
+    def function_name
+      raise '#function_name called but not function request' unless function?
+      id = type_param()
+      return nil unless id
+      name = id
+      unless functionname?(name)
+        raise InvalidKey, "invalid function name: #{name.inspect}"
+      end
+      name
     end
 
     private

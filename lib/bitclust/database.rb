@@ -9,6 +9,8 @@
 
 require 'bitclust/entry'
 require 'bitclust/completion'
+require 'bitclust/rrdparser'
+require 'bitclust/functionreferenceparser'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
 require 'fileutils'
@@ -378,9 +380,11 @@ module BitClust
       result
     end
 
-    #
-    # Direct File Access (Internal use only)
-    #
+  end
+
+
+  # internal use only
+  module DirectFileAccess
 
     def exist?(rel)
       return false unless @prefix
@@ -445,6 +449,133 @@ module BitClust
       "#{@prefix}/#{encodeid(rel)}"
     end
     private :realpath
+
+  end
+
+
+  class Database   # reopen
+    include DirectFileAccess
+  end
+
+
+  class FunctionDatabase
+
+    include DirectFileAccess
+    include NameUtils
+
+    def initialize(prefix)
+      @prefix = prefix
+      @properties = nil
+      @in_transaction = false
+      @properties_dirty = false
+      @dirty_functions = {}
+      @functionmap = {}
+      @function_extent_loaded = false
+    end
+
+    attr_reader :properties
+
+    def encoding
+      'euc-jp'
+    end
+
+    def transaction
+      @in_transaction = true
+      yield
+      return if dummy?
+      if @properties_dirty
+        save_properties 'properties', @properties
+        @properties_dirty = false
+      end
+      if dirty?
+        each_dirty_function do |f|
+          f.save
+        end
+        clear_dirty
+#        save_completion_index
+      end
+    ensure
+      @in_transaction = false
+    end
+
+    def dummy?
+      not @prefix
+    end
+
+    def dirty_function(f)
+      @dirty_functions[f] = true
+    end
+
+    def dirty?
+      not @dirty_functions.empty?
+    end
+
+    def each_dirty_function(&block)
+      @dirty_functions.each_key(&block)
+    end
+
+    def clear_dirty
+      @dirty_functions.clear
+    end
+
+    def check_transaction
+      return if dummy?
+      unless @in_transaction
+        raise NotInTransaction, "begin transaction before changing DB"
+      end
+    end
+    private :check_transaction
+
+    def update_by_file(path, filename)
+      check_transaction
+      FunctionReferenceParser.new(self).parse_file(path, filename, properties())
+    end
+
+    def open_function(id)
+      check_transaction
+      if exist?("function/#{id}")
+        f = load_function(id)
+        f.clear
+      else
+        f = (@functionmap[id] ||= FunctionEntry.new(self, id))
+      end
+      yield f
+      dirty_function f
+      f
+    end
+
+    def fetch_function(id)
+      load_function(id) or
+          raise FunctionNotFound, "function not found: #{id.inspect}"
+    end
+
+    def load_function(id)
+      @functionmap[id] ||=
+          begin
+            return nil unless exist?("function/#{id}")
+            FunctionEntry.new(self, id)
+          end
+    end
+    private :load_function
+
+    def functions
+      functionmap().values
+    end
+
+    def functionmap
+      return @functionmap if @function_extent_loaded
+      id_extent(FunctionEntry).each do |id|
+        @functionmap[id] ||= FunctionEntry.new(self, id)
+      end
+      @function_extent_loaded = true
+      @functionmap
+    end
+    private :functionmap
+
+    def id_extent(entry_class)
+      entries(entry_class.type_id.to_s)
+    end
+    private :id_extent
 
   end
 

@@ -24,6 +24,7 @@ module BitClust
   class ClassNotFound           < UserError; end
   class MethodNotFound          < UserError; end
   class InvalidScheme           < UserError; end
+  class FunctionNotFound        < UserError; end
 
   module WriterError; end
   class DocumentError

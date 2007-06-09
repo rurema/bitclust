@@ -46,6 +46,14 @@ module BitClust
       new_screen(MethodScreen, ms)
     end
 
+    def function_screen(f)
+      new_screen(FunctionScreen, f)
+    end
+
+    def function_index_screen(fs)
+      new_screen(FunctionIndexScreen, fs)
+    end
+
     private
 
     def new_screen(c, *args)
@@ -90,6 +98,14 @@ module BitClust
     def method_url(spec)
       cname, tmark, mname = *split_method_spec(spec)
       "#{@cgi_url}/method/#{classname2id(cname)}/#{typemark2char(tmark)}/#{encodename_url(mname)}"
+    end
+
+    def function_index_url
+      "#{@cgi_url}/function/"
+    end
+
+    def function_url(name)
+      "#{@cgi_url}/function/#{name}"
     end
   end
 
@@ -184,6 +200,10 @@ module BitClust
       @urlmapper.library_index_url
     end
 
+    def function_index_url
+      @urlmapper.function_index_url
+    end
+
     def headline_init
       @hlevel = 1
     end
@@ -206,6 +226,10 @@ module BitClust
 
     def compile_method(m)
       rdcompiler().compile_method(m)
+    end
+
+    def compile_function(f)
+      compile_rd(f.source)
     end
 
     def compile_rd(src)
@@ -291,6 +315,18 @@ module BitClust
 
     def body
       run_template('method')
+    end
+  end
+
+  class FunctionScreen < EntryBoundScreen
+    def body
+      run_template('function')
+    end
+  end
+
+  class FunctionIndexScreen < IndexScreen
+    def body
+      run_template('function-index')
     end
   end
 

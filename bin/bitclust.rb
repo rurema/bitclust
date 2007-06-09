@@ -34,6 +34,7 @@ end
 
 def _main
   prefix = nil
+  capi = false
   parser = OptionParser.new
   parser.banner = <<-EndBanner
 Usage: #{File.basename($0, '.*')} [global options] <subcommand> [options] [args]
@@ -51,6 +52,9 @@ Global Options:
   EndBanner
   parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
     prefix = path
+  }
+  parser.on('--capi', 'Process C API database.') {
+    capi = true
   }
   parser.on('--help', 'Prints this message and quit.') {
     puts parser.help
@@ -90,7 +94,11 @@ Global Options:
     $stderr.puts "no database given. Use --database option"
     exit 1
   end
-  db = BitClust::Database.new(prefix)
+  unless capi
+    db = BitClust::Database.new(prefix)
+  else
+    db = BitClust::FunctionDatabase.new(prefix)
+  end
   cmd.exec db, ARGV
 rescue BitClust::WriterError => err
   raise if $DEBUG
@@ -177,7 +185,7 @@ class UpdateCommand < Subcommand
   def parse(argv)
     super
     if not @root and argv.empty?
-      error "no file given"
+      error "no input file given"
     end
   end
 
@@ -200,6 +208,10 @@ class UpdateCommand < Subcommand
     else
       path
     end
+  end
+
+  def get_c_filename(path)
+    File.basename(path, '.rd')
   end
 
 end

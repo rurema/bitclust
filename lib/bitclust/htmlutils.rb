@@ -35,6 +35,10 @@ module BitClust
       a_href(@urlmapper.method_url(spec), label || spec)
     end
 
+    def function_link(name, label = nil)
+      a_href(@urlmapper.function_url(name), label || name)
+    end
+
     def a_href(url, label)
       %Q(<a href="#{escape_html(url)}">#{escape_html(label)}</a>)
     end

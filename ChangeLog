@@ -1,3 +1,29 @@
+Sat Jun  9 16:44:00 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/function: new file.
+
+	* template/function-index: new file.
+
+	* bin/bitclust.rb: support function database.
+
+	* lib/bitclust/requesthandler.rb: ditto.
+
+	* lib/bitclust/screen.rb: ditto.
+
+	* lib/bitclust/database.rb: new class FunctionDatabase.
+
+	* lib/bitclust/database.rb: new module DirectFileAccess.
+
+	* lib/bitclust/entry.rb: new class FunctionEntry.
+
+	* lib/bitclust/htmlutils.rb: new method #function_link.
+
+	* lib/bitclust/nameutils.rb: new method #functionname?.
+
+	* lib/bitclust/exception.rb: new exception class FunctionNotFound.
+
+	* lib/bitclust/functionreferenceparser.rb: new file.
+
 Sun May  6 21:30:56 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb (method_entry_paragraph): last change

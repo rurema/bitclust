@@ -195,6 +195,10 @@ module BitClust
           raise "must not happen: #{mark.inspect}"
     end
 
+    def functionname?(n)
+      /\A\w+\z/ =~ n ? true : false
+    end
+
     # string -> case-sensitive ID
     def encodename_url(str)
       str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('=%02x', ch[0].ord) }

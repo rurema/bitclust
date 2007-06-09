@@ -949,4 +949,49 @@ module BitClust
 
   end
 
+
+  class FunctionEntry < Entry
+
+    def FunctionEntry.type_id
+      :function
+    end
+
+    def initialize(db, id)
+      super db
+      @id = id
+      init_properties
+    end
+
+    persistent_properties {
+      property :header,     'String'
+      property :source,     'String'
+    }
+
+    attr_reader :id
+    alias name id
+    alias label id
+
+# FIXME
+    def type_label
+      'function'
+    end
+
+    def inspect
+      "\#<function #{@id}>"
+    end
+
+    def <=>(other)
+      @id.casecmp(other.id)
+    end
+
+    def public?
+true   # FIXME
+    end
+
+    def visibility
+      :extern
+    end
+
+  end
+
 end
