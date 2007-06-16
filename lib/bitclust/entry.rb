@@ -77,6 +77,7 @@ module BitClust
         case @type
         when 'String'         then "'(uninitialized)'"
         when 'Symbol'         then "nil"
+        when 'bool'           then "false"
         when 'LibraryEntry'   then "nil"
         when 'ClassEntry'     then "nil"
         when 'MethodEntry'    then "nil"
@@ -93,6 +94,7 @@ module BitClust
         case @type
         when 'String'         then "h['#{@name}']"
         when 'Symbol'         then "h['#{@name}'].intern"
+        when 'bool'           then "h['#{@name}'] == 'true' ? true : false"
         when 'LibraryEntry'   then "restore_library(h['#{@name}'])"
         when 'ClassEntry'     then "restore_class(h['#{@name}'])"
         when 'MethodEntry'    then "restore_method(h['#{@name}'])"
@@ -109,6 +111,7 @@ module BitClust
         case @type
         when 'String'         then "@#{@name}"
         when 'Symbol'         then "@#{@name}.to_s"
+        when 'bool'           then "@#{@name}.to_s"
         when 'LibraryEntry'   then "serialize_entry(@#{@name})"
         when 'ClassEntry'     then "serialize_entry(@#{@name})"
         when 'MethodEntry'    then "serialize_entry(@#{@name})"
@@ -962,20 +965,6 @@ module BitClust
       init_properties
     end
 
-    persistent_properties {
-      property :header,     'String'
-      property :source,     'String'
-    }
-
-    attr_reader :id
-    alias name id
-    alias label id
-
-# FIXME
-    def type_label
-      'function'
-    end
-
     def inspect
       "\#<function #{@id}>"
     end
@@ -984,12 +973,42 @@ module BitClust
       @id.casecmp(other.id)
     end
 
+    persistent_properties {
+      property :filename,   'String'
+      property :macro,      'bool'
+      property :private,    'bool'
+      property :type,       'String'
+      property :name,       'String'
+      property :params,     'String'
+      property :source,     'String'
+    }
+
+    attr_reader :id
+    alias name id
+    alias label id
+
+    alias macro? macro
+    alias private? private
+
     def public?
-true   # FIXME
+      not private?
     end
 
-    def visibility
-      :extern
+    def callable?
+      not params().empty?
+    end
+
+    def type_label
+      macro? ? 'macro' : 'function'
+    end
+
+    def header
+      if callable?
+        base = "#{type()} #{name()}#{params()}"
+      else
+        base = "#{type()} #{name()}"
+      end
+      "#{private? ? 'static ' : ''}#{base}"
     end
 
   end

@@ -1,3 +1,12 @@
+Sun Jun 17 04:40:59 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/functionreferenceparser.rb: parse function header.
+
+	* lib/bitclust/entry.rb (FunctionEntry): new persistent attribute
+	  "filename".
+
+	* template/function: show static and macro symbol.
+
 Sat Jun  9 16:44:00 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/function: new file.

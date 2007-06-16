@@ -24,6 +24,7 @@ module BitClust
     end
 
     def parse(f, filename)
+      @filename = filename
       file_entries LineInput.new(f)
     end
 
@@ -38,18 +39,32 @@ module BitClust
     end
 
     def entry(header, body)
-      id = parse_header(header)
-      @db.open_function(id) {|f|
-        f.header = header
+      h = parse_header(header)
+      @db.open_function(h.name) {|f|
+        f.filename = @filename
+        f.macro = h.macro
+        f.private = h.private
+        f.type = h.type
+        f.name = h.name
+        f.params = h.params
         f.source = body.join('')
       }
     end
 
     def parse_header(header)
-      header.slice(/(\w+)(?:\(|\s*\z)/, 1) or
-          raise "function header parse error: #{header.inspect}"
+      h = FunctionHeader.new
+      m = header.match(/\A\s*(MACRO\s+)?(static\s+)?(.+?\W)(\w+)(\(.*\))?\s*\z/)
+      raise ParseError, "syntax error: #{header.inspect}" unless m
+      h.macro = m[1] ? true : false
+      h.private = m[2] ? true : false
+      h.type = m[3].strip
+      h.name = m[4]
+      h.params = m[5].strip if m[5]
+      h
     end
 
   end
+
+  FunctionHeader = Struct.new(:macro, :private, :type, :name, :params)
 
 end
