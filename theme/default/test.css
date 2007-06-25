@@ -5,14 +5,14 @@
 */
 
 body {
-    background-color: white;
-    color: black;
-    font-family: osaka,'MS PGothic',sans-serif;
-    text-align: left;
     margin-top: 20px;
     margin-left: 2%;
     margin-right: 2%;
     line-height: 1.3;
+    text-align: left;
+    color: black;
+    font-family: osaka,'MS PGothic',sans-serif;
+    background-color: white;
 }
 
 /*
