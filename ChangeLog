@@ -1,3 +1,7 @@
+Sun Jul  1 18:19:41 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* standalone.rb: --cgidir -> --themedir.
+
 Sun Jul  1 18:09:56 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* standalone.rb: new file.  WEBrick based server entry point.

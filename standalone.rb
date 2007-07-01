@@ -12,13 +12,13 @@ params = {
 }
 baseurl = nil
 dbpath = nil
-cgidir = nil
 srcdir = nil
 templatedir = nil
+themedir = nil
 debugp = false
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--port=NUM] --baseurl=URL --database=PATH --cgidir=PATH --srcdir=PATH [--templatedir=PATH] [--debug]"
+parser.banner = "#{$0} [--port=NUM] --baseurl=URL --database=PATH --srcdir=PATH [--templatedir=PATH] [--themedir=PATH] [--debug]"
 parser.on('--port=NUM', 'Listening port number') {|num|
   params[:Port] = num.to_i
 }
@@ -28,16 +28,17 @@ parser.on('--baseurl=URL', 'The base URL to host.') {|url|
 parser.on('--database=PATH', 'Database root directory.') {|path|
   dbpath = path
 }
-parser.on('--cgidir=PATH', 'Server working directory.') {|path|
-  cgidir = path
-}
 parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
   srcdir = path
   templatedir ||= "#{srcdir}/template"
+  themedir ||= "#{srcdir}/theme"
   $LOAD_PATH.unshift "#{srcdir}/lib"
 }
 parser.on('--templatedir=PATH', 'BitClust template directory.') {|path|
   templatedir = path
+}
+parser.on('--themedir=PATH', 'BitClust theme directory.') {|path|
+  themedir = path
 }
 parser.on('--[no-]debug', 'Debug mode.') {|flag|
   debugp = flag
@@ -57,16 +58,16 @@ unless baseurl
   $stderr.puts "missing --baseurl"
   exit 1
 end
-unless cgidir
-  $stderr.puts "missing --cgidir"
-  exit 1
-end
 unless dbpath
   $stderr.puts "missing --database"
   exit 1
 end
 unless templatedir
   $stderr.puts "missing templatedir; use --srcdir or --templatedir"
+  exit 1
+end
+unless themedir
+  $stderr.puts "missing themedir; use --srcdir or --themedir"
   exit 1
 end
 
@@ -95,7 +96,7 @@ else
 end
 server = WEBrick::HTTPServer.new(params)
 server.mount '/', BitClust::Interface.new { handler }
-server.mount '/theme/', WEBrick::HTTPServlet::FileHandler, "#{cgidir}/theme"
+server.mount '/theme/', WEBrick::HTTPServlet::FileHandler, themedir
 if debugp
   trap(:INT) { server.shutdown }
 else
