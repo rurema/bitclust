@@ -1,3 +1,7 @@
+Sun Jul  1 18:45:03 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* standalone.rb: now --srcdir is optional.
+
 Sun Jul  1 18:19:41 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* standalone.rb: --cgidir -> --themedir.

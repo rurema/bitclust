@@ -5,6 +5,8 @@
 # Stand-alone BitClust server based on WEBrick
 #
 
+require 'uri'
+require 'webrick'
 require 'optparse'
 
 params = {
@@ -12,13 +14,18 @@ params = {
 }
 baseurl = nil
 dbpath = nil
-srcdir = nil
-templatedir = nil
-themedir = nil
+srcdir = templatedir = themedir = nil
+set_srcdir = lambda {|path|
+  srcdir = path
+  templatedir ||= "#{srcdir}/template"
+  themedir ||= "#{srcdir}/theme"
+  $LOAD_PATH.unshift "#{srcdir}/lib"
+}
+set_srcdir.call File.dirname($0)
 debugp = false
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--port=NUM] --baseurl=URL --database=PATH --srcdir=PATH [--templatedir=PATH] [--themedir=PATH] [--debug]"
+parser.banner = "#{$0} [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug]"
 parser.on('--port=NUM', 'Listening port number') {|num|
   params[:Port] = num.to_i
 }
@@ -29,10 +36,7 @@ parser.on('--database=PATH', 'Database root directory.') {|path|
   dbpath = path
 }
 parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
-  srcdir = path
-  templatedir ||= "#{srcdir}/template"
-  themedir ||= "#{srcdir}/theme"
-  $LOAD_PATH.unshift "#{srcdir}/lib"
+  set_srcdir.call path
 }
 parser.on('--templatedir=PATH', 'BitClust template directory.') {|path|
   templatedir = path
@@ -73,7 +77,6 @@ end
 
 require 'bitclust'
 require 'bitclust/interface'
-require 'webrick'
 
 db = BitClust::Database.new(dbpath)
 manager = BitClust::ScreenManager.new(
@@ -94,9 +97,10 @@ else
   params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::INFO)
   params[:AccessLog] = []
 end
+basepath = URI.parse(baseurl).path
 server = WEBrick::HTTPServer.new(params)
-server.mount '/', BitClust::Interface.new { handler }
-server.mount '/theme/', WEBrick::HTTPServlet::FileHandler, themedir
+server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
+server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, themedir
 if debugp
   trap(:INT) { server.shutdown }
 else
