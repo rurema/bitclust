@@ -1,3 +1,10 @@
+Sun Jul  1 18:09:56 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* standalone.rb: new file.  WEBrick based server entry point.
+
+	* lib/bitclust/interface.rb: support WEBrick servlet (still
+	  multi-thread unsafe).
+
 Sun Jun 17 04:40:59 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/functionreferenceparser.rb: parse function header.
