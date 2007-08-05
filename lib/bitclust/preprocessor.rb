@@ -1,0 +1,236 @@
+#
+# bitclust/preprocessor.rb
+#
+# Copyright (c) 2006-2007 Minero Aoki
+#
+# This program is free software.
+# You can distribute/modify this program under the Ruby License.
+#
+
+require 'bitclust/parseutils'
+require 'strscan'
+
+module BitClust
+
+  class LineFilter
+
+    include ParseUtils
+    include Enumerable
+
+    def initialize(f)
+      @f = f
+      @buf = []
+    end
+
+    def gets
+      @buf.shift || next_line(@f)
+    end
+
+    def each
+      while line = gets()
+        yield line
+      end
+    end
+
+    # abstract next_line
+
+  end
+
+
+  class Preprocessor < LineFilter
+
+    def Preprocessor.process(path, params = {})
+      File.open(path) {|f|
+        return wrap(f, params).to_a
+      }
+    end
+
+    def Preprocessor.wrap(f, params = {})
+      new(LineStream.new(f), params)
+    end
+
+    def initialize(f, params = {})
+      super f
+      @params = params
+      @last_if = nil
+      cond_init
+    end
+
+    private
+
+    def next_line(f)
+      while line = f.gets
+        case line
+        when /\A\#@\#/   # preprocessor comment
+          ;
+        when /\A\#@todo/i
+          ;
+        when /\A\#@include\s*\((.*?)\)/
+          begin
+            file = $1.strip
+            basedir = File.dirname(line.location.file)
+            @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
+          rescue Errno::ENOENT => err
+            raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
+          end
+        when /\A\#@since\b/
+          @last_if = line
+          begin
+            cond_push eval_cond(build_cond_by_value(line, 'version >='))
+          rescue ScanError => err
+            parse_error err.message, line
+          end
+        when /\A\#@if\b/
+          @last_if = line
+          begin
+            cond_push eval_cond(line.sub(/\A\#@if/, '').strip)
+          rescue ScanError => err
+            parse_error err.message, line
+          end
+        when /\A\#@else\s*\z/
+          parse_error "no matching #@if", line  if cond_toplevel?
+          cond_invert
+        when /\A\#@end\s*\z/
+          parse_error "no matching #@if", line  if cond_toplevel?
+          cond_pop
+        when /\A\#@/
+          parse_error "unknown preprocessor directive", line
+        else
+          if @cond_stack.last
+            @buf.push line
+            break
+          end
+        end
+      end
+      if @buf.empty?
+        unless cond_toplevel?
+          parse_error "unterminated \#@if", @last_if
+        end
+      end
+      @buf.shift
+    end
+
+    def build_cond_by_value(line, left)
+      case ver = line.sub(/\A\#@since/, '').strip
+      when /\A[\d\.]+\z/
+        %Q(#{left} "#{ver}")
+      when /\A"[\d\.]+"\z/
+        "#{left} #{ver}"
+      else
+        parse_error "wrong #@since line", line
+      end
+    end
+
+    def cond_init
+      @cond_stack = [true]
+    end
+
+    def cond_toplevel?
+      @cond_stack.size == 1
+    end
+
+    def cond_push(bool)
+      @cond_stack.push(@cond_stack.last && bool)
+    end
+
+    def cond_invert
+      b = @cond_stack.pop
+      @cond_stack.push(!b && @cond_stack.last)
+    end
+
+    def cond_pop
+      @cond_stack.pop
+    end
+
+    def eval_cond(str)
+      s = StringScanner.new(str)
+      result = eval_expr(s) ? true : false
+      unless s.eos?
+        scan_error "parse error at: #{s.inspect}"
+      end
+      result
+    end
+
+    def eval_expr(s)
+      paren_open = s.scan(/\s*\(/)
+      val = eval_primary(s)
+      while op = read_op(s)
+        if op == '!='
+          val = (val != eval_primary(s))
+        else
+          val = val.__send(op, eval_primary(s))
+        end
+      end
+      if paren_open
+        unless s.skip(/\s*\)/)
+          scan_error "paren opened but not closed"
+        end
+      end
+      val
+    end
+
+    def read_op(s)
+      s.skip(/\s+/)
+      s.scan(/>=|<=|==|<|>|!=/)
+    end
+
+    def eval_primary(s)
+      s.skip(/\s+/)
+      if t = s.scan(/\w+/)
+        unless @params.key?(t)
+          scan_error "database property `#{t}' not exist"
+        end
+        @params[t]
+      elsif t = s.scan(/".*?"/)
+        eval(t)
+      elsif t = s.scan(/'.*?'/)
+        eval(t)
+      elsif t = s.scan(/\d+/)
+        t.to_i
+      else
+        scan_error "parse error at: #{s.inspect}"
+      end
+    end
+
+    def scan_error(msg)
+      raise ScanError, msg
+    end
+
+  end
+
+
+  class LineCollector < LineFilter
+
+    def LineCollector.process(path)
+      File.open(path) {|f|
+        return wrap(f).to_a
+      }
+    end
+
+    def LineCollector.wrap(f)
+      new(LineStream.new(f))
+    end
+
+    private
+
+    def next_line(f)
+      while line = f.gets
+        if /\A\#@include\s*\((.*?)\)/ =~ line
+          begin
+            file = $1.strip
+            basedir = File.dirname(line.location.file)
+            @buf.concat LineCollector.process("#{basedir}/#{file}")
+          rescue Errno::ENOENT => err
+            raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
+          end
+        else
+          @buf.push line
+        end
+        break unless @buf.empty?
+      end
+      @buf.shift
+    end
+
+  end
+
+end
