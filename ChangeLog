@@ -1,3 +1,7 @@
+Wed Aug  8 06:42:44 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb (method_info): change output (tmp).
+
 Wed Aug  8 06:38:11 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb: compile @return, @param, ...

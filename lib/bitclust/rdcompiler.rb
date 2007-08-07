@@ -228,14 +228,14 @@ module BitClust
       when '@param'
         name = header.slice!(/\A\s*\w+/n) || '?'
         line '<p>'
-        line "PARAM #{escape_html(name.strip)}:"
+        line "[PARAM] #{escape_html(name.strip)}:"
         body.each do |line|
           line compile_text(line.strip)
         end
         line '</p>'
       when '@return'
         line '<p>'
-        line "RETURN:"
+        line "[RETURN]"
         body.each do |line|
           line compile_text(line.strip)
         end
@@ -243,14 +243,14 @@ module BitClust
       when '@raise'
         ex = header.slice!(/\A\s*[\w:]+/n) || '?'
         line '<p>'
-        line "EXCEPTION #{escape_html(ex.strip)}:"
+        line "[EXCEPTION] #{escape_html(ex.strip)}:"
         body.each do |line|
           line compile_text(line.strip)
         end
         line '</p>'
       else
         line '<p>'
-        line "UNKNOWN META INFO: #{escape_html(cmd)}:"
+        line "[UNKNOWN_META_INFO] #{escape_html(cmd)}:"
         body.each do |line|
           line compile_text(line.strip)
         end
