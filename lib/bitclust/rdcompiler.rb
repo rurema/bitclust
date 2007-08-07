@@ -112,6 +112,8 @@ module BitClust
           emlist
         when /\A\s+\S/
           list
+        when /\A@[a-z]/
+          method_info
         else
           if @f.peek.strip.empty?
             @f.gets
@@ -214,17 +216,59 @@ module BitClust
       line '</p>'
     end
 
+    def read_paragraph(f)
+      f.span(%r<\A(?!---|=|//\w)\S>)
+    end
+
+    def method_info
+      header = @f.gets
+      cmd = header.slice!(/\A\@\w+/)
+      body = [header] + @f.span(/\A\s+\S/)
+      case cmd
+      when '@param'
+        name = header.slice!(/\A\s*\w+/n) || '?'
+        line '<p>'
+        line "PARAM #{escape_html(name.strip)}:"
+        body.each do |line|
+          line compile_text(line.strip)
+        end
+        line '</p>'
+      when '@return'
+        line '<p>'
+        line "RETURN:"
+        body.each do |line|
+          line compile_text(line.strip)
+        end
+        line '</p>'
+      when '@raise'
+        ex = header.slice!(/\A\s*[\w:]+/n) || '?'
+        line '<p>'
+        line "EXCEPTION #{escape_html(ex.strip)}:"
+        body.each do |line|
+          line compile_text(line.strip)
+        end
+        line '</p>'
+      else
+        line '<p>'
+        line "UNKNOWN META INFO: #{escape_html(cmd)}:"
+        body.each do |line|
+          line compile_text(line.strip)
+        end
+        line '</p>'
+      end
+    end
+
     # FIXME: parse @param, @return, ...
     def method_entry_paragraph
       line '<p>'
-      read_paragraph(@f).each do |line|
+      read_method_entry_paragraph(@f).each do |line|
         line compile_text(line.strip)
       end
       line '</p>'
     end
 
-    def read_paragraph(f)
-      f.span(%r<\A(?!---|=|//\w)\S>)
+    def read_method_entry_paragraph(f)
+      f.span(%r<\A(?!---|=|//\w|@[a-z])\S>)
     end
 
     def method_signature(sig)

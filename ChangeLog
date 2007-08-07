@@ -1,3 +1,7 @@
+Wed Aug  8 06:38:11 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb: compile @return, @param, ...
+
 Mon Aug  6 03:36:02 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/stattodo.rb: use history database.
