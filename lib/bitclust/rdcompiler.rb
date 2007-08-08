@@ -251,7 +251,7 @@ module BitClust
         line '</p>'
       when '@see'
         line '<p>'
-        line '[SEE_ALSO] ' + body.join(' ').split.map {|ref| compile_text(ref) }.join(",\n")
+        line '[SEE_ALSO] ' + body.join('').split(',').map {|ref| compile_text(ref.strip) }.join(",\n")
         line '</p>'
       else
         line '<p>'

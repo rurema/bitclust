@@ -1,3 +1,8 @@
+Thu Aug  9 01:41:19 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/rdcompiler.rb (method_info): @see accepts comma
+	  separated ref list.
+
 Thu Aug  9 01:23:23 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/rdcompiler.rb (method_info): compile @see.
