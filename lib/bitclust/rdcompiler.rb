@@ -220,6 +220,7 @@ module BitClust
       f.span(%r<\A(?!---|=|//\w)\S>)
     end
 
+    # FIXME: temporary implementation
     def method_info
       header = @f.gets
       cmd = header.slice!(/\A\@\w+/)
@@ -247,6 +248,10 @@ module BitClust
         body.each do |line|
           line compile_text(line.strip)
         end
+        line '</p>'
+      when '@see'
+        line '<p>'
+        line '[SEE_ALSO] ' + body.join(' ').split.map {|ref| compile_text(ref) }.join(",\n")
         line '</p>'
       else
         line '<p>'
