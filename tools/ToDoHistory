@@ -6,7 +6,6 @@ Bignum	0
 Binding	1
 Class	6
 Comparable	6
-constants	18
 Continuation	1
 Data	0
 Dir	19
@@ -24,7 +23,6 @@ FileTest	26
 Fixnum	2
 Float	17
 FloatDomainError	0
-functions	59
 GC	5
 Hash	35
 IndexError	0
@@ -49,9 +47,7 @@ NotImplementedError	0
 Numeric	18
 Object	51
 ObjectSpace	9
-pack-template	0
 Precision	5
-printf-format	0
 Proc	7
 Process	52
 Process__GID	9
@@ -67,7 +63,6 @@ ScriptError	0
 SecurityError	0
 Signal	2
 SignalException	0
-specialvars	43
 StandardError	0
 String	79
 Struct	11
