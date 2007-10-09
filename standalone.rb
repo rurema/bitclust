@@ -25,7 +25,10 @@ set_srcdir.call File.dirname($0)
 debugp = false
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug]"
+parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug]"
+parser.on('--bind-address=ADDR', 'Bind address') {|addr|
+  params[:BindAddress] = addr
+}
 parser.on('--port=NUM', 'Listening port number') {|num|
   params[:Port] = num.to_i
 }
