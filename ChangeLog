@@ -1,3 +1,9 @@
+Sun Nov  4 19:37:37 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/preprocessor.rb: new conditional statement #@until.
+
+	* lib/bitclust/rdcompiler.rb: new alias @arg (== @param).
+
 Sat Oct 13 05:59:03 2007  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: create archive files.

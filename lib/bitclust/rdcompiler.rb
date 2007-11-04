@@ -226,7 +226,7 @@ module BitClust
       cmd = header.slice!(/\A\@\w+/)
       body = [header] + @f.span(/\A\s+\S/)
       case cmd
-      when '@param'
+      when '@param', '@arg'
         name = header.slice!(/\A\s*\w+/n) || '?'
         line '<p>'
         line "[PARAM] #{escape_html(name.strip)}:"

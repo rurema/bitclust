@@ -74,19 +74,11 @@ module BitClust
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
           end
         when /\A\#@since\b/
-          @last_if = line
-          begin
-            cond_push eval_cond(build_cond_by_value(line, 'version >='))
-          rescue ScanError => err
-            parse_error err.message, line
-          end
+          cond_stmt_begin line, build_cond_by_value(line, 'version >=')
+        when /\A\#@until\b/
+          cond_stmt_begin line, build_cond_by_value(line, 'version <')
         when /\A\#@if\b/
-          @last_if = line
-          begin
-            cond_push eval_cond(line.sub(/\A\#@if/, '').strip)
-          rescue ScanError => err
-            parse_error err.message, line
-          end
+          cond_stmt_begin line, line.sub(/\A\#@if/, '').strip
         when /\A\#@else\s*\z/
           parse_error "no matching #@if", line  if cond_toplevel?
           cond_invert
@@ -110,14 +102,23 @@ module BitClust
       @buf.shift
     end
 
+    def cond_stmt_begin(line, cond)
+      @last_if = line
+      begin
+        cond_push eval_cond(cond)
+      rescue ScanError => err
+        parse_error err.message, line
+      end
+    end
+
     def build_cond_by_value(line, left)
-      case ver = line.sub(/\A\#@since/, '').strip
+      case ver = line.sub(/\A\#@\w+/, '').strip
       when /\A[\d\.]+\z/
         %Q(#{left} "#{ver}")
       when /\A"[\d\.]+"\z/
         "#{left} #{ver}"
       else
-        parse_error "wrong #@since line", line
+        parse_error "wrong conditional expr", line
       end
     end
 
