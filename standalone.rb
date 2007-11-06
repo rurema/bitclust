@@ -23,9 +23,11 @@ set_srcdir = lambda {|path|
 }
 set_srcdir.call File.dirname($0)
 debugp = false
+autop = false
+browser = nil
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug]"
+parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER]"
 parser.on('--bind-address=ADDR', 'Bind address') {|addr|
   params[:BindAddress] = addr
 }
@@ -49,6 +51,12 @@ parser.on('--themedir=PATH', 'BitClust theme directory.') {|path|
 }
 parser.on('--[no-]debug', 'Debug mode.') {|flag|
   debugp = flag
+}
+parser.on('--[no-]auto', 'Auto mode.') {|flag|
+  autop = flag
+}
+parser.on('--browser=BROWSER', 'Open with the browser.') {|path|
+  browser = path
 }
 parser.on('--help', 'Prints this message and quit.') {
   puts parser.help
@@ -102,6 +110,33 @@ else
 end
 basepath = URI.parse(baseurl).path
 server = WEBrick::HTTPServer.new(params)
+
+if autop
+  handlers = {}
+  Dir.glob("db-*").each do |dbpath|
+    next unless /db-([\d_]+)/ =~ dbpath
+    version = $1.tr("_", ".")
+    db = BitClust::Database.new(dbpath)
+    manager = BitClust::ScreenManager.new(
+      :base_url => baseurl,
+      :cgi_url => "#{baseurl}/#{version}",
+      :templatedir => templatedir
+    )
+    handlers[version] = BitClust::RequestHandler.new(db, manager)
+    server.mount File.join(basepath, "#{version}/"), BitClust::Interface.new { handlers[version] }
+    $bitclust_context_cache = nil # clear cache
+  end
+  server.mount_proc(File.join(basepath, '/')) do |req, res|
+    raise WEBrick::HTTPStatus::NotFound if req.path != '/'
+    res.body = "<html><head><title>bitclust</title></head><body><ul>"
+    handlers.keys.sort.each do |version|
+      res.body << "<li><a href=\"#{version}/\">#{version}</a></li>"
+    end
+    res.body << "</ul></body></html>"
+    res['Content-Type'] = 'text/html; charset=euc-jp'
+  end
+end
+
 server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
 server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, themedir
 if debugp
@@ -109,4 +144,12 @@ if debugp
 else
   WEBrick::Daemon.start
 end
+exit if $".include?("exerb/mkexy.rb")
+if autop && !browser
+  case RUBY_PLATFORM
+  when /mswin/
+    browser = "start"
+  end
+end
+system("#{browser} http://localhost:#{params[:Port]}/") if browser
 server.start

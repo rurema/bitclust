@@ -13,13 +13,21 @@ begin
 rescue LoadError
   ruby = "ruby"
 end
-output_path = "../rubyrefm-1.9.0-dynamic"
-bitclust_src_path = File.dirname(__FILE__)
+
+bitclust_src_path = File.dirname(File.expand_path(__FILE__))
+parent_path = File.dirname(bitclust_src_path)
+output_path = File.join(parent_path, "rubyrefm-1.9.0-dynamic")
 bitclust_dest_dir = "bitclust"
-rubydoc_refm_api_src_path = "../rubydoc/refm/api/src"
-database_dir = "db"
+rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
 database_encoding = "euc-jp"
-database_version = "1.9.0"
+database_versions = [
+  "1.8.6",
+  "1.9.0",
+]
+default_version = "1.8.6"
+database_version_to_dir = proc {|version| "db-" + version.tr(".", "_") }
+title = "bitclust"
+
 fu = FileUtils::Verbose
 
 parser = OptionParser.new
@@ -39,14 +47,11 @@ parser.on('--rubydoc-refm-api-srcdir=SRCDIR', 'path to rubydoc/refm/api/src.') {
 parser.on('--output-dir=OUTPUTDIR', 'path to output.') {|path|
   output_path = path
 }
-parser.on('--database-dir=DATABASEDIR', 'dirname of database in output.') {|dir|
-  database_dir = dir
-}
 parser.on('--database-encoding=ENCODING', 'encoding of database.') {|encoding|
   database_encoding = encoding
 }
-parser.on('--database-version=VERSION', 'version of database.') {|version|
-  database_version = version
+parser.on('--database-versions=VERSION,VERSION', 'versions of database.', Array) {|versions|
+  database_versions = versions
 }
 
 begin
@@ -58,17 +63,16 @@ rescue OptionParser::ParseError => err
 end
 
 bitclust_command = File.join(bitclust_src_path, "bin/bitclust.rb")
-database_path = File.join(output_path, database_dir)
 
 def system_verbose(*args)
   puts args.inspect
   system(*args) or raise "failed: #{args.inspect}"
 end
 
-unless File.exist?(output_path)
+unless File.exist?(File.join(output_path, bitclust_dest_dir))
   fu.mkpath(output_path)
   Dir.glob("#{bitclust_src_path}/**/*").each do |src|
-    dest = File.join(output_path, bitclust_dest_dir, src)
+    dest = File.join(output_path, bitclust_dest_dir, src[bitclust_src_path.size..-1])
     if File.directory?(src)
       fu.mkpath(dest)
     else
@@ -77,25 +81,29 @@ unless File.exist?(output_path)
   end
 end
 
-unless File.exist?(database_path)
-  system_verbose(ruby, bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{database_version}")
-  system_verbose(ruby, bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
+database_versions.each do |version|
+  database_path = File.join(output_path, database_version_to_dir.call(version))
+  unless File.exist?(database_path)
+    system_verbose(ruby, bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{version}")
+    system_verbose(ruby, bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
+  end
 end
 
 server_rb = File.join(output_path, "server.rb")
 unless File.exist?(server_rb)
   puts "write #{server_rb}"
+  database_dir = database_version_to_dir.call(default_version)
   File.open(server_rb, "wb", 0755) do |f|
     f.puts <<-RUBY
 #!/usr/bin/ruby -Ke
 Dir.chdir File.dirname(__FILE__)
 standalone = "#{bitclust_dest_dir}/standalone.rb"
 src = File.read(standalone).sub(/\\$0/) { standalone.dump }
-src.gsub!(/\.start$/, "") if $".include?("exerb/mkexy.rb")
 ARGV.unshift "--bind-address=127.0.0.1"
 ARGV.unshift "--baseurl="
 ARGV.unshift "--database=#{database_dir}"
 ARGV.unshift "--debug"
+ARGV.unshift "--auto"
 eval src, binding, standalone, 1
     RUBY
   end
@@ -105,6 +113,7 @@ Dir.chdir(File.dirname(output_path))
 archive_name = File.basename(output_path)
 begin
   require "Win32API"
+  # make server.exe using exerb
   Dir.chdir(File.basename(output_path)) do
     system_verbose("ruby", "-rexerb/mkexy", "server.rb")
     File.open("server.exy", "r+") do |f|
@@ -117,6 +126,8 @@ begin
     end
     system_verbose("ruby", "-S", "exerb", "server.exy")
   end
+
+  # call DLL to make archives
   buf = ' '*32*1024
   [
     ["7-zip32", "SevenZip", "-tzip -mx9 a #{archive_name}.zip #{archive_name}"],
