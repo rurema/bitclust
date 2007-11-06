@@ -19,7 +19,9 @@
 
 <%
     headline_push
-    classes = @entry.classes.sort
+    all_classes = (@entry.classes + @entry.requires.map{|lib| lib.classes }.flatten).uniq.sort
+    err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
+    classes = (all_classes - err_classes).sort
 %>
 
 <%= headline("Abstract") %>
@@ -30,6 +32,19 @@
 <table>
 <%
       classes.each do |c|
+%>
+<tr>
+<td class="signature"><%=h c.type.to_s %> <%= class_link(c.name) %></td>
+<td class="description"><%= compile_rd(c.synopsis_source) %></td>
+<%    end %>
+</table>
+<%  end %>
+
+<%  unless err_classes.empty? %>
+<%= headline("Exception Classes") %>
+<table>
+<%
+      err_classes.each do |c|
 %>
 <tr>
 <td class="signature"><%=h c.type.to_s %> <%= class_link(c.name) %></td>
