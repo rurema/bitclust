@@ -1,5 +1,7 @@
 2007-11-07  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* template.offline/class: display all the methods in a single page. [ruby-reference-manual:557].
+
 	* template/library: separate classes into Exception ones and others.
 
 Wed Nov  7 01:47:22 2007  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
