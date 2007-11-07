@@ -1,5 +1,9 @@
 2007-11-07  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/ridatabase.rb (RiDatabase): take out RiDatabase from tools/bc-rdoc.rb.
+
+	* tools/bc-methods.rb (main): display RDoc domcuments of entries that do not exist in Rurima.
+
 	* template.offline/class: display all the methods in a single page. [ruby-reference-manual:557].
 
 	* template/library: separate classes into Exception ones and others.

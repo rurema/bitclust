@@ -13,6 +13,7 @@ $LOAD_PATH.unshift((bindir + '../lib').realpath)
 
 require 'bitclust'
 require 'bitclust/crossrubyutils'
+require 'bitclust/ridatabase'
 require 'optparse'
 
 include BitClust::CrossRubyUtils
@@ -33,6 +34,12 @@ def main
   opts.on('--diff=RDFILE', '') {|path|
     mode = :diff
     target = path
+  }
+  opts.on('-c', '') {
+    @content = true
+  }
+  opts.on('--ri-database', ''){|path|
+    @ri_path = path
   }
   opts.on('--help', 'Prints this message and quit.') {
     puts opts.help
@@ -59,11 +66,28 @@ def main
     lib = BitClust::RRDParser.parse_stdlib_file(target)
     c = lib.fetch_class(classname)
     list = c.entries.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
-    (table.keys - list).sort.each do |name|
-      puts "-#{name}"
-    end
-    (list - table.keys).sort.each do |name|
-      puts "+#{name}"
+
+    if @content      
+      ri = @ri_path ? RiDatabase.open(@ri_path, nil) : RiDatabase.open_system_db
+      ri.current_class = c.name
+      mthds = ( ri.singleton_methods + ri.instance_methods )
+      fmt = Formatter.new
+      (table.keys - list).sort.each do |name|
+        mthd = mthds.find{|m| name == m.fullname }
+        if mthd
+          puts fmt.method_info(mthd.entry)
+        else
+          name = name.sub(/\A\w+#/, '')
+          puts "--- #{name}\n\#@todo\n\n"
+        end
+      end
+    else      
+      (table.keys - list).sort.each do |name|
+        puts "-#{name}"
+      end
+      (list - table.keys).sort.each do |name|
+        puts "+#{name}" 
+      end
     end
   else
     raise "must not happen: #{mode.inspect}"
