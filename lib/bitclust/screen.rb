@@ -54,6 +54,10 @@ module BitClust
       new_screen(FunctionIndexScreen, fs)
     end
 
+    def rd_file_screen(s)
+      new_screen(RDFileScreen, s)
+    end
+      
     private
 
     def new_screen(c, *args)
@@ -330,4 +334,19 @@ module BitClust
     end
   end
 
+  class RDFileScreen < TemplateScreen
+    def initialize(u, t, e, entry)
+      super u, t, e
+      @entry = entry
+    end
+
+    def encoding
+      default_encoding()
+    end
+
+    alias charset encoding
+    def body
+      run_template('rd_file')
+    end
+  end
 end

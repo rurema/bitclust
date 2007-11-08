@@ -24,7 +24,7 @@ require 'optparse'
 def main
   templatedir = srcdir_root() + 'template.offline'
   target = nil
-  baseurl = '.'
+  baseurl = 'file://' + srcdir_root
   parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0, '.*')} rdfile"
   parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
@@ -52,14 +52,18 @@ def main
     exit 1
   end
 
-  lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0])
-  entry = target ? lookup(lib, target) : lib
   manager = BitClust::ScreenManager.new(
-    :templatedir => templatedir,
-    :base_url => baseurl,
-    :cgi_url => baseurl,
-    :default_encoding => 'euc-jp')
-  puts manager.entry_screen(entry).body
+                                        :templatedir => templatedir,
+                                        :base_url => baseurl,
+                                        :cgi_url => baseurl,
+                                        :default_encoding => 'euc-jp')
+  begin
+    lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0])
+    entry = target ? lookup(lib, target) : lib
+    puts manager.entry_screen(entry).body
+  rescue BitClust::ParseError
+    puts manager.rd_file_screen(ARGF.read).body
+  end
 rescue BitClust::WriterError => err
   $stderr.puts err.message
   exit 1

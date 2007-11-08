@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
-  <link rel="stylesheet" type="text/css" href="<%=h 'file://' + File.join(srcdir_root, 'theme/default/style.css') %>"> 
+  <link rel="stylesheet" type="text/css" href="<%=h css_url() %>"> 
   <title>class <%=h @entry.name %></title>
 </head>
 <body>
