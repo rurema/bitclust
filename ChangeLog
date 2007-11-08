@@ -1,3 +1,13 @@
+2007-11-08  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/screen.rb (BitClust::RDFileScreen): add a new class for general RD files.
+
+	* tools/bc-tohtml.rb (main): a new feature of compiling general RD files.
+
+	* template.offline/rd_file: add a new template for general RD files.
+
+	* template.offline/class: fix the url of a css file.
+
 2007-11-07  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/ridatabase.rb (RiDatabase): take out RiDatabase from tools/bc-rdoc.rb.
