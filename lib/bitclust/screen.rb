@@ -335,9 +335,9 @@ module BitClust
   end
 
   class RDFileScreen < TemplateScreen
-    def initialize(u, t, e, entry)
+    def initialize(u, t, e, s)
       super u, t, e
-      @entry = entry
+      @source = s
     end
 
     def encoding
@@ -347,6 +347,10 @@ module BitClust
     alias charset encoding
     def body
       run_template('rd_file')
+    end
+    
+    def rdcompiler
+      RDCompiler.new(@urlmapper, @hlevel, {:force => true})
     end
   end
 end

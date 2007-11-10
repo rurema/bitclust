@@ -19,13 +19,14 @@ module BitClust
     include HTMLUtils
     include TextUtils
 
-    def initialize(urlmapper, hlevel = 1)
+    def initialize(urlmapper, hlevel = 1, opt = {})
       @urlmapper = urlmapper
       @hlevel = hlevel
       @type = nil
       @library = nil
       @class = nil
       @method = nil
+      @option = opt.dup
     end
 
     def compile(src)
@@ -99,7 +100,11 @@ module BitClust
         when /\A===+/
           headline @f.gets
         when /\A==?/
-          raise "method entry includes headline: #{@f.peek.inspect}"
+          if @option[:force]
+            break
+          else
+            raise "method entry includes headline: #{@f.peek.inspect}"
+          end
         when /\A---/
           break
         when /\A\s+\*\s/
@@ -123,6 +128,7 @@ module BitClust
         end
       end
       @out.puts '</dd>'
+      @out.puts '</dl>' if @option[:force]
     end
 
     def headline(line)
@@ -278,6 +284,7 @@ module BitClust
 
     def method_signature(sig)
       # FIXME: check parameters, types, etc.
+      string '<dl>' if @option[:force]
       string '<dt><code>'
       string escape_html(sig.sub(/\A---/, '').strip)
       string '</code>'

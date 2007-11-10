@@ -1,3 +1,15 @@
+2007-11-10  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser.parse_stdlib_file): add a new argument `params'.
+
+	* lib/bitclust/screen.rb (BitClust::RDFileScreen): minor edit.
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler): add a new instance variable `@option'.
+
+	* template.offline/rd_file: minor edit
+
+	* tools/bc-tohtml.rb (main): add new options, --force and --ruby_version.
+
 2007-11-08  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/screen.rb (BitClust::RDFileScreen): add a new class for general RD files.

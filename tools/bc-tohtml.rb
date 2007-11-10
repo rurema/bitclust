@@ -26,9 +26,16 @@ def main
   target = nil
   baseurl = 'file://' + srcdir_root
   parser = OptionParser.new
+  ver = '1.9.0'
   parser.banner = "Usage: #{File.basename($0, '.*')} rdfile"
   parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
     target = name
+  }
+  parser.on('--force', '-f', 'Force to use rd_file template.') {|name|
+    @rd_file = true
+  }
+  parser.on('--ruby_version=VER', '--ruby=VER', 'Set Ruby version') {|v|
+    ver = v
   }
   parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
     baseurl = url
@@ -57,13 +64,25 @@ def main
                                         :base_url => baseurl,
                                         :cgi_url => baseurl,
                                         :default_encoding => 'euc-jp')
-  begin
-    lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0])
-    entry = target ? lookup(lib, target) : lib
-    puts manager.entry_screen(entry).body
-  rescue BitClust::ParseError
-    puts manager.rd_file_screen(ARGF.read).body
+  unless @rd_file
+    begin
+      lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0], {'version' => ver})
+      entry = target ? lookup(lib, target) : lib
+      puts manager.entry_screen(entry).body
+      return 
+    rescue BitClust::ParseError => ex
+      $stderr.puts ex.message
+      $stderr.puts ex.backtrace[0], ex.backtrace[1..-1].map{|s| "\tfrom " + s}
+    end
   end
+  
+  ret = ''
+  io = BitClust::Preprocessor.new(File.open(ARGV[0]), {'version' => ver})
+  while s = io.gets
+    ret << s
+  end
+  puts manager.rd_file_screen(ret).body
+  return 
 rescue BitClust::WriterError => err
   $stderr.puts err.message
   exit 1
