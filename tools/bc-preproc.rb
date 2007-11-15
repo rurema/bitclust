@@ -35,7 +35,7 @@ def main
     }
   end
 rescue BitClust::WriterError => err
-  $stder.puts err.message
+  $stderr.puts err.message
   exit 1
 end
 

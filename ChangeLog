@@ -1,5 +1,7 @@
 2007-11-15  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* tools/bc-preproc.rb (main): fix typo
+
 	* lib/bitclust/preprocessor.rb (BitClust::Preprocessor::next_line): should check cond also when #@include
 
 2007-11-10  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
