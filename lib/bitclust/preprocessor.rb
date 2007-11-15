@@ -66,6 +66,7 @@ module BitClust
         when /\A\#@todo/i
           ;
         when /\A\#@include\s*\((.*?)\)/
+          next unless current_cond          
           begin
             file = $1.strip
             basedir = File.dirname(line.location.file)
@@ -88,7 +89,7 @@ module BitClust
         when /\A\#@/
           parse_error "unknown preprocessor directive", line
         else
-          if @cond_stack.last
+          if current_cond
             @buf.push line
             break
           end
@@ -122,6 +123,10 @@ module BitClust
       end
     end
 
+    def current_cond
+      @cond_stack.last
+    end
+    
     def cond_init
       @cond_stack = [true]
     end

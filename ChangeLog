@@ -1,3 +1,7 @@
+2007-11-15  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/preprocessor.rb (BitClust::Preprocessor::next_line): should check cond also when #@include
+
 2007-11-10  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/rrdparser.rb (BitClust::RRDParser.parse_stdlib_file): add a new argument `params'.
