@@ -19,7 +19,7 @@
 
 <%
     headline_push
-    all_classes = (@entry.classes + @entry.requires.map{|lib| lib.classes }.flatten).uniq.sort
+    all_classes = @entry.classes
     err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
     classes = (all_classes - err_classes).sort
 %>

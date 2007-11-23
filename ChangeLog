@@ -1,3 +1,7 @@
+2007-11-23  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* template/library: do not display classes in required libraries
+
 2007-11-15  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* tools/bc-preproc.rb (main): fix typo
