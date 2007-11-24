@@ -1,3 +1,7 @@
+2007-11-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* template/class: fix a regexp to split signatures of methods.
+
 2007-11-23  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* template/library: do not display classes in required libraries
