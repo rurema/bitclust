@@ -1,3 +1,9 @@
+2007-11-25  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* template/method: put `$' in the cases of global variables.
+
+	* template.offline/method: ditto
+
 2007-11-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* template/class: fix a regexp to split signatures of methods.
