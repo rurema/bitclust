@@ -1,5 +1,7 @@
 2007-11-25  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* template/class: fix a regexp to split signatures of Added Methods. 
+
 	* template/method: put `$' in the cases of global variables.
 
 	* template.offline/method: ditto
