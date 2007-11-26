@@ -19,25 +19,49 @@
 
 <%
     headline_push
-    classes = @entry.classes.sort
+    required_classes = (@entry.sublibraries & @entry.requires).map{|lib| lib.classes }.flatten
+    all_classes = (@entry.classes + required_classes).uniq.sort
+    err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
+    classes = (all_classes - err_classes).sort
 %>
+
 
 <%= headline("Abstract") %>
 <%= compile_rd(@entry.source) %>
-
-<%  unless classes.empty? %>
-<%= headline("Classes/Modules") %>
-<table>
 <%
-      classes.each do |c|
+  [[classes,      'Classes/Modules'],
+   [err_classes,  'Exception Classes']].each do |cs, msg|
+    unless cs.empty?
 %>
+<%= headline(msg) %>
+<table>
+<%    cs.each do |c| %>
 <tr>
 <td class="signature"><%=h c.type.to_s %> <%= class_link(c.name) %></td>
 <td class="description"><%= compile_rd(c.synopsis_source) %></td>
 <%    end %>
 </table>
-<%  end %>
-
+<%
+    end
+  end
+%>
+<%
+  [[@entry.requires.sort, 'Required Libraries'],
+   [(@entry.sublibraries - @entry.requires).sort, 'Sublibraries']].each do |cs, msg|
+    unless cs.empty?
+%>
+<%= headline(msg) %>
+<table>
+<%    cs.each do |c| %>
+<tr>
+<td class="signature"><%= library_link(c.name) %></td>
+<td class="description"><%= compile_rd(c.synopsis_source) %></td>
+<%    end %>
+</table>
+<%
+    end
+  end
+%>
 <%
     ents = @entry.methods.sort
     unless ents.empty? %>

@@ -25,14 +25,9 @@ All Libraries
 <td class="description"><%= compile_rd(lib.synopsis_source) %></td>
 </tr>
 <%
-    currroot = nil
     @entries.each do |lib|
       next if lib.id == '_builtin'
-      if currroot and lib.id[0, currroot.size] == currroot
-        next
-      else
-        currroot = lib.id
-      end
+      next if lib.is_sublibrary
 %>
 <tr>
 <td class="signature"><%= library_link(lib.name) %></td>

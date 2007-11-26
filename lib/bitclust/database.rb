@@ -80,6 +80,8 @@ module BitClust
         @properties_dirty = false
       end
       if dirty?
+        update_requires()
+        update_sublibraries()
         # FIXME: many require loops in tk
         #each_dirty_library do |lib|
         #  lib.check_link
@@ -151,6 +153,21 @@ module BitClust
       @dirty_methods.clear
     end
 
+    def update_requires
+      libraries.each{|lib|
+        lib.requires = lib.all_requires
+      }
+    end
+    
+    def update_sublibraries
+      libraries.each{|lib|
+        re = /\A#{lib.name}\// 
+        libraries.each{|l|
+          lib.sublibrary(l) if re =~ l.name
+        }
+      }
+    end
+    
     def update_by_stdlibtree(root)
       parse_LIBRARIES("#{root}/LIBRARIES", properties()).each do |libname|
         update_by_file "#{root}/#{libname}.rd", libname

@@ -62,6 +62,10 @@ module BitClust
         @context.require line.split[1]
       end
       f.skip_blank_lines
+      f.while_match(/\Asublibrary\s/) do |line|
+        @context.sublibrary line.split[1]
+      end
+      f.skip_blank_lines
       @context.library.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       read_classes f
       if line = f.gets   # error
@@ -307,6 +311,10 @@ end
         @library.require @db.get_library(libname)
       end
 
+      def sublibrary(libname)
+        @library.sublibrary @db.get_library(libname)
+      end
+      
       def define_class(name, supername)
         superclass = (name == 'Object' ? nil : @db.get_class(supername))
         register_class :class, name, superclass

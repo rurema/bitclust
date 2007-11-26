@@ -1,3 +1,29 @@
+2007-11-26  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* template/library: display Required Libraries and Sublibraries.
+
+	* template.offline/library: ditto.
+
+	* template/library-index: remove an adhoc indexing. do not display libraries that are sublibraries.
+
+	* template.offline/library-index: ditto.
+
+	* lib/bitclust/database.rb (Bitclust::Database::update_requires): LibraryEntry#requires should 
+	  include all the required libraries recursively.
+
+	* lib/bitclust/database.rb (BitClust::Database::transaction): call update methods.
+
+	* lib/bitclust/database.rb (BitClust::Database): add new methods, Database#update_requires 
+	  and Database#update_sublibraries.
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::do_parse): add a new command `sublibrary'.
+
+	* lib/bitclust/entry.rb (LibraryEntry): add new properties, LibraryEntry#sublibraries and 
+	  LibraryEntry#is_sublibrary.
+
+	* lib/bitclust/entry.rb (LibraryEntry): add new methods, LibraryEntry#sublibrary and 
+	  LibraryEntry#all_requires.
+
 2007-11-25  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* template/class: fix a regexp to split signatures of Added Methods. 

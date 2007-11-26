@@ -268,6 +268,8 @@ module BitClust
       property :classes,  '[ClassEntry]'   # :defined classes
       property :methods,  '[MethodEntry]'  # :added/:redefined entries
       property :source,   'String'
+      property :sublibraries, '[LibraryEntry]'
+      property :is_sublibrary,   'bool'
     }
 
     def inspect
@@ -287,10 +289,24 @@ module BitClust
       @link_checked = true
     end
 
+    def all_requires(libs = {})
+      requires.each{|l|
+        next if libs[l.name] 
+        libs[l.name] = l
+        l.all_requires(libs)
+      }
+      libs.values
+    end
+    
     def require(lib)
       requires().push lib
     end
 
+    def sublibrary(lib)
+      sublibraries().push lib
+      lib.is_sublibrary = true
+    end
+    
     def fetch_class(name)
       get_class(name) or
           raise ClassNotFound, "no such class in the library #{name()}: #{name}"
