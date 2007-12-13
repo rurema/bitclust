@@ -1,3 +1,8 @@
+2007-12-13  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::Context::define_class): 
+	  top class is BasicObject in 1.9.0
+
 2007-11-26  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* template/library: display Required Libraries and Sublibraries.

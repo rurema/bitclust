@@ -316,7 +316,12 @@ end
       end
       
       def define_class(name, supername)
-        superclass = (name == 'Object' ? nil : @db.get_class(supername))
+        if @db.properties['version'] >= "1.9.0"
+          top = 'BasicObject'
+        else
+          top = 'Object'
+        end
+        superclass = (name == top ? nil : @db.get_class(supername))
         register_class :class, name, superclass
       end
 
