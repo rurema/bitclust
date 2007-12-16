@@ -37,8 +37,10 @@ module BitClust
       end
     end
 
-    def Database.dummy
-      new(nil)
+    def Database.dummy(params)
+      db = new(nil)
+      db.properties['version'] = params['version']
+      db
     end
 
     def initialize(prefix)

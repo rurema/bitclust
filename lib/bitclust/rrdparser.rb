@@ -23,7 +23,7 @@ module BitClust
     include ParseUtils
 
     def RRDParser.parse_stdlib_file(path, params = {"version" => "1.9.0"})
-      parser = new(Database.dummy)
+      parser = new(Database.dummy(params))
       parser.parse_file(path, libname(path), params)
     end
 

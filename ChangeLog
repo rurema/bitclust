@@ -1,3 +1,10 @@
+2007-12-16  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/database.rb (BitClust::Database::Database.dummy): 
+	  dummy databases should have version info.
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::RRDParser.parse_stdlib_file): ditto
+
 2007-12-13  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::Context::define_class): 
