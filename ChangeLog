@@ -1,3 +1,8 @@
+2007-12-18  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/entry.rb (BitClust::Entry::Property::deserializer): 
+	  fix [ruby-reference-manual:454].
+
 2007-12-16  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/database.rb (BitClust::Database::Database.dummy): 

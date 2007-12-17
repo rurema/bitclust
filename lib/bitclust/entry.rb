@@ -98,7 +98,7 @@ module BitClust
         when 'LibraryEntry'   then "restore_library(h['#{@name}'])"
         when 'ClassEntry'     then "restore_class(h['#{@name}'])"
         when 'MethodEntry'    then "restore_method(h['#{@name}'])"
-        when '[String]'       then "h['#{@name}'].split(',')"
+        when '[String]'       then "h['#{@name}'].split(/,(?=.)/)"
         when '[LibraryEntry]' then "restore_libraries(h['#{@name}'])"
         when '[ClassEntry]'   then "restore_classes(h['#{@name}'])"
         when '[MethodEntry]'  then "restore_methods(h['#{@name}'])"
