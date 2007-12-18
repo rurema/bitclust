@@ -1,5 +1,7 @@
 2007-12-18  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* template/*: escape entry names. [ruby-reference-manual:607]
+
 	* lib/bitclust/entry.rb (BitClust::Entry::Property::deserializer): 
 	  fix [ruby-reference-manual:454].
 

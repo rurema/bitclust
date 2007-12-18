@@ -10,7 +10,7 @@
 
 <p>
 <a href="<%= function_index_url() %>">All Functions</a>
-&gt; <%= @entry.name %>
+&gt; <%=h @entry.name %>
 <% unless @entry.public? %>(static)<% end %>
 </p>
 

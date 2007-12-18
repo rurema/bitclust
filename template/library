@@ -10,7 +10,7 @@
 
 <p>
 <a href="<%= library_index_url() %>">All Libraries</a>
-&gt; library <%= @entry.name %>
+&gt; library <%=h @entry.name %>
 </p>
 <%
     headline_init
