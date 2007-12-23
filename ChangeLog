@@ -1,3 +1,7 @@
+2007-12-23  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* test/test_preprocessor.rb: add a new test.
+
 2007-12-18  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* template/*: escape entry names. [ruby-reference-manual:607]
