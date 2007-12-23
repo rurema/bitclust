@@ -159,12 +159,13 @@ module BitClust
 
     def eval_expr(s)
       paren_open = s.scan(/\s*\(/)
-      val = eval_primary(s)
-      while op = read_op(s)
-        if op == '!='
-          val = (val != eval_primary(s))
-        else
-          val = val.__send(op, eval_primary(s))
+      val = eval_expr_p(s)
+      while conj = read_conj(s)       
+        case conj
+        when 'and'
+          val = eval_expr_p(s) && val
+        when 'or'
+          val = eval_expr_p(s) || val
         end
       end
       if paren_open
@@ -173,6 +174,23 @@ module BitClust
         end
       end
       val
+    end
+
+    def eval_expr_p(s)
+      val = eval_primary(s)
+      while op = read_op(s)
+        if op == '!='
+          val = (val != eval_primary(s))
+        else
+          val = val.__send__(op, eval_primary(s))
+        end
+      end
+      val 
+    end
+
+    def read_conj(s)
+      s.skip(/\s+/)
+      s.scan(/and|or/)
     end
 
     def read_op(s)

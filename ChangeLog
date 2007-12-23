@@ -1,5 +1,8 @@
 2007-12-23  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/preprocessor.rb (BitClust::Preprocessor::eval_expr): 
+	  make conjunctions(and, or) available.
+
 	* test/test_preprocessor.rb: add a new test.
 
 2007-12-18  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
