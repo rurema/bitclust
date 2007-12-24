@@ -312,7 +312,8 @@ module BitClust
     end
 
     def encoding
-      @entries.first.encoding || default_encoding()
+      ent = @entries.first
+      ent ? ent.encoding : default_encoding()
     end
 
     alias charset encoding
