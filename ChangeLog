@@ -1,5 +1,8 @@
 2007-12-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* test/test_preprocessor.rb (TestPreprocessor::test_eval_cond): 
+	  add new assertions.
+
 	* lib/bitclust/parseutils.rb: add a new require.
 
 2007-12-23  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
