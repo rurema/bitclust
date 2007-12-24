@@ -7,6 +7,8 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/exception'
+
 class String   # reopen
   attr_accessor :location
 end
