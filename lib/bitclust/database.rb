@@ -458,7 +458,7 @@ module BitClust
 
     def atomic_write_open(rel, &block)
       tmppath = realpath(rel) + '.writing'
-      File.open(tmppath, 'w', &block)
+      File.open(tmppath, 'wb', &block)
       File.rename tmppath, realpath(rel)
     ensure
       File.unlink tmppath  rescue nil

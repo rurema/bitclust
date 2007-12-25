@@ -4,6 +4,8 @@
 
 	* standalone.rb: use readme.html if exists.
 
+	* lib/bitclust/database.rb: do not write db files as CRLF.
+
 2007-12-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* test/test_rdcompiler.rb: add a new test.
