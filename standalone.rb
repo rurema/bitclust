@@ -128,11 +128,16 @@ if autop
   end
   server.mount_proc(File.join(basepath, '/')) do |req, res|
     raise WEBrick::HTTPStatus::NotFound if req.path != '/'
-    res.body = "<html><head><title>bitclust</title></head><body><ul>"
+    links = "<ul>"
     handlers.keys.sort.each do |version|
-      res.body << "<li><a href=\"#{version}/\">#{version}</a></li>"
+      links << "<li><a href=\"#{version}/\">#{version}</a></li>"
     end
-    res.body << "</ul></body></html>"
+    links << "</ul>"
+    if File.exist?("readme.html")
+      res.body = File.read("readme.html").sub(%r!\./bitclust!, '').sub(/<!--links-->/) { links }
+    else
+      res.body = "<html><head><title>bitclust</title></head><body>#{links}</body></html>"
+    end
     res['Content-Type'] = 'text/html; charset=euc-jp'
   end
 end

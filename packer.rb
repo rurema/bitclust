@@ -16,7 +16,7 @@ end
 
 bitclust_src_path = File.dirname(File.expand_path(__FILE__))
 parent_path = File.dirname(bitclust_src_path)
-output_path = File.join(parent_path, "rubyrefm-1.9.0-dynamic")
+output_path = File.join(parent_path, "ruby-refm-1.9.0-dynamic")
 bitclust_dest_dir = "bitclust"
 rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
 database_encoding = "euc-jp"
@@ -106,6 +106,49 @@ ARGV.unshift "--debug"
 ARGV.unshift "--auto"
 eval src, binding, standalone, 1
     RUBY
+  end
+end
+
+readme_html = File.join(output_path, "readme.html")
+unless File.exist?(readme_html)
+  puts "write #{readme_html}"
+  File.open(readme_html, "wb") do |f|
+    f.puts <<-HTML
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=euc-jp">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="./bitclust/theme/default/style.css">
+  <title>Ruby リファレンスマニュアル刷新計画</title>
+</head>
+<body>
+<h1>Ruby リファレンスマニュアル刷新計画</h1>
+
+<h2>これは何？</h2>
+<p>
+Ruby リファレンスマニュアルの簡易 Web サーバシステムです。
+</p>
+
+<!--links-->
+
+<p>
+使い方に関しては以下の URL を参照してください。
+</p>
+<ul>
+  <li><a href="http://doc.loveruby.net/wiki/ReleasePackageHowTo.html">http://doc.loveruby.net/wiki/ReleasePackageHowTo.html</a></li>
+</ul>
+
+<p>
+プロジェクト全体に関しては以下の URL を参照してください。
+</p>
+<ul>
+  <li><a href="http://doc.loveruby.net/wiki/FrontPage.html">http://doc.loveruby.net/wiki/FrontPage.html</a></li>
+</ul>
+
+</body>
+</html>
+    HTML
   end
 end
 

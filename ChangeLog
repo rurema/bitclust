@@ -1,3 +1,9 @@
+2007-12-25  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* packer.rb: generate readme.html.
+
+	* standalone.rb: use readme.html if exists.
+
 2007-12-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* test/test_rdcompiler.rb: add a new test.
