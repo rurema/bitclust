@@ -14,6 +14,7 @@ require 'bitclust/exception'
 require 'uri'
 require 'rbconfig'
 require 'optparse'
+require 'nkf'
 
 module BitClust
 
@@ -27,6 +28,7 @@ module BitClust
       @name = (/\Abitclust/ =~ cmd ? 'bitclust search' : 'refe')
       @describe_all = false
       @linep = false
+      @encoding = nil
       @target_type = nil
       @listen_url = nil
       @foreground = false
@@ -50,6 +52,9 @@ module BitClust
         }
         opt.on('-l', '--line', 'Prints one entry in one line.') {
           @linep = true
+        }
+        opt.on('-e', '--encoding=ENCODING', 'Select encoding.') {|enc|
+          @encoding = enc
         }
         opt.on('--class', 'Search class or module.') {
           @target_type = :class
@@ -126,7 +131,9 @@ module BitClust
       #compiler = RDCompiler::Text.new
       compiler = Plain.new
       @view = TerminalView.new(compiler,
-                              {:describe_all => @describe_all, :line => @linep})
+                              {:describe_all => @describe_all, 
+                               :line => @linep,
+                               :encoding => @encoding})
     end
 
     def spawn_server(db)
@@ -140,7 +147,9 @@ module BitClust
     end
 
     def new_database
-      Database.connect(@dblocation || dblocation())
+      db = Database.connect(@dblocation || dblocation())
+      @view.database = db if @view
+      db
     end
 
     def dblocation_name
@@ -288,7 +297,11 @@ module BitClust
       @compiler = compiler
       @describe_all = opts[:describe_all]
       @line = opts[:line]
+      @encoding = opts[:encoding]
+      @database = nil
     end
+    
+    attr_accessor :database
 
     def show_class(cs)
       if cs.size == 1
@@ -393,6 +406,51 @@ module BitClust
       end
       puts @compiler.compile(rec.entry.source.strip)
       puts
+    end
+
+    def puts(*args)
+      super(*args.collect {|arg| convert(arg)})
+    end
+
+    def convert(string)
+      return string if @database.nil?
+      _output_encoding = output_encoding
+      return string if _output_encoding.nil?
+      input_nkf_option = encoding_to_nkf_option(@database.encoding)
+      output_nkf_option = encoding_to_nkf_option(_output_encoding)
+      if input_nkf_option and output_nkf_option
+        NKF.nkf("-#{input_nkf_option.upcase}#{output_nkf_option}", string)
+      else
+        string
+      end
+    end
+
+    def output_encoding
+      return @encoding if @encoding
+
+      locale = ENV["LC_ALL"] || ENV["LC_MESSAGE"] || ENV["LANG"]
+      case locale
+      when /\.([a-z\d\-]+)\z/i
+        $1
+      else
+        nil
+      end
+    end
+
+    def encoding_to_nkf_option(encoding)
+      return nil if encoding.nil?
+      case encoding
+      when /\A(?:euc[-_]?jp|ujis)\z/i
+        "e"
+      when /\Autf[-_]?8\z/i
+        "w"
+      when /\As(?:hift[-_]?)?jis\z/i
+        "s"
+      when /\Aiso-2022-jp\z/i
+        "j"
+      else
+        nil
+      end
     end
 
   end
