@@ -1,3 +1,7 @@
+2007-12-26  IWATSUKI Hiroyuki  <don@na.rim.or.jp>
+
+	* tools/bc-tochm.rb (main): add alias method names to keyword page.
+
 2007-12-25  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: generate readme.html.
