@@ -231,9 +231,11 @@ def main
         end
         @index_contents << Sitemap::Content.new("#{e.name} (#{e.library.name})", filename)
       when :method
-        name = e.typename == :special_variable ? "$#{e.name}" : e.name.to_s
-        @index_contents << Sitemap::Content.new("#{name} (#{e.library.name} - #{e.klass.name})", filename)
-        @index_contents << Sitemap::Content.new("#{e.klass.name}#{e.typemark}#{name} (#{e.library.name})", filename)
+        e.names.each do |e_name|
+          name = e.typename == :special_variable ? "$#{e_name}" : e_name
+          @index_contents << Sitemap::Content.new("#{name} (#{e.library.name} - #{e.klass.name})", filename)
+          @index_contents << Sitemap::Content.new("#{e.klass.name}#{e.typemark}#{name} (#{e.library.name})", filename)
+        end
       end
       pb.title.replace(e.name)
       pb.inc
