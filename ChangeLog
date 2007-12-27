@@ -1,3 +1,11 @@
+2007-12-27  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/nameutils.rb (BitClust::NameUtils::libname2id): 
+	  fix regexp for redefinable not operator. a patch from Yugui 
+	  [ruby-reference-manual:660].
+
+	* test/test_nameutils.rb (TestNameUtils::test_methodname): ditto
+	
 2007-12-26  IWATSUKI Hiroyuki  <don@na.rim.or.jp>
 
 	* tools/bc-tochm.rb (main): add alias method names to keyword page.

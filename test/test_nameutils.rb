@@ -89,10 +89,10 @@ class TestNameUtils < Test::Unit::TestCase
   end
 
   def test_methodid2spec
-    assert_equal "String#index", methodid2spec("String/i.index._builtin")
-    assert_equal "CGI#accept", methodid2spec("CGI/i.accept.cgi")
-    assert_equal "Net::HTTP#ca_path", methodid2spec("Net=HTTP/i.ca_path.net.http")
-    assert_equal "FileUtils.#cp", methodid2spec("FileUtils/m.cp.fileutils")
+    assert_equal "String#index", methodid2specstring("String/i.index._builtin")
+    assert_equal "CGI#accept", methodid2specstring("CGI/i.accept.cgi")
+    assert_equal "Net::HTTP#ca_path", methodid2specstring("Net=HTTP/i.ca_path.net.http")
+    assert_equal "FileUtils.#cp", methodid2specstring("FileUtils/m.cp.fileutils")
   end
 
   def test_methodid2libid
@@ -160,7 +160,7 @@ class TestNameUtils < Test::Unit::TestCase
     assert_equal true, methodname?("[]=")
 
     assert_equal false, methodname?("")
-    assert_equal false, methodname?("!=")
+    assert_equal true,  methodname?("!=")
     assert_equal false, methodname?("!~")
     assert_equal false, methodname?("&&")
     assert_equal false, methodname?("||")
