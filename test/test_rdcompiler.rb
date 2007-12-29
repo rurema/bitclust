@@ -8,16 +8,20 @@ class TestRDCompiler < Test::Unit::TestCase
     @u = BitClust::URLMapper.new(Hash.new{'dummy'})
     @c = BitClust::RDCompiler.new(@u)
   end
+
+  def compile_and_assert_equal(expected, src)
+    assert_equal expected, @c.compile(src)
+  end
   
   def test_dlist  
-    ret = @c.compile <<'HERE'
+    src = <<'HERE'
 : t1
  c1
 : t2
  c2-1
  c2-2
 HERE
-    assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <dl>
 <dt>t1</dt>
 <dd>
@@ -30,14 +34,18 @@ c2-2
 </dd>
 </dl>
 HERE
-    ret = @c.compile <<HERE
+    compile_and_assert_equal(expected, src)
+    
+    src = <<HERE
 : t1
  c1
 
 : t2
  c2
+
+ c3
 HERE
-    assert_equal <<'HERE', ret
+    expected = <<HERE
 <dl>
 <dt>t1</dt>
 <dd>
@@ -47,11 +55,14 @@ c1
 <dt>t2</dt>
 <dd>
 c2
+
+c3
 </dd>
 </dl>
 HERE
+    compile_and_assert_equal(expected, src)
     
-    ret = @c.compile <<HERE
+    src = <<HERE
 : t1
  c1
 //emlist{
@@ -60,8 +71,7 @@ HERE
 : t2
  c2
 HERE
-
-    assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <dl>
 <dt>t1</dt>
 <dd>
@@ -78,18 +88,17 @@ c2
 </dd>
 </dl>
 HERE
-
+    compile_and_assert_equal(expected, src)
   end
 
   def test_pre
-    ret = @c.compile <<'HERE'
+    src = <<'HERE'
  <
  hoge
 
  foo
 HERE
-
-    assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <pre>
 &lt;
 hoge
@@ -97,17 +106,31 @@ hoge
 foo
 </pre>
 HERE
+    compile_and_assert_equal(expected, src)
+        
+    src = <<'HERE'
+ pretext
+
+ * hoge1
+HERE
+    expected = <<'HERE'
+<pre>
+pretext
+
+* hoge1
+</pre>
+HERE
+    compile_and_assert_equal(expected, src)    
   end
 
-  def test_method
-    
-    ret = @c.compile <<'HERE'
+  def test_method  
+    src = <<'HERE'
 --- hoge
 foo
 bar
  text
 HERE
-    assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <dt><code>hoge</code></dt>
 <dd>
 <p>
@@ -119,24 +142,25 @@ text
 </pre>
 </dd>
 HERE
+    compile_and_assert_equal(expected, src)
     
-    ret = @c.compile <<'HERE'
+    src = <<'HERE'
 --- <=>
 HERE
-   assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <dt><code>&lt;=&gt;</code></dt>
 <dd>
 </dd>
 HERE
+    compile_and_assert_equal(expected, src)
     
-    c = BitClust::RDCompiler.new(@u, 1, {:force => true})
-    ret = c.compile <<'HERE'
+    @c = BitClust::RDCompiler.new(@u, 1, {:force => true})   
+    src = <<'HERE'
 --- hoge1
 --- hoge2
 bar
 HERE
-    
-    assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <dl>
 <dt><code>hoge1</code></dt>
 <dt><code>hoge2</code></dt>
@@ -147,28 +171,28 @@ bar
 </dd>
 </dl>
 HERE
-
+    compile_and_assert_equal(expected, src)
   end
 
-  def test_ul
-        
-    ret = @c.compile <<'HERE'
+  def test_ul        
+    src =  <<'HERE'
  * hoge1
  * hoge2
 HERE
-   assert_equal <<'HERE', ret
+    expected = <<'HERE'
 <ul>
 <li>hoge1</li>
 <li>hoge2</li>
 </ul>
 HERE
-        
-    ret = @c.compile <<'HERE'
+    compile_and_assert_equal(expected, src)
+    
+    src = <<'HERE'
  * hoge1
 
  * hoge2
 HERE
-   assert_equal <<'HERE', ret
+   expected = <<'HERE'
 <ul>
 <li>hoge1</li>
 </ul>
@@ -176,6 +200,21 @@ HERE
 <li>hoge2</li>
 </ul>
 HERE
- 
+    compile_and_assert_equal(expected, src)
+
+    src = <<'HERE'
+ * hoge1
+   bar
+ * hoge2
+HERE
+   expected = <<'HERE'
+<ul>
+<li>hoge1
+bar</li>
+<li>hoge2</li>
+</ul>
+HERE
+    compile_and_assert_equal(expected, src)
+
   end
 end
