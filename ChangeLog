@@ -1,3 +1,8 @@
+2007-12-30  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* test/test_rdcompiler.rb (TestRDCompiler): 
+	  add new tests.
+
 2007-12-29  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* test/test_rdcompiler.rb (TestRDCompiler): 

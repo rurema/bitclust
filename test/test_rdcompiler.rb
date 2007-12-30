@@ -3,9 +3,10 @@ require 'bitclust/screen'
 require 'test/unit'
 
 class TestRDCompiler < Test::Unit::TestCase
-
+  
   def setup
-    @u = BitClust::URLMapper.new(Hash.new{'dummy'})
+    @dummy = 'dummy'
+    @u = BitClust::URLMapper.new(Hash.new{@dummy})
     @c = BitClust::RDCompiler.new(@u)
   end
 
@@ -216,5 +217,28 @@ bar</li>
 HERE
     compile_and_assert_equal(expected, src)
 
+  end
+
+  def test_braket_link
+    [
+     ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
+     ['[[c:String ]]',     '<a href="dummy/class/String">String</a>'           ],
+     ['[[c:File::Stat]]',  '<a href="dummy/class/File=Stat">File::Stat</a>'    ],
+     ['[[m:String.new]]',  '<a href="dummy/method/String/s/new">String.new</a>'],
+     ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
+     ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
+     ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
+     ['[[man:tr(1)]]',     '<a href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
+     ['[[RFC:2822]]',      '<a href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
+     ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
+     ['[[c:String]][[c:String]]',
+      '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
+     ['[[m:File::SEPARATOR]]',          '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],     
+     ['[[url:http://i.loveruby.net ]]', '<a href="http://i.loveruby.net">http://i.loveruby.net</a>'],
+     ['[[ruby-list:12345]]',
+      '<a href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
+    ].each{|src, expected|
+      assert_equal expected, @c.send(:compile_text, src)
+    }
   end
 end
