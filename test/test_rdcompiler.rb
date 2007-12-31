@@ -154,7 +154,62 @@ HERE
 </dd>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
+    src = <<'HERE'
+--- method
+
+: word1
+  dsc
+HERE
+    expected = <<'HERE'
+<dt><code>method</code></dt>
+<dd>
+<dl>
+<dt>word1</dt>
+<dd>
+dsc
+</dd>
+</dl>
+</dd>
+HERE
+    compile_and_assert_equal(expected, src)
+
+    src = <<'HERE'
+--- method
+dsc
+
+@param hoge bar
+@return hoge
+@raise hoge
+@see hoge
+HERE
+    expected = <<'HERE'
+<dt><code>method</code></dt>
+<dd>
+<p>
+dsc
+</p>
+<p>
+[PARAM] hoge:
+bar
+</p>
+<p>
+[RETURN]
+hoge
+</p>
+<p>
+[EXCEPTION] hoge:
+
+</p>
+<p>
+[SEE_ALSO] hoge
+</p>
+</dd>
+HERE
+    compile_and_assert_equal(expected, src)
+  end
+
+  def test_method2   
     @c = BitClust::RDCompiler.new(@u, 1, {:force => true})   
     src = <<'HERE'
 --- hoge1
@@ -219,6 +274,22 @@ HERE
 
   end
 
+  def test_olist
+    src = <<'HERE'
+ (1) hoge1
+     bar
+ (2) hoge2
+HERE
+   expected = <<'HERE'
+<ol>
+<li>hoge1
+bar</li>
+<li>hoge2</li>
+</ol>
+HERE
+    compile_and_assert_equal(expected, src)    
+  end
+  
   def test_braket_link
     [
      ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
@@ -228,13 +299,15 @@ HERE
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
      ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
+     ['[[d:hoge/bar]]',    '<a href="dummy/hoge/bar">hoge/bar</a>'],
      ['[[man:tr(1)]]',     '<a href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
      ['[[RFC:2822]]',      '<a href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
+     ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],     
      ['[[c:String]][[c:String]]',
-      '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
+      '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],     
      ['[[m:File::SEPARATOR]]',          '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],     
-     ['[[url:http://i.loveruby.net ]]', '<a href="http://i.loveruby.net">http://i.loveruby.net</a>'],
+     ['[[url:http://i.loveruby.net]]', '<a href="http://i.loveruby.net">http://i.loveruby.net</a>'],
      ['[[ruby-list:12345]]',
       '<a href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
     ].each{|src, expected|
