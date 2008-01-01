@@ -307,7 +307,7 @@ module BitClust
       line '</dt>'
     end
 
-    BracketLink = /\[\[[!-~]+?(?:\[\] )?(|.+?)?\]\]/n
+    BracketLink = /\[\[[!-~]+?(?:\[\] )?(\|.+?)?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)
