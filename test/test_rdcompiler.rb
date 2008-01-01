@@ -26,12 +26,16 @@ HERE
 <dl>
 <dt>t1</dt>
 <dd>
+<p>
 c1
+</p>
 </dd>
 <dt>t2</dt>
 <dd>
+<p>
 c2-1
 c2-2
+</p>
 </dd>
 </dl>
 HERE
@@ -50,14 +54,18 @@ HERE
 <dl>
 <dt>t1</dt>
 <dd>
+<p>
 c1
-
+</p>
 </dd>
 <dt>t2</dt>
 <dd>
+<p>
 c2
-
+</p>
+<p>
 c3
+</p>
 </dd>
 </dl>
 HERE
@@ -76,18 +84,46 @@ HERE
 <dl>
 <dt>t1</dt>
 <dd>
+<p>
 c1
-</dd>
-</dl>
+</p>
 <pre>
  hoge
 </pre>
-<dl>
+</dd>
 <dt>t2</dt>
 <dd>
+<p>
 c2
+</p>
 </dd>
 </dl>
+HERE
+    compile_and_assert_equal(expected, src)
+    
+    src = <<HERE
+: t1
+ c1
+
+ c2
+
+text
+HERE
+    expected = <<'HERE'
+<dl>
+<dt>t1</dt>
+<dd>
+<p>
+c1
+</p>
+<p>
+c2
+</p>
+</dd>
+</dl>
+<p>
+text
+</p>
 HERE
     compile_and_assert_equal(expected, src)
   end
@@ -147,10 +183,21 @@ HERE
     
     src = <<'HERE'
 --- <=>
+
+abs
+//emlist{
+text
+//}
 HERE
     expected = <<'HERE'
 <dt><code>&lt;=&gt;</code></dt>
 <dd>
+<p>
+abs
+</p>
+<pre>
+text
+</pre>
 </dd>
 HERE
     compile_and_assert_equal(expected, src)
@@ -167,7 +214,9 @@ HERE
 <dl>
 <dt>word1</dt>
 <dd>
+<p>
 dsc
+</p>
 </dd>
 </dl>
 </dd>
@@ -207,6 +256,30 @@ hoge
 </dd>
 HERE
     compile_and_assert_equal(expected, src)
+
+    
+    src = <<'HERE'
+--- method
+
+@param arg dsc1
+           
+           dsc2
+           dsc3
+HERE
+    expected = <<'HERE'
+<dt><code>method</code></dt>
+<dd>
+<p>
+[PARAM] arg:
+dsc1
+
+dsc2
+dsc3
+</p>
+</dd>
+HERE
+#    compile_and_assert_equal(expected, src)
+
   end
 
   def test_method2   
@@ -230,7 +303,7 @@ HERE
     compile_and_assert_equal(expected, src)
   end
 
-  def test_ul        
+  def test_ulist        
     src =  <<'HERE'
  * hoge1
  * hoge2

@@ -1,3 +1,14 @@
+2008-01-01  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler):
+	  the document link [[d:src|text]] is allowed.
+	
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::dlist):
+	  nested pre is allowed in dlist. Please use //emlist{.
+	  use <p> in <dd>.
+
+	* test/test_rdcompiler.rb (TestRDCompiler): ditto.
+
 2007-12-31  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* test/test_rdcompiler.rb (TestRDCompiler): 

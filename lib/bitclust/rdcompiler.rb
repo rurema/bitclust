@@ -86,6 +86,7 @@ module BitClust
     end
 
     def method_entry_chunk
+      @out.puts '<dl>' if @option[:force]                  
       @f.while_match(/\A---/) do |line|
         method_signature line
       end
@@ -177,8 +178,21 @@ module BitClust
         end
         line '<dd>'
         # FIXME: allow nested pre??
-        @f.while_match(/\A(?:\s|\z)/) do |line|
-          line compile_text(line.strip)
+        while /\A(?:\s|\z)/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
+          case @f.peek
+          when /\A$/
+            @f.gets
+          when  /\A[ \t\z]/
+            line '<p>'
+            @f.while_match(/\A[ \t\z]/) do |line|
+              line compile_text(line.strip)
+            end
+            line '</p>'
+          when %r!\A//emlist\{!
+            emlist
+          else
+            raise 'must not happen'
+          end
         end
         line '</dd>'
       end
@@ -284,7 +298,6 @@ module BitClust
 
     def method_signature(sig)
       # FIXME: check parameters, types, etc.
-      string '<dl>' if @option[:force]
       string '<dt><code>'
       string escape_html(sig.sub(/\A---/, '').strip)
       string '</code>'
@@ -294,7 +307,7 @@ module BitClust
       line '</dt>'
     end
 
-    BracketLink = /\[\[[!-~]+?(?:\[\] )?\]\]/n
+    BracketLink = /\[\[[!-~]+?(?:\[\] )?(|.+?)?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)
@@ -316,6 +329,7 @@ module BitClust
       when 'lib'     then protect(link) { library_link(arg) }
       when 'c'       then protect(link) { class_link(arg) }
       when 'm'       then protect(link) { method_link(complete_spec(arg), arg) }
+      when 'd'       then protect(link) { document_link(arg) }
       when 'url'     then direct_url(arg)
       when 'man'     then man_link(arg)
       when 'rfc', 'RFC'
