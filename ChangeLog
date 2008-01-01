@@ -1,11 +1,14 @@
 2008-01-01  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler):
-	  the document link [[d:src|text]] is allowed.
-	
+	  use dlist for @param, @raise and so on.
+
+	* test/test_rdcompiler.rb (TestRDCompiler::test_method): 
+	  ditto.
+
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::dlist):
-	  nested pre is allowed in dlist. Please use //emlist{.
-	  use <p> in <dd>.
+	  allow nested pre (//emlist{) in dlist.
+	  use <p> in <dd>. empty lines separate paragraphs in dlist.
 
 	* test/test_rdcompiler.rb (TestRDCompiler): ditto.
 

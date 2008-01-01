@@ -118,6 +118,8 @@ module BitClust
           emlist
         when /\A\s+\S/
           list
+        when /@see/
+          see
         when /\A@[a-z]/
           method_info
         else
@@ -176,27 +178,47 @@ module BitClust
         @f.while_match(/\A:/) do |line|
           line dt(compile_text(line.sub(/\A:/, '').strip))
         end
-        line '<dd>'
-        # FIXME: allow nested pre??
-        while /\A(?:\s|\z)/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
-          case @f.peek
-          when /\A$/
-            @f.gets
-          when  /\A[ \t\z]/
-            line '<p>'
-            @f.while_match(/\A[ \t\z]/) do |line|
-              line compile_text(line.strip)
-            end
-            line '</p>'
-          when %r!\A//emlist\{!
-            emlist
-          else
-            raise 'must not happen'
-          end
-        end
-        line '</dd>'
+        dlist_dd_with_p
       end
       line '</dl>'
+    end
+
+    def dlist_dd_with_p
+      line '<dd>'
+      while /\A(?:\s|\z)/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
+        case @f.peek
+        when /\A$/
+          @f.gets
+        when  /\A[ \t\z]/
+          line '<p>'
+          @f.while_match(/\A[ \t\z]/) do |line|
+            line compile_text(line.strip)
+          end
+          line '</p>'
+        when %r!\A//emlist\{!
+            emlist
+        else
+          raise 'must not happen'
+        end
+      end
+      line '</dd>'
+    end
+    
+    def dlist_dd_without_p
+      line '<dd>'
+      while /\A[ \t]/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
+        case @f.peek
+        when  /\A[ \t\z]/
+          @f.while_match(/\A[ \t\z]/) do |line|
+            line compile_text(line.strip)
+          end
+        when %r!\A//emlist\{!
+            emlist
+        else
+          raise 'must not happen'
+        end
+      end
+      line '</dd>'
     end
 
     def dt(s)
@@ -240,47 +262,36 @@ module BitClust
       f.span(%r<\A(?!---|=|//\w)\S>)
     end
 
-    # FIXME: temporary implementation
-    def method_info
+    def see
       header = @f.gets
       cmd = header.slice!(/\A\@\w+/)
       body = [header] + @f.span(/\A\s+\S/)
-      case cmd
-      when '@param', '@arg'
-        name = header.slice!(/\A\s*\w+/n) || '?'
-        line '<p>'
-        line "[PARAM] #{escape_html(name.strip)}:"
-        body.each do |line|
-          line compile_text(line.strip)
+      line '<p>'
+      line '[SEE_ALSO] ' + body.join('').split(',').map {|ref| compile_text(ref.strip) }.join(",\n")
+      line '</p>'
+    end
+    
+    def method_info
+      line '<dl>'
+      while @f.next? and /\A\@(?!see)\w+/ =~ @f.peek 
+        header = @f.gets
+        cmd = header.slice!(/\A\@\w+/)   
+        @f.ungets(header)
+        case cmd
+        when '@param', '@arg'
+          name = header.slice!(/\A\s*\w+/n) || '?'
+          line "<dt>[PARAM] #{escape_html(name.strip)}:</dt>"
+        when '@raise'
+          ex = header.slice!(/\A\s*[\w:]+/n) || '?'
+          line "<dt>[EXCEPTION] #{escape_html(ex.strip)}:</dt>"
+        when '@return'
+          line "<dt>[RETURN]</dt>"
+        else
+          line "<dt>[UNKNOWN_META_INFO] #{escape_html(cmd)}:</dt>"
         end
-        line '</p>'
-      when '@return'
-        line '<p>'
-        line "[RETURN]"
-        body.each do |line|
-          line compile_text(line.strip)
-        end
-        line '</p>'
-      when '@raise'
-        ex = header.slice!(/\A\s*[\w:]+/n) || '?'
-        line '<p>'
-        line "[EXCEPTION] #{escape_html(ex.strip)}:"
-        body.each do |line|
-          line compile_text(line.strip)
-        end
-        line '</p>'
-      when '@see'
-        line '<p>'
-        line '[SEE_ALSO] ' + body.join('').split(',').map {|ref| compile_text(ref.strip) }.join(",\n")
-        line '</p>'
-      else
-        line '<p>'
-        line "[UNKNOWN_META_INFO] #{escape_html(cmd)}:"
-        body.each do |line|
-          line compile_text(line.strip)
-        end
-        line '</p>'
+        dlist_dd_without_p
       end
+      line '</dl>'
     end
 
     # FIXME: parse @param, @return, ...
@@ -307,7 +318,7 @@ module BitClust
       line '</dt>'
     end
 
-    BracketLink = /\[\[[!-~]+?(?:\[\] )?(\|.+?)?\]\]/n
+    BracketLink = /\[\[[!-~]+?(?:\[\] )?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)

@@ -227,9 +227,9 @@ HERE
 --- method
 dsc
 
-@param hoge bar
-@return hoge
-@raise hoge
+@param hoge dsc
+@return dsc
+@raise hoge dsc
 @see hoge
 HERE
     expected = <<'HERE'
@@ -238,18 +238,20 @@ HERE
 <p>
 dsc
 </p>
-<p>
-[PARAM] hoge:
-bar
-</p>
-<p>
-[RETURN]
-hoge
-</p>
-<p>
-[EXCEPTION] hoge:
-
-</p>
+<dl>
+<dt>[PARAM] hoge:</dt>
+<dd>
+dsc
+</dd>
+<dt>[RETURN]</dt>
+<dd>
+dsc
+</dd>
+<dt>[EXCEPTION] hoge:</dt>
+<dd>
+dsc
+</dd>
+</dl>
 <p>
 [SEE_ALSO] hoge
 </p>
@@ -262,23 +264,52 @@ HERE
 --- method
 
 @param arg dsc1
-           
+
            dsc2
            dsc3
 HERE
     expected = <<'HERE'
 <dt><code>method</code></dt>
 <dd>
-<p>
-[PARAM] arg:
+<dl>
+<dt>[PARAM] arg:</dt>
+<dd>
 dsc1
-
+</dd>
+</dl>
+<pre>
 dsc2
 dsc3
-</p>
+</pre>
 </dd>
 HERE
-#    compile_and_assert_equal(expected, src)
+    compile_and_assert_equal(expected, src)
+    
+    src = <<'HERE'
+--- method
+
+@param arg dsc1
+//emlist{
+dsc2
+dsc3
+//}
+HERE
+    expected = <<'HERE'
+<dt><code>method</code></dt>
+<dd>
+<dl>
+<dt>[PARAM] arg:</dt>
+<dd>
+dsc1
+<pre>
+dsc2
+dsc3
+</pre>
+</dd>
+</dl>
+</dd>
+HERE
+    compile_and_assert_equal(expected, src)
 
   end
 
@@ -366,13 +397,14 @@ HERE
   def test_braket_link
     [
      ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
-     ['[[c:String ]]',     '<a href="dummy/class/String">String</a>'           ],
+     ['[[c:String ]]',     '[[c:String ]]'           ],
      ['[[c:File::Stat]]',  '<a href="dummy/class/File=Stat">File::Stat</a>'    ],
      ['[[m:String.new]]',  '<a href="dummy/method/String/s/new">String.new</a>'],
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
      ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
-     ['[[d:hoge/bar]]',    '<a href="dummy/hoge/bar">hoge/bar</a>'],
+#     ['[[d:hoge/bar]]',    '<a href="dummy/hoge/bar">hoge/bar</a>'],
+#     ['[[d:hoge/bar|text]]',    '<a href="dummy/hoge/bar">text</a>'],
      ['[[man:tr(1)]]',     '<a href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
      ['[[RFC:2822]]',      '<a href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
