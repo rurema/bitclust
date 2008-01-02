@@ -178,12 +178,13 @@ module BitClust
         @f.while_match(/\A:/) do |line|
           line dt(compile_text(line.sub(/\A:/, '').strip))
         end
-        dlist_dd_with_p
+        dd_with_p
       end
       line '</dl>'
     end
 
-    def dlist_dd_with_p
+    # empty lines separate paragraphs.
+    def dd_with_p
       line '<dd>'
       while /\A(?:\s|\z)/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
         case @f.peek
@@ -204,7 +205,8 @@ module BitClust
       line '</dd>'
     end
     
-    def dlist_dd_without_p
+    # empty lines do not separate paragraphs.
+    def dd_without_p
       line '<dd>'
       while /\A[ \t]/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
         case @f.peek
@@ -214,8 +216,6 @@ module BitClust
           end
         when %r!\A//emlist\{!
             emlist
-        else
-          raise 'must not happen'
         end
       end
       line '</dd>'
@@ -289,7 +289,7 @@ module BitClust
         else
           line "<dt>[UNKNOWN_META_INFO] #{escape_html(cmd)}:</dt>"
         end
-        dlist_dd_without_p
+        dd_without_p
       end
       line '</dl>'
     end
@@ -318,7 +318,7 @@ module BitClust
       line '</dt>'
     end
 
-    BracketLink = /\[\[[!-~]+?(?:\[\] )?\]\]/n
+    BracketLink = /\[\[[\w-]+?:[!-~]+?(?:\[\] )?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)

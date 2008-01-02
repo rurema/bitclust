@@ -398,6 +398,7 @@ HERE
     [
      ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
      ['[[c:String ]]',     '[[c:String ]]'           ],
+     ['[[String]]',        '[[String]]'              ],
      ['[[c:File::Stat]]',  '<a href="dummy/class/File=Stat">File::Stat</a>'    ],
      ['[[m:String.new]]',  '<a href="dummy/method/String/s/new">String.new</a>'],
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
