@@ -273,8 +273,9 @@ module BitClust
     
     def method_info
       line '<dl>'
-      while @f.next? and /\A\@(?!see)\w+/ =~ @f.peek 
+      while @f.next? and /\A\@(?!see)\w+|\A$/ =~ @f.peek 
         header = @f.gets
+        next if /\A$/ =~ header
         cmd = header.slice!(/\A\@\w+/)   
         @f.ungets(header)
         case cmd

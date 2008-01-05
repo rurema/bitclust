@@ -1,3 +1,11 @@
+2008-01-05  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler): 
+	  fix parsing at @param separated by empty lines.
+
+	* test/test_rdcompiler.rb (TestRDCompiler::test_dlist): 
+	  ditto.
+
 2008-01-02  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler): 
