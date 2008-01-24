@@ -10,7 +10,7 @@ require 'bitclust/crossrubyutils'
 include BitClust::CrossRubyUtils
 
 def main
-  forall_ruby(ENV['PATH']).each do |ruby, ver|
+  forall_ruby(ENV['PATH']) do |ruby, ver|
     puts ver
     system ruby, *ARGV
   end
