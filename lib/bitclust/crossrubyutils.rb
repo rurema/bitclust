@@ -35,6 +35,17 @@ module BitClust
       ver.split[1].tr('.', '')
     end
 
+    def get_ruby(version)      
+      forall_ruby(ENV['PATH']) do |ruby, |
+        v = `#{ruby} -e 'print RUBY_VERSION'`
+        patch = `#{ruby} -e 'print RUBY_PATCHLEVEL if defined? RUBY_PATCHLEVEL'`
+        if version == v or ( version == v.succ and patch == '5000')
+          return ruby
+        end
+      end
+      return nil
+    end
+    
     def build_crossruby_table
       ENV.delete 'RUBYOPT'
       ENV.delete 'RUBYLIB'

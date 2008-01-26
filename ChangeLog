@@ -1,3 +1,13 @@
+2008-01-26  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* tools/bc-methods.rb (defined_methods): 
+	  should treat Object and Kernel as special cases.
+
+	* tools/bc-methods.rb : add a new option `--ruby='.
+
+	* lib/bitclust/crossrubyutils.rb (BitClust::CrossRubyUtils::get_ruby): 
+	  add a new method that return the ruby interpreter path of a given version.
+
 2008-01-05  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler): 

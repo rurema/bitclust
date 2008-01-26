@@ -21,6 +21,7 @@ include BitClust::CrossRubyUtils
 def main
   @requires = []
   @verbose = false
+  @ver = RUBY_VERSION
   mode = :list
   target = nil
   opts = OptionParser.new
@@ -38,7 +39,10 @@ def main
   opts.on('-c', '') {
     @content = true
   }
-  opts.on('--ri-database', ''){|path|
+  opts.on('--ruby=[VER]', "the version of Ruby interpreter"){|ver|
+    @ver = ver
+  }
+  opts.on('--ri-database', 'the path of ri database'){|path|
     @ri_path = path
   }
   opts.on('--help', 'Prints this message and quit.') {
@@ -62,8 +66,11 @@ def main
   when :list
     print_crossruby_table {|ruby| defined_methods(ruby, classname) }
   when :diff
-    _, table = build_crossruby_table {|ruby| defined_methods(ruby, classname) }
-    lib = BitClust::RRDParser.parse_stdlib_file(target)
+    unless ruby = get_ruby(@ver)
+      raise "Not found Ruby interpreter of the given version"
+    end
+    keys = defined_methods(ruby, classname) 
+    lib = BitClust::RRDParser.parse_stdlib_file(target, { 'version' => @ver })
     c = lib.fetch_class(classname)
     list = c.entries.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
 
@@ -72,7 +79,7 @@ def main
       ri.current_class = c.name
       mthds = ( ri.singleton_methods + ri.instance_methods )
       fmt = Formatter.new
-      (table.keys - list).sort.each do |name|
+      (keys - list).sort.each do |name|
         mthd = mthds.find{|m| name == m.fullname }
         if mthd
           puts fmt.method_info(mthd.entry)
@@ -81,11 +88,11 @@ def main
           puts "--- #{name}\n\#@todo\n\n"
         end
       end
-    else      
-      (table.keys - list).sort.each do |name|
+    else
+      (keys - list).sort.each do |name|
         puts "-#{name}"
       end
-      (list - table.keys).sort.each do |name|
+      (list - keys).sort.each do |name|
         puts "+#{name}" 
       end
     end
@@ -115,7 +122,34 @@ end
 
 def defined_methods(ruby, classname)
   req = @requires.map {|lib| "-r#{lib}" }.join(' ')
-  `#{ruby} #{req} -e '
+  if classname == 'Object'
+     `#{ruby} #{req} -e '
+     c = #{classname}
+     c.singleton_methods(false).each do |m|
+       puts "#{classname}.\#{m}"
+     end
+     c.instance_methods(true).each do |m|
+       puts "#{classname}\\#\#{m}"
+     end
+   '`.split
+  elsif classname == 'Kernel'
+    `#{ruby} #{req} -e '
+     c = #{classname}
+     c.singleton_methods(true).each do |m|
+       puts "#{classname}.\#{m}"
+     end
+     ( c.private_instance_methods(false) && c.methods(false) ).each do |m|
+       puts "#{classname}\\#\#{m}"
+     end
+     Object::constants.delete_if{|c| cl = Object.const_get(c).class; cl == Class or cl == Module }.each do |m|
+       puts "#{classname}::\#{m}"
+     end
+     global_variables.each do |m|
+       puts "#{classname}\#{m}"
+     end
+   '`.split
+  else
+    `#{ruby} #{req} -e '
     c = #{classname}
     c.singleton_methods(false).each do |m|
       puts "#{classname}.\#{m}"
@@ -127,6 +161,7 @@ def defined_methods(ruby, classname)
       puts "#{classname}::\#{m}"
     end
   '`.split
+  end
 end
 
 main
