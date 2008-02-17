@@ -70,7 +70,7 @@ def system_verbose(*args)
 end
 
 unless File.exist?(File.join(output_path, bitclust_dest_dir))
-  fu.mkpath(output_path)
+  fu.mkpath(File.join(output_path, bitclust_dest_dir))
   Dir.glob("#{bitclust_src_path}/**/*").each do |src|
     dest = File.join(output_path, bitclust_dest_dir, src[bitclust_src_path.size..-1])
     if File.directory?(src)

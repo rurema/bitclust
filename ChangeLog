@@ -1,3 +1,8 @@
+2008-02-17  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* packer.rb: mkpath File.join(output_path, bitclust_dest_dir) instead
+	  of output_path.
+
 2008-01-26  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
 	* tools/bc-methods.rb (defined_methods): 
