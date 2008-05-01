@@ -36,16 +36,16 @@ parser.on('--ruby=RUBY', 'path to ruby.') {|path|
   ruby = path
 }
 parser.on('--bitclust-srcdir=BITCLUSTDIR', 'path to bitclust.') {|path|
-  bitclust_src_path = path
+  bitclust_src_path = File.expand_path(path)
 }
 parser.on('--bitclust-dstdir=BITCLUSTDIR', 'dirname of bitclust in output.') {|dir|
   bitclust_dest_dir = dir
 }
 parser.on('--rubydoc-refm-api-srcdir=SRCDIR', 'path to rubydoc/refm/api/src.') {|path|
-  rubydoc_refm_api_src_path = path
+  rubydoc_refm_api_src_path = File.expand_path(path)
 }
 parser.on('--output-dir=OUTPUTDIR', 'path to output.') {|path|
-  output_path = path
+  output_path = File.expand_path(path)
 }
 parser.on('--database-encoding=ENCODING', 'encoding of database.') {|encoding|
   database_encoding = encoding
