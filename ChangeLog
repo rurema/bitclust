@@ -1,6 +1,8 @@
 2008-05-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
-	* tools/bc-methods.rb: take constans into class when diff.
+	* tools/bc-rdoc.rb: should use ``require 'bitclust/ridatabase' ''
+
+	* tools/bc-methods.rb: take constants into a list when diff.
 
 	* test_nameutils.rb: add a test.
 
