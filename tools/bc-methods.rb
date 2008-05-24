@@ -13,7 +13,6 @@ $LOAD_PATH.unshift((bindir + '../lib').realpath)
 
 require 'bitclust'
 require 'bitclust/crossrubyutils'
-require 'bitclust/ridatabase'
 require 'optparse'
 
 include BitClust::CrossRubyUtils
@@ -32,17 +31,18 @@ def main
   opts.on('-v', '--verbose', "Prints each ruby's version") {
     @verbose = true
   }
-  opts.on('--diff=RDFILE', '') {|path|
+  opts.on('--diff=RDFILE', 'RD file name') {|path|
     mode = :diff
     target = path
   }
   opts.on('-c', '') {
     @content = true
+    require 'bitclust/ridatabase'
   }
-  opts.on('--ruby=[VER]', "the version of Ruby interpreter"){|ver|
+  opts.on('--ruby=[VER]', "The version of Ruby interpreter"){|ver|
     @ver = ver
   }
-  opts.on('--ri-database', 'the path of ri database'){|path|
+  opts.on('--ri-database', 'The path of ri database'){|path|
     @ri_path = path
   }
   opts.on('--help', 'Prints this message and quit.') {
@@ -72,8 +72,9 @@ def main
     keys = defined_methods(ruby, classname) 
     lib = BitClust::RRDParser.parse_stdlib_file(target, { 'version' => @ver })
     c = lib.fetch_class(classname)
-    list = c.entries.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
-
+    list0 = lib.classes.find_all{|c0| /\A#{classname}\b/o =~ c0.name }
+    list0 = c.entries + list0
+    list = list0.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
     if @content      
       ri = @ri_path ? RiDatabase.open(@ri_path, nil) : RiDatabase.open_system_db
       ri.current_class = c.name
