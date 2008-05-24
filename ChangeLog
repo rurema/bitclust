@@ -1,3 +1,7 @@
+2008-05-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* test_nameutils.rb: add a test.
+
 2008-05-01  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: File.expand_path path arguments.
