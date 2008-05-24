@@ -1,5 +1,7 @@
 2008-05-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
+	* template/class:  allow the case that spaces don't exist between a signature and a `{'
+
 	* tools/bc-rdoc.rb: should use ``require 'bitclust/ridatabase' ''
 
 	* tools/bc-methods.rb: take constants into a list when diff.

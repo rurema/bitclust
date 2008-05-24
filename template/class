@@ -57,7 +57,7 @@ ancestors: <%= escape_html(myself.name) %>
 <tr>
 <td class="signature"><%=
               sigs.map {|sig|
-              name, params = sig.split(/(?=\(|\z|\s+[-{])/, 2)
+              name, params = sig.split(/(?=\(|\z|\s*[-{])/, 2)
               method_link(m.spec_string, name) + escape_html(params)
             }.join("<br>") %></td>
 <%          if m.redefined? %>
@@ -102,7 +102,7 @@ ancestors: <%= escape_html(myself.name) %>
 <tr>
 <td class="signature"><%=
             sigs.map {|sig|
-              name, params = sig.split(/(?=\(|\z|\s+[-{])/, 2)
+              name, params = sig.split(/(?=\(|\z|\s*[-{])/, 2)
               method_link(m.spec_string, name) + escape_html(params)
             }.join("<br>") %></td>
 <td class="description"><%= compile_rd(src) %></td>
