@@ -38,7 +38,7 @@ module BitClust
       new_screen(ClassIndexScreen, cs)
     end
 
-    def class_screen(c, level)
+    def class_screen(c, level = 0)
       new_screen(ClassScreen, c, level)
     end
 
@@ -305,7 +305,7 @@ module BitClust
   end
 
   class ClassScreen < EntryBoundScreen
-    def initialize(u, t, e, entry, level)
+    def initialize(u, t, e, entry, level = 0)
       @alevel = level
       super(u, t, e, entry)
     end
