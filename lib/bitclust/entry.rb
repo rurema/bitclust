@@ -549,9 +549,12 @@ module BitClust
       ancestors().select {|c| c.class? }.map {|c| c.extended }.flatten
     end
 
-    def entries
+    def entries(level = 0)
       @entries ||= @db.entries("method/#{@id}")\
           .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
+      ret = @entries
+      ancestors[1..level].each{|c| ret += c.entries }
+      ret 
     end
 
     alias methods entries
@@ -571,13 +574,13 @@ module BitClust
                        :constants, :special_variables,
                        :added)
 
-    def partitioned_entries
+    def partitioned_entries(level = 0)
       s = []; spv = []
       i = []; ipv = []
       mf = []
       c = []; v = []
       added = []
-      entries().sort.each do |m|
+      entries(level).sort_by{|e| e.name}.each do |m|
         case m.kind
         when :defined, :redefined
           case m.type
@@ -601,40 +604,40 @@ module BitClust
       Parts.new(s,spv, i,ipv, mf, c, v, added)
     end
 
-    def singleton_methods(inherit = true)
+    def singleton_methods(level = 0)
       # FIXME: inheritance
-      entries().select {|m| m.singleton_method? }.sort
+      entries(level).select {|m| m.singleton_method? }.sort
     end
 
-    def public_singleton_methods(inherit = true)
+    def public_singleton_methods(level = 0)
       # FIXME: inheritance
-      entries().select {|m| m.public_singleton_method? }.sort
+      entries(level).select {|m| m.public_singleton_method? }.sort
     end
 
-    def instance_methods(inherit = true)
+    def instance_methods(level = 0)
       # FIXME: inheritance
-      entries().select {|m| m.instance_method? }.sort
+      entries(level).select {|m| m.instance_method? }.sort
     end
 
-    def private_singleton_methods(inherit = true)
+    def private_singleton_methods(level = 0)
       # FIXME: inheritance
-      entries().select {|m| m.private_singleton_method? }.sort
+      entries(level).select {|m| m.private_singleton_method? }.sort
     end
 
-    def public_instance_methods(inherit = true)
+    def public_instance_methods(level = 0)
       # FIXME: inheritance
-      entries().select {|m| m.public_instance_method? }.sort
+      entries(level).select {|m| m.public_instance_method? }.sort
     end
 
-    def private_instance_methods(inherit = true)
+    def private_instance_methods(level = 0)
       # FIXME: inheritance
-      entries().select {|m| m.private_instance_method? }.sort
+      entries(level).select {|m| m.private_instance_method? }.sort
     end
 
     alias private_methods   private_instance_methods
 
-    def constants(inherit = true)
-      entries().select {|m| m.constant? }.sort
+    def constants(level = 0)
+      entries(level).select {|m| m.constant? }.sort
     end
 
     def special_variables

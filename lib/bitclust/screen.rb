@@ -38,8 +38,8 @@ module BitClust
       new_screen(ClassIndexScreen, cs)
     end
 
-    def class_screen(c)
-      new_screen(ClassScreen, c)
+    def class_screen(c, level)
+      new_screen(ClassScreen, c, level)
     end
 
     def method_screen(ms)
@@ -110,6 +110,11 @@ module BitClust
 
     def function_url(name)
       "#{@cgi_url}/function/#{name}"
+    end
+
+    def document_url(name)
+      raise unless %r!\A[\w/]+\z! =~ name
+      "#{@cgi_url}/#{name}"
     end
   end
 
@@ -300,6 +305,11 @@ module BitClust
   end
 
   class ClassScreen < EntryBoundScreen
+    def initialize(u, t, e, entry, level)
+      @alevel = level
+      super(u, t, e, entry)
+    end
+    
     def body
       run_template('class')
     end

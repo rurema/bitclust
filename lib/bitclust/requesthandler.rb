@@ -52,8 +52,8 @@ module BitClust
 
     def handle_class(req)
       return class_index() unless req.class_name
-      c = @db.fetch_class(req.class_name)
-      @screenmanager.class_screen(c).response
+      c =  @db.fetch_class(req.class_name)
+      @screenmanager.class_screen(c, req.ancestors_level).response
     end
 
     def handle_method(req)
@@ -183,6 +183,15 @@ module BitClust
       name
     end
 
+    def ancestors_level
+      ret = @wreq.query['a'].to_i
+      if ret < 0
+        0
+      else
+        ret
+      end
+    end
+    
     private
 
     def type_param

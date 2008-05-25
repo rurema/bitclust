@@ -16,14 +16,16 @@
 <%
     headline_init
 %>
-<%= headline("#{@entry.type} #{@entry.name}") %>
+<%= headline("#{@entry.type} #{@entry.name}" + @entry.ancestors[1..@alevel].map{|c| " + #{c.name}" }.join) %>
 <p>
 <%
     myself, *supers = @entry.ancestors
+    n = 0
 %>
 ancestors: <%= escape_html(myself.name) %>
 <%  supers.each do |c| %>
-      &lt; <%= class_link(c.name) %>
+      <a href="?a=<%=n%>">&lt;</a> <%= class_link(c.name) %>
+      <%n += 1 %>
 <%  end %>
 
 <% unless @entry.extended.empty? %>
@@ -37,14 +39,14 @@ ancestors: <%= escape_html(myself.name) %>
 <%= compile_rd(@entry.source) %>
 
 <%
-    ents = @entry.partitioned_entries
-    [['Singleton Methods',         ents.singleton_methods],
-     ['Instance Methods',          ents.instance_methods],
-     ['Private Singleton Methods', ents.private_singleton_methods],
-     ['Private Instance Methods',  ents.private_instance_methods],
-     ['Module Functions',          ents.module_functions],
-     ['Constants',                 ents.constants],
-     ['Special Variables',         ents.special_variables]]\
+    ents =  @entry.partitioned_entries(@alevel)
+    [['Singleton Methods',         ents.singleton_methods          ],
+     ['Instance Methods',          ents.instance_methods           ],
+     ['Private Singleton Methods', ents.private_singleton_methods  ],
+     ['Private Instance Methods',  ents.private_instance_methods   ],
+     ['Module Functions',          ents.module_functions           ],
+     ['Constants',                 ents.constants                  ],
+     ['Special Variables',         ents.special_variables          ]]\
     .each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
@@ -63,6 +65,9 @@ ancestors: <%= escape_html(myself.name) %>
 <%          if m.redefined? %>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
+<%          elsif @entry.name != m.klass.name %>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= class_link(m.klass.name) %></td>
 <%          else %>
 <td class="description" colspan="2"><%= compile_rd(src) %></td>
 <%          end %>

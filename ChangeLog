@@ -1,6 +1,20 @@
+2008-05-25  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_class):
+	  BitClust now can display methods of ancestors in template/class pages.
+
+	* lib/bitclust/screen.rb (BitClust::ScreenManager::class_screen): ditto.
+
+	* template/class: ditto.
+
+	* lib/bitclust/entry.rb (BitClust::ClassEntry::entries): 
+	  ClassEntry#entries now takes the depth of recursion.
+
+	* test/test_entry.rb: ditto.
+
 2008-05-24  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
 
-	* template/class:  allow the case that spaces don't exist between a signature and a `{'
+	* template/class:  allow the case that spaces don't exist between a signature and `{'
 
 	* tools/bc-rdoc.rb: should use ``require 'bitclust/ridatabase' ''
 
