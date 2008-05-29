@@ -12,7 +12,8 @@
 <body>
 
 <p>
-<a href="<%= library_index_url() %>">All Libraries</a>
+<%=h ruby_version() %>
+&gt; <a href="<%= library_index_url() %>">All Libraries</a>
 &gt; library <%= library_link(entry.library.name) %>
 &gt; <%= entry.klass.type %> <%= class_link(entry.klass.name) %>
 &gt; <% if entry.typename == :special_variable %>$<% end %><%=h entry.name %>

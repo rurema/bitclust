@@ -93,7 +93,8 @@ db = BitClust::Database.new(dbpath)
 manager = BitClust::ScreenManager.new(
   :base_url => baseurl,
   :cgi_url => "#{baseurl}/view",
-  :templatedir => templatedir
+  :templatedir => templatedir,
+  :target_version => db.propget('version')
 )
 handler = BitClust::RequestHandler.new(db, manager)
 
@@ -120,7 +121,8 @@ if autop
     manager = BitClust::ScreenManager.new(
       :base_url => baseurl,
       :cgi_url => "#{baseurl}/#{version}",
-      :templatedir => templatedir
+      :templatedir => templatedir,
+      :target_version => db.propget('version')
     )
     handlers[version] = BitClust::RequestHandler.new(db, manager)
     server.mount File.join(basepath, "#{version}/"), BitClust::Interface.new { handlers[version] }

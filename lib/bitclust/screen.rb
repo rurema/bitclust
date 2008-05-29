@@ -19,6 +19,7 @@ module BitClust
     def initialize(h)
       @template = TemplateRepository.new(h.delete(:templatedir))
       @default_encoding = h.delete(:default_encoding)
+      @target_version = h.delete(:target_version)
       @urlmapper = URLMapper.new(h)
     end
 
@@ -61,7 +62,7 @@ module BitClust
     private
 
     def new_screen(c, *args)
-      c.new(@urlmapper, @template, @default_encoding, *args)
+      c.new(@urlmapper, @template, @default_encoding, @target_version, *args)
     end
   end
 
@@ -171,10 +172,11 @@ module BitClust
   class TemplateScreen < Screen
     include HTMLUtils
 
-    def initialize(urlmapper, template_repository, default_encoding)
+    def initialize(urlmapper, template_repository, default_encoding, target_version)
       @urlmapper = urlmapper
       @template_repository = template_repository
       @default_encoding = default_encoding
+      @target_version = target_version
     end
 
     def content_type
@@ -183,6 +185,10 @@ module BitClust
 
     def encoding
       default_encoding()
+    end
+
+    def ruby_version
+      @target_version || 'unknown'
     end
 
     private
@@ -260,8 +266,8 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
-    def initialize(u, t, e, entries)
-      super u, t, e
+    def initialize(u, t, e, v, entries)
+      super u, t, e, v
       @entries = entries
     end
 
@@ -274,8 +280,8 @@ module BitClust
   end
 
   class EntryBoundScreen < TemplateScreen
-    def initialize(u, t, e, entry)
-      super u, t, e
+    def initialize(u, t, e, v, entry)
+      super u, t, e, v
       @entry = entry
     end
 
@@ -305,9 +311,9 @@ module BitClust
   end
 
   class ClassScreen < EntryBoundScreen
-    def initialize(u, t, e, entry, level = 0)
+    def initialize(u, t, e, v, entry, level = 0)
       @alevel = level
-      super(u, t, e, entry)
+      super(u, t, e, v, entry)
     end
     
     def body
@@ -316,8 +322,8 @@ module BitClust
   end
 
   class MethodScreen < TemplateScreen
-    def initialize(u, t, e, entries)
-      super u, t, e
+    def initialize(u, t, e, v, entries)
+      super u, t, e, v
       @entries = entries
     end
 
@@ -346,8 +352,8 @@ module BitClust
   end
 
   class RDFileScreen < TemplateScreen
-    def initialize(u, t, e, s)
-      super u, t, e
+    def initialize(u, t, e, v, s)
+      super u, t, e, v
       @source = s
     end
 
