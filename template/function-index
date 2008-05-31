@@ -12,6 +12,7 @@
 <%=h ruby_version() %>
 &gt; All Functions
 </p>
+<%= search_form() %>
 <%
     headline_init
 %>

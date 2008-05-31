@@ -8,6 +8,7 @@
 </head>
 <body>
 
+<%= search_form() %>
 <%
     headline_init
 %>

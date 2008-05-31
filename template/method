@@ -19,6 +19,8 @@
 &gt; <% if entry.typename == :special_variable %>$<% end %><%=h entry.name %>
 <% unless entry.really_public? %>(<%= entry.visibility %>)<% end %>
 </p>
+<%= search_form() %>
+
 
 <% headline_init %>
 <%= headline("#{entry.type_label} #{entry.label}") %>

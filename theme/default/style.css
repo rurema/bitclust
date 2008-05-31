@@ -250,3 +250,9 @@ hr {
         font-weight: normal;
     }
 }
+
+#top_search {
+ position: absolute;
+ top: 15px; 
+ right: 10px; 
+}

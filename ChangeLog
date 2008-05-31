@@ -1,3 +1,38 @@
+2008-06-01  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+
+	* template/search: BitClust now takes a search query.
+
+	* template/class-index: ditto.
+
+	* template/function-index: ditto.
+
+	* template/function: ditto.
+
+	* template/library-index: ditto.
+
+	* template/library: ditto.
+
+	* template/class: ditto.
+
+	* template/method: ditto
+
+	* theme/default/style.css: ditto.
+
+	* lib/bitclust/screen.rb (BitClust::ScreenManager::seach_screen): ditto.
+	(BitClust::TemplateScreen::search_form): ditto.
+	(BitClust::SearchScreen::initialize): ditto.
+
+	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_search): ditto.
+
+	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher): ditto.
+
+	* test/test_simplesearcher.rb (TestSearcher::test_simple_search): add a new test.
+
+	* test/test_entry.rb: minor edit.
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser.parse): 
+	  add a new class method for debug.
+
 2008-05-29  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/screen.rb (BitClust::ScreenManager::new_screen):

@@ -11,6 +11,8 @@
 <p>
 <%=h ruby_version() %> &gt; All Libraries
 </p>
+<%= search_form() %>
+
 <%
     headline_init
 %>

@@ -27,6 +27,21 @@ module BitClust
       parser.parse_file(path, libname(path), params)
     end
 
+    def RRDParser.parse(s, lib, params = {"version" => "1.9.0"})
+      parser = new(Database.dummy(params))
+      if s.respond_to?(:to_io)
+        io = s.to_io
+      elsif s.respond_to?(:to_str)
+        s1 = s.to_str
+        require 'stringio'
+        io = StringIO.new(s1)
+      else
+        io = s
+      end
+      l = parser.parse(io, lib, params)
+      return l, parser.db
+    end
+        
     def RRDParser.libname(path)
       case path
       when %r<(\A|/)_builtin/>
@@ -40,7 +55,8 @@ module BitClust
     def initialize(db)
       @db = db
     end
-
+    attr_reader :db
+    
     def parse_file(path, libname, params = {})
       File.open(path) {|f|
         return parse(f, libname, params)

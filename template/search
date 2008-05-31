@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <title>Search Results</title>
+</head>
+<body>
+
+<%
+    headline_init
+%>
+<%= headline "search results" %>
+<form method="get" action="" name="f">
+<input value="<%=h @query %>" name="q" size="41">
+<input value="Search" type="submit"> 
+</form>
+<p>
+
+<table class="entries">
+<tr  ><td></td><td style="text-align:right" nowrap="nowrap">Results <b><%= @entries.size %></b> </td></tr>
+<% if @entries.size > 0 %>
+<tr><th>results</th><th colspan="2">description</th></tr>
+<% end %>
+<%
+        headline_push
+        @entries.each do |e|
+          foreach_method_chunk(e.source) do |sigs, src| %>
+<tr>
+<%          case e.type_id
+            when :method  %>
+<td class="signature"><%=
+              case e.type
+              when :special_variable
+                e.names.map{|l| method_link(e.spec_string, '$' + l) }
+              else
+                sigs.map {|sig|
+                  name, params = sig.split(/(?=\(|\z|\s*[-{])/, 2)
+                  method_link(e.spec_string, e.klass.name + e.typemark + name) + escape_html(params)
+                }
+              end.join("<br>") %></td>
+<td class="description"><%= compile_rd(src) %></td>
+<%          when :class   %>
+<td class="signature"><%= class_link e.name %></td>
+<td class="description"><%= compile_rd(src) %></td>
+<%          end           %>
+</tr>
+<%         
+          end
+        end
+        headline_pop
+%>
+</table>
+
+</body>
+</html>

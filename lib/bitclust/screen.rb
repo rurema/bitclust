@@ -47,6 +47,10 @@ module BitClust
       new_screen(MethodScreen, ms)
     end
 
+    def seach_screen(result, q)
+      new_screen(SearchScreen, result, q)
+    end
+    
     def function_screen(f)
       new_screen(FunctionScreen, f)
     end
@@ -206,11 +210,15 @@ module BitClust
     def h(str)
       escape_html(str.to_s)
     end
-
+    
     def css_url
       @urlmapper.css_url
     end
 
+    def search_url
+      "#{@urlmapper.cgi_url}/search"
+    end
+    
     def library_index_url
       @urlmapper.library_index_url
     end
@@ -239,6 +247,10 @@ module BitClust
       "<h#{@hlevel}>#{str}</h#{@hlevel}>"
     end
 
+    def search_form
+      %Q!<form method="get" action="#{h search_url()}" name="f" id="top_search"><input value="" name="q" size="15"> <input value="Search" type="submit"></form>!
+    end
+    
     def compile_method(m)
       rdcompiler().compile_method(m)
     end
@@ -310,6 +322,17 @@ module BitClust
     end
   end
 
+  class SearchScreen < IndexScreen
+    def initialize(u, t, e, v, entries, q)
+      super u, t, e, v, entries
+      @query = q
+    end
+
+    def body
+      run_template('search')
+    end
+  end
+  
   class ClassScreen < EntryBoundScreen
     def initialize(u, t, e, v, entry, level = 0)
       @alevel = level

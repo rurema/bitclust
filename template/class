@@ -14,6 +14,8 @@
 &gt; library <%= library_link(@entry.library.name) %>
 &gt; <%=h @entry.type %> <%=h @entry.name %>
 </p>
+<%= search_form() %>
+
 <%
     headline_init
 %>

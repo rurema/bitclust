@@ -11,6 +11,7 @@ require 'bitclust/compat'
 require 'bitclust/screen'
 require 'bitclust/methodid'
 require 'bitclust/nameutils'
+require 'bitclust/simplesearcher'
 
 module BitClust
 
@@ -60,7 +61,7 @@ module BitClust
       ms = @db.fetch_methods(req.method_spec)
       @screenmanager.method_screen(ms).response
     end
-
+   
     def library_index
       @screenmanager.library_index_screen(@db.libraries.sort).response
     end
@@ -70,7 +71,12 @@ module BitClust
     end
 
     def handle_search(req)
-      # FIXME
+      q0 = req.wreq.query['q'] || ''
+      q0 = URI.unescape(q0)
+      q = q0.gsub(/\A +/, '').split(/ /)[0]
+      q = nil if /[^a-zA-Z0-9#:\.$\[\]=]/ =~ q
+      ret = SimpleSearcher.search_pattern(@db, q) if q
+      @screenmanager.seach_screen(ret || [], q0).response
     end
 
     def handle_function(req)
@@ -93,7 +99,8 @@ module BitClust
     def initialize(wreq)
       @wreq = wreq
     end
-
+    attr_reader :wreq
+    
     def library?
       type_id() == :library
     end
@@ -161,7 +168,7 @@ module BitClust
     def type_id
       type, param = parse_path_info()
       case type
-      when 'library', 'class', 'method', 'function'
+      when 'library', 'class', 'method', 'function', 'search'
         type.intern
       else
         nil

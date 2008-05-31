@@ -13,6 +13,8 @@
 &gt; <a href="<%= library_index_url() %>">All Libraries</a>
 &gt; library <%=h @entry.name %>
 </p>
+<%= search_form() %>
+
 <%
     headline_init
 %>
