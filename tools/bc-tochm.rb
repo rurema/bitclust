@@ -2,10 +2,16 @@
 
 require 'pathname'
 def srcdir_root
-  #Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
-  Pathname.new(__FILE__).dirname.parent.cleanpath
+  (Pathname.new(__FILE__).realpath.dirname + '..').cleanpath
 end
-$LOAD_PATH.unshift srcdir_root + 'lib'
+
+$LOAD_PATH.unshift srcdir_root() + 'lib'
+
+#def srcdir_root
+#  #Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
+#  Pathname.new(__FILE__).dirname.parent.cleanpath
+#end
+#$LOAD_PATH.unshift srcdir_root + 'lib'
 
 require 'bitclust'
 require 'erb'
@@ -195,9 +201,10 @@ def main
     exit(1)
   end
 
-  #manager = BitClust::ScreenManager.new(manager_config)
-  manager = BitClust::ScreenManagerEx.new(manager_config)
   db = BitClust::Database.new(prefix.to_s)
+  #manager = BitClust::ScreenManager.new(manager_config)
+  manager_config[:target_version] = db.propget('version')
+  manager = BitClust::ScreenManagerEx.new(manager_config)
   @html_files = []
   db.transaction do
     methods = {}

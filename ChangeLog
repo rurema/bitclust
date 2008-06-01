@@ -1,3 +1,8 @@
+2008-06-01  okkez  <okkez000@gmail.com>
+
+	* tools/bc-tochm.rb (main):
+	  bc-tochm now can display target ruby version.
+
 2008-06-01  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* standalone.rb: add default_encoding to the manager.
