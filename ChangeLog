@@ -1,4 +1,8 @@
-2008-06-01  TAMURA Takashi  <sheepman@sheepman.sakura.ne.jp>
+2008-06-01  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* standalone.rb: add default_encoding to the manager.
+
+2008-06-01  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* template/search: BitClust now takes a search query.
 

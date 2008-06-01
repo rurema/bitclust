@@ -94,7 +94,8 @@ manager = BitClust::ScreenManager.new(
   :base_url => baseurl,
   :cgi_url => "#{baseurl}/view",
   :templatedir => templatedir,
-  :target_version => db.propget('version')
+  :target_version => db.propget('version'),
+  :default_encoding => db.properties['encoding']
 )
 handler = BitClust::RequestHandler.new(db, manager)
 
