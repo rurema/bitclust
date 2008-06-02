@@ -17,10 +17,9 @@ module BitClust
 
   class ScreenManager
     def initialize(h)
-      @template = TemplateRepository.new(h.delete(:templatedir))
-      @default_encoding = h.delete(:default_encoding)
-      @target_version = h.delete(:target_version)
-      @urlmapper = URLMapper.new(h)
+      h[:template_repository]  = TemplateRepository.new(h.delete(:templatedir))
+      h[:urlmapper] = URLMapper.new(h)
+      @conf = h
     end
 
     def entry_screen(entry)
@@ -66,7 +65,7 @@ module BitClust
     private
 
     def new_screen(c, *args)
-      c.new(@urlmapper, @template, @default_encoding, @target_version, *args)
+      c.new(@conf, *args)
     end
   end
 
@@ -176,11 +175,12 @@ module BitClust
   class TemplateScreen < Screen
     include HTMLUtils
 
-    def initialize(urlmapper, template_repository, default_encoding, target_version)
-      @urlmapper = urlmapper
-      @template_repository = template_repository
-      @default_encoding = default_encoding
-      @target_version = target_version
+    def initialize(h)
+      @urlmapper = h[:urlmapper]
+      @template_repository = h[:template_repository]
+      @default_encoding = h[:default_encoding]      
+      @target_version = h[:target_version]
+      @conf = h
     end
 
     def content_type
@@ -248,7 +248,11 @@ module BitClust
     end
 
     def search_form
-      %Q!<form method="get" action="#{h search_url()}" name="f" id="top_search"><input value="" name="q" size="15"> <input value="Search" type="submit"></form>!
+      if @conf[:tochm_mode]
+        ""
+      else
+        %Q!<form method="get" action="#{h search_url()}" name="f" id="top_search"><input value="" name="q" size="15"> <input value="Search" type="submit"></form>!
+      end
     end
     
     def compile_method(m)
@@ -278,8 +282,8 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
-    def initialize(u, t, e, v, entries)
-      super u, t, e, v
+    def initialize(h, entries)
+      super h
       @entries = entries
     end
 
@@ -292,8 +296,8 @@ module BitClust
   end
 
   class EntryBoundScreen < TemplateScreen
-    def initialize(u, t, e, v, entry)
-      super u, t, e, v
+    def initialize(h, entry)
+      super h
       @entry = entry
     end
 
@@ -323,8 +327,8 @@ module BitClust
   end
 
   class SearchScreen < IndexScreen
-    def initialize(u, t, e, v, entries, q)
-      super u, t, e, v, entries
+    def initialize(h, entries, q)
+      super h, entries
       @query = q
     end
 
@@ -334,9 +338,9 @@ module BitClust
   end
   
   class ClassScreen < EntryBoundScreen
-    def initialize(u, t, e, v, entry, level = 0)
+    def initialize(h, entry, level = 0)
       @alevel = level
-      super(u, t, e, v, entry)
+      super(h, entry)
     end
     
     def body
@@ -345,8 +349,8 @@ module BitClust
   end
 
   class MethodScreen < TemplateScreen
-    def initialize(u, t, e, v, entries)
-      super u, t, e, v
+    def initialize(h, entries)
+      super h
       @entries = entries
     end
 
@@ -375,8 +379,8 @@ module BitClust
   end
 
   class RDFileScreen < TemplateScreen
-    def initialize(u, t, e, v, s)
-      super u, t, e, v
+    def initialize(h, s)
+      super h
       @source = s
     end
 

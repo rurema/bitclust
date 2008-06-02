@@ -27,7 +27,7 @@
 %>
 ancestors: <%= escape_html(myself.name) %>
 <%  supers.each do |c| %>
-      <a href="?a=<%=n%>">&lt;</a> <%= class_link(c.name) %>
+      <%= @conf[:tochm_mode] ? "&lt;" : a_href("?a=#{n}", "<")  %> <%= class_link(c.name) %>
       <%n += 1 %>
 <%  end %>
 

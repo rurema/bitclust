@@ -1,3 +1,15 @@
+2008-06-02  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+        * lib/bitclust/screen.rb (BitClust::ScreenManager):
+          use a hash to store configuration data.
+
+        * lib/bitclust/screen.rb (BitClust::TemplateScreen::search_form):
+          check whether called by bc-tochm.rb.
+
+        * tools/bc-tochm.rb (main): ditto.
+
+        * template/class (ancestors): ditto.
+
 2008-06-01  okkez  <okkez000@gmail.com>
 
 	* tools/bc-tochm.rb (main):

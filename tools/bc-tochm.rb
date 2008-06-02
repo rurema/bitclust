@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+# coding: euc-jp
 require 'pathname'
 def srcdir_root
   (Pathname.new(__FILE__).realpath.dirname + '..').cleanpath
@@ -181,6 +181,7 @@ def main
     :themedir => srcdir_root + 'theme' + 'default',
     :css_url => 'style.css',
     :cgi_url => '',
+    :tochm_mode => true
   }
   parser = OptionParser.new
   parser.on('-d', '--database=PATH', 'Database prefix') do |path|
@@ -240,8 +241,10 @@ def main
       when :method
         e.names.each do |e_name|
           name = e.typename == :special_variable ? "$#{e_name}" : e_name
-          @index_contents << Sitemap::Content.new("#{name} (#{e.library.name} - #{e.klass.name})", filename)
-          @index_contents << Sitemap::Content.new("#{e.klass.name}#{e.typemark}#{name} (#{e.library.name})", filename)
+          @index_contents <<
+            Sitemap::Content.new("#{name} (#{e.library.name} - #{e.klass.name})", filename)
+          @index_contents <<
+            Sitemap::Content.new("#{e.klass.name}#{e.typemark}#{name} (#{e.library.name})", filename)
         end
       end
       pb.title.replace(e.name)
@@ -255,7 +258,8 @@ def main
   create_file(outputdir + 'refm.hhk', HHK_SKEL, true)
   create_file(outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort).body)
   create_file(outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort).body)
-  FileUtils.cp(manager_config[:themedir] + manager_config[:css_url], outputdir.to_s, {:verbose => true, :preserve => true})
+  FileUtils.cp(manager_config[:themedir] + manager_config[:css_url],
+               outputdir.to_s, {:verbose => true, :preserve => true})
 end
 
 def create_html_file(entry, manager, outputdir)
@@ -265,7 +269,8 @@ def create_html_file(entry, manager, outputdir)
          when :library, :class
            outputdir + e.type_id.to_s + (BitClust::NameUtils.encodename_fs(e.name) + '.html')
          when :method
-           outputdir + e.type_id.to_s + BitClust::NameUtils.encodename_fs(e.klass.name) + e.typechar + (BitClust::NameUtils.encodename_fs(e.name) + '.html')
+           outputdir + e.type_id.to_s + BitClust::NameUtils.encodename_fs(e.klass.name) +
+             e.typechar + (BitClust::NameUtils.encodename_fs(e.name) + '.html')
          else
            raise
          end
