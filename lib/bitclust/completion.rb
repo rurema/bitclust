@@ -391,6 +391,10 @@ $cm_comb_m += 1
     attr_reader :classes
     attr_reader :records
 
+    def inspect
+      "\#<BitClust::SearchResult @pattern=#{@pattern.inspect} @classes=#{@classes.inspect} @database=#{@database.inspect} @records=[#{record.inspect}, ...] >"
+    end
+
     def fail?
       @records.empty?
     end

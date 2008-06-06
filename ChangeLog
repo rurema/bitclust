@@ -1,5 +1,8 @@
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/completion.rb (BitClust::SearchResult::inspect): 
+	  avoid too big SearchResult#inspect.
+
 	* lib/bitclust/preprocessor.rb (BitClust::Preprocessor::Preprocessor.read): 
 	  add a File.read-like method.
 
