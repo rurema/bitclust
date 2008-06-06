@@ -1,3 +1,8 @@
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher::search_pattern): 
+	  check whether pattern is empty.
+
 2008-06-02  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
         * lib/bitclust/screen.rb (BitClust::ScreenManager):

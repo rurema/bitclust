@@ -8,6 +8,7 @@ module BitClust
     module_function
     
     def search_pattern(db, pat)
+      return [] if pat.empty?
       cname, type, mname = parse_method_spec_pattern(pat)
       ret = cs = ms = []
       if cname and not cname.empty?
