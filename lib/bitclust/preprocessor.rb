@@ -39,6 +39,15 @@ module BitClust
 
   class Preprocessor < LineFilter
 
+    def Preprocessor.read(path, params = {})
+      io = Preprocessor.new(File.open(path), params)
+      ret = ""
+      while s = io.gets
+        ret << s
+      end
+      ret
+    end
+    
     def Preprocessor.process(path, params = {})
       File.open(path) {|f|
         return wrap(f, params).to_a
