@@ -41,7 +41,15 @@ module BitClust
       l = parser.parse(io, lib, params)
       return l, parser.db
     end
-        
+
+    def RRDParser.title(source)
+      source.each_line{|l|
+        if /\A=(\[a:.*?\])? *(.*)/ =~ l
+          return $2 
+        end
+      }            
+    end
+
     def RRDParser.libname(path)
       case path
       when %r<(\A|/)_builtin/>

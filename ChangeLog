@@ -1,5 +1,8 @@
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::RRDParser.title): 
+	  new method. extract the title of a document.
+
 	* lib/bitclust/refsdatabase.rb (BitClust::RefsDatabase): 
 	  add a new reference-database class.
 
