@@ -136,12 +136,14 @@ module BitClust
 
     def headline(line)
       level = @hlevel + (line.slice(/\A=+/).size - 3)
-      label = line.sub(/\A=+(\[a:.*?\])?/, '').strip
-      line h(level, escape_html(label))
+      label = line.sub(/\A=+(\[a:(.*?)\])?/, '').strip
+      frag = $2 if $2 and not $2.empty?
+      line h(level, escape_html(label), frag)
     end
 
-    def h(level, label)
-      "<h#{level}>#{label}</h#{level}>"
+    def h(level, label, frag = nil)
+      name = frag ? "id=#{escape_html(frag)}" : ""
+      "<h#{level} #{name}>#{label}</h#{level}>"
     end
 
     def ulist
@@ -334,14 +336,15 @@ module BitClust
       }
     end
 
-    def bracket_link(link)
+    def bracket_link(link, label = nil, frag = nil)
       type, _arg = link.split(':', 2)
       arg = _arg.rstrip
       case type
-      when 'lib'     then protect(link) { library_link(arg) }
-      when 'c'       then protect(link) { class_link(arg) }
-      when 'm'       then protect(link) { method_link(complete_spec(arg), arg) }
-      when 'd'       then protect(link) { document_link(arg) }
+      when 'lib'     then protect(link) { library_link(arg, label, frag) }
+      when 'c'       then protect(link) { class_link(arg, label, frag) }
+      when 'm'       then protect(link) { method_link(complete_spec(arg), label || arg, frag) }
+      when 'd'       then protect(link) { document_link(arg, label, frag) }
+      when 'ref'     then protect(link) { reference_link(arg) }
       when 'url'     then direct_url(arg)
       when 'man'     then man_link(arg)
       when 'rfc', 'RFC'
@@ -363,10 +366,41 @@ module BitClust
       %Q(<a href="#{escape_html(url)}">#{escape_html(url)}</a>)
     end
 
-    def document_link(name, label = nil)
-      a_href(@urlmapper.document_url(name), label || @option[:database].get_doc(name).title)
+    def document_link(name, label = nil, frag = nil)
+      f = frag ? "##{frag}" : ""
+      a_href(@urlmapper.document_url(name) + f, label || @option[:database].get_doc(name).title)
     end
-        
+
+    def reference_link(arg)
+      case arg
+      when /(\w+):(.*)\#(\w+)\z/
+        type, name, frag = $1, $2, $3
+        case type
+        when 'lib'
+          title, t, id = name, LibraryEntry.type_id.to_s, name
+        when 'c'
+          title, t, id = name, ClassEntry.type_id.to_s,   name
+        when 'm'
+          title, t, id = name, MethodEntry.type_id.to_s,  name
+        when 'd'
+          title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
+        else
+          raise "must not happen"
+        end        
+        label = @option[:database].refs[t, id, frag]
+        label = title + '/' + label if label and name
+        bracket_link("#{type}:#{name}", label, frag)
+      when /\A(\w+)\z/        
+        e = @option[:entry]
+        frag = $1
+        type = e.type_id.to_s
+        label = @option[:database].refs[type, e.name, frag] || frag
+        a_href('#' + frag, label)
+      else
+        raise "must not happen" 
+      end
+    end
+                   
     BLADE_URL = 'http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/%s/%s'
 
     def blade_link(ml, num)

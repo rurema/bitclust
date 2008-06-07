@@ -231,7 +231,7 @@ module BitClust
     end
 
     def make_refs
-      [classes, libraries, docs].each{|es|
+      [classes, libraries, methods, docs].each{|es|
         es.each{|e|
           refs().extract(e)
         }

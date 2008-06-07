@@ -259,6 +259,10 @@ module BitClust
       libid2name(@id)
     end
     alias label name
+
+    def labels
+      [label()]
+    end
     
     def name?(n)
       name() == n
@@ -1062,9 +1066,13 @@ module BitClust
     end
 
     def name
-      @id
+      libid2name(@id)
     end
     alias label name
+
+    def labels
+      [label()]
+    end
     
     def name?(n)
       name() == n

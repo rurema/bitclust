@@ -3,7 +3,7 @@ module BitClust
   class RefsDatabase
     def self.load(s)
       if s.respond_to?(:to_str)
-        buf = s.to_str
+        buf = File.read(s.to_str)
       elsif s.respond_to?(:to_io)
         buf = s.to_io.read
       else
@@ -14,10 +14,9 @@ module BitClust
       buf.each_line{|l|
         if /((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+)\n/ =~ l
           type, id, linkid, desc = [$1, $2, $3, $4].map{|e| e.gsub(/\\(.)/){|s| $1 == ',' ? ',' : s } }
-          refs[type, id, linkid] = desc
+          refs[type, id, linkid] = desc          
         end
       }
-
       refs
     end
     
@@ -48,11 +47,12 @@ module BitClust
       }
     end
 
-    def extract(entry)
-      name = entry.label
+    def extract(entry)      
       entry.source.each_line{|l|
         if /\A={1,4}\[a:(\w+)\] *(.*)\n/ =~ l
-          self[entry.class.type_id, name, $1] = $2
+          entry.labels.each{|name|
+            self[entry.class.type_id, name, $1] = $2
+          }
         end
       }
     end

@@ -23,20 +23,24 @@ module BitClust
       a_href(@urlmapper.method_url(methodid2specstring(m.id)), label)
     end
 
-    def library_link(name, label = nil)
-      a_href(@urlmapper.library_url(name), label || name)
+    def library_link(name, label = nil, frag = nil)
+      f = frag ? "##{frag}" : ""
+      a_href(@urlmapper.library_url(name) + f, label || name)
     end
 
-    def class_link(name, label = nil)
-      a_href(@urlmapper.class_url(name), label || name)
+    def class_link(name, label = nil, frag = nil)
+      f = frag ? "##{frag}" : ""
+      a_href(@urlmapper.class_url(name) + f , label || name)
     end
 
-    def method_link(spec, label = nil)
-      a_href(@urlmapper.method_url(spec), label || spec)
+    def method_link(spec, label = nil, frag = nil)
+      f = frag ? "##{frag}" : ""
+      a_href(@urlmapper.method_url(spec) + f, label || spec)
     end
 
-    def function_link(name, label = nil)
-      a_href(@urlmapper.function_url(name), label || name)
+    def function_link(name, label = nil, frag = nil)
+      f = frag ? "##{frag}" : ""
+      a_href(@urlmapper.function_url(name) + f, label || name)
     end
 
     def a_href(url, label)

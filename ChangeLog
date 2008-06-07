@@ -1,5 +1,22 @@
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/database.rb (BitClust::Database::make_refs): 
+	  Database now can contain references in method entries.
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::reference_link): 
+	  new method. create a link from a reference ([[ref:c:String#m17n]] ...etc).
+
+	  (BitClust::RDCompiler::bracket_link): 
+	  bracket_link now can take a label and a fragment.
+	  bracket_link now can treat [[ref:c:String#m17n]] ...etc.
+
+	  (BitClust::RDCompiler::h): now can take a fragment.
+
+	* lib/bitclust/htmlutils.rb (BitClust::HTMLUtils::library_link): 
+	  now can take a fragment. 
+
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::document_link): 
 	  new method. create a link to a document.
 

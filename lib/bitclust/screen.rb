@@ -301,7 +301,8 @@ module BitClust
 
   class EntryBoundScreen < TemplateScreen
     def initialize(h, entry)
-      super h
+      h[:entry] = entry
+      super h      
       @entry = entry
     end
 
