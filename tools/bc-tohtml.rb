@@ -75,13 +75,13 @@ def main
       $stderr.puts ex.backtrace[0], ex.backtrace[1..-1].map{|s| "\tfrom " + s}
     end
   end
+
   
-  ret = ''
-  io = BitClust::Preprocessor.new(File.open(ARGV[0]), {'version' => ver})
-  while s = io.gets
-    ret << s
-  end
-  puts manager.rd_file_screen(ret).body
+  ent = BitClust::DocEntry.new(BitClust::Database.dummy({'version' => ver}), ARGV[0])
+  ret = BitClust::Preprocessor.read(ARGV[0], {'version' => ver})
+  ent.source = ret
+  ent.title = BitClust::RRDParser.title(ret) || ''
+  puts manager.doc_screen(ent).body
   return 
 rescue BitClust::WriterError => err
   $stderr.puts err.message

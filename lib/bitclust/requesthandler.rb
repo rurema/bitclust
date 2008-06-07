@@ -33,7 +33,7 @@ module BitClust
     private
 
     def _handle(req)
-      return library_index() unless req.type_id
+      return handle_doc(req) unless req.defined_type?
       mid = "handle_#{req.type_id}"
       unless respond_to?(mid, true)
         raise RequestError, "wrong request: type_id=#{req.type_id}"
@@ -73,12 +73,18 @@ module BitClust
     def handle_search(req)
       q0 = req.wreq.query['q'] || ''
       q0 = URI.unescape(q0)
-      q = q0.gsub(/\A +/, '').split(/ /)[0]
-      q = nil if /[^a-zA-Z0-9#:\.$\[\]=]/ =~ q
-      ret = SimpleSearcher.search_pattern(@db, q) if q
+      q = q0.gsub(/\A +/, '').split(/ /)[0..1].join('.')
+      unless /[^a-zA-Z0-9#:\.$\[\]=]/ =~ q
+        ret = SimpleSearcher.search_pattern(@db, q)
+      end
       @screenmanager.seach_screen(ret || [], q0).response
     end
 
+    def handle_doc(req)
+      d = @db.fetch_doc(req.doc_name || 'index' )
+      @screenmanager.doc_screen(d).response
+    end
+    
     def handle_function(req)
       return function_index() unless req.function_name
       f = @db.fetch_function(req.function_name)
@@ -113,6 +119,11 @@ module BitClust
       type_id() == :method
     end
 
+    def doc_name
+      name = @wreq.path_info.sub(%r!\A/!, '')
+      name unless name.empty?
+    end
+    
     def library_name
       raise '#library_name called but not library request' unless library?
       id = type_param()
@@ -165,14 +176,19 @@ module BitClust
       MethodSpec.new(cname, tmark, mname)
     end
 
-    def type_id
+    def defined_type?
       type, param = parse_path_info()
       case type
       when 'library', 'class', 'method', 'function', 'search'
-        type.intern
+        true
       else
-        nil
+        false
       end
+    end
+    
+    def type_id
+      type, param = parse_path_info()
+      type.intern if type
     end
 
     def function?

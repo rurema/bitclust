@@ -1,5 +1,20 @@
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/screen.rb (BitClust::DocScreen): 
+	  BitClust now can display documents.
+
+	* lib/bitclust/entry.rb (BitClust::DocEntry): 
+	  ditto.
+
+	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_doc): 
+	  ditto.
+
+	* template/doc: ditto.
+
+	* template.offline/doc: ditto.
+
+	* tools/bc-tohtml.rb (main): ditto.
+
 	* lib/bitclust/database.rb (BitClust::Database::docs): 
 	  Database now can contain documents.
 

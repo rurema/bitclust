@@ -49,6 +49,10 @@ module BitClust
     def seach_screen(result, q)
       new_screen(SearchScreen, result, q)
     end
+
+    def doc_screen(d)
+      new_screen(DocScreen, d)
+    end
     
     def function_screen(f)
       new_screen(FunctionScreen, f)
@@ -58,10 +62,6 @@ module BitClust
       new_screen(FunctionIndexScreen, fs)
     end
 
-    def rd_file_screen(s)
-      new_screen(RDFileScreen, s)
-    end
-      
     private
 
     def new_screen(c, *args)
@@ -116,6 +116,10 @@ module BitClust
       "#{@cgi_url}/function/#{name}"
     end
 
+    def spec_url(name)
+      "#{@cgi_url}/spec/#{name}"
+    end
+    
     def document_url(name)
       raise unless %r!\A[\w/]+\z! =~ name
       "#{@cgi_url}/#{name}"
@@ -179,7 +183,7 @@ module BitClust
       @urlmapper = h[:urlmapper]
       @template_repository = h[:template_repository]
       @default_encoding = h[:default_encoding]      
-      @target_version = h[:target_version]
+      @target_version = h[:target_version]      
       @conf = h
     end
 
@@ -268,7 +272,7 @@ module BitClust
     end
 
     def rdcompiler
-      RDCompiler.new(@urlmapper, @hlevel)
+      RDCompiler.new(@urlmapper, @hlevel, @conf)
     end
 
     def foreach_method_chunk(src)
@@ -378,23 +382,20 @@ module BitClust
     end
   end
 
-  class RDFileScreen < TemplateScreen
-    def initialize(h, s)
-      super h
-      @source = s
-    end
+  class DocScreen < EntryBoundScreen
 
     def encoding
       default_encoding()
     end
-
     alias charset encoding
+
     def body
-      run_template('rd_file')
+      run_template('doc')
     end
     
     def rdcompiler
-      RDCompiler.new(@urlmapper, @hlevel, {:force => true})
+      h = {:force => true}.merge(@conf)
+      RDCompiler.new(@urlmapper, @hlevel, h)
     end
   end
 end

@@ -258,7 +258,8 @@ module BitClust
     def name
       libid2name(@id)
     end
-
+    alias label name
+    
     def name?(n)
       name() == n
     end
@@ -1030,6 +1031,53 @@ module BitClust
       "#{private? ? 'static ' : ''}#{base}"
     end
 
+  end
+
+  
+  class DocEntry < Entry
+
+    def self.type_id
+      :doc
+    end
+
+    def initialize(db, id)
+      super db
+      @id = id
+      init_properties
+    end
+    attr_reader :id
+
+    def ==(other)
+      @id == other.id
+    end
+
+    alias eql? ==
+
+    def hash
+      @id.hash
+    end
+
+    def <=>(other)
+      @id.casecmp(other.id)
+    end
+
+    def name
+      @id
+    end
+    alias label name
+    
+    def name?(n)
+      name() == n
+    end
+
+    persistent_properties {
+      property :title,    'String'
+      property :source,   'String'
+    }
+
+    def inspect
+      "#<doc #{@id}>"
+    end
   end
 
 end
