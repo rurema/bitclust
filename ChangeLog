@@ -1,5 +1,10 @@
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/refsdatabase.rb (BitClust::RefsDatabase): 
+	  add a new reference-database class.
+
+	* test/test_refsdatabase.rb (Test_RefsDatabase): ditto.
+
 	* lib/bitclust/completion.rb (BitClust::SearchResult::inspect): 
 	  avoid too big SearchResult#inspect.
 
