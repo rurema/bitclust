@@ -9,6 +9,7 @@
 
 require 'bitclust/entry'
 require 'bitclust/completion'
+require 'bitclust/refsdatabase'
 require 'bitclust/rrdparser'
 require 'bitclust/functionreferenceparser'
 require 'bitclust/nameutils'
@@ -66,7 +67,9 @@ module BitClust
       Dir.mkdir "#{@prefix}/library"
       Dir.mkdir "#{@prefix}/class"
       Dir.mkdir "#{@prefix}/method"
+      Dir.mkdir "#{@prefix}/doc"
       FileUtils.touch "#{@prefix}/properties"
+      FileUtils.touch "#{@prefix}/refs"
     end
 
     #
@@ -100,6 +103,9 @@ module BitClust
         end
         clear_dirty
         save_completion_index
+        copy_doc
+        make_refs
+        refs().save(realpath('refs'))
       end
     ensure
       @in_transaction = false
@@ -171,6 +177,7 @@ module BitClust
     end
     
     def update_by_stdlibtree(root)
+      @root = root
       parse_LIBRARIES("#{root}/LIBRARIES", properties()).each do |libname|
         update_by_file "#{root}/#{libname}.rd", libname
       end
@@ -218,11 +225,58 @@ module BitClust
     def encoding
       propget('encoding')
     end
+    
+    def refs
+      @refs ||= RefsDatabase.load( realpath('refs') )
+    end
 
+    def make_refs
+      [classes, libraries, docs].each{|es|
+        es.each{|e|
+          refs().extract(e)
+        }
+      }
+    end
+    
+    def copy_doc
+      Dir.glob("#{@root}/../../doc/**/*.rd").each{|f|          
+        if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f            
+          id = libname2id($1)
+          se = DocEntry.new(self, id)
+          se.source = Preprocessor.read(f, properties)
+          se.title = RRDParser.title(se.source) || ""
+          se.save
+        end
+      }
+    end
+
+    #
+    # Doc Entry
+    #
+    
+    def docs
+      docmap().values
+    end
+
+    def docmap
+      @docmap ||= load_extent(DocEntry)
+    end
+    private :docmap
+
+    def get_doc(name)
+      id = libname2id(name)
+      docmap()[id] ||= DocEntry.new(self, id)
+    end
+
+    def fetch_doc(name)
+      docmap()[libname2id(name)] or
+          raise DocNotFound, "doc not found: #{name.inspect}"
+    end
+   
     #
     # Library Entry
     #
-
+    
     def libraries
       librarymap().values
     end
