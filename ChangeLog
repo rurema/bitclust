@@ -1,5 +1,10 @@
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/exception.rb (BitClust::DocNotFound): 
+	  new error class.
+
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/screen.rb (BitClust::DocScreen): 
 	  BitClust now can display documents.
 
@@ -15,6 +20,8 @@
 
 	* tools/bc-tohtml.rb (main): ditto.
 
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/database.rb (BitClust::Database::docs): 
 	  Database now can contain documents.
 
@@ -24,34 +31,44 @@
 	  (BitClust::Database::copy_doc): 
 	  new method. copy documents.
 
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::RRDParser.title): 
 	  new method. extract the title of a document.
+
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/refsdatabase.rb (BitClust::RefsDatabase): 
 	  add a new reference-database class.
 
 	* test/test_refsdatabase.rb (Test_RefsDatabase): ditto.
 
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/completion.rb (BitClust::SearchResult::inspect): 
 	  avoid too big SearchResult#inspect.
 
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/preprocessor.rb (BitClust::Preprocessor::Preprocessor.read): 
 	  add a File.read-like method.
+
+2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher::search_pattern): 
 	  check whether pattern is empty.
 
 2008-06-02  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
-        * lib/bitclust/screen.rb (BitClust::ScreenManager):
+	* lib/bitclust/screen.rb (BitClust::ScreenManager):
           use a hash to store configuration data.
 
-        * lib/bitclust/screen.rb (BitClust::TemplateScreen::search_form):
-          check whether called by bc-tochm.rb.
+	* lib/bitclust/screen.rb (BitClust::TemplateScreen::search_form):
+	  check whether called by bc-tochm.rb.
 
-        * tools/bc-tochm.rb (main): ditto.
+	* tools/bc-tochm.rb (main): ditto.
 
-        * template/class (ancestors): ditto.
+	* template/class (ancestors): ditto.
 
 2008-06-01  okkez  <okkez000@gmail.com>
 
