@@ -18,7 +18,7 @@ module BitClust
 
     include HTMLUtils
     include TextUtils
-
+    
     def initialize(urlmapper, hlevel = 1, opt = {})
       @urlmapper = urlmapper
       @hlevel = hlevel
@@ -136,7 +136,7 @@ module BitClust
 
     def headline(line)
       level = @hlevel + (line.slice(/\A=+/).size - 3)
-      label = line.sub(/\A=+/, '').strip
+      label = line.sub(/\A=+(\[a:.*?\])?/, '').strip
       line h(level, escape_html(label))
     end
 
@@ -363,6 +363,10 @@ module BitClust
       %Q(<a href="#{escape_html(url)}">#{escape_html(url)}</a>)
     end
 
+    def document_link(name, label = nil)
+      a_href(@urlmapper.document_url(name), label || @option[:database].get_doc(name).title)
+    end
+        
     BLADE_URL = 'http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/%s/%s'
 
     def blade_link(ml, num)
