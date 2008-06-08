@@ -116,6 +116,10 @@ module BitClust
       "#{@cgi_url}/function/#{name}"
     end
 
+    def search_url
+      "#{@cgi_url}/search"
+    end
+    
     def spec_url(name)
       "#{@cgi_url}/spec/#{name}"
     end
@@ -220,7 +224,7 @@ module BitClust
     end
 
     def search_url
-      "#{@urlmapper.cgi_url}/search"
+      @urlmapper.search_url
     end
     
     def library_index_url

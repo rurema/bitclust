@@ -57,7 +57,7 @@ module BitClust
       @dirty_classes = {}
       @dirty_methods = {}
     end
-    attr_accessor :refs
+    attr_writer :refs
     
     def dummy?
       not @prefix
@@ -233,11 +233,12 @@ module BitClust
     end
 
     def make_refs
-      [classes, libraries, methods, docs].each{|es|
+      [classes, libraries, methods, docs].each{|es|        
         es.each{|e|
           refs().extract(e)
         }
       }
+      refs
     end
     
     def copy_doc

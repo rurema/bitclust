@@ -47,9 +47,9 @@ module BitClust
       }
     end
 
-    def extract(entry)      
+    def extract(entry)
       entry.source.each_line{|l|
-        if /\A={1,4}\[a:(\w+)\] *(.*)\n/ =~ l
+        if /\A={1,4}\[a:(\w+)\] *(.*)/ =~ l
           entry.labels.each{|name|
             self[entry.class.type_id, name, $1] = $2
           }
