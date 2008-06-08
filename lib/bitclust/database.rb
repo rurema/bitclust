@@ -41,6 +41,7 @@ module BitClust
     def Database.dummy(params = {})
       db = new(nil)
       db.properties['version'] = params['version']
+      db.refs = RefsDatabase.new
       db
     end
 
@@ -56,7 +57,8 @@ module BitClust
       @dirty_classes = {}
       @dirty_methods = {}
     end
-
+    attr_accessor :refs
+    
     def dummy?
       not @prefix
     end

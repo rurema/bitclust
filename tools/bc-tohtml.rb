@@ -37,6 +37,9 @@ def main
   parser.on('--ruby_version=VER', '--ruby=VER', 'Set Ruby version') {|v|
     ver = v
   }
+  parser.on('--db=DB', '--database=DB', 'Set database path') {|path|
+    db = Bitclust::Database.new(path)
+  }
   parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
     baseurl = url
   }
@@ -59,6 +62,7 @@ def main
     exit 1
   end
 
+  db ||= BitClust::Database.dummy({'version' => ver})
   manager = BitClust::ScreenManager.new(
                                         :templatedir => templatedir,
                                         :base_url => baseurl,
@@ -68,7 +72,7 @@ def main
     begin
       lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0], {'version' => ver})
       entry = target ? lookup(lib, target) : lib
-      puts manager.entry_screen(entry).body
+      puts manager.entry_screen(entry, {:database => db}).body
       return 
     rescue BitClust::ParseError => ex
       $stderr.puts ex.message
@@ -77,11 +81,11 @@ def main
   end
 
   
-  ent = BitClust::DocEntry.new(BitClust::Database.dummy({'version' => ver}), ARGV[0])
+  ent = BitClust::DocEntry.new(db, ARGV[0])
   ret = BitClust::Preprocessor.read(ARGV[0], {'version' => ver})
   ent.source = ret
   ent.title = BitClust::RRDParser.title(ret) || ''
-  puts manager.doc_screen(ent).body
+  puts manager.doc_screen(ent, {:database => db} ).body
   return 
 rescue BitClust::WriterError => err
   $stderr.puts err.message
