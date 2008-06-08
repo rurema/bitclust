@@ -20,6 +20,7 @@ module BitClust
     def initialize(db, manager)
       @db = db
       @screenmanager = manager
+      @conf = { :database => @db }
     end
 
     def handle(webrick_req)
@@ -48,51 +49,56 @@ module BitClust
     def handle_library(req)
       return library_index() unless req.library_name
       lib = @db.fetch_library(req.library_name)
-      @screenmanager.library_screen(lib).response
+      @screenmanager.library_screen(lib, @conf).response
     end
 
     def handle_class(req)
       return class_index() unless req.class_name
       c =  @db.fetch_class(req.class_name)
-      @screenmanager.class_screen(c, req.ancestors_level).response
+      h = @conf.dup
+      h[:level] = req.ancestors_level
+      @screenmanager.class_screen(c, h).response
     end
 
     def handle_method(req)
       ms = @db.fetch_methods(req.method_spec)
-      @screenmanager.method_screen(ms).response
+      @screenmanager.method_screen(ms, @conf).response
     end
    
     def library_index
-      @screenmanager.library_index_screen(@db.libraries.sort).response
+      @screenmanager.library_index_screen(@db.libraries.sort, @conf).response
     end
 
     def class_index
-      @screenmanager.class_index_screen(@db.classes.sort).response
+      @screenmanager.class_index_screen(@db.classes.sort, @conf).response
     end
 
     def handle_search(req)
+      ret = []
       q0 = req.wreq.query['q'] || ''
       q0 = URI.unescape(q0)
       q = q0.gsub(/\A +/, '').split(/ /)[0..1].join('.')
       unless /[^a-zA-Z0-9#:\.$\[\]=]/ =~ q
         ret = SimpleSearcher.search_pattern(@db, q)
       end
-      @screenmanager.seach_screen(ret || [], q0).response
+      c = @conf.dup
+      c[:q] = q
+      @screenmanager.seach_screen(ret, c).response
     end
 
     def handle_doc(req)
       d = @db.fetch_doc(req.doc_name || 'index' )
-      @screenmanager.doc_screen(d).response
+      @screenmanager.doc_screen(d, @conf).response
     end
     
     def handle_function(req)
       return function_index() unless req.function_name
       f = @db.fetch_function(req.function_name)
-      @screenmanager.function_screen(f).response
+      @screenmanager.function_screen(f, @conf).response
     end
 
     def function_index
-      @screenmanager.function_index_screen(@db.functions.sort).response
+      @screenmanager.function_index_screen(@db.functions.sort, @conf).response
     end
 
   end

@@ -1,7 +1,24 @@
+2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_class): 
+	  pass the database to screen objects through the second argument.
+
+	  (BitClust::RequestHandler::handle_doc): ditto.
+	  (BitClust::RequestHandler::handle_search): ditto.
+	  (BitClust::RequestHandler::handle_function): ditto.
+	  (BitClust::RequestHandler::handle_method): ditto.
+	  (BitClust::RequestHandler::handle_library): ditto.
+
+	* lib/bitclust/screen.rb (BitClust::IndexScreen::initialize): 
+	  now can take a database through the third argument.
+
+	  (BitClust::EntryBoundScreen::initialize): ditto.
+	  (BitClust::MethodScreen::initialize): ditto.
+
 2008-06-07  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/database.rb (BitClust::Database::make_refs): 
-	  Database now can contain references in method entries.
+	  Database now contains references in method entries.
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::reference_link): 
 	  new method. create a link from a reference ([[ref:c:String#m17n]] ...etc).
