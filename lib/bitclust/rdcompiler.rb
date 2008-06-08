@@ -142,7 +142,7 @@ module BitClust
     end
 
     def h(level, label, frag = nil)
-      name = frag ? "id=#{escape_html(frag)}" : ""
+      name = frag ? "id='#{escape_html(frag)}'" : ""
       "<h#{level} #{name}>#{label}</h#{level}>"
     end
 

@@ -141,12 +141,6 @@ class Sitemap
 end
 
 module BitClust
-  class ScreenManagerEx < ScreenManager
-    def initialize(h)
-      super
-      @urlmapper = URLMapperEx.new(h)
-    end
-  end
 
   class URLMapperEx < URLMapper
     def library_url(name)
@@ -183,6 +177,8 @@ def main
     :cgi_url => '',
     :tochm_mode => true
   }
+  manager_config[:urlmapper] = BitClust::URLMapperEx.new(manager_config)
+  
   parser = OptionParser.new
   parser.on('-d', '--database=PATH', 'Database prefix') do |path|
     prefix = Pathname.new(path).realpath
@@ -204,8 +200,7 @@ def main
 
   db = BitClust::Database.new(prefix.to_s)
   #manager = BitClust::ScreenManager.new(manager_config)
-  manager_config[:target_version] = db.propget('version')
-  manager = BitClust::ScreenManagerEx.new(manager_config)
+  manager = BitClust::ScreenManager.new(manager_config)
   @html_files = []
   db.transaction do
     methods = {}
@@ -219,7 +214,7 @@ def main
     entries = db.libraries.sort + db.classes.sort + methods.values.sort
     pb = ProgressBar.new('entry', entries.size)
     entries.each_with_index do |c, i|
-      filename = create_html_file(c, manager, outputdir)
+      filename = create_html_file(c, manager, outputdir, db)
       @html_files << filename
       e = c.is_a?(Array) ? c.sort.first : c
       case e.type_id
@@ -256,14 +251,14 @@ def main
   create_file(outputdir + 'refm.hhp', HHP_SKEL, true)
   create_file(outputdir + 'refm.hhc', HHC_SKEL, true)
   create_file(outputdir + 'refm.hhk', HHK_SKEL, true)
-  create_file(outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort).body)
-  create_file(outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort).body)
+  create_file(outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort, {:database => db}).body)
+  create_file(outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort, {:database => db}).body)
   FileUtils.cp(manager_config[:themedir] + manager_config[:css_url],
                outputdir.to_s, {:verbose => true, :preserve => true})
 end
 
-def create_html_file(entry, manager, outputdir)
-  html = manager.entry_screen(entry).body
+def create_html_file(entry, manager, outputdir, db)
+  html = manager.entry_screen(entry, {:database => db}).body
   e = entry.is_a?(Array) ? entry.sort.first : entry
   path = case e.type_id
          when :library, :class

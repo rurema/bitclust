@@ -17,48 +17,48 @@ module BitClust
 
   class ScreenManager
     def initialize(h)
-      h[:template_repository]  = TemplateRepository.new(h.delete(:templatedir))
-      h[:urlmapper] = URLMapper.new(h)
+      h[:template_repository]  ||= TemplateRepository.new(h.delete(:templatedir))
+      h[:urlmapper] ||= URLMapper.new(h)
       @conf = h
     end
 
-    def entry_screen(entry)
-      new_screen(Screen.for_entry(entry), entry)
+    def entry_screen(entry, opt)
+      new_screen(Screen.for_entry(entry), entry, opt)
     end
 
-    def library_index_screen(libs, opt = {})
+    def library_index_screen(libs, opt)
       new_screen(LibraryIndexScreen, libs, opt)
     end
 
-    def library_screen(lib, opt = {})
+    def library_screen(lib, opt)
       new_screen(LibraryScreen, lib, opt)
     end
 
-    def class_index_screen(cs, opt = {})
+    def class_index_screen(cs, opt)
       new_screen(ClassIndexScreen, cs, opt)
     end
 
-    def class_screen(c, opt = {:level => 0})
+    def class_screen(c, opt)
       new_screen(ClassScreen, c, opt)
     end
 
-    def method_screen(ms, opt = {})
+    def method_screen(ms, opt)
       new_screen(MethodScreen, ms, opt)
     end
 
-    def seach_screen(result, opt = {})
+    def seach_screen(result, opt)
       new_screen(SearchScreen, result, opt)
     end
 
-    def doc_screen(d, opt = {})
+    def doc_screen(d, opt)
       new_screen(DocScreen, d, opt)
     end
     
-    def function_screen(f, opt = {})
+    def function_screen(f, opt)
       new_screen(FunctionScreen, f, opt)
     end
 
-    def function_index_screen(fs, opt = {})
+    def function_index_screen(fs, opt)
       new_screen(FunctionIndexScreen, fs, opt)
     end
 
@@ -183,7 +183,7 @@ module BitClust
       @urlmapper = h[:urlmapper]
       @template_repository = h[:template_repository]
       @default_encoding = h[:default_encoding]      
-      @target_version = h[:database].propget('version')
+      @target_version = h[:target_version] || h[:database].propget('version')
       @conf = h
     end
 
@@ -286,7 +286,7 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
-    def initialize(h, entries, opt = {})
+    def initialize(h, entries, opt)
       h = h.dup
       h[:entries] = entries
       h[:database] = opt[:database]
@@ -303,7 +303,7 @@ module BitClust
   end
 
   class EntryBoundScreen < TemplateScreen
-    def initialize(h, entry, opt = {})
+    def initialize(h, entry, opt)
       h = h.dup
       h[:entry] = entry
       h[:database] = opt[:database]
@@ -337,7 +337,7 @@ module BitClust
   end
 
   class SearchScreen < IndexScreen
-    def initialize(h, entries, opt = {})
+    def initialize(h, entries, opt)
       super h, entries, opt
       @query = opt[:q]
     end
@@ -348,8 +348,8 @@ module BitClust
   end
   
   class ClassScreen < EntryBoundScreen
-    def initialize(h, entry, opt = {})
-      @alevel = opt[:level]
+    def initialize(h, entry, opt)
+      @alevel = opt[:level] || 0
       super(h, entry, opt)
     end
     
@@ -359,7 +359,7 @@ module BitClust
   end
 
   class MethodScreen < TemplateScreen
-    def initialize(h, entries, opt = {})
+    def initialize(h, entries, opt)
       h = h.dup
       h[:database] = opt[:database]
       super h
