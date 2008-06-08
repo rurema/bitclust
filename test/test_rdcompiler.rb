@@ -1,4 +1,5 @@
 require 'bitclust/rdcompiler'
+require 'bitclust/database'
 require 'bitclust/screen'
 require 'test/unit'
 
@@ -7,7 +8,7 @@ class TestRDCompiler < Test::Unit::TestCase
   def setup
     @dummy = 'dummy'
     @u = BitClust::URLMapper.new(Hash.new{@dummy})
-    @c = BitClust::RDCompiler.new(@u)
+    @c = BitClust::RDCompiler.new(@u, 1, {:database => BitClust::Database.dummy})
   end
 
   def compile_and_assert_equal(expected, src)
@@ -405,8 +406,6 @@ HERE
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
      ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
-#     ['[[d:hoge/bar]]',    '<a href="dummy/hoge/bar">hoge/bar</a>'],
-#     ['[[d:hoge/bar|text]]',    '<a href="dummy/hoge/bar">text</a>'],
      ['[[man:tr(1)]]',     '<a href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
      ['[[RFC:2822]]',      '<a href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
@@ -419,6 +418,19 @@ HERE
       '<a href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
     ].each{|src, expected|
       assert_equal expected, @c.send(:compile_text, src)
+    }
+    
+    [
+     ['[[d:hoge/bar]]',             '<a href="dummy/hoge/bar">.*</a>'],
+     ['[[ref:d:hoge/bar#frag]]',    '<a href="dummy/hoge/bar#frag">.*</a>'],
+     ['[[ref:c:Hoge#frag]]',        '<a href="dummy/class/Hoge#frag">.*</a>'],
+     ['[[ref:m:$~#frag]]',          '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
+     ['[[ref:lib:jcode#frag]]',     '<a href="dummy/library/jcode#frag">.*</a>'],
+     
+     ['[[ref:c:Hoge]]',             'compileerror'],
+     ['[[ref:ref:hoge/bar#frag]]',  'compileerror'],
+    ].each{|src, expected|
+      assert_match /#{expected}/, @c.send(:compile_text, src)
     }
   end
 end

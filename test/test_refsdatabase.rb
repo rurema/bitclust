@@ -8,14 +8,19 @@ class Test_RefsDatabase < Test::Unit::TestCase
     @s = <<HERE
 class,klass,linkid,description
 method,method,linkid,description
+method,method,linkid2,des\\,cription
 HERE
-    @refs = BitClust::RefsDatabase.load(@s)
+    @refs = BitClust::RefsDatabase.load(StringIO.new(@s))
   end
 
   def test_refs
     assert @refs["class", "klass", "linkid"]
+    @refs["class", "klass", "linkid3"] = "hoge"
+    assert_equal( "hoge", @refs["class", "klass", "linkid3"] )
     sio = StringIO.new
-    @refs.save(sio)
-    assert_equal(@s, sio.string)
+    assert_nothing_raised do
+      @refs.save(sio)
+    end
+    assert_match(/des\\,cription/, sio.string)
   end
 end

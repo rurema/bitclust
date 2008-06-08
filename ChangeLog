@@ -1,5 +1,29 @@
 2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* test/test_rdcompiler.rb (TestRDCompiler::test_braket_link): 
+	  add new assertions.
+
+2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+	
+	* tools/bc-tohtml.rb (main): 
+	  should pass the database to ScreenManager.entry_screen.
+
+	* lib/bitclust/database.rb (BitClust::Database::Database.dummy): 
+	  set Database#refs for dummy databases.
+
+2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* tools/bc-tochm.rb (main): 
+	  delete ScreenManagerEx. use ScreenManager.
+	  should pass the database to ScreenManager.entry_screen and others.
+
+	* lib/bitclust/screen.rb (BitClust::ScreenManager::initialize): 
+	  should not overwrite given configuration.
+	
+	  (BitClust::TemplateScreen::initialize): ditto.
+
+2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
 	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_class): 
 	  pass the database to screen objects through the second argument.
 
