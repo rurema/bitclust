@@ -9,7 +9,8 @@
 <body>
 
 <p>
-<%=h ruby_version() %>
+Ruby <%=h ruby_version() %>
+&gt; <%= document_link('index', 'Home') %>
 &gt; <a href="<%= library_index_url() %>">All Libraries</a>
 &gt; library <%= library_link(@entry.library.name) %>
 &gt; <%=h @entry.type %> <%=h @entry.name %>

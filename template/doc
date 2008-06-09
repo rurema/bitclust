@@ -7,6 +7,16 @@
   <title><%=h @entry.title %></title>
 </head>
 <body>
+<p>
+Ruby <%=h ruby_version() %>
+<% if @entry.name == 'index' %>
+&gt; Home
+<% else %>
+&gt; <%= document_link('index', 'Home') %>
+&gt; document <%=h @entry.name %>
+<% end %>
+</p>
+<%= search_form() %>
 <% 
 headline_init 
 headline_push

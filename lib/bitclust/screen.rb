@@ -186,7 +186,7 @@ module BitClust
     def initialize(h)
       @urlmapper = h[:urlmapper]
       @template_repository = h[:template_repository]
-      @default_encoding = h[:default_encoding]      
+      @default_encoding = h[:default_encoding] || h[:database].propget('encoding')
       @target_version = h[:target_version] || h[:database].propget('version')
       @conf = h
     end
@@ -395,11 +395,6 @@ module BitClust
   end
 
   class DocScreen < EntryBoundScreen
-
-    def encoding
-      default_encoding()
-    end
-    alias charset encoding
 
     def body
       run_template('doc')

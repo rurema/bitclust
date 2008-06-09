@@ -93,9 +93,7 @@ db = BitClust::Database.new(dbpath)
 manager = BitClust::ScreenManager.new(
   :base_url => baseurl,
   :cgi_url => "#{baseurl}/view",
-  :templatedir => templatedir,
-  :target_version => db.propget('version'),
-  :default_encoding => db.properties['encoding']
+  :templatedir => templatedir
 )
 handler = BitClust::RequestHandler.new(db, manager)
 
@@ -122,8 +120,7 @@ if autop
     manager = BitClust::ScreenManager.new(
       :base_url => baseurl,
       :cgi_url => "#{baseurl}/#{version}",
-      :templatedir => templatedir,
-      :target_version => db.propget('version')
+      :templatedir => templatedir
     )
     handlers[version] = BitClust::RequestHandler.new(db, manager)
     server.mount File.join(basepath, "#{version}/"), BitClust::Interface.new { handlers[version] }
@@ -147,6 +144,7 @@ end
 
 server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
 server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, themedir
+
 if debugp
   trap(:INT) { server.shutdown }
 else

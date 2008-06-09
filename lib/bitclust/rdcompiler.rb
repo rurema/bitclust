@@ -366,11 +366,6 @@ module BitClust
       %Q(<a href="#{escape_html(url)}">#{escape_html(url)}</a>)
     end
 
-    def document_link(name, label = nil, frag = nil)
-      f = frag ? "##{frag}" : ""
-      a_href(@urlmapper.document_url(name) + f, label || @option[:database].get_doc(name).title)
-    end
-
     def reference_link(arg)
       case arg
       when /(\w+):(.*)\#(\w+)\z/

@@ -1,10 +1,25 @@
+2008-06-09  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/screen.rb (BitClust::TemplateScreen::initialize): 
+	  set the encoding of the database to default_encoding.
+
+	* template: add `Home' to each breadcrumb navigation.
+
+2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/screen.rb (BitClust::URLMapper::search_url): 
+	  new method.
+
+	* test/test_refsdatabase.rb (Test_RefsDatabase::test_make_refs): 
+	  new test.
+
 2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* test/test_rdcompiler.rb (TestRDCompiler::test_braket_link): 
 	  add new assertions.
 
 2008-06-08  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
-	
+
 	* tools/bc-tohtml.rb (main): 
 	  should pass the database to ScreenManager.entry_screen.
 

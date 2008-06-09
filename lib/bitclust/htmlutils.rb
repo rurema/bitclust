@@ -43,6 +43,11 @@ module BitClust
       a_href(@urlmapper.function_url(name) + f, label || name)
     end
 
+    def document_link(name, label = nil, frag = nil)
+      f = frag ? "##{frag}" : ""
+      a_href(@urlmapper.document_url(name) + f, label || @option[:database].get_doc(name).title)
+    end
+
     def a_href(url, label)
       %Q(<a href="#{escape_html(url)}">#{escape_html(label)}</a>)
     end

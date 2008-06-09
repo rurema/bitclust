@@ -8,6 +8,11 @@
 </head>
 <body>
 
+<p>
+Ruby <%=h ruby_version() %>
+&gt; <%= document_link('index', 'Home') %>
+&gt; All Classes
+</p>
 <%= search_form() %>
 <%
     headline_init
