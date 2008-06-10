@@ -152,6 +152,33 @@ Ruby リファレンスマニュアルの簡易 Web サーバシステムです。
   end
 end
 
+database_versions.each do |version|
+  database_dir = database_version_to_dir.call(version)
+  refe = File.join(output_path, database_dir.sub(/db/, "refe"))
+  refe_cmd = refe + ".cmd"
+  unless File.exist?(refe_cmd)
+    puts "write #{refe_cmd}"
+    File.open(refe_cmd, "wb") do |f|
+      f.puts(<<-CMD.gsub(/\r?\n/, "\r\n"))
+@echo off
+pushd "%~dp0"
+ruby -Ke -I bitclust/lib bitclust/bin/refe.rb -d #{database_dir} -e sjis %*
+popd
+      CMD
+    end
+  end
+  unless File.exist?(refe)
+    puts "write #{refe}"
+    File.open(refe, "wb", 0755) do |f|
+      f.puts <<-SH
+#!/bin/sh
+cd "`dirname "$0"`"
+exec ruby -Ke -I bitclust/lib bitclust/bin/refe.rb -d #{database_dir} "$@"
+      SH
+    end
+  end
+end
+
 Dir.chdir(File.dirname(output_path))
 archive_name = File.basename(output_path)
 begin
