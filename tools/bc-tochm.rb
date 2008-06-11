@@ -41,7 +41,7 @@ Compatibility=1.1 or later
 Compiled file=refm.chm
 Contents file=refm.hhc
 Default Window=titlewindow
-Default topic=library/index.html
+Default topic=doc/index.html
 Display compile progress=No
 Error log file=refm.log
 Full-text search=Yes
@@ -50,7 +50,7 @@ Language=0x411 日本語 (日本)
 Title=Rubyリファレンスマニュアル
 
 [WINDOWS]
-titlewindow="Rubyリファレンスマニュアル","refm.hhc","refm.hhk","library/index.html","library/index.html",,,,,0x21420,,0x387e,,,,,,,,0
+titlewindow="Rubyリファレンスマニュアル","refm.hhc","refm.hhk","doc/index.html","doc/index.html",,,,,0x21420,,0x387e,,,,,,,,0
 
 [FILES]
 <%= @html_files.join("\n") %>
@@ -144,7 +144,11 @@ module BitClust
 
   class URLMapperEx < URLMapper
     def library_url(name)
-      "/library/#{encodename_fs(name)}.html"
+      if name == '/'
+        "/library/index.html"
+      else
+        "/library/#{encodename_fs(name)}.html"
+      end
     end
 
     def class_url(name)
@@ -154,6 +158,10 @@ module BitClust
     def method_url(spec)
       cname, tmark, mname = *split_method_spec(spec)
       "/method/#{encodename_fs(cname)}/#{typemark2char(tmark)}/#{encodename_fs(mname)}.html"
+    end
+
+    def document_url(name)
+      "/doc/#{encodename_fs(name)}.html"
     end
   end
 end
@@ -211,7 +219,7 @@ def main
       pb.inc
     end
     pb.finish
-    entries = db.libraries.sort + db.classes.sort + methods.values.sort
+    entries = db.docs + db.libraries.sort + db.classes.sort + methods.values.sort 
     pb = ProgressBar.new('entry', entries.size)
     entries.each_with_index do |c, i|
       filename = create_html_file(c, manager, outputdir, db)
@@ -261,7 +269,7 @@ def create_html_file(entry, manager, outputdir, db)
   html = manager.entry_screen(entry, {:database => db}).body
   e = entry.is_a?(Array) ? entry.sort.first : entry
   path = case e.type_id
-         when :library, :class
+         when :library, :class, :doc
            outputdir + e.type_id.to_s + (BitClust::NameUtils.encodename_fs(e.name) + '.html')
          when :method
            outputdir + e.type_id.to_s + BitClust::NameUtils.encodename_fs(e.klass.name) +

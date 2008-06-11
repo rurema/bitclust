@@ -1,3 +1,7 @@
+2008-06-11  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* tools/bc-tochm.rb: refm.chm now includes other documents.
+
 2008-06-10  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: generate refe-{1_8_6,1_9_0}{,.cmd}.
