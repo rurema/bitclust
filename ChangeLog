@@ -1,3 +1,13 @@
+2008-06-14  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::read_paragraph): 
+	  in regexp, should use //emlist\{ instead of //\w.
+	
+	  (BitClust::RDCompiler::read_method_entry_paragraph): ditto.
+
+	* test/test_rdcompiler.rb (TestRDCompiler::test_invalid_case): 
+	  new test.
+
 2008-06-11  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* tools/bc-tochm.rb: refm.chm now includes other documents.

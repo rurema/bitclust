@@ -261,7 +261,7 @@ module BitClust
     end
 
     def read_paragraph(f)
-      f.span(%r<\A(?!---|=|//\w)\S>)
+      f.span(%r<\A(?!---|=|//emlist\{)\S>)
     end
 
     def see
@@ -307,7 +307,7 @@ module BitClust
     end
 
     def read_method_entry_paragraph(f)
-      f.span(%r<\A(?!---|=|//\w|@[a-z])\S>)
+      f.span(%r<\A(?!---|=|//emlist\{|@[a-z])\S>)
     end
 
     def method_signature(sig)

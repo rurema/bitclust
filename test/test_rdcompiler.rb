@@ -2,6 +2,7 @@ require 'bitclust/rdcompiler'
 require 'bitclust/database'
 require 'bitclust/screen'
 require 'test/unit'
+require 'timeout'
 
 class TestRDCompiler < Test::Unit::TestCase
   
@@ -394,6 +395,20 @@ bar</li>
 </ol>
 HERE
     compile_and_assert_equal(expected, src)    
+  end
+
+
+  def test_invalid_case
+        src = <<HERE
+: t1
+ c1
+//e
+ hoge
+//}
+HERE
+    Timeout.timeout(10) do
+      assert @c.compile(src)
+    end
   end
   
   def test_braket_link
