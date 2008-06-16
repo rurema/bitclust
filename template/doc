@@ -24,3 +24,4 @@ headline_push
 %>
 <%= compile_rd(@entry.source) %>
 </body>
+</html>

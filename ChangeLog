@@ -1,3 +1,7 @@
+2008-06-16  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* template/doc: minor edit.
+
 2008-06-14  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::read_paragraph): 
