@@ -1,3 +1,8 @@
+2008-06-21  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* theme/default/style.css: 
+	  add margin to orderd lists.
+
 2008-06-19  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/preprocessor.rb (BitClust::Preprocessor::self.read): 

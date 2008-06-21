@@ -137,6 +137,10 @@ li {
     padding-left: 0px;
 }
 
+ol li {
+    margin-bottom: 10px;
+}
+
 dl {
     margin-left: 0em;
 }
