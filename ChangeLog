@@ -1,3 +1,11 @@
+Sun Jun 22 00:30:59 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* bin/refe.rb: automatically add command-relative libdir to the
+	  load path.
+
+	* bin/refe.rb: automatically set $KCODE to 'EUC' on Ruby 1.8
+	  (tmp).
+
 2008-06-21  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* theme/default/style.css: 
