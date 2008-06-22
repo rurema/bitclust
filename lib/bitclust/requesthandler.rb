@@ -76,13 +76,15 @@ module BitClust
     def handle_search(req)
       ret = []
       q0 = req.wreq.query['q'] || ''
-      q0 = URI.unescape(q0)
-      q = q0.gsub(/\A +/, '').split(/ /)[0..1].join('.')
-      unless /[^a-zA-Z0-9#:\.$\[\]=]/ =~ q
+      q = URI.unescape(q0)
+      q = q.scan(/\S+/)[0..1]
+      q = q.reverse unless /\A[A-Z]/ =~ q[0]
+      q = q[1] ? q.join('.') : q[0]
+      unless /[^a-zA-Z0-9#:;,'"`~_!&%$<>=@\\\/\*\-\+\.\?\[\]]/ =~ q
         ret = SimpleSearcher.search_pattern(@db, q)
       end
       c = @conf.dup
-      c[:q] = q
+      c[:q] = q0
       @screenmanager.seach_screen(ret, c).response
     end
 

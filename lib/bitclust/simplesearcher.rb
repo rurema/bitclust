@@ -30,13 +30,13 @@ module BitClust
     end
 
     def find_class(db, cname)
-      db.classes.find_all{|c| /\b#{cname}\w*\z/ =~ c.name }
+      db.classes.find_all{|c| /\b#{Regexp.escape(cname)}\w*\z/ =~ c.name }
     end
     
     def find_class_method(db, cname, type, mname)
       ret = []
       db.classes.each{|c|
-        if /\b#{cname}/ =~ c.name
+        if /\b#{Regexp.escape(cname)}/ =~ c.name
           ret += c.methods.find_all{|m|
             m.names.any?{|n| /\A#{Regexp.escape(mname)}/ =~ n }
           }
