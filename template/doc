@@ -17,11 +17,9 @@ Ruby <%=h ruby_version() %>
 <% end %>
 </p>
 <%= search_form() %>
-<% 
-headline_init 
-headline_push
-headline_push
-%>
+<% headline_init %>
+<%= headline(@entry.title) %>
+<% headline_push %>
 <%= compile_rd(@entry.source) %>
 </body>
 </html>

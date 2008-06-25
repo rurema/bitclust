@@ -246,8 +246,10 @@ module BitClust
         if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f            
           id = libname2id($1)
           se = DocEntry.new(self, id)
-          se.source = Preprocessor.read(f, properties)
-          se.title = RRDParser.title(se.source) || ""
+          s = Preprocessor.read(f, properties)
+          title, source = RRDParser.split_doc(s)
+          se.title = title
+          se.source = source
           se.save
         end
       }

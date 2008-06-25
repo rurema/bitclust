@@ -1,3 +1,21 @@
+2008-06-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* template/method: fix heading levels.
+	* template/doc: ditto.
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser::RRDParser.split_doc): 
+	  split the title and the other.
+	* lib/bitclust/database.rb (BitClust::Database::copy_doc): 
+	  ditto.
+
+2008-06-22  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_search): 
+	  use String#scan. use appropriate regexp.
+
+	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher::find_class): 
+	  should escape strings in regexps.
+
 Sun Jun 22 00:30:59 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* bin/refe.rb: automatically add command-relative libdir to the

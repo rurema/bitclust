@@ -42,14 +42,15 @@ module BitClust
       return l, parser.db
     end
 
-    def RRDParser.title(source)
-      source.each_line{|l|
-        if /\A=(\[a:.*?\])? *(.*)/ =~ l
-          return $2 
-        end
-      }            
+    def RRDParser.split_doc(source)
+      if m = /^=(\[a:.*?\])?( +(.*)|([^=].*))\r?\n/.match(source)
+        title = $3 || $4
+        s = m.post_match
+        return title, s
+      end
+      return ["", source]
     end
-
+    
     def RRDParser.libname(path)
       case path
       when %r<(\A|/)_builtin/>
