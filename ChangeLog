@@ -1,3 +1,7 @@
+2008-06-28  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* tools/bc-tohtml.rb (main): fix a bug.
+
 2008-06-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* template/method: fix heading levels.

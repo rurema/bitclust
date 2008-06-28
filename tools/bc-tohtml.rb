@@ -84,7 +84,6 @@ def main
   ent = BitClust::DocEntry.new(db, ARGV[0])
   ret = BitClust::Preprocessor.read(ARGV[0], {'version' => ver})
   ent.source = ret
-  ent.title = BitClust::RRDParser.title(ret) || ''
   puts manager.doc_screen(ent, {:database => db} ).body
   return 
 rescue BitClust::WriterError => err
