@@ -1,3 +1,14 @@
+2008-06-29  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher::search_pattern): 
+	  should check whether pat includes only white spaces.
+
+	* test/test_rrdparser.rb (TestRRDParser::test_title): 
+	  new test.
+
+	* test/test_simplesearcher.rb (TestSearcher::test_simple_search): 
+	  ditto.
+
 2008-06-28  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* tools/bc-tohtml.rb (main): fix a bug.

@@ -8,7 +8,7 @@ module BitClust
     module_function
     
     def search_pattern(db, pat)
-      return [] if pat.empty?
+      return [] if pat.empty? or /\s+/ =~ pat
       cname, type, mname = parse_method_spec_pattern(pat)
       ret = cs = ms = []
       if cname and not cname.empty?
@@ -17,7 +17,6 @@ module BitClust
           cs += find_class(db, cname + '::' + mname) if /\A[A-Z]/ =~ mname
         else
           cs = find_class(db, cname)
-#          ms = find_methods(db, cname)        
         end
       elsif type == '$'
         ms = find_special_vars(db, mname)

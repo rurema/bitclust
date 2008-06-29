@@ -29,7 +29,8 @@ HERE
      ['B.b',    'bar'],
      ['Hoge::B','Hoge::Bar']].each{|q, expected|      
       ret = search_pattern(@db, q)
-      assert_equal(expected, ret[0].name)
+      assert_equal(expected, ret[0].name) 
     }
+    assert_equal([], search_pattern(@db, " "))
   end
 end
