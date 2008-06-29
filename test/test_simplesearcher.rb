@@ -43,5 +43,6 @@ HERE
       assert_equal(expected, ret[0].name) 
     }
     assert_equal([], search_pattern(@db, " "))
+    assert_equal([], search_pattern(@db, ""))
   end
 end
