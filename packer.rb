@@ -20,11 +20,11 @@ output_path = File.join(parent_path, "ruby-refm-1.9.0-dynamic")
 bitclust_dest_dir = "bitclust"
 rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
 database_encoding = "euc-jp"
+default_version = "1.8.7"
 database_versions = [
-  "1.8.6",
+  default_version,
   "1.9.0",
 ]
-default_version = "1.8.6"
 database_version_to_dir = proc {|version| "db-" + version.tr(".", "_") }
 title = "bitclust"
 
