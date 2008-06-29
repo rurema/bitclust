@@ -8,7 +8,8 @@ module BitClust
     module_function
     
     def search_pattern(db, pat)
-      return [] if pat.empty? or /\s+/ =~ pat
+      pat = to_pattern(pat)
+      return [] if pat.empty? or /\A\s+\z/ =~ pat
       cname, type, mname = parse_method_spec_pattern(pat)
       ret = cs = ms = []
       if cname and not cname.empty?
@@ -55,15 +56,29 @@ module BitClust
         m.names.any?{|n| /\A#{Regexp.escape(mname)}/ =~ n }
       }
     end
+
+    def to_pattern(pat)
+      pat = pat.to_str
+      pat = pat[/\A\s*(.*?)\s*\z/, 1]                  
+    end
     
     def parse_method_spec_pattern(pat)
+      if /\s/ =~ pat
+        return parse_method_spec_pattern0(pat)
+      end
       return pat, nil, nil if /\A[A-Z]\w*\z/ =~ pat
-      _m, _t, _c = pat.reverse.split(/(::|[\#,]\.|\.[\#,]|[\#\.\,$])/, 2)
+      return nil, '$', $1  if /\$(\S*)/ =~ pat
+      _m, _t, _c = pat.reverse.split(/(::|[\#,]\.|\.[\#,]|[\#\.\,])/, 2)
       c = _c.reverse if _c
       t = _t.tr(',', '#').sub(/\#\./, '.#') if _t
       m = _m.reverse
       return c, t, m
     end
 
+    def parse_method_spec_pattern0(q)
+      q = q.scan(/\S+/)[0..1]
+      q = q.reverse unless /\A[A-Z]/ =~ q[0]
+      return q[0], nil, q[1]
+    end
   end
 end

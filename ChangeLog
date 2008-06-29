@@ -1,6 +1,17 @@
 2008-06-29  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher::search_pattern): 
+	  Fixed #204
+
+	* lib/bitclust/requesthandler.rb (BitClust::RequestHandler::handle_search): 
+	  ditto.
+
+	* test/test_simplesearcher.rb (TestSearcher::test_simple_search): 
+	  new assertions.
+
+2008-06-29  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/simplesearcher.rb (BitClust::SimpleSearcher::search_pattern): 
 	  should check whether pat includes only white spaces.
 
 	* test/test_rrdparser.rb (TestRRDParser::test_title): 

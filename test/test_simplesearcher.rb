@@ -17,6 +17,10 @@ class TestSearcher <  Test::Unit::TestCase
 = reopen Kernel
 == Special Variables
 --- $spespe
+
+--- $/
+
+--- $$
 HERE
     _, @db = BitClust::RRDParser.parse(s, 'hoge')
   end
@@ -26,9 +30,16 @@ HERE
     [['Ho',     'Hoge'],
      ['Hoge.h', 'hoge'],
      ['$sp',    'spespe'],
+     ['$/',     '/'],
+     ['$$',     '$'],
      ['B.b',    'bar'],
-     ['Hoge::B','Hoge::Bar']].each{|q, expected|      
+     ['Hoge::B','Hoge::Bar'],
+     ['B b',    'bar'],
+     [' B b c ','bar'],
+     ['b B',    'bar'], 
+    ].each{|q, expected|      
       ret = search_pattern(@db, q)
+      assert_not_equal([], ret )
       assert_equal(expected, ret[0].name) 
     }
     assert_equal([], search_pattern(@db, " "))
