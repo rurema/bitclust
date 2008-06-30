@@ -4,7 +4,6 @@ standalone = "bitclust/standalone.rb"
 src = File.read(standalone).sub(/\$0/) { standalone.dump }
 ARGV.unshift "--bind-address=127.0.0.1"
 ARGV.unshift "--baseurl="
-ARGV.unshift "--database=db-1_8_7"
 ARGV.unshift "--debug"
 ARGV.unshift "--auto"
 eval src, binding, standalone, 1
