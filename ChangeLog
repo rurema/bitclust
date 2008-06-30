@@ -1,4 +1,4 @@
-2008-06-29  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+2008-06-30  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* lib/bitclust/screen.rb, lib/bitclust/requesthandler.rb: error
 	  response should not be 200 OK. see #204
