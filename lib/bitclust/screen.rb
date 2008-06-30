@@ -153,6 +153,10 @@ module BitClust
       ent = entry.kind_of?(Array) ? entry.first : entry
       ::BitClust.const_get("#{ent.type_id.to_s.capitalize}Screen")
     end
+
+    def status
+      nil
+    end
   end
 
   class ErrorScreen < Screen
@@ -160,6 +164,10 @@ module BitClust
 
     def initialize(err)
       @error = err
+    end
+
+    def status
+      500
     end
 
     def content_type

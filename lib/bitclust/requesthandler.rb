@@ -1,7 +1,7 @@
 #
 # bitclust/requesthandler.rb
 #
-# Copyright (c) 2006-2007 Minero Aoki
+# Copyright (c) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -251,7 +251,7 @@ module BitClust
     end
 
     def update(webrick_res)
-      # webrick_res.status = @status if @status
+      webrick_res.status = @screen.status if @screen.status
       webrick_res['Content-Type'] = @screen.content_type
       # webrick_res['Last-Modified'] = @screen.last_modified
       body = @screen.body
