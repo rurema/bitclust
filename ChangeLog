@@ -1,5 +1,12 @@
 2008-06-30  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
+	* standalone.rb: allow without --database option when with --auto
+	  option.
+
+	* packer.rb: remove default_version and --database option in server.rb.
+
+2008-06-30  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
 	* lib/bitclust/screen.rb, lib/bitclust/requesthandler.rb: error
 	  response should not be 200 OK. see #204
 

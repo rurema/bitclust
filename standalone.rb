@@ -73,7 +73,7 @@ unless baseurl
   $stderr.puts "missing --baseurl"
   exit 1
 end
-unless dbpath
+unless dbpath || autop
   $stderr.puts "missing --database"
   exit 1
 end
@@ -88,14 +88,6 @@ end
 
 require 'bitclust'
 require 'bitclust/interface'
-
-db = BitClust::Database.new(dbpath)
-manager = BitClust::ScreenManager.new(
-  :base_url => baseurl,
-  :cgi_url => "#{baseurl}/view",
-  :templatedir => templatedir
-)
-handler = BitClust::RequestHandler.new(db, manager)
 
 if debugp
   params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::DEBUG)
@@ -140,9 +132,17 @@ if autop
     end
     res['Content-Type'] = 'text/html; charset=euc-jp'
   end
+else
+  db = BitClust::Database.new(dbpath)
+  manager = BitClust::ScreenManager.new(
+    :base_url => baseurl,
+    :cgi_url => "#{baseurl}/view",
+    :templatedir => templatedir
+    )
+  handler = BitClust::RequestHandler.new(db, manager)
+  server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
 end
 
-server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
 server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, themedir
 
 if debugp

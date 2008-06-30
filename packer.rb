@@ -20,9 +20,8 @@ output_path = File.join(parent_path, "ruby-refm-1.9.0-dynamic")
 bitclust_dest_dir = "bitclust"
 rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
 database_encoding = "euc-jp"
-default_version = "1.8.7"
 database_versions = [
-  default_version,
+  "1.8.7",
   "1.9.0",
 ]
 database_version_to_dir = proc {|version| "db-" + version.tr(".", "_") }
@@ -92,7 +91,6 @@ end
 server_rb = File.join(output_path, "server.rb")
 unless File.exist?(server_rb)
   puts "write #{server_rb}"
-  database_dir = database_version_to_dir.call(default_version)
   File.open(server_rb, "wb", 0755) do |f|
     f.puts <<-RUBY
 #!/usr/bin/ruby -Ke
@@ -101,7 +99,6 @@ standalone = "#{bitclust_dest_dir}/standalone.rb"
 src = File.read(standalone).sub(/\\$0/) { standalone.dump }
 ARGV.unshift "--bind-address=127.0.0.1"
 ARGV.unshift "--baseurl="
-ARGV.unshift "--database=#{database_dir}"
 ARGV.unshift "--debug"
 ARGV.unshift "--auto"
 eval src, binding, standalone, 1
