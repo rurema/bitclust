@@ -25,9 +25,10 @@ set_srcdir.call File.dirname($0)
 debugp = false
 autop = false
 browser = nil
+pid_file = nil
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER]"
+parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER] [--pid-file=PATH]"
 parser.on('--bind-address=ADDR', 'Bind address') {|addr|
   params[:BindAddress] = addr
 }
@@ -58,6 +59,9 @@ parser.on('--[no-]auto', 'Auto mode.') {|flag|
 parser.on('--browser=BROWSER', 'Open with the browser.') {|path|
   browser = path
 }
+parser.on('--pid-file=PATH', 'Write pid of the daemon to the specified file.') {|path|
+  pid_file = path
+}
 parser.on('--help', 'Prints this message and quit.') {
   puts parser.help
   exit 0
@@ -85,6 +89,12 @@ unless themedir
   $stderr.puts "missing themedir; use --srcdir or --themedir"
   exit 1
 end
+if File.exist? pid_file
+  $stderr.puts "There is still #{pid_file}. Is another process running?"
+  exit(1)
+else
+  pid_file = File.expand_path(pid_file)
+end
 
 require 'bitclust'
 require 'bitclust/interface'
@@ -107,6 +117,7 @@ if autop
   handlers = {}
   Dir.glob("db-*").each do |dbpath|
     next unless /db-([\d_]+)/ =~ dbpath
+    dbpath = File.expand_path(dbpath)
     version = $1.tr("_", ".")
     db = BitClust::Database.new(dbpath)
     manager = BitClust::ScreenManager.new(
@@ -148,7 +159,16 @@ server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, t
 if debugp
   trap(:INT) { server.shutdown }
 else
-  WEBrick::Daemon.start
+  WEBrick::Daemon.start do
+    trap(:TERM) {
+      server.shutdown 
+      begin
+        File.unlink pid_file if pid_file
+      rescue Errno::ENOENT
+      end
+    }
+    File.open(pid_file, 'w') {|f| f.write Process.pid } if pid_file
+  end
 end
 exit if $".include?("exerb/mkexy.rb")
 if autop && !browser
