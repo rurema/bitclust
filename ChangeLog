@@ -1,3 +1,11 @@
+Tue Aug 12 17:52:13 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/refsdatabase.rb: reduce warnings.
+
+	* lib/bitclust/entry.rb: ditto.
+
+	* lib/bitclust/methoddatabase.rb: ditto.
+
 Tue Aug 12 17:49:46 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/entry.rb: use better error message. (closes #424)

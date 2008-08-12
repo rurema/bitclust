@@ -1,13 +1,19 @@
+#
+# bitclust/refsdatabase.rb
+#
+# This program is free software.
+# You can distribute this program under the Ruby License.
+#
 
 module BitClust
   class RefsDatabase
-    def self.load(s)
-      if s.respond_to?(:to_str)
-        buf = File.read(s.to_str)
-      elsif s.respond_to?(:to_io)
-        buf = s.to_io.read
+    def self.load(src)
+      if src.respond_to?(:to_str)
+        buf = File.read(src.to_str)
+      elsif src.respond_to?(:to_io)
+        buf = src.to_io.read
       else
-        buf = s.read
+        buf = src.read
       end
 
       refs = self.new

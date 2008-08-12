@@ -378,8 +378,8 @@ module BitClust
       result = _search_methods(pattern)
       if result.fail?
         if result.classes.empty?
-          c = pattern.klass ? pattern.klass + '.' : ''
-          raise MethodNotFound, "no such method: #{c}#{pattern.method}"
+          loc = pattern.klass ? pattern.klass + '.' : ''
+          raise MethodNotFound, "no such method: #{loc}#{pattern.method}"
         end
         if result.classes.size <= 5
           loc = result.classes.map {|c| c.label }.join(', ')

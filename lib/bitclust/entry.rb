@@ -1008,6 +1008,7 @@ module BitClust
     }
 
     attr_reader :id
+    remove_method :name
     alias name id
     alias label id
 
