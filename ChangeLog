@@ -1,3 +1,10 @@
+Tue Aug 12 18:03:32 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust.rb: should require bitclust/*database.rb.
+	  (refs #422)
+
+	* lib/bitclust/server.rb: ditto.
+
 Tue Aug 12 17:56:27 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/completion.rb (search_methods_by_cname):

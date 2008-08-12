@@ -1,13 +1,14 @@
 #
 # bitclust/server.rb
 #
-# Copyright (c) 2006-2007 Minero Aoki
+# Copyright (c) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
 #
 
-require 'bitclust/database'
+require 'bitclust/methoddatabase'
+require 'bitclust/functiondatabase'
 require 'bitclust/entry'
 require 'drb'
 require 'webrick/server'
