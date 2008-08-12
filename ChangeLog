@@ -1,3 +1,11 @@
+Tue Aug 12 09:27:30 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb (#search_method): result may not have
+	  any class.
+
+	* lib/bitclust/completion.rb (#expand_method_name): should not
+	  return nil.
+
 2008-06-30  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* standalone.rb: allow without --database option when with --auto

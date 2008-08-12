@@ -88,7 +88,7 @@ GC.enable; GC.start; x
 
     def expand_method_name(c, ts, m)
       names_w = expand_name_wide(method_names(), m)
-      return nil if names_w.empty?
+      return [] if names_w.empty?
 #split_time "m expandW (#{names_w.size})"
       names_n = squeeze_names(names_w, m)
 #split_time "m squeeze (#{names_n.size})"
@@ -106,7 +106,7 @@ GC.enable; GC.start; x
 #split_time "c expandW (#{nclass}c x #{$cm_comb_m}m -> #{recs.size})"
         end
       end
-      return nil if recs.empty?
+      return [] if recs.empty?
       urecs = nclass > 50 ? recs : unify_entries(recs)
 #split_time "unify     (#{urecs.size})"
       urecs
