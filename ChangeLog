@@ -1,3 +1,8 @@
+Tue Aug 12 17:56:27 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/completion.rb (search_methods_by_cname):
+	  _search_methods must return a SearchResult. (closes #425)
+
 Tue Aug 12 17:52:13 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/refsdatabase.rb: reduce warnings.

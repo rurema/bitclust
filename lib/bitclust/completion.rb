@@ -57,7 +57,7 @@ GC.enable; GC.start; x
 
     def search_methods_from_cname(pattern)
       cs = expand_ic(classes(), pattern.klass)
-      return [] if cs.empty?
+      return SearchResult.new(self, pattern, [], []) if cs.empty?
       recs = cs.map {|c|
         c.entries.map {|m|
           if not pattern.type or m.typemark == pattern.type
