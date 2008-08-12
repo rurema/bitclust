@@ -1,3 +1,17 @@
+Tue Aug 12 18:22:16 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/entry.rb: split file.
+
+	* lib/bitclust/libraryentry.rb: new file.
+
+	* lib/bitclust/classentry.rb: new file.
+
+	* lib/bitclust/methodentry.rb: new file.
+
+	* lib/bitclust/functionentry.rb: new file.
+
+	* lib/bitclust/docentry.rb: new file.
+
 Tue Aug 12 18:03:32 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust.rb: should require bitclust/*database.rb.
