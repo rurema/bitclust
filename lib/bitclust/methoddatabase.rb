@@ -8,7 +8,10 @@
 #
 
 require 'bitclust/database'
-require 'bitclust/entry'
+require 'bitclust/libraryentry'
+require 'bitclust/classentry'
+require 'bitclust/methodentry'
+require 'bitclust/docentry'
 require 'bitclust/completion'
 require 'bitclust/refsdatabase'
 require 'bitclust/rrdparser'

@@ -9,7 +9,10 @@
 
 require 'bitclust/methoddatabase'
 require 'bitclust/functiondatabase'
-require 'bitclust/entry'
+require 'bitclust/libraryentry'
+require 'bitclust/classentry'
+require 'bitclust/methodentry'
+require 'bitclust/docentry'
 require 'drb'
 require 'webrick/server'
 

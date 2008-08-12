@@ -1,3 +1,13 @@
+Tue Aug 12 18:29:16 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/methoddatabase.rb: LoadError fixed.
+
+	* lib/bitclust/functiondatabase.rb: ditto.
+
+	* lib/bitclust/server.rb: ditto.
+
+	* lib/bitclust/libraryentry.rb: fix typo.
+
 Tue Aug 12 18:22:16 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/entry.rb: split file.

@@ -7,7 +7,7 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
-require 'bitclust/libraryentry'
+require 'bitclust/entry'
 require 'bitclust/exception'
 
 module BitClust

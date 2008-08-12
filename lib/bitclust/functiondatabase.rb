@@ -8,7 +8,7 @@
 #
 
 require 'bitclust/database'
-require 'bitclust/entry'
+require 'bitclust/functionentry'
 require 'bitclust/functionreferenceparser'
 require 'bitclust/exception'
 
