@@ -15,7 +15,7 @@ end
 
 # called many times per process.
 def bitclust_context
-  db = BitClust::Database.new("#{@bc_vardir}/db")
+  db = BitClust::MethodDatabase.new("#{@bc_vardir}/db")
   manager = BitClust::ScreenManager.new(
     :baseurl     => "#{@bc_urlroot}/refm/api/view",
     :templatedir => "#{@bc_srcdir}/template"

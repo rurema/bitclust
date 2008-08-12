@@ -1,3 +1,7 @@
+Tue Aug 12 18:55:06 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* config.in: use MethodDatabase instead of Database.
+
 Tue Aug 12 18:54:18 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* tools/update-database.rb: use MethodDatabase.
