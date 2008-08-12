@@ -1,7 +1,7 @@
 #
 # bitclust/completion.rb
 #
-# Copyright (c) 2006-2007 Minero Aoki
+# Copyright (c) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -32,16 +32,21 @@ module BitClust
         SearchResult.new(self, pattern, [c], search_svar(c, pattern.method))
       when pattern.class?
         search_methods_from_cname(pattern)
-      when pattern.klass && pattern.method
-GC.disable; x =
-        search_methods_from_cname_mname(pattern)
-GC.enable; GC.start; x
-      when pattern.method
-        search_methods_from_mname(pattern)
-      when pattern.type
-        raise 'type only search is not supportted yet'
       else
-        raise 'must not happen'
+        case
+        when pattern.klass && pattern.method
+GC.disable; x =
+          search_methods_from_cname_mname(pattern)
+GC.enable; GC.start; x
+        when pattern.method
+          search_methods_from_mname(pattern)
+        when pattern.klass && pattern.type
+          search_methods_from_cname(pattern)
+        when pattern.type
+          raise 'type only search is not supportted yet'
+        else
+          raise 'must not happen'
+        end
       end
     end
 
@@ -51,13 +56,17 @@ GC.enable; GC.start; x
     end
 
     def search_methods_from_cname(pattern)
-      cs = expand_ic(classes(), pattern)
+      cs = expand_ic(classes(), pattern.klass)
       return [] if cs.empty?
       recs = cs.map {|c|
         c.entries.map {|m|
-          s = m.spec
-          SearchResult::Record.new(s, s, m)
-        }
+          if not pattern.type or m.typemark == pattern.type
+            s = m.spec
+            SearchResult::Record.new(s, s, m)
+          else
+            nil
+          end
+        }.compact
       }.flatten
       SearchResult.new(self, pattern, cs, recs)
     end

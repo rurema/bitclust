@@ -1,3 +1,10 @@
+Tue Aug 12 17:29:31 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/completion.rb: implement class+type search.
+	  (fixes #423)
+
+	* lib/bitclust/completion.rb: class name only search did not work.
+
 Tue Aug 12 09:27:30 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/database.rb (#search_method): result may not have
