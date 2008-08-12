@@ -7,7 +7,7 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
-require 'bitclust/database'
+require 'bitclust/methoddatabase'
 require 'bitclust/nameutils'
 require 'bitclust/methodid'
 require 'bitclust/exception'
@@ -143,11 +143,11 @@ module BitClust
     def new_local_database(db)
       return db if db
       path = @dblocation ? @dblocation.path : dbpath()
-      Database.new(path)
+      MethodDatabase.new(path)
     end
 
     def new_database
-      db = Database.connect(@dblocation || dblocation())
+      db = MethodDatabase.connect(@dblocation || dblocation())
       @view.database = db if @view
       db
     end
@@ -179,7 +179,7 @@ module BitClust
     def env_dbpath
       [ 'REFE2_DATADIR', 'BITCLUST_DATADIR' ].each do |key|
         if ENV.key?(key)
-          unless Database.datadir?(ENV[key])
+          unless MethodDatabase.datadir?(ENV[key])
             raise InvalidDatabase, "environment variable #{key} given but #{ENV[key]} is not a valid BitClust database"
           end
           return ENV[key]
@@ -191,7 +191,7 @@ module BitClust
     def default_dbpath
       datadir = ::Config::CONFIG['datadir']
       [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
-        return path if Database.datadir?(path)
+        return path if MethodDatabase.datadir?(path)
       end
       nil
     end

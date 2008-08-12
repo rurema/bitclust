@@ -23,12 +23,12 @@ module BitClust
     include ParseUtils
 
     def RRDParser.parse_stdlib_file(path, params = {"version" => "1.9.0"})
-      parser = new(Database.dummy(params))
+      parser = new(MethodDatabase.dummy(params))
       parser.parse_file(path, libname(path), params)
     end
 
     def RRDParser.parse(s, lib, params = {"version" => "1.9.0"})
-      parser = new(Database.dummy(params))
+      parser = new(MethodDatabase.dummy(params))
       if s.respond_to?(:to_io)
         io = s.to_io
       elsif s.respond_to?(:to_str)

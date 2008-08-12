@@ -2,7 +2,7 @@
 #
 # bitclust.rb
 #
-# Copyright (c) 2006-2007 Minero Aoki
+# Copyright (c) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -95,7 +95,7 @@ Global Options:
     exit 1
   end
   unless capi
-    db = BitClust::Database.new(prefix)
+    db = BitClust::MethodDatabase.new(prefix)
   else
     db = BitClust::FunctionDatabase.new(prefix)
   end

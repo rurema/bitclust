@@ -1,3 +1,19 @@
+Tue Aug 12 17:31:51 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/database.rb: fork methoddatabase.rb.
+
+	* lib/bitclust/methoddatabase.rb: new file.
+
+	* lib/bitclust/functiondatabase.rb: inherit Database class, to
+	  provide #propget.  It is required to get work C-API reference.
+	  (refs #422)
+
+	* lib/bitclust/searcher.rb: Database -> MethodDatabase.
+
+	* lib/bitclust/rrdparser.rb: ditto.
+
+	* bin/bitclust.rb: ditto.
+
 Tue Aug 12 17:29:31 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/completion.rb: implement class+type search.
