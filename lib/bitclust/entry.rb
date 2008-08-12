@@ -687,12 +687,12 @@ module BitClust
 
     def fetch_methods(spec)
       get_methods(spec) or
-          raise MethodNotFound, "spec=#{spec.inspect}"
+          raise MethodNotFound, "no such method: #{spec}"
     end
 
     def fetch_method(spec)
       get_method(spec) or
-          raise MethodNotFound, "spec=#{spec.inspect}"
+          raise MethodNotFound, "no such method: #{spec}"
     end
 
     # internal use only
