@@ -81,7 +81,7 @@ ensure
 end
 
 def build_database(prefix, doctree, version)
-  db = BitClust::Database.new(prefix)
+  db = BitClust::MethodDatabase.new(prefix)
   db.init
   db.transaction {
     db.propset 'version', version
