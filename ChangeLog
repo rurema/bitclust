@@ -1,3 +1,8 @@
+Wed Aug 13 14:16:41 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/methodsignature.rb (friendly_string): show return
+	  types for also unary/binary operators.
+
 Wed Aug 13 13:59:21 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/methodsignature.rb: new class MethodSignature,

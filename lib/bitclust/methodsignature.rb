@@ -54,16 +54,16 @@ module BitClust
 
     def friendly_string
       case @name
-      when "@+", "@-", "~"
+      when "@+", "@-", "~"  # unary operator
         "#{@name.sub(/@/, '')}#{@params}"
-      when "[]"
-        "self[#{@params}]"
-      when "[]="
+      when "[]"     # aref
+        "self[#{@params}]" + (@type ? " -> #{@type}" : "")
+      when "[]="    # aset
         params = @params.split(',')
         val = params.pop
         "self[#{params.join(',').strip}] = #{val.strip}"
-      when /\A\W/
-        "self #{@name} #{@params}"
+      when /\A\W/   # binary operator
+        "self #{@name} #{@params}" + (@type ? " -> #{@type}" : "")
       else
         to_s()
       end
