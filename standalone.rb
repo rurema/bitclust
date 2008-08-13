@@ -38,7 +38,7 @@ parser.on('--port=NUM', 'Listening port number') {|num|
 parser.on('--baseurl=URL', 'The base URL to host.') {|url|
   baseurl = url
 }
-parser.on('--database=PATH', 'Database root directory.') {|path|
+parser.on('--database=PATH', 'MethodDatabase root directory.') {|path|
   dbpath = path
 }
 parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
@@ -89,13 +89,14 @@ unless themedir
   $stderr.puts "missing themedir; use --srcdir or --themedir"
   exit 1
 end
-if File.exist? pid_file
-  $stderr.puts "There is still #{pid_file}. Is another process running?"
-  exit(1)
-else
-  pid_file = File.expand_path(pid_file)
+if pid_file 
+  if File.exist? pid_file
+    $stderr.puts "There is still #{pid_file}. Is another process running?"
+    exit(1)
+  else
+    pid_file = File.expand_path(pid_file)
+  end
 end
-
 require 'bitclust'
 require 'bitclust/interface'
 
@@ -119,7 +120,7 @@ if autop
     next unless /db-([\d_]+)/ =~ dbpath
     dbpath = File.expand_path(dbpath)
     version = $1.tr("_", ".")
-    db = BitClust::Database.new(dbpath)
+    db = BitClust::MethodDatabase.new(dbpath)
     manager = BitClust::ScreenManager.new(
       :base_url => baseurl,
       :cgi_url => "#{baseurl}/#{version}",
@@ -144,7 +145,7 @@ if autop
     res['Content-Type'] = 'text/html; charset=euc-jp'
   end
 else
-  db = BitClust::Database.new(dbpath)
+  db = BitClust::MethodDatabase.new(dbpath)
   manager = BitClust::ScreenManager.new(
     :base_url => baseurl,
     :cgi_url => "#{baseurl}/view",
