@@ -62,10 +62,9 @@ ancestors: <%= escape_html(myself.name) %>
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
 <td class="signature"><%=
-              sigs.map {|sig|
-              name, params = sig.split(/(?=\(|\z|\s*[-{])/, 2)
-              method_link(m.spec_string, name) + escape_html(params)
-            }.join("<br>") %></td>
+            sigs.map {|sig|
+              method_link(m.spec_string, sig.friendly_string)
+            }.join("<br>\n") %></td>
 <%          if m.redefined? %>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
@@ -110,10 +109,7 @@ ancestors: <%= escape_html(myself.name) %>
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
 <td class="signature"><%=
-            sigs.map {|sig|
-              name, params = sig.split(/(?=\(|\z|\s*[-{])/, 2)
-              method_link(m.spec_string, name) + escape_html(params)
-            }.join("<br>") %></td>
+            sigs.map {|sig| method_link(m.spec_string, sig.to_s) }.join("<br>") %></td>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
 </tr>

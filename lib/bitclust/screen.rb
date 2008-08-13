@@ -1,13 +1,14 @@
 #
 # bitclust/screen.rb
 #
-# Copyright (C) 2006-2007 Minero Aoki
+# Copyright (C) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
 #
 
 require 'bitclust/rdcompiler'
+require 'bitclust/methodsignature'
 require 'bitclust/htmlutils'
 require 'bitclust/nameutils'
 require 'erb'
@@ -290,7 +291,7 @@ module BitClust
     def foreach_method_chunk(src)
       f = LineInput.for_string(src)
       while f.next?
-        sigs = f.span(/\A---/).map {|line| line.sub(/\A---\s+/, '').rstrip }
+        sigs = f.span(/\A---/).map {|line| MethodSignature.parse(line.rstrip) }
         body = f.break(/\A---/).join.split(/\n\n/, 2).first || ''
         yield sigs, body
       end

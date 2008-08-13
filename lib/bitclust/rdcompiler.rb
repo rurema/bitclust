@@ -1,12 +1,13 @@
 #
 # bitclust/rdcompiler.rb
 #
-# Copyright (C) 2006-2007 Minero Aoki
+# Copyright (C) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/methodsignature'
 require 'bitclust/lineinput'
 require 'bitclust/htmlutils'
 require 'bitclust/textutils'
@@ -310,10 +311,11 @@ module BitClust
       f.span(%r<\A(?!---|=|//emlist\{|@[a-z])\S>)
     end
 
-    def method_signature(sig)
+    def method_signature(sig_line)
       # FIXME: check parameters, types, etc.
+      sig = MethodSignature.parse(sig_line)
       string '<dt><code>'
-      string escape_html(sig.sub(/\A---/, '').strip)
+      string escape_html(sig.friendly_string)
       string '</code>'
       if @method and not @method.defined?
         line %Q( <span class="kindinfo">[#{@method.kind} by #{library_link(@method.library.name)}]</span>)

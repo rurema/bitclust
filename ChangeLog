@@ -1,3 +1,28 @@
+Wed Aug 13 13:59:21 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/methodsignature.rb: new class MethodSignature,
+	  which represents RRD method signature line ("--- m(param) {...} ->
+	  type").
+
+	* lib/bitclust/screen.rb (foreach_method_chunk): yields a
+	  MethodSignature to the template.
+
+	* lib/bitclust/rdcompiler.rb (method_signature): show method
+	  signature in user-friendly form ("x + y" rather than "+(y)").
+	  (refs #170)
+
+	* template/class: ditto.
+
+	* lib/bitclust/rdcompiler.rb (method_signature): makes the whole
+	  signature a hyperlink. (refs #188)
+
+	* template/class: ditto.
+
+	* template/search: ditto.
+
+	* tools/check-signature.rb: a new tool to check method signature
+	  format.
+
 Tue Aug 12 18:55:06 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* config.in: use MethodDatabase instead of Database.

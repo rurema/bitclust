@@ -41,8 +41,7 @@ Ruby <%=h ruby_version() %>
                 e.names.map{|l| method_link(e.spec_string, '$' + l) }
               else
                 sigs.map {|sig|
-                  name, params = sig.split(/(?=\(|\z|\s*[-{])/, 2)
-                  method_link(e.spec_string, e.klass.name + e.typemark + name) + escape_html(params)
+                  method_link(e.spec_string, e.klass.name + e.typemark + sig.name + sig.params)
                 }
               end.join("<br>") %></td>
 <td class="description"><%= compile_rd(src) %></td>
