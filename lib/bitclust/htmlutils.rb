@@ -24,28 +24,28 @@ module BitClust
     end
 
     def library_link(name, label = nil, frag = nil)
-      f = frag ? "##{frag}" : ""
-      a_href(@urlmapper.library_url(name) + f, label || name)
+      a_href(@urlmapper.library_url(name) + fragment(frag), label || name)
     end
 
     def class_link(name, label = nil, frag = nil)
-      f = frag ? "##{frag}" : ""
-      a_href(@urlmapper.class_url(name) + f , label || name)
+      a_href(@urlmapper.class_url(name) + fragment(frag), label || name)
     end
 
     def method_link(spec, label = nil, frag = nil)
-      f = frag ? "##{frag}" : ""
-      a_href(@urlmapper.method_url(spec) + f, label || spec)
+      a_href(@urlmapper.method_url(spec) + fragment(frag), label || spec)
     end
 
     def function_link(name, label = nil, frag = nil)
-      f = frag ? "##{frag}" : ""
-      a_href(@urlmapper.function_url(name) + f, label || name)
+      a_href(@urlmapper.function_url(name) + fragment(frag), label || name)
     end
 
     def document_link(name, label = nil, frag = nil)
-      f = frag ? "##{frag}" : ""
-      a_href(@urlmapper.document_url(name) + f, label || @option[:database].get_doc(name).title)
+      a_href(@urlmapper.document_url(name) + fragment(frag),
+             label || @option[:database].get_doc(name).title)
+    end
+
+    def fragment(str)
+      str ? '#' + str : ''
     end
 
     def a_href(url, label)

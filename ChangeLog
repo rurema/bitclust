@@ -1,3 +1,7 @@
+Fri Aug 15 01:15:01 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/htmlutils.rb: refactoring.
+
 Fri Aug 15 00:36:23 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/screen.rb (default_message_catalog): :datadir
