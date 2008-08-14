@@ -5,21 +5,18 @@
 @bc_cgidir = File.dirname(File.expand_path(__FILE__))
 @bc_vardir = @bc_cgidir
 @bc_srcdir = @bc_cgidir
-@bc_datadir = @bc_srcdir
 
-# called only once per process.
 def setup_environment
   $KCODE = 'EUC'
   $LOAD_PATH.unshift "#{@bc_srcdir}/lib"
   require 'bitclust'
 end
 
-# called many times per process.
 def bitclust_context
   db = BitClust::MethodDatabase.new("#{@bc_vardir}/db")
   manager = BitClust::ScreenManager.new(
     :baseurl => "#{@bc_urlroot}/refm/api/view",
-    :datadir => @bc_datadir,
+    :datadir => "#{@bc_srcdir}/data/bitclust",
     :encoding => 'enc-jp'
   )
   BitClust::RequestHandler.new(db, manager)
