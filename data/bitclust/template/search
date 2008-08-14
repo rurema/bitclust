@@ -10,7 +10,7 @@
 
 <p>
 <%= manual_home_link() %>
-&gt; search
+&gt; <%=h _('Search Results') %>
 </p>
 <%
     headline_init
