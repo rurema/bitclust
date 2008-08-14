@@ -31,7 +31,7 @@
 </tr>
 <% unless @entries.empty? %>
 <tr>
-    <th><%=h _('Method') %></th>
+    <th><%=h _('Entry') %></th>
     <th colspan="2"><%=h _('Description') %></th>
 </tr>
 <% end %>
@@ -48,7 +48,8 @@
                 e.names.map {|name| method_link(e.spec_string, '$' + name) }
               else
                 sigs.map {|sig|
-                  method_link(e.spec_string, e.klass.name + e.typemark + sig.name + sig.params)
+                  method_link(e.spec_string, 
+                              e.klass.name + e.typemark + sig.to_s)
                 }
               end.join("<br>\n") %></td>
 <td class="description"><%= compile_rd(src) %></td>
