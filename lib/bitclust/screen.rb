@@ -280,17 +280,25 @@ module BitClust
       if @conf[:tochm_mode]
         ""
       else
-        %Q!<form method="get" action="#{h search_url()}" name="f" id="top_search"><input value="" name="q" size="15"> <input value="Search" type="submit"></form>!
+        <<-EndForm
+        <form method="get" action="#{h(search_url())}" name="f" id="top_search">
+        <input value="" name="q" size="15">
+        <input value="#{h(_('Search'))}" type="submit">
+        </form>
+        EndForm
       end
     end
 
     def manual_home_link
-      _('Ruby %s Reference Manual', ruby_version())
+      document_link('index', _('Ruby %s Reference Manual', ruby_version()))
     end
 
-    def friendly_library_link(name)
-      lab = (name == '_builtin') ? _('Builtin Library') : _('library %s', name)
-      library_link(name, lab)
+    def friendly_library_link(id)
+      library_link(id, friendly_library_name(id))
+    end
+
+    def friendly_library_name(id)
+      (id == '_builtin') ? _('Builtin Library') : _('library %s', id)
     end
     
     def compile_method(m)

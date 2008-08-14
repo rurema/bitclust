@@ -1,3 +1,18 @@
+Fri Aug 15 02:10:12 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/screen.rb: new method friendly_library_name.
+
+	* data/bitclust/template/library: do not link to current page in
+	  topic path.
+
+	* data/bitclust/template/class: translate "ancestors".
+
+	* lib/bitclust/screen.rb: translate search button label.
+
+	* data/bitclust/catalog/ja_JP.EUC-JP: more translation.
+
+	* data/bitclust/template/search: fix syntax error.
+
 Fri Aug 15 01:16:48 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/screen.rb: add utility methods #manual_home_link

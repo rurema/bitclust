@@ -42,10 +42,12 @@ Private Singleton Methods
 private特異メソッド
 Required Libraries
 同時にrequireされるライブラリ
-Results
-検索結果
+%d Results
+%d件ヒット
 Ruby %s Reference Manual
 Ruby %s リファレンスマニュアル
+Search
+検索
 Search Results
 検索結果
 Signature
@@ -56,6 +58,8 @@ Special Variables
 特殊変数
 Sub-Libraries
 サブライブラリ
+ancestors
+クラスの継承リスト
 class %s
 %sクラス
 library %s

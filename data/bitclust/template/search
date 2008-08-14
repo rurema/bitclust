@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title><%= _('Search Results') %></title>
+  <title><%=h _('Search Results') %></title>
 </head>
 <body>
 
@@ -15,7 +15,7 @@
 <%
     headline_init
 %>
-<%= headline(_('"Search Results")) %>
+<%= headline(_('Search Results')) %>
 <form method="get" action="" name="f">
 <input value="<%=h @query %>" name="q" size="41">
 <input value="Search" type="submit"> 
@@ -26,11 +26,14 @@
 <tr>
     <td></td>
     <td style="text-align:right" nowrap="nowrap">
-        <%= _('Search Results') %><b><%= @entries.size %></b>
+        <%=h _('%d Results', @entries.size) %>
     </td>
 </tr>
 <% unless @entries.empty? %>
-<tr><th><%= _('Method') %></th><th colspan="2"><%= _('Description') %></th></tr>
+<tr>
+    <th><%=h _('Method') %></th>
+    <th colspan="2"><%=h _('Description') %></th>
+</tr>
 <% end %>
 <%
         headline_push
