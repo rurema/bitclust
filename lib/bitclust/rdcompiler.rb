@@ -20,8 +20,9 @@ module BitClust
     include HTMLUtils
     include TextUtils
     
-    def initialize(urlmapper, hlevel = 1, opt = {})
+    def initialize(urlmapper, catalog, hlevel = 1, opt = {})
       @urlmapper = urlmapper
+      @catalog = catalog
       @hlevel = hlevel
       @type = nil
       @library = nil

@@ -10,8 +10,8 @@
 
 <p>
 Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', 'Home') %>
-&gt; <a href="<%= library_index_url() %>">All Libraries</a>
+&gt; <%= document_link('index', _('Home')) %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
 &gt; library <%= library_link(@entry.library.name) %>
 &gt; <%=h @entry.type %> <%=h @entry.name %>
 </p>
@@ -39,23 +39,26 @@ ancestors: <%= escape_html(myself.name) %>
 <%
     headline_push
 %>
-<%= headline("Abstract") %>
+<%= headline(_("Abstract")) %>
 <%= compile_rd(@entry.source) %>
 
 <%
     ents =  @entry.partitioned_entries(@alevel)
-    [['Singleton Methods',         ents.singleton_methods          ],
-     ['Instance Methods',          ents.instance_methods           ],
-     ['Private Singleton Methods', ents.private_singleton_methods  ],
-     ['Private Instance Methods',  ents.private_instance_methods   ],
-     ['Module Functions',          ents.module_functions           ],
-     ['Constants',                 ents.constants                  ],
-     ['Special Variables',         ents.special_variables          ]]\
+    [[_('Singleton Methods'),         ents.singleton_methods          ],
+     [_('Instance Methods'),          ents.instance_methods           ],
+     [_('Private Singleton Methods'), ents.private_singleton_methods  ],
+     [_('Private Instance Methods'),  ents.private_instance_methods   ],
+     [_('Module Functions'),          ents.module_functions           ],
+     [_('Constants'),                 ents.constants                  ],
+     [_('Special Variables'),         ents.special_variables          ]]\
     .each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
 <table class="entries">
-<tr><th>signature</th><th colspan="2">description</th></tr>
+<tr>
+  <th><%= _('Signature') %></th>
+  <th colspan="2"><%= _('Description') %></th>
+</tr>
 <%
         headline_push
         entries.each do |m|
@@ -88,7 +91,7 @@ ancestors: <%= escape_html(myself.name) %>
 
 <%  specs = @entry.inherited_method_specs.sort
     unless specs.empty?  %>
-<%= headline('Inherited Methods') %>
+<%= headline(_('Inherited Methods')) %>
 <p><code>
 <%    specs.each do |s| %>
 <%=     method_link(s.to_s, (s.type == '#' ? s.method : s.type + s.method)) %>
@@ -97,12 +100,16 @@ ancestors: <%= escape_html(myself.name) %>
 <%  end %>
 
 <%
-    [['Added Methods',          ents.added]]\
+    [[_('Added Methods'),          ents.added]]\
     .each do |label, entries|
       unless entries.empty?  %>
 <%=     headline(label) %>
 <table class="entries">
-<tr><th>signature</th><th>description</th><th>library</th></tr>
+<tr>
+  <th><%= _('Signature') %></th>
+  <th><%= _('Description') %></th>
+  <th><%= _('Library') %></th>
+</tr>
 <%
         headline_push
         entries.each do |m|

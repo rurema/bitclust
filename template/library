@@ -10,8 +10,8 @@
 
 <p>
 Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', 'Home') %>
-&gt; <a href="<%= library_index_url() %>">All Libraries</a>
+&gt; <%= document_link('index', _('Home')) %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
 &gt; library <%=h @entry.name %>
 </p>
 <%= search_form() %>
@@ -19,22 +19,22 @@ Ruby <%=h ruby_version() %>
 <%
     headline_init
 %>
-<%= headline(@entry.id == '_builtin' ? '組み込みライブラリ' : "library #{@entry.name}") %>
+<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}") %>
 
 <%
     headline_push
     required_classes = (@entry.sublibraries & @entry.requires).map{|lib| lib.classes }.flatten
     all_classes = (@entry.classes + required_classes).uniq.sort
-    err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
+    err_classes = all_classes.select {|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
     classes = (all_classes - err_classes).sort
 %>
 
 
-<%= headline("Abstract") %>
+<%= headline(_("Abstract")) %>
 <%= compile_rd(@entry.source) %>
 <%
-  [[classes,      'Classes/Modules'],
-   [err_classes,  'Exception Classes']].each do |cs, msg|
+  [[classes,      _('Classes/Modules')],
+   [err_classes,  _('Exception Classes')]].each do |cs, msg|
     unless cs.empty?
 %>
 <%= headline(msg) %>
@@ -50,8 +50,8 @@ Ruby <%=h ruby_version() %>
   end
 %>
 <%
-  [[@entry.requires.sort, 'Required Libraries'],
-   [(@entry.sublibraries - @entry.requires).sort, 'Sublibraries']].each do |cs, msg|
+  [[@entry.requires.sort, _('Required Libraries')],
+   [(@entry.sublibraries - @entry.requires).sort, _('Sub-Libraries')]].each do |cs, msg|
     unless cs.empty?
 %>
 <%= headline(msg) %>
@@ -69,7 +69,7 @@ Ruby <%=h ruby_version() %>
 <%
     ents = @entry.methods.sort
     unless ents.empty? %>
-<%= headline("Added/Redefined Methods") %>
+<%= headline(_("Added/Redefined Methods")) %>
 <p><code>
 <%    ents.each do |m| %>
 <%= link_to_method(m, true) %>

@@ -1,3 +1,24 @@
+Thu Aug 14 22:42:18 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/messagecatalog.rb: new file.
+
+	* lib/bitclust/screen.rb: make messages translatable by
+	  MessageCatalog.
+
+	* lib/bitclust/rdcompiler.rb: receive a MessageCatalog (but not
+	  used yet).
+
+	* template/*: translate messages.
+
+	* catalog/ja_JP.EUC-JP: new file.
+
+	* config.in: new configuration parameter :catalogdir.
+
+	* config.in: new configuration parameter :datadir.
+
+	* tools/gencatalog.rb: new tool to generate message translation
+	  catalog file from source codes.
+
 Wed Aug 13 14:16:41 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/methodsignature.rb (friendly_string): show return

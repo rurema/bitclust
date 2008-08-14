@@ -11,6 +11,7 @@ require 'bitclust/rdcompiler'
 require 'bitclust/methodsignature'
 require 'bitclust/htmlutils'
 require 'bitclust/nameutils'
+require 'bitclust/messagecatalog'
 require 'erb'
 require 'stringio'
 
@@ -18,10 +19,19 @@ module BitClust
 
   class ScreenManager
     def initialize(h)
-      h[:template_repository]  ||= TemplateRepository.new(h.delete(:templatedir))
       h[:urlmapper] ||= URLMapper.new(h)
+      tmpldir = h[:templatedir] || "#{h[:datadir]}/template"
+      h[:template_repository] ||= TemplateRepository.new(tmpldir)
+      h[:message_catalog] ||= default_message_catalog(h)
       @conf = h
     end
+
+    def default_message_catalog(h)
+      dir = h[:catalogdir] || "#{h[:datadir]}/bitclust/catalog"
+      loc = MessageCatalog.encoding2locale(h[:encoding] || 'euc-jp')
+      MessageCatalog.load_with_locales(dir, [loc])
+    end
+    private :default_message_catalog
 
     def entry_screen(entry, opt)
       new_screen(Screen.for_entry(entry), entry, opt)
@@ -190,6 +200,7 @@ module BitClust
   end
 
   class TemplateScreen < Screen
+    include Translatable
     include HTMLUtils
 
     def initialize(h)
@@ -197,6 +208,7 @@ module BitClust
       @template_repository = h[:template_repository]
       @default_encoding = h[:default_encoding] || h[:database].propget('encoding')
       @target_version = h[:target_version] || h[:database].propget('version')
+      init_message_catalog h[:message_catalog]
       @conf = h
     end
 
@@ -285,7 +297,7 @@ module BitClust
     end
 
     def rdcompiler
-      RDCompiler.new(@urlmapper, @hlevel, @conf)
+      RDCompiler.new(@urlmapper, message_catalog(), @hlevel, @conf)
     end
 
     def foreach_method_chunk(src)
@@ -411,7 +423,7 @@ module BitClust
     
     def rdcompiler
       h = {:force => true}.merge(@conf)
-      RDCompiler.new(@urlmapper, @hlevel, h)
+      RDCompiler.new(@urlmapper, message_catalog(), @hlevel, h)
     end
   end
 end

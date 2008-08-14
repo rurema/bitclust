@@ -4,13 +4,13 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>Search Results</title>
+  <title><%= _('Search Results') %></title>
 </head>
 <body>
 
 <p>
 Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', 'Home') %>
+&gt; <%= document_link('index', _('Home')) %>
 &gt; search
 </p>
 <%
@@ -24,9 +24,14 @@ Ruby <%=h ruby_version() %>
 <p>
 
 <table class="entries">
-<tr  ><td></td><td style="text-align:right" nowrap="nowrap">Results <b><%= @entries.size %></b> </td></tr>
-<% if @entries.size > 0 %>
-<tr><th>results</th><th colspan="2">description</th></tr>
+<tr>
+    <td></td>
+    <td style="text-align:right" nowrap="nowrap">
+        <%= _('Results') %><b><%= @entries.size %></b>
+    </td>
+</tr>
+<% unless @entries.empty? %>
+<tr><th><%= _('Method') %></th><th colspan="2"><%= _('Description') %></th></tr>
 <% end %>
 <%
         headline_push
@@ -38,12 +43,12 @@ Ruby <%=h ruby_version() %>
 <td class="signature"><%=
               case e.type
               when :special_variable
-                e.names.map{|l| method_link(e.spec_string, '$' + l) }
+                e.names.map {|name| method_link(e.spec_string, '$' + name) }
               else
                 sigs.map {|sig|
                   method_link(e.spec_string, e.klass.name + e.typemark + sig.name + sig.params)
                 }
-              end.join("<br>") %></td>
+              end.join("<br>\n") %></td>
 <td class="description"><%= compile_rd(src) %></td>
 <%          when :class   %>
 <td class="signature"><%= class_link e.name %></td>

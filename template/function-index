@@ -4,20 +4,20 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>Function Index</title>
+  <title><%= _('Function Index') %></title>
 </head>
 <body id="functionindex">
 
 <p>
 Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', 'Home') %>
-&gt; All Functions
+&gt; <%= document_link('index', _('Home')) %>
+&gt; <%= _('All Functions') %>
 </p>
 <%= search_form() %>
 <%
     headline_init
 %>
-<%= headline("function°ìÍ÷") %>
+<%= headline(_("Function Index")) %>
 <table>
 <%
     headline_push

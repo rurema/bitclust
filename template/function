@@ -10,8 +10,8 @@
 
 <p>
 Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', 'Home') %>
-&gt; <a href="<%= function_index_url() %>">All Functions</a>
+&gt; <%= document_link('index', _('Home')) %>
+&gt; <a href="<%= function_index_url() %>"><%= _('All Functions') %></a>
 &gt; <%=h @entry.name %>
 <% unless @entry.public? %>(static)<% end %>
 </p>

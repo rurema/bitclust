@@ -4,28 +4,28 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>Library Index</title>
+  <title><%= _('Library Index') %></title>
 </head>
 <body id="libraryindex">
 
 <p>
 Ruby <%=h ruby_version() %> 
-&gt; <%= document_link('index', 'Home') %>
-&gt; All Libraries
+&gt; <%= document_link('index', _('Home')) %>
+&gt; <%= _("All Libraries") %>
 </p>
 <%= search_form() %>
 
 <%
     headline_init
 %>
-<%= headline("ライブラリ一覧") %>
+<%= headline(_("Library Index")) %>
 <table>
 <%
     headline_push
     lib = @entries.detect {|lib| lib.id == '_builtin' }
 %>
 <tr>
-<td class="signature"><%= library_link(lib.name, '組み込みライブラリ') %></td>
+<td class="signature"><%= library_link(lib.name, _('Builtin Library')) %></td>
 <td class="description"><%= compile_rd(lib.synopsis_source) %></td>
 </tr>
 <%
