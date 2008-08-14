@@ -8,12 +8,11 @@
 </head>
 <body>
 <p>
-Ruby <%=h ruby_version() %>
 <% if @entry.name == 'index' %>
-&gt; Home
+<%= _('Ruby %s Reference Manual', ruby_version()) %>
 <% else %>
-&gt; <%= document_link('index', 'Home') %>
-&gt; document <%=h @entry.name %>
+<%= manual_home_link() %>
+&gt; <%=h @entry.name %>
 <% end %>
 </p>
 <%= search_form() %>

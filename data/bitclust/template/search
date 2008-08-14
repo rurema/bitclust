@@ -9,14 +9,13 @@
 <body>
 
 <p>
-Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', _('Home')) %>
+<%= manual_home_link() %>
 &gt; search
 </p>
 <%
     headline_init
 %>
-<%= headline "search results" %>
+<%= headline(_('"Search Results")) %>
 <form method="get" action="" name="f">
 <input value="<%=h @query %>" name="q" size="41">
 <input value="Search" type="submit"> 
@@ -27,7 +26,7 @@ Ruby <%=h ruby_version() %>
 <tr>
     <td></td>
     <td style="text-align:right" nowrap="nowrap">
-        <%= _('Results') %><b><%= @entries.size %></b>
+        <%= _('Search Results') %><b><%= @entries.size %></b>
     </td>
 </tr>
 <% unless @entries.empty? %>

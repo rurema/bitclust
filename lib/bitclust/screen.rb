@@ -283,6 +283,15 @@ module BitClust
         %Q!<form method="get" action="#{h search_url()}" name="f" id="top_search"><input value="" name="q" size="15"> <input value="Search" type="submit"></form>!
       end
     end
+
+    def manual_home_link
+      _('Ruby %s Reference Manual', ruby_version())
+    end
+
+    def friendly_library_link(name)
+      lab = (name == '_builtin') ? _('Builtin Library') : _('library %s', name)
+      library_link(name, lab)
+    end
     
     def compile_method(m)
       rdcompiler().compile_method(m)

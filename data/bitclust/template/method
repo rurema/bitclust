@@ -12,8 +12,7 @@
 <body>
 
 <p>
-Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', _('Home')) %>
+<%= manual_home_link() %>
 &gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
 &gt; library <%= library_link(entry.library.name) %>
 &gt; <%= entry.klass.type %> <%= class_link(entry.klass.name) %>

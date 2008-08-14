@@ -9,8 +9,7 @@
 <body id="functionindex">
 
 <p>
-Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', _('Home')) %>
+<%= manual_home_link() %>
 &gt; <%= _('All Functions') %>
 </p>
 <%= search_form() %>

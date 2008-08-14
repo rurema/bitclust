@@ -24,8 +24,6 @@ Exception Classes
 例外クラス
 Function Index
 関数一覧
-Home
-ホーム
 Inherited Methods
 継承したメソッド
 Instance Methods
@@ -46,6 +44,8 @@ Required Libraries
 同時にrequireされるライブラリ
 Results
 検索結果
+Ruby %s Reference Manual
+Ruby %s リファレンスマニュアル
 Search Results
 検索結果
 Signature
@@ -56,3 +56,11 @@ Special Variables
 特殊変数
 Sub-Libraries
 サブライブラリ
+class %s
+%sクラス
+library %s
+%sライブラリ
+module %s
+%sモジュール
+object %s
+%sオブジェクト

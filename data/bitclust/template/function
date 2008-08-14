@@ -9,8 +9,7 @@
 <body>
 
 <p>
-Ruby <%=h ruby_version() %>
-&gt; <%= document_link('index', _('Home')) %>
+<%= manual_home_link() %>
 &gt; <a href="<%= function_index_url() %>"><%= _('All Functions') %></a>
 &gt; <%=h @entry.name %>
 <% unless @entry.public? %>(static)<% end %>

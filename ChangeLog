@@ -1,3 +1,14 @@
+Fri Aug 15 01:16:48 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitclust/screen.rb: add utility methods #manual_home_link
+	  and #friendly_library_link.
+
+	* tools/gencatalog.rb: strip "\n" from catalog keys and values.
+
+	* data/bitclust/template/*: translate topic-path.
+
+	* data/bitclust/catalog/ja_JP.EUC-JP: more translation.
+
 Fri Aug 15 01:15:01 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitclust/htmlutils.rb: refactoring.

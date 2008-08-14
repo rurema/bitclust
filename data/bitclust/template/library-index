@@ -9,8 +9,7 @@
 <body id="libraryindex">
 
 <p>
-Ruby <%=h ruby_version() %> 
-&gt; <%= document_link('index', _('Home')) %>
+<%= manual_home_link() %> 
 &gt; <%= _("All Libraries") %>
 </p>
 <%= search_form() %>

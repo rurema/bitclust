@@ -57,7 +57,13 @@ def collect_messages(f)
 end
 
 def load_catalog(path)
-  Hash[*File.readlines(path)]
+  h = {}
+  File.open(path) {|f|
+    f.each do |line|
+      h[line.chomp] = f.gets.chomp
+    end
+  }
+  h
 end
 
 main
