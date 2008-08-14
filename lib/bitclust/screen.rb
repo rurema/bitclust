@@ -27,7 +27,7 @@ module BitClust
     end
 
     def default_message_catalog(h)
-      dir = h[:catalogdir] || "#{h[:datadir]}/bitclust/catalog"
+      dir = h[:catalogdir] || "#{h[:datadir]}/catalog"
       loc = MessageCatalog.encoding2locale(h[:encoding] || 'euc-jp')
       MessageCatalog.load_with_locales(dir, [loc])
     end
