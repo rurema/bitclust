@@ -1,3 +1,7 @@
+Thu Aug 14 23:45:42 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* standalone.rb: templatedir -> datadir.
+
 Thu Aug 14 22:44:47 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* template -> data/bitclust/template

@@ -1,6 +1,6 @@
 #!/usr/bin/ruby -Ke
 #
-# $Id: standalone.rb 994 2004-12-08 15:16:41Z aamine $
+# $Id$
 #
 # Stand-alone BitClust server based on WEBrick
 #
@@ -14,12 +14,13 @@ params = {
 }
 baseurl = nil
 dbpath = nil
-srcdir = templatedir = themedir = nil
+srcdir = libdir = datadir = themedir = nil
+encoding = 'euc-jp'   # encoding of view
 set_srcdir = lambda {|path|
   srcdir = path
-  templatedir ||= "#{srcdir}/template"
+  datadir ||= "#{srcdir}/data/bitclust"
   themedir ||= "#{srcdir}/theme"
-  $LOAD_PATH.unshift "#{srcdir}/lib"
+  libdir ||= "#{srcdir}/lib"
 }
 set_srcdir.call File.dirname($0)
 debugp = false
@@ -28,7 +29,7 @@ browser = nil
 pid_file = nil
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--templatedir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER] [--pid-file=PATH]"
+parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--datadir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER] [--pid-file=PATH]"
 parser.on('--bind-address=ADDR', 'Bind address') {|addr|
   params[:BindAddress] = addr
 }
@@ -44,8 +45,8 @@ parser.on('--database=PATH', 'MethodDatabase root directory.') {|path|
 parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
   set_srcdir.call path
 }
-parser.on('--templatedir=PATH', 'BitClust template directory.') {|path|
-  templatedir = path
+parser.on('--datadir=PATH', 'BitClust data directory.') {|path|
+  datadir = path
 }
 parser.on('--themedir=PATH', 'BitClust theme directory.') {|path|
   themedir = path
@@ -74,29 +75,30 @@ rescue OptionParser::ParseError => err
   exit 1
 end
 unless baseurl
-  $stderr.puts "missing --baseurl"
+  $stderr.puts "missing base URL.  Use --baseurl"
   exit 1
 end
 unless dbpath || autop
-  $stderr.puts "missing --database"
+  $stderr.puts "missing database path.  Use --database"
   exit 1
 end
-unless templatedir
-  $stderr.puts "missing templatedir; use --srcdir or --templatedir"
+unless datadir
+  $stderr.puts "missing datadir.  Use --datadir"
   exit 1
 end
 unless themedir
-  $stderr.puts "missing themedir; use --srcdir or --themedir"
+  $stderr.puts "missing themedir.  Use --themedir"
   exit 1
 end
 if pid_file 
-  if File.exist? pid_file
-    $stderr.puts "There is still #{pid_file}. Is another process running?"
-    exit(1)
-  else
-    pid_file = File.expand_path(pid_file)
+  if File.exist?(pid_file)
+    $stderr.puts "There is still #{pid_file}.  Is another process running?"
+    exit 1
   end
+  pid_file = File.expand_path(pid_file)
 end
+
+$LOAD_PATH.unshift libdir
 require 'bitclust'
 require 'bitclust/interface'
 
@@ -124,17 +126,18 @@ if autop
     manager = BitClust::ScreenManager.new(
       :base_url => baseurl,
       :cgi_url => "#{baseurl}/#{version}",
-      :templatedir => templatedir
+      :datadir => datadir,
+      :encoding => encoding
     )
     handlers[version] = BitClust::RequestHandler.new(db, manager)
-    server.mount File.join(basepath, "#{version}/"), BitClust::Interface.new { handlers[version] }
+    server.mount "#{basepath}/#{version}/", BitClust::Interface.new { handlers[version] }
     $bitclust_context_cache = nil # clear cache
   end
-  server.mount_proc(File.join(basepath, '/')) do |req, res|
+  server.mount_proc("#{basepath}/") do |req, res|
     raise WEBrick::HTTPStatus::NotFound if req.path != '/'
     links = "<ul>"
     handlers.keys.sort.each do |version|
-      links << "<li><a href=\"#{version}/\">#{version}</a></li>"
+      links << %Q(<li><a href="#{version}/">#{version}</a></li>)
     end
     links << "</ul>"
     if File.exist?("readme.html")
@@ -149,8 +152,9 @@ else
   manager = BitClust::ScreenManager.new(
     :base_url => baseurl,
     :cgi_url => "#{baseurl}/view",
-    :templatedir => templatedir
-    )
+    :datadir => datadir,
+    :encoding => encoding
+  )
   handler = BitClust::RequestHandler.new(db, manager)
   server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
 end
