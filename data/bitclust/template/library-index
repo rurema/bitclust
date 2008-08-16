@@ -18,7 +18,7 @@
     headline_init
 %>
 <%= headline(_("Library Index")) %>
-<table>
+<table class="entries" class="libraries">
 <%
     headline_push
     lib = @entries.detect {|lib| lib.id == '_builtin' }

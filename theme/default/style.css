@@ -166,6 +166,9 @@ th {
     valign: top;
     text-align: left;
     vertical-align: top;
+    background-color: #AAC;
+    border: 3px solid white;
+    padding: 0.3em;
 }
 
 td {
@@ -173,6 +176,10 @@ td {
     valign: top;
     text-align: left;
     vertical-align: top;
+}
+
+table.entries {
+    width: 100%;
 }
 
 table.entries tr {
@@ -194,13 +201,13 @@ td.signature {
 
 td.signature a {
     display: block;
-    padding: 0.5em;
+    padding: 0.3em;
     width: 100%;
     height: 100%;
 }
 
 td.description {
-    padding: 0.5em;
+    padding: 0.3em;
     background-color: #EEE;
     border: 3px solid white;
 }

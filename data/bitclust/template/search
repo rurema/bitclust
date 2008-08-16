@@ -18,7 +18,7 @@
 <%= headline(_('Search Results')) %>
 <form method="get" action="" name="f">
 <input value="<%=h @query %>" name="q" size="41">
-<input value="Search" type="submit"> 
+<input value="<%= _('Search') %>" type="submit"> 
 </form>
 <p>
 

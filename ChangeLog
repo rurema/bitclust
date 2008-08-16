@@ -1,3 +1,14 @@
+Sat Aug 16 15:49:16 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* theme/default/style.css: table should always printed in 100%
+	  width.
+
+	* data/bitclust/template/*: <table>s participate in the entries
+	  class.
+
+	* lib/bitclust/methodsignature.rb: gvar should be shown as
+	  "$gvar", not "self $gvar".
+
 Sat Aug 16 15:07:23 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* theme/default/style.css: make method links a block, to widen

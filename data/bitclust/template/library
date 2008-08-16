@@ -37,10 +37,10 @@
     unless cs.empty?
 %>
 <%= headline(msg) %>
-<table>
+<table class="entries" class="libraries">
 <%    cs.each do |c| %>
 <tr>
-<td class="signature"><%=h c.type.to_s %> <%= class_link(c.name) %></td>
+<td class="signature"><%= class_link(c.name, "#{c.type} #{c.name}") %></td>
 <td class="description"><%= compile_rd(c.synopsis_source) %></td>
 <%    end %>
 </table>
@@ -54,7 +54,7 @@
     unless cs.empty?
 %>
 <%= headline(msg) %>
-<table>
+<table class="entries" class="libraries">
 <%    cs.each do |c| %>
 <tr>
 <td class="signature"><%= library_link(c.name) %></td>
