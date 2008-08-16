@@ -1,7 +1,7 @@
 #
 # bitclust/htmlutils.rb
 #
-# Copyright (C) 2006-2007 Minero Aoki
+# Copyright (C) 2006-2008 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -32,7 +32,11 @@ module BitClust
     end
 
     def method_link(spec, label = nil, frag = nil)
-      a_href(@urlmapper.method_url(spec) + fragment(frag), label || spec)
+      a_href(method_url(spec, frag), label || spec)
+    end
+
+    def method_url(spec, frag = nil)
+      @urlmapper.method_url(spec) + fragment(frag)
     end
 
     def function_link(name, label = nil, frag = nil)

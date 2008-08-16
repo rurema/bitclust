@@ -184,10 +184,19 @@ table.entries tr {
 }
 
 td.signature {
-    padding: 0.5em;
+    padding: 0;
+    margin: 0;
     background-color: #DDD;
     border: 3px solid white;
-    width: 20em;
+    width: 30%;
+    height: 100%;
+}
+
+td.signature a {
+    display: block;
+    padding: 0.5em;
+    width: 100%;
+    height: 100%;
 }
 
 td.description {
@@ -203,6 +212,9 @@ td.library {
     border: 3px solid white;
 }
 
+code {
+    font-family: monospace;
+}
 
 a {
     font-weight: bold;

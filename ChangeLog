@@ -1,3 +1,13 @@
+Sat Aug 16 15:07:23 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* theme/default/style.css: make method links a block, to widen
+	  clickable area. (refs #177)
+
+	* data/bitclust/template/class: locate only one anchor for one
+	  <td>.
+
+	* lib/bitclust/htmlutils.rb: new method #method_url.
+
 Fri Aug 15 02:21:17 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* data/bitclust/template/search: method parameters were wrongly

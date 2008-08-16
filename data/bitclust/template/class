@@ -63,10 +63,11 @@
         entries.each do |m|
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
-<td class="signature"><%=
-            sigs.map {|sig|
-              method_link(m.spec_string, sig.friendly_string)
-            }.join("<br>\n") %></td>
+<td class="signature">
+  <a href="<%=h method_url(m.spec_string) %>"><code>
+  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
+  </code></a>
+</td>
 <%          if m.redefined? %>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
@@ -114,8 +115,9 @@
         entries.each do |m|
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
-<td class="signature"><%=
-            sigs.map {|sig| method_link(m.spec_string, sig.to_s) }.join("<br>") %></td>
+<td class="signature"><code><%=
+            sigs.map {|sig| method_link(m.spec_string, sig.to_s) }.join("<br>")
+%></code></td>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
 </tr>
