@@ -1,3 +1,7 @@
+2008-08-23  Yutaka HARA  <yhara.at.kmc.gr.jp>
+
+	* bin/standalone.rb: redirect '/' to '#{basepath}/view/'.
+
 Sat Aug 16 15:49:16 2008  Minero Aoki  <aamine@loveruby.net>
 
 	* theme/default/style.css: table should always printed in 100%
