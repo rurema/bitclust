@@ -157,15 +157,15 @@ else
   )
   handler = BitClust::RequestHandler.new(db, manager)
   server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
+
+  # Redirect from '/' to 'view/'
+  server.mount_proc('/') do |req, res|
+    viewpath = File.join(basepath, 'view/')
+    res.body = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
+  end
 end
 
 server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, themedir
-
-# Redirect from '/' to 'view/'
-server.mount_proc('/') do |req, res|
-  viewpath = File.join(basepath, 'view/')
-  res.body = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
-end
 
 if debugp
   trap(:INT) { server.shutdown }

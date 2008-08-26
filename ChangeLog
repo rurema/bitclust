@@ -1,3 +1,7 @@
+2008-06-30  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* standalone.rb: do not mount '/' twice when --auto.
+
 2008-08-23  Yutaka HARA  <yhara.at.kmc.gr.jp>
 
 	* bin/standalone.rb: redirect '/' to '#{basepath}/view/'.
