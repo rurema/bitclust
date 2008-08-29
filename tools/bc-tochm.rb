@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# coding: euc-jp
+# -*- coding: euc-jp -*-
 require 'pathname'
 def srcdir_root
   (Pathname.new(__FILE__).realpath.dirname + '..').cleanpath
@@ -179,7 +179,7 @@ def main
   manager_config = {
     :baseurl => 'http://example.com/',
     :suffix => '.html',
-    :templatedir => srcdir_root + 'template',
+    :templatedir => srcdir_root + 'data'+ 'bitclust' + 'template',
     :themedir => srcdir_root + 'theme' + 'default',
     :css_url => 'style.css',
     :cgi_url => '',
@@ -206,8 +206,7 @@ def main
     exit(1)
   end
 
-  db = BitClust::Database.new(prefix.to_s)
-  #manager = BitClust::ScreenManager.new(manager_config)
+  db = BitClust::MethodDatabase.new(prefix.to_s)
   manager = BitClust::ScreenManager.new(manager_config)
   @html_files = []
   db.transaction do
