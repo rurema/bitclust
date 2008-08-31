@@ -1,3 +1,8 @@
+2008-08-31  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/methodsignature.rb (BitClust::MethodSignature):
+	  fix regexp to match '-> ()' (fix #521)
+
 2008-08-29  okkez  <okkez000@gmail.com>
 
 	* tools/bc-tochm.rb (#main): use BitClust::MethodDatabase instead

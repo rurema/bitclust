@@ -21,7 +21,7 @@ module BitClust
           (?: (?:#{CLASS_PATH_RE} #{TYPEMARK_RE})? (#{METHOD_NAME_RE})
           | (#{GVAR_RE})
           )                 \s*         # method name ($1) or gvar name ($2)
-        (?: \( (.*) \)      \s* )?      # parameters (optional); $3=parameter_list
+        (?: \( (.*?) \)     \s* )?      # parameters (optional); $3=parameter_list
         (?: (\{ .* \})      \s* )?      # block (optional); $4=block
         (?: -> \s* (\S.*)   \s* )?      # type declaration (optional); $5=return_type
     \z/x
