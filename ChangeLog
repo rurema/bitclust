@@ -4,7 +4,7 @@
 	  BitClust::Database
 	* tools/bc-tochm.rb (#main): template -> data/bitclust/template
 
-2008-06-30  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+2008-08-26  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* standalone.rb: do not mount '/' twice when --auto.
 
