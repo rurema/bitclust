@@ -37,6 +37,11 @@ module BitClust
       end
     end
 
+    # for rack
+    def call(env)
+      @handler.handle(Rack::Request.new(env)).rack_finish
+    end
+
     private
 
     def fastcgi?

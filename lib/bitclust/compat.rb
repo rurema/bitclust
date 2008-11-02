@@ -23,3 +23,9 @@ unless String.method_defined?(:lines)
     alias lines to_a
   end
 end
+
+unless String.method_defined?(:bytesize)
+  class String
+    alias bytesize size
+  end
+end

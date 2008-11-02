@@ -75,7 +75,7 @@ module BitClust
 
     def handle_search(req)
       ret = []
-      q0 = req.wreq.query['q'] || ''
+      q0 = req.query['q'] || ''
       q = URI.unescape(q0)
       ret = SimpleSearcher.search_pattern(@db, q)
       c = @conf.dup
@@ -100,6 +100,13 @@ module BitClust
 
   end
 
+  class RackRequestHandler < RequestHandler
+    def handle(rack_req)
+      _handle(RackRequest.new(rack_req))
+    rescue => err
+      return error_response(err)
+    end
+  end
 
   class Request
 
@@ -108,8 +115,7 @@ module BitClust
     def initialize(wreq)
       @wreq = wreq
     end
-    attr_reader :wreq
-    
+
     def library?
       type_id() == :library
     end
@@ -123,10 +129,10 @@ module BitClust
     end
 
     def doc_name
-      name = @wreq.path_info.sub(%r!\A/!, '')
+      name = path_info.sub(%r!\A/!, '')
       name unless name.empty?
     end
-    
+
     def library_name
       raise '#library_name called but not library request' unless library?
       id = type_param()
@@ -210,14 +216,18 @@ module BitClust
     end
 
     def ancestors_level
-      ret = @wreq.query['a'].to_i
+      ret = query['a'].to_i
       if ret < 0
         0
       else
         ret
       end
     end
-    
+
+    def query
+      @wreq.query
+    end
+
     private
 
     def type_param
@@ -228,14 +238,33 @@ module BitClust
     end
 
     def parse_path_info
-      return nil unless @wreq.path_info
-      _, type, param = @wreq.path_info.split('/', 3)
+      return nil unless path_info
+      _, type, param = path_info.split('/', 3)
       param = nil if not param or param.empty?
       return type, param
     end
 
+    def path_info
+      @wreq.path_info
+    end
+
   end
 
+  class RackRequest < Request
+
+    def initialize(rack_req)
+      @rack_req = rack_req
+    end
+
+    def query
+      @rack_req.params
+    end
+
+    def path_info
+      @rack_req.env["PATH_INFO"]
+    end
+
+  end
 
   class Screen   # reopen
     def response
@@ -255,8 +284,18 @@ module BitClust
       webrick_res['Content-Type'] = @screen.content_type
       # webrick_res['Last-Modified'] = @screen.last_modified
       body = @screen.body
-      webrick_res['Content-Length'] = body.length
+      webrick_res['Content-Length'] = body.bytesize
       webrick_res.body = body
+    end
+
+    def rack_finish
+      [
+        @screen.status || 200,
+        {
+          'Content-Type' => @screen.content_type,
+        },
+        @screen.body
+      ]
     end
 
   end

@@ -1,3 +1,10 @@
+2008-11-03  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* config.ru, standalone.rb, lib/bitclust/app.rb,
+	  lib/bitclust/compat.rb, lib/bitclust/interface.rb,
+	  lib/bitclust/requesthandler.rb, standalone.rb:
+	  support rack.
+
 2008-08-31  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/methodsignature.rb (BitClust::MethodSignature):

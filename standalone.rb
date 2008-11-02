@@ -90,7 +90,7 @@ unless themedir
   $stderr.puts "missing themedir.  Use --themedir"
   exit 1
 end
-if pid_file 
+if pid_file
   if File.exist?(pid_file)
     $stderr.puts "There is still #{pid_file}.  Is another process running?"
     exit 1
@@ -99,8 +99,7 @@ if pid_file
 end
 
 $LOAD_PATH.unshift libdir
-require 'bitclust'
-require 'bitclust/interface'
+require 'bitclust/app'
 
 if debugp
   params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::DEBUG)
@@ -117,52 +116,30 @@ basepath = URI.parse(baseurl).path
 server = WEBrick::HTTPServer.new(params)
 
 if autop
-  handlers = {}
-  Dir.glob("db-*").each do |dbpath|
-    next unless /db-([\d_]+)/ =~ dbpath
-    dbpath = File.expand_path(dbpath)
-    version = $1.tr("_", ".")
-    db = BitClust::MethodDatabase.new(dbpath)
-    manager = BitClust::ScreenManager.new(
-      :base_url => baseurl,
-      :cgi_url => "#{baseurl}/#{version}",
-      :datadir => datadir,
-      :encoding => encoding
-    )
-    handlers[version] = BitClust::RequestHandler.new(db, manager)
-    server.mount "#{basepath}/#{version}/", BitClust::Interface.new { handlers[version] }
-    $bitclust_context_cache = nil # clear cache
-  end
-  server.mount_proc("#{basepath}/") do |req, res|
-    raise WEBrick::HTTPStatus::NotFound if req.path != '/'
-    links = "<ul>"
-    handlers.keys.sort.each do |version|
-      links << %Q(<li><a href="#{version}/">#{version}</a></li>)
-    end
-    links << "</ul>"
-    if File.exist?("readme.html")
-      res.body = File.read("readme.html").sub(%r!\./bitclust!, '').sub(/<!--links-->/) { links }
-    else
-      res.body = "<html><head><title>bitclust</title></head><body>#{links}</body></html>"
-    end
-    res['Content-Type'] = 'text/html; charset=euc-jp'
-  end
-else
-  db = BitClust::MethodDatabase.new(dbpath)
-  manager = BitClust::ScreenManager.new(
-    :base_url => baseurl,
-    :cgi_url => "#{baseurl}/view",
+  app = BitClust::App.new(
+    :dbpath => Dir.glob("db-*"),
+    :baseurl => baseurl,
     :datadir => datadir,
     :encoding => encoding
-  )
-  handler = BitClust::RequestHandler.new(db, manager)
-  server.mount File.join(basepath, 'view/'), BitClust::Interface.new { handler }
-
-  # Redirect from '/' to 'view/'
-  server.mount_proc('/') do |req, res|
-    viewpath = File.join(basepath, 'view/')
-    res.body = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
+    )
+  app.interfaces.each do |version, interface|
+    server.mount "#{basepath}/#{version}/", interface
   end
+  server.mount("#{basepath}/", app)
+else
+  viewpath = File.join(basepath, 'view/')
+  app = BitClust::App.new(
+    :viewpath => viewpath,
+    :dbpath => dbpath,
+    :baseurl => baseurl,
+    :datadir => datadir,
+    :encoding => encoding
+    )
+  app.interfaces.each do |viewpath, interface|
+    server.mount viewpath, interface
+  end
+  # Redirect from '/' to "#{viewpath}/"
+  server.mount('/', app)
 end
 
 server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, themedir
@@ -172,7 +149,7 @@ if debugp
 else
   WEBrick::Daemon.start do
     trap(:TERM) {
-      server.shutdown 
+      server.shutdown
       begin
         File.unlink pid_file if pid_file
       rescue Errno::ENOENT
