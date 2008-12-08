@@ -1,3 +1,9 @@
+2008-12-08  okkez  <okkez000@gmail.com>
+
+	* standalone.rb: Fix view_path.
+
+	* lib/bitclust/app.rb (BitClust::App#initialize): Fix :cgi_url.
+
 2008-11-03  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* config.ru, standalone.rb, lib/bitclust/app.rb,

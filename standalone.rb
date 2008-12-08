@@ -127,7 +127,7 @@ if autop
   end
   server.mount("#{basepath}/", app)
 else
-  viewpath = File.join(basepath, 'view/')
+  viewpath = File.join(basepath, 'view')
   app = BitClust::App.new(
     :viewpath => viewpath,
     :dbpath => dbpath,

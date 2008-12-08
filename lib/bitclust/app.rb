@@ -22,7 +22,7 @@ module BitClust
         db = BitClust::MethodDatabase.new(dbpath)
         manager = BitClust::ScreenManager.new(
           :base_url => baseurl,
-          :cgi_url => "#{baseurl}/#{viewpath}",
+          :cgi_url => "#{baseurl}#{viewpath}",
           :datadir => datadir,
           :encoding => encoding
           )
