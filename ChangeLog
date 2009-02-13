@@ -1,5 +1,7 @@
 2009-02-13  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
+	* packer.rb: add -Ke to `bitclust init` and `bitclust update` too.
+
 	* config.ru: auto search themedir.
 
 2008-12-08  okkez  <okkez000@gmail.com>

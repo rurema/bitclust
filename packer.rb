@@ -83,8 +83,8 @@ end
 database_versions.each do |version|
   database_path = File.join(output_path, database_version_to_dir.call(version))
   unless File.exist?(database_path)
-    system_verbose(ruby, bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{version}")
-    system_verbose(ruby, bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
+    system_verbose(ruby, "-Ke", bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{version}")
+    system_verbose(ruby, "-Ke", bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
   end
 end
 
