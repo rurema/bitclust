@@ -1,3 +1,7 @@
+2009-02-13  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* config.ru: auto search themedir.
+
 2008-12-08  okkez  <okkez000@gmail.com>
 
 	* standalone.rb: Fix view_path.

@@ -2,7 +2,13 @@
 
 baseurl = nil
 basepath = ''
-themedir = "#{File.dirname(__FILE__)}/theme"
+themedir = nil
+%w[theme bitclust/theme ../bitclust/theme].each do |theme|
+  dir = File.expand_path(theme, File.dirname(__FILE__))
+  if File.directory?(dir)
+    themedir = dir
+  end
+end
 
 $LOAD_PATH.unshift File.expand_path('lib', File.dirname(__FILE__))
 $LOAD_PATH.unshift File.expand_path('bitclust/lib', File.dirname(__FILE__))
