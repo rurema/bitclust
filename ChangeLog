@@ -1,3 +1,8 @@
+2009-02-24  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* lib/bitclust/screen.rb, lib/bitclust/requesthandler.rb,
+	  data/bitclust/template/*: add opensearchdescription.
+
 2009-02-13  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: add -Ke to `bitclust init` and `bitclust update` too.

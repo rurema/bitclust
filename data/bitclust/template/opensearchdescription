@@ -1,0 +1,10 @@
+<?xml version="1.0"  encoding="<%=h encoding() %>"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+                       xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName><%= _('Ruby %s Reference Manual', ruby_version()) %></ShortName>
+  <Description><%= _('Ruby %s Reference Manual', ruby_version()) %></Description>
+  <Image height="16" width="16">data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%10%00%00%00%10%08%02%00%00%00%90%91h6%00%00%00%04gAMA%00%00%B1%8F%0B%FCa%05%00%00%00%06tRNS%00%FF%00%FF%00%FF7X%1B%7D%00%00%00TIDAT(%CFc%F8%0F%06%0C%C4%01%90J%88jc%E3U%10%84%A9%08Y%0AC%03P%08%03%19%C3d%D150%80%A5%D3PUC%B8%08%05%98%1A%D0%7C%F3%9FH%0D%98%8C%A1%A7%81%04O%93%10%AC%24G%1CiI%83%E4%C4w%86%10%80%A8%86j%20)y%03%00%B7%DF%E3P%F6%95%E2%F8%00%00%00%00IEND%AEB%60%82</Image>
+  <InputEncoding><%=h encoding() %></InputEncoding>
+  <Url type="text/html" method="get" template="<%=h search_full_url() %>?q={searchTerms}"/>
+  <moz:SearchForm><%=h search_full_url() %></moz:SearchForm>
+</OpenSearchDescription>

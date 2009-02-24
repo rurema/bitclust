@@ -73,6 +73,10 @@ module BitClust
       @screenmanager.class_index_screen(@db.classes.sort, @conf).response
     end
 
+    def handle_opensearchdescription(req)
+      @screenmanager.opensearchdescription_screen(req.full_uri, @conf).response
+    end
+
     def handle_search(req)
       ret = []
       q0 = req.query['q'] || ''
@@ -188,7 +192,7 @@ module BitClust
     def defined_type?
       type, param = parse_path_info()
       case type
-      when 'library', 'class', 'method', 'function', 'search'
+      when 'library', 'class', 'method', 'function', 'search', 'opensearchdescription'
         true
       else
         false
@@ -228,6 +232,10 @@ module BitClust
       @wreq.query
     end
 
+    def full_uri
+      @wreq.request_uri
+    end
+
     private
 
     def type_param
@@ -264,6 +272,9 @@ module BitClust
       @rack_req.env["PATH_INFO"]
     end
 
+    def full_uri
+      URI.parse(@rack_req.url)
+    end
   end
 
   class Screen   # reopen

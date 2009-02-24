@@ -57,6 +57,10 @@ module BitClust
       new_screen(MethodScreen, ms, opt)
     end
 
+    def opensearchdescription_screen(request_full_uri, opt)
+      new_screen(OpenSearchDescriptionScreen, request_full_uri, opt)
+    end
+
     def seach_screen(result, opt)
       new_screen(SearchScreen, result, opt)
     end
@@ -125,6 +129,10 @@ module BitClust
 
     def function_url(name)
       "#{@cgi_url}/function/#{name}"
+    end
+
+    def opensearchdescription_url
+      "#{@cgi_url}/opensearchdescription"
     end
 
     def search_url
@@ -242,6 +250,10 @@ module BitClust
     
     def css_url
       @urlmapper.css_url
+    end
+
+    def opensearchdescription_url
+      @urlmapper.opensearchdescription_url
     end
 
     def search_url
@@ -375,6 +387,25 @@ module BitClust
   class ClassIndexScreen < IndexScreen
     def body
       run_template('class-index')
+    end
+  end
+
+  class OpenSearchDescriptionScreen < TemplateScreen
+    def initialize(h, request_full_uri, opt)
+      h = h.dup
+      h[:database] = opt[:database]
+      super h
+      @search_full_url = (request_full_uri + search_url()).to_s
+    end
+
+    attr_reader :search_full_url
+
+    def body
+      run_template('opensearchdescription')
+    end
+
+    def content_type
+      "application/opensearchdescription+xml; charset=#{encoding()}"
     end
   end
 
