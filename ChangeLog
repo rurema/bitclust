@@ -1,3 +1,14 @@
+2009-03-15  okkez  <okkez000@gmail.com>
+
+	* standalone.rb: fix mount point.
+
+	* lib/bitclust/app.rb (BitClust::App#service): fix redirect (fix #1228)
+
+	* lib/bitclust/app.rb (BitClust::App#initialize): fix multi
+	version's viewpath.
+
+	* lib/bitclust/app.rb (BitClust::App#index): fix redirect.
+
 2009-02-24  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* lib/bitclust/screen.rb, lib/bitclust/requesthandler.rb,

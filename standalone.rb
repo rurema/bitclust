@@ -123,9 +123,9 @@ if autop
     :encoding => encoding
     )
   app.interfaces.each do |version, interface|
-    server.mount "#{basepath}/#{version}/", interface
+    server.mount File.join(basepath, version), interface
   end
-  server.mount("#{basepath}/", app)
+  server.mount(File.join(basepath, '/'), app)
 else
   viewpath = File.join(basepath, 'view')
   app = BitClust::App.new(

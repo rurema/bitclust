@@ -17,59 +17,80 @@ module BitClust
       else
         request_handler_class = BitClust::RequestHandler
       end
-      if viewpath
+      @interfaces = {}
+      case dbpath
+      when String
         dbpath = File.expand_path(dbpath)
         db = BitClust::MethodDatabase.new(dbpath)
         manager = BitClust::ScreenManager.new(
           :base_url => baseurl,
-          :cgi_url => "#{baseurl}#{viewpath}",
+          :cgi_url => File.join(baseurl, viewpath),
           :datadir => datadir,
           :encoding => encoding
           )
         handler = request_handler_class.new(db, manager)
-        @interfaces = {
-          viewpath => BitClust::Interface.new { handler }
-        }
-      else
-        @interfaces = {}
+        @interfaces[viewpath] = BitClust::Interface.new { handler }
+      when Array
         dbpaths = dbpath
+        @versions = []
         dbpaths.each do |dbpath|
           next unless /db-([\d_]+)/ =~ dbpath
           dbpath = File.expand_path(dbpath)
           version = $1.tr("_", ".")
+          @versions << version
+          if viewpath
+            version_viewpath = File.join(version, viewpath)
+          else
+            version_viewpath = version
+          end
           db = BitClust::MethodDatabase.new(dbpath)
           manager = BitClust::ScreenManager.new(
             :base_url => baseurl,
-            :cgi_url => "#{baseurl}/#{version}",
+            :cgi_url => File.join(baseurl, version_viewpath),
             :datadir => datadir,
             :encoding => encoding
             )
           handler = request_handler_class.new(db, manager)
-          @interfaces[version] = BitClust::Interface.new { handler }
+          @interfaces[version_viewpath] = BitClust::Interface.new { handler }
           $bitclust_context_cache = nil # clear cache
         end
       end
     end
 
-    attr_reader :interfaces
+    attr_reader :interfaces, :versions
 
-    def index
+    def index(req)
       case
-      when defined?(@index)
-        return @index
-      when viewpath = @options[:viewpath]
+      when @interfaces.size == 1 && viewpath = @options[:viewpath]
         # Redirect from '/' to "#{viewpath}/"
         @index = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
-      when defined?(@interfaces)
-        links = "<ul>"
-        @interfaces.keys.sort.each do |version|
-          links << %Q(<li><a href="#{version}/">#{version}</a></li>)
-        end
-        links << "</ul>"
-        if File.exist?("readme.html")
-          @index = File.read("readme.html").sub(%r!\./bitclust!, '').sub(/<!--links-->/) { links }
+      when 1 < @interfaces.size
+        request_path = case
+                       when req.respond_to?(:path_info)
+                         req.path_info
+                       when req.respond_to?(:path)
+                         req.path_info
+                       end
+        if @versions.any?{|version| %r|\A/?#{version}/?\z| =~ request_path }
+          viewpath = File.join(request_path, @options[:viewpath])
+          @index = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
         else
-          @index = "<html><head><title>bitclust</title></head><body>#{links}</body></html>"
+          links = "<ul>"
+          @interfaces.keys.sort.each do |v|
+            if @options[:viewpath]
+              version = v.sub(@options[:viewpath], '')
+            else
+              version = v
+            end
+            url = v
+            links << %Q(<li><a href="#{url}/">#{version}</a></li>)
+          end
+          links << "</ul>"
+          if File.exist?("readme.html")
+            @index = File.read("readme.html").sub(%r!\./bitclust!, '').sub(/<!--links-->/) { links }
+          else
+            @index = "<html><head><title>bitclust</title></head><body>#{links}</body></html>"
+          end
         end
       end
     end
@@ -79,8 +100,10 @@ module BitClust
     end
 
     def service(req, res)
-      raise WEBrick::HTTPStatus::NotFound if req.path != '/'
-      res.body = index
+      unless  %r|/#{File.basename(@options[:baseurl])}/?\z| =~ req.path
+        raise WEBrick::HTTPStatus::NotFound
+      end
+      res.body = index(req)
       res['Content-Type'] = 'text/html; charset=euc-jp'
     end
 
@@ -88,7 +111,7 @@ module BitClust
       [
         200,
         {'Content-Type' => 'text/html; charset=euc-jp'},
-        index
+        index(Rack::Request.new(env))
       ]
     end
   end
