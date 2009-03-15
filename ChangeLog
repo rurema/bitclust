@@ -1,5 +1,9 @@
 2009-03-15  okkez  <okkez000@gmail.com>
 
+	* config.ru.sample: Add another sample of config.ru for rackup command.
+
+2009-03-15  okkez  <okkez000@gmail.com>
+
 	* standalone.rb: fix mount point.
 
 	* lib/bitclust/app.rb (BitClust::App#service): fix redirect (fix #1228)

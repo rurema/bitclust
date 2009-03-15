@@ -1,0 +1,31 @@
+# -*- ruby -*-
+
+a = File.dirname(File.expand_path(__FILE__))
+$LOAD_PATH.unshift(File.join(a, 'lib'))
+require 'bitclust/app'
+
+app = BitClust::App.new(
+  :baseurl => 'http://localhost:9292',
+  :dbpath => Dir.glob('db-*'),
+  :datadir => File.join(a, 'data', 'bitclust'),
+  :encoding => 'euc-jp',
+  :viewpath => '/view',
+  :rack => true
+)
+
+use Rack::ShowExceptions
+# use Rack::ShowStatus
+use Rack::Lint
+use Rack::CommonLogger
+use Rack::Static, :urls => ['/theme'], :root => '.'
+
+map "/" do
+  run app
+end
+
+app.interfaces.each do |viewpath, interface|
+  map '/'+viewpath do
+    run interface
+  end
+end
+
