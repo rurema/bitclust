@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <link rel="icon" type="image/png" href="<%=h favicon_url() %>" />
   <title><%= _('Library Index') %></title>
   <link rel="search" type="application/opensearchdescription+xml" title="<%= _('Ruby %s Reference Manual', ruby_version()) %>" href="<%=h opensearchdescription_url() %>">
 </head>

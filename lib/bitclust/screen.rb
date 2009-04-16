@@ -92,6 +92,7 @@ module BitClust
       @base_url = h[:base_url]
       @cgi_url = h[:cgi_url]
       @css_url = h[:css_url]
+      @favicon_url = h[:favicon_url]
       @theme = h[:theme] || 'default'
     end
 
@@ -104,6 +105,11 @@ module BitClust
     def css_url
       return @css_url if @css_url
       "#{@base_url}/theme/#{@theme}/style.css"
+    end
+
+    def favicon_url
+      return @favicon_url if @favicon_url
+      "#{@base_url}/theme/#{@theme}/rurema.png"
     end
 
     def library_index_url
@@ -250,6 +256,10 @@ module BitClust
     
     def css_url
       @urlmapper.css_url
+    end
+
+    def favicon_url
+      @urlmapper.favicon_url
     end
 
     def opensearchdescription_url
