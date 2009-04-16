@@ -1,5 +1,10 @@
 2009-04-17  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
+	* lib/bitclust/methodsignature.rb, lib/bitclust/nameutils.rb,
+	  test/test_nameutils.rb: fix unary operator signature (fix #1384)
+
+2009-04-17  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
 	* lib/bitclust/screen.rb, theme/default/rurema.png,
 	  data/bitclust/template/*: add favicon.
 

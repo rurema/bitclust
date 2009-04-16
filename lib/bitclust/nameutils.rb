@@ -20,7 +20,7 @@ module BitClust
     CONST_PATH_RE  = /#{CONST_RE}(?:::#{CONST_RE})*/
     CLASS_NAME_RE  = /(?:#{CONST_RE}|fatal)/
     CLASS_PATH_RE  = /(?:#{CONST_PATH_RE}|fatal)/
-    METHOD_NAME_RE = /\w+[?!=]?|===|==|=~|<=>|<=|>=|!=|!|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
+    METHOD_NAME_RE = /\w+[?!=]?|===|==|=~|<=>|<=|>=|!=|!|!@|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
     TYPEMARK_RE    = /(?:\.|\#|\.\#|::|\$)/
     METHOD_SPEC_RE = /#{CLASS_PATH_RE}#{TYPEMARK_RE}#{METHOD_NAME_RE}/
     GVAR_RE        = /\$(?:\w+|-.|\S)/
