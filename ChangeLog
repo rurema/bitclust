@@ -1,3 +1,8 @@
+2009-04-18  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* tools/bc-tohtmlpackage.rb
+	  add a tool to create an html package.
+
 2009-04-17  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* lib/bitclust/methodsignature.rb, lib/bitclust/nameutils.rb,
