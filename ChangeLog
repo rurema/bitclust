@@ -2,6 +2,9 @@
 
 	* tools/bc-tohtmlpackage.rb
 	  add a tool to create an html package.
+	
+	* tools/bc-tohtmlpackage.rb (encodename_package): 
+	  Add an option, --fs-casesensitive, which allow case-sensitive file names.
 
 2009-04-17  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 

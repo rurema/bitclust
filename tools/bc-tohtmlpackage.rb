@@ -18,21 +18,22 @@ module BitClust
       if name == '/'
         $bitclust_html_base + "/library/index.html"
       else
-        $bitclust_html_base + "/library/#{encodename_fs(name)}.html"
+        $bitclust_html_base + "/library/#{encodename_package(name)}.html"
       end
     end
 
     def class_url(name)
-      $bitclust_html_base + "/class/#{encodename_fs(name)}.html"
+      $bitclust_html_base + "/class/#{encodename_package(name)}.html"
     end
 
     def method_url(spec)
       cname, tmark, mname = *split_method_spec(spec)
-      $bitclust_html_base + "/method/#{encodename_fs(cname)}/#{typemark2char(tmark)}/#{encodename_fs(mname)}.html"
+      $bitclust_html_base +
+        "/method/#{encodename_package(cname)}/#{typemark2char(tmark)}/#{encodename_package(mname)}.html"
     end
 
     def document_url(name)
-      $bitclust_html_base + "/doc/#{encodename_fs(name)}.html"
+      $bitclust_html_base + "/doc/#{encodename_package(name)}.html"
     end
 
     def css_url
@@ -63,6 +64,9 @@ def main
   end
   parser.on('--templatedir=PATH', 'Template directory') do |path|
     templatedir = Pathname.new(path).realpath
+  end
+  parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
+    $fs_casesensitive = true
   end
   parser.on('--help', 'Prints this message and quit') do
     puts(parser.help)
@@ -102,11 +106,21 @@ def main
     end
   end
   $bitclust_html_base = '..'
-  create_file(outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort, {:database => db}).body)
-  create_file(outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort, {:database => db}).body)
+  create_file(outputdir + 'library/index.html',
+              manager.library_index_screen(db.libraries.sort, {:database => db}).body)
+  create_file(outputdir + 'class/index.html',
+              manager.class_index_screen(db.classes.sort, {:database => db}).body)
   create_index_html(outputdir)
   FileUtils.cp(manager_config[:themedir] + manager_config[:css_url],
                outputdir.to_s, {:verbose => true, :preserve => true})
+end
+
+def encodename_package(str)
+  if $fs_casesensitive
+    BitClust::NameUtils.encodename_url(str)
+  else
+    BitClust::NameUtils.encodename_fs(str)
+  end
 end
 
 def create_index_html(outputdir)
@@ -124,8 +138,7 @@ def create_html_file(entry, manager, outputdir, db)
   case e.type_id
   when :library, :class, :doc
     $bitclust_html_base = '..'
-    path = outputdir + e.type_id.to_s +
-           (BitClust::NameUtils.encodename_fs(e.name) + '.html')
+    path = outputdir + e.type_id.to_s + (encodename_package(e.name) + '.html')
     create_html_file_p(entry, manager, path, db)
     return path.relative_path_from(outputdir).to_s
   when :method
@@ -140,8 +153,8 @@ def create_html_method_file(entry, manager, outputdir, db)
   $bitclust_html_base = '../../..'
   e = entry.is_a?(Array) ? entry.sort.first : entry
   e.names.each{|name|
-    path = outputdir + e.type_id.to_s + BitClust::NameUtils.encodename_fs(e.klass.name) +
-           e.typechar + (BitClust::NameUtils.encodename_fs(name) + '.html')
+    path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
+           e.typechar + (encodename_package(name) + '.html')
     create_html_file_p(entry, manager, path, db)
   }
   path.relative_path_from(outputdir).to_s
