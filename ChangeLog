@@ -1,3 +1,11 @@
+2009-04-20  okkez  <okkez000@gmail.com>
+
+	* tools/bc-tochm.rb: set svn:executable.
+
+	* tools/bc-tohtmlpackage.rb: ditto.
+
+	* tools/stattodo.rb: ditto.
+
 2009-04-20  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* data/bitclust/template/*: remove / because there are not XHTML.
