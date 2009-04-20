@@ -40,6 +40,10 @@ module BitClust
       $bitclust_html_base + "/" + @css_url
     end
 
+    def favicon_url
+      $bitclust_html_base + "/" + @favicon_url
+    end
+
     def library_index_url
       $bitclust_html_base + "/library/index.html"
     end
@@ -86,6 +90,7 @@ def main
     :templatedir => templatedir,
     :themedir => srcdir_root + 'theme' + 'default',
     :css_url => 'style.css',
+    :favicon_url => 'rurema.png',
     :cgi_url => '',
     :tochm_mode => true
   }
@@ -98,7 +103,7 @@ def main
     db.methods.each_with_index do |entry, i|
       method_name = entry.klass.name + entry.typemark + entry.name
       (methods[method_name] ||= []) << entry
-    end      
+    end
     entries = db.docs + db.libraries.sort + db.classes.sort + methods.values
     entries.each_with_index do |c, i|
       create_html_file(c, manager, outputdir, db)
@@ -112,6 +117,8 @@ def main
               manager.class_index_screen(db.classes.sort, {:database => db}).body)
   create_index_html(outputdir)
   FileUtils.cp(manager_config[:themedir] + manager_config[:css_url],
+               outputdir.to_s, {:verbose => true, :preserve => true})
+  FileUtils.cp(manager_config[:themedir] + manager_config[:favicon_url],
                outputdir.to_s, {:verbose => true, :preserve => true})
 end
 
@@ -145,7 +152,7 @@ def create_html_file(entry, manager, outputdir, db)
     return create_html_method_file(entry, manager, outputdir, db)
   else
     raise
-  end  
+  end
 end
 
 def create_html_method_file(entry, manager, outputdir, db)
@@ -165,7 +172,7 @@ def create_html_file_p(entry, manager, path, db)
     html = manager.entry_screen(entry, {:database => db}).body
     path.open('w') do |f|
       f.write(html)
-    end     
+    end
 end
 
 def create_file(path, str)

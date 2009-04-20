@@ -1,5 +1,9 @@
 2009-04-20  okkez  <okkez000@gmail.com>
 
+	* tools/bc-tohtmlpackage.rb: add favicon. trim white spaces.
+
+2009-04-20  okkez  <okkez000@gmail.com>
+
 	* tools/bc-tochm.rb: set svn:executable.
 
 	* tools/bc-tohtmlpackage.rb: ditto.
