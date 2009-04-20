@@ -26,18 +26,18 @@
 %>
 
 
-<%= headline("Abstract") %>
+<%= headline(_("Abstract")) %>
 <%= compile_rd(@entry.source) %>
 <%
-  [[classes,      'Classes/Modules'],
-   [err_classes,  'Exception Classes']].each do |cs, msg|
+  [[classes,      _('Classes/Modules')],
+   [err_classes,  _('Exception Classes')]].each do |cs, msg|
     unless cs.empty?
 %>
 <%= headline(msg) %>
-<table>
+<table class="entries libraries">
 <%    cs.each do |c| %>
 <tr>
-<td class="signature"><%=h c.type.to_s %> <%= class_link(c.name) %></td>
+<td class="signature"><%= class_link(c.name, "#{c.type} #{c.name}") %></td>
 <td class="description"><%= compile_rd(c.synopsis_source) %></td>
 <%    end %>
 </table>
@@ -46,12 +46,12 @@
   end
 %>
 <%
-  [[@entry.requires.sort, 'Required Libraries'],
-   [(@entry.sublibraries - @entry.requires).sort, 'Sublibraries']].each do |cs, msg|
+  [[@entry.requires.sort, _('Required Libraries')],
+   [(@entry.sublibraries - @entry.requires).sort, _('Sub-Libraries')]].each do |cs, msg|
     unless cs.empty?
 %>
 <%= headline(msg) %>
-<table>
+<table class="entries libraries">
 <%    cs.each do |c| %>
 <tr>
 <td class="signature"><%= library_link(c.name) %></td>
@@ -65,7 +65,7 @@
 <%
     ents = @entry.methods.sort
     unless ents.empty? %>
-<%= headline("Added/Redefined Methods") %>
+<%= headline(_("Added/Redefined Methods")) %>
 <p><code>
 <%    ents.each do |m| %>
 <%= link_to_method(m, true) %>

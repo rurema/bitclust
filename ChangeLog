@@ -1,5 +1,21 @@
 2009-04-20  okkez  <okkez000@gmail.com>
 
+	* template.offline/rd_file: change to the same design as template for online.
+
+	* template.offline/method: ditto.
+
+	* template.offline/library-index: ditto.
+
+	* template.offline/library: ditto.
+
+	* template.offline/doc: ditto.
+
+	* template.offline/class-index: ditto.
+
+	* template.offline/class: ditto.
+
+2009-04-20  okkez  <okkez000@gmail.com>
+
 	* data/bitclust/template/function-index: fix classes.
 
 	* data/bitclust/template/library-index: ditto.

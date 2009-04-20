@@ -4,13 +4,20 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
   <title><%=h @entry.title %></title>
 </head>
 <body>
-<% 
-headline_init 
-headline_push
-headline_push
-%>
+<p>
+<% if @entry.name == 'index' %>
+<%= _('Ruby %s Reference Manual', ruby_version()) %>
+<% else %>
+<%= manual_home_link() %>
+&gt; <%=h @entry.name %>
+<% end %>
+</p>
+<% headline_init %>
+<%= headline(@entry.title) %>
+<% headline_push %>
 <%= compile_rd(@entry.source) %>
 </body>

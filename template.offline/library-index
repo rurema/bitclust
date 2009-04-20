@@ -4,24 +4,26 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>Library Index</title>
+  <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
+  <title><%= _('Library Index') %></title>
 </head>
 <body id="libraryindex">
 
 <p>
-All Libraries
+<%= manual_home_link() %>
+&gt; <%= _("All Libraries") %>
 </p>
 <%
     headline_init
 %>
-<%= headline("ライブラリ一覧") %>
-<table>
+<%= headline(_("Library Index")) %>
+<table class="entries libraries">
 <%
     headline_push
     lib = @entries.detect {|lib| lib.id == '_builtin' }
 %>
 <tr>
-<td class="signature"><%= library_link(lib.name, '組み込みライブラリ') %></td>
+<td class="signature"><%= library_link(lib.name, _('Builtin Library')) %></td>
 <td class="description"><%= compile_rd(lib.synopsis_source) %></td>
 </tr>
 <%

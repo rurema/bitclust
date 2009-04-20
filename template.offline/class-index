@@ -4,14 +4,19 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <title>Class Index</title>
+  <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
+  <title><%= _('Class Index') %></title>
 </head>
 <body>
 
+<p>
+<%= manual_home_link() %>
+&gt; <%= _('All Classes') %>
+</p>
 <%
     headline_init
 %>
-<%= headline("Class Index") %>
+<%= headline(_("Class Index")) %>
 <p>
 <%= @entries.size %> classes/modules in database
 </p>

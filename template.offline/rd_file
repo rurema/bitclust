@@ -4,10 +4,11 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
 </head>
 <body>
-<% 
-headline_init 
+<%
+headline_init
 headline_push
 headline_push
 %>
