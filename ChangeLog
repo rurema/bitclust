@@ -1,3 +1,7 @@
+2009-04-20  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* data/bitclust/template/*: remove / because there are not XHTML.
+
 2009-04-18  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* tools/bc-tohtmlpackage.rb
