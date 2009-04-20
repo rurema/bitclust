@@ -192,7 +192,12 @@ def main
     prefix = Pathname.new(path).realpath
   end
   parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
-    outputdir = Pathname.new(path).realpath
+    begin
+      outputdir = Pathname.new(path).realpath
+    rescue Errno::ENOENT
+      FileUtils.mkdir_p(path, :verbose => true)
+      retry
+    end
   end
   parser.on('--help', 'Prints this message and quit') do
     puts(parser.help)

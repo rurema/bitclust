@@ -1,6 +1,15 @@
 2009-04-20  okkez  <okkez000@gmail.com>
 
+	* tools/bc-tohtmlpackage.rb: change default output directory.
+
+	* tools/bc-tohtmlpackage.rb: create output directory if it doesn't exist.
+
+	* tools/bc-tochm.rb: ditto.
+
+2009-04-20  okkez  <okkez000@gmail.com>
+
 	* tools/bc-tohtmlpackage.rb: add favicon. trim white spaces.
+
 
 2009-04-20  okkez  <okkez000@gmail.com>
 

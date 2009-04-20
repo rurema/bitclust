@@ -53,7 +53,7 @@ end
 
 def main
   prefix = Pathname.new('./db')
-  outputdir = Pathname.new('./chm')
+  outputdir = Pathname.new('./doc')
   templatedir = srcdir_root + 'data'+ 'bitclust' + 'template'
   catalogdir = nil
   parser = OptionParser.new
@@ -61,7 +61,12 @@ def main
     prefix = Pathname.new(path).realpath
   end
   parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
-    outputdir = Pathname.new(path).realpath
+    begin
+      outputdir = Pathname.new(path).realpath
+    rescue Errno::ENOENT
+      FileUtils.mkdir_p(path, :verbose => true)
+      retry
+    end
   end
   parser.on('--catalog=PATH', 'Catalog directory') do |path|
     catalogdir = Pathname.new(path).realpath
