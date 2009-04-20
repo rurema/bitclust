@@ -19,7 +19,7 @@
     headline_init
 %>
 <%= headline(_("Function Index")) %>
-<table class="entries" class="functions">
+<table class="entries functions">
 <%
     headline_push
     @entries.each do |f|

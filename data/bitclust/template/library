@@ -39,7 +39,7 @@
     unless cs.empty?
 %>
 <%= headline(msg) %>
-<table class="entries" class="libraries">
+<table class="entries libraries">
 <%    cs.each do |c| %>
 <tr>
 <td class="signature"><%= class_link(c.name, "#{c.type} #{c.name}") %></td>
@@ -56,7 +56,7 @@
     unless cs.empty?
 %>
 <%= headline(msg) %>
-<table class="entries" class="libraries">
+<table class="entries libraries">
 <%    cs.each do |c| %>
 <tr>
 <td class="signature"><%= library_link(c.name) %></td>
