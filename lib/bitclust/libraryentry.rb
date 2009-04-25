@@ -99,8 +99,18 @@ module BitClust
       libs.values
     end
 
+    def all_classes
+      return @all_classes if @all_classes
+      required_classes = (sublibraries & requires).map{|l| l.classes }.flatten
+      @all_classes = (classes() + required_classes).uniq.sort
+    end
+    
     def error_classes
-      classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+      @error_classes ||= classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+    end
+
+    def all_error_classes
+      @all_error_classes ||= all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
     end
     
     def require(lib)
