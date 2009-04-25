@@ -14,7 +14,7 @@ params = {
 }
 baseurl = nil
 dbpath = nil
-srcdir = libdir = datadir = themedir = nil
+srcdir = libdir = datadir = themedir = theme = templatedir = nil
 encoding = 'euc-jp'   # encoding of view
 set_srcdir = lambda {|path|
   srcdir = path
@@ -48,8 +48,14 @@ parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
 parser.on('--datadir=PATH', 'BitClust data directory.') {|path|
   datadir = path
 }
+parser.on('--templatedir=PATH', 'Template directory.') {|path|
+  templatedir = path
+}
 parser.on('--themedir=PATH', 'BitClust theme directory.') {|path|
   themedir = path
+}
+parser.on('--theme=THEME', 'BitClust theme.') {|th|
+  theme = th
 }
 parser.on('--[no-]debug', 'Debug mode.') {|flag|
   debugp = flag
@@ -116,10 +122,12 @@ basepath = URI.parse(baseurl).path
 server = WEBrick::HTTPServer.new(params)
 
 if autop
-  app = BitClust::App.new(
+  app = BitClust::App.new(                          
     :dbpath => Dir.glob("db-*"),
     :baseurl => baseurl,
     :datadir => datadir,
+    :templatedir => templatedir,
+    :theme => theme,                          
     :encoding => encoding
     )
   app.interfaces.each do |version, interface|
@@ -133,6 +141,8 @@ else
     :dbpath => dbpath,
     :baseurl => baseurl,
     :datadir => datadir,
+    :templatedir => templatedir,                          
+    :theme => theme,
     :encoding => encoding
     )
   app.interfaces.each do |viewpath, interface|

@@ -22,10 +22,12 @@ module BitClust
       when String
         dbpath = File.expand_path(dbpath)
         db = BitClust::MethodDatabase.new(dbpath)
-        manager = BitClust::ScreenManager.new(
+        manager = BitClust::ScreenManager.new(                                                     
           :base_url => baseurl,
           :cgi_url => File.join(baseurl, viewpath),
           :datadir => datadir,
+          :templatedir => options[:templatedir],
+          :theme => options[:theme],                                              
           :encoding => encoding
           )
         handler = request_handler_class.new(db, manager)
@@ -48,6 +50,8 @@ module BitClust
             :base_url => baseurl,
             :cgi_url => File.join(baseurl, version_viewpath),
             :datadir => datadir,
+            :templatedir => options[:templatedir],
+            :theme => options[:theme],           
             :encoding => encoding
             )
           handler = request_handler_class.new(db, manager)
