@@ -107,6 +107,11 @@ module BitClust
       "#{@base_url}/theme/#{@theme}/style.css"
     end
 
+    def js_url
+      return @js_url if @js_url
+      "#{@base_url}/theme/#{@theme}/t.js"
+    end
+    
     def favicon_url
       return @favicon_url if @favicon_url
       "#{@base_url}/theme/#{@theme}/rurema.png"
@@ -258,6 +263,10 @@ module BitClust
       @urlmapper.css_url
     end
 
+    def js_url
+      @urlmapper.js_url
+    end
+    
     def favicon_url
       @urlmapper.favicon_url
     end

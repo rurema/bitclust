@@ -98,6 +98,10 @@ module BitClust
       }
       libs.values
     end
+
+    def error_classes
+      classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+    end
     
     def require(lib)
       requires().push lib

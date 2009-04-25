@@ -1,3 +1,11 @@
+2009-04-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/screen.rb (BitClust::URLMapper::js_url): add a new method.
+	* lib/bitclust/screen.rb (BitClust::TemplateScreen::js_url): ditto.
+	* lib/bitclust/libraryentry.rb (BitClust::LibraryEntry::error_classes): ditto.
+	* lib/bitclust/docentry.rb (BitClust::DocEntry): ditto.
+
+
 2009-04-20  okkez  <okkez000@gmail.com>
 
 	* template.offline/rd_file: change to the same design as template for online.

@@ -62,6 +62,22 @@ module BitClust
     def inspect
       "#<doc #{@id}>"
     end
+
+    def classes
+      @db.classes
+    end
+
+    def error_classes
+      classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+    end
+    
+    def methods
+      @db.methods
+    end
+
+    def libraries
+      @db.libraries
+    end
   end
 
 end
