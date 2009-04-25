@@ -1,5 +1,9 @@
 2009-04-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* theme/lillia/: 
+	* data/bitclust/template.lillia: 
+	  add a theme and a template.
+
 	* lib/bitclust/app.rb (BitClust::App::initialize):   add new options.
 	* standalone.rb: ditto.
 
@@ -10,7 +14,6 @@
 	* lib/bitclust/screen.rb (BitClust::TemplateScreen::js_url): ditto.
 	* lib/bitclust/libraryentry.rb (BitClust::LibraryEntry::error_classes): ditto.
 	* lib/bitclust/docentry.rb (BitClust::DocEntry): ditto.
-
 
 2009-04-20  okkez  <okkez000@gmail.com>
 
