@@ -332,8 +332,8 @@ module BitClust
       (id == '_builtin') ? _('Builtin Library') : _('library %s', id)
     end
     
-    def compile_method(m)
-      rdcompiler().compile_method(m)
+    def compile_method(m, opt = nil)
+      rdcompiler().compile_method(m, opt)
     end
 
     def compile_function(f)

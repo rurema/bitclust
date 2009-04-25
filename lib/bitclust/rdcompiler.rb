@@ -37,12 +37,16 @@ module BitClust
       }
     end
 
-    def compile_method(m)
+    # FIXME
+    def compile_method(m, opt = nil)
+      @opt = opt
       @type = :method
       @method = m
       setup(m.source) {
         method_entry
       }
+    ensure
+      @opt = nil      
     end
 
     private
@@ -316,6 +320,7 @@ module BitClust
       # FIXME: check parameters, types, etc.
       sig = MethodSignature.parse(sig_line)
       string '<dt class="method-heading"><code>'
+      string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
       if @method and not @method.defined?

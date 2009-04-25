@@ -1,5 +1,10 @@
 2009-04-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/screen.rb (BitClust::TemplateScreen::compile_method): 
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::method_signature): 
+	  (BitClust::RDCompiler::compile_method): 
+	  compile_method now can take an option.
+
 	* theme/lillia/: 
 	* data/bitclust/template.lillia: 
 	  add a theme and a template.
