@@ -1,8 +1,12 @@
 2009-04-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* data/bitclust/template.lillia/class: 
+	* data/bitclust/template.lillia/library:
+	  use added methods.
+
 	* lib/bitclust/libraryentry.rb (BitClust::LibraryEntry::all_classes):
 	(BitClust::LibraryEntry::all_error_classes): 
-	add new methods.
+	  add new methods.
 
 	* lib/bitclust/screen.rb (BitClust::TemplateScreen::compile_method): 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::method_signature): 

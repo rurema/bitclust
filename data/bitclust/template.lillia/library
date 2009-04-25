@@ -11,7 +11,8 @@
 <div id="main">
 
 <p>
-<a href="<%= library_index_url() %>">All Libraries</a>
+<%= manual_home_link() %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
 &gt; library <%=h @entry.name %>
 </p>
 <%
@@ -21,10 +22,8 @@
 
 <%
     headline_push
-    required_classes = (@entry.sublibraries & @entry.requires).map{|lib| lib.classes }.flatten
-    all_classes = (@entry.classes + required_classes).uniq.sort
-    err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
-    classes = (all_classes - err_classes).sort
+    err_classes = @entry.error_classes
+    classes = (@entry.all_classes - @entry.all_error_classes).sort
 %>
 
 
@@ -66,14 +65,24 @@
 %>
 <%
     ents = @entry.methods.sort
-    unless ents.empty? %>
-<%= headline(_("Added/Redefined Methods")) %>
-<p><code>
-<%    ents.each do |m| %>
-<%= link_to_method(m, true) %>
-<%    end %>
-</code></p>
-<%  end %>
+    unless ents.empty? 
+%>
+<%=   headline(_("Added/Redefined Methods")) %>
+<dl class="rightlist">
+<%    headline_push
+      ents.each do |m|
+%> 
+<span id="<%= BitClust::NameUtils.encodename_url(m.name) %>"></span>
+<%=     compile_method(m, true) %>
+<%
+      end
+      headline_pop
+%>
+</dl>
+<%
+    end
+%>
+
 </div>
 
 
@@ -86,7 +95,7 @@
 </form>
 <ul id="index-classes-list">
 <%
-    ((@entry.classes - @entry.error_classes).sort + @entry.error_classes.sort).each do |c| 
+    ((@entry.all_classes - @entry.all_error_classes).sort + @entry.all_error_classes.sort).each do |c| 
 %> 
 <li><%= class_link(c.name, "#{c.name}") %></li>
 <%  end  %>    

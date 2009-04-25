@@ -53,7 +53,8 @@
      [_('Private Instance Methods'),  ents.private_instance_methods   ],
      [_('Module Functions'),          ents.module_functions           ],
      [_('Constants'),                 ents.constants                  ],
-     [_('Special Variables'),         ents.special_variables          ]]\
+     [_('Special Variables'),         ents.special_variables          ],
+     [_('Added Methods'),             ents.added                      ] ]\
     .each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
@@ -99,10 +100,7 @@
 <ul id="index-classes-list">
 <%
     lib = @entry.library 
-    required_classes = (lib.sublibraries & lib.requires).map{|l| l.classes }.flatten
-    all_classes = (lib.classes + required_classes).uniq.sort
-    err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
-    ((all_classes - err_classes).sort + err_classes).each do |c| 
+    ((lib.all_classes - lib.all_error_classes).sort + lib.all_error_classes).each do |c| 
 %> 
 <li><%= class_link(c.name, "#{c.name}") %></li>
 <%  end  %>    
