@@ -1,5 +1,8 @@
 2009-04-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler): 
+	  set class to html elemets.
+
 	* lib/bitclust/screen.rb (BitClust::URLMapper::js_url): add a new method.
 	* lib/bitclust/screen.rb (BitClust::TemplateScreen::js_url): ditto.
 	* lib/bitclust/libraryentry.rb (BitClust::LibraryEntry::error_classes): ditto.

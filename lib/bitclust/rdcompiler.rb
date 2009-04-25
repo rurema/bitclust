@@ -88,7 +88,7 @@ module BitClust
     end
 
     def method_entry_chunk
-      @out.puts '<dl>' if @option[:force]                  
+      @out.puts '<dl>' if @option[:force]
       @f.while_match(/\A---/) do |line|
         method_signature line
       end
@@ -97,7 +97,7 @@ module BitClust
         k, v = line.sub(/\A:/, '').split(':', 2)
         props[k.strip] = v.strip
       end
-      @out.puts '<dd>'
+      @out.puts '<dd  class="method-description">'
       while @f.next?
         case @f.peek
         when /\A===+/
@@ -285,7 +285,7 @@ module BitClust
         case cmd
         when '@param', '@arg'
           name = header.slice!(/\A\s*\w+/n) || '?'
-          line "<dt>[PARAM] #{escape_html(name.strip)}:</dt>"
+          line "<dt class='method-param'>[PARAM] #{escape_html(name.strip)}:</dt>"
         when '@raise'
           ex = header.slice!(/\A\s*[\w:]+/n) || '?'
           line "<dt>[EXCEPTION] #{escape_html(ex.strip)}:</dt>"
@@ -315,7 +315,7 @@ module BitClust
     def method_signature(sig_line)
       # FIXME: check parameters, types, etc.
       sig = MethodSignature.parse(sig_line)
-      string '<dt><code>'
+      string '<dt class="method-heading"><code>'
       string escape_html(sig.friendly_string)
       string '</code>'
       if @method and not @method.defined?
