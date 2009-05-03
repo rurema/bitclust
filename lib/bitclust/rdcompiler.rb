@@ -20,9 +20,9 @@ module BitClust
     include HTMLUtils
     include TextUtils
     
-    def initialize(urlmapper, catalog, hlevel = 1, opt = {})
+    def initialize(urlmapper, hlevel = 1, opt = {})
       @urlmapper = urlmapper
-      @catalog = catalog
+      @catalog = opt[:catalog]
       @hlevel = hlevel
       @type = nil
       @library = nil
@@ -348,7 +348,16 @@ module BitClust
       type, _arg = link.split(':', 2)
       arg = _arg.rstrip
       case type
-      when 'lib'     then protect(link) { library_link(arg, label, frag) }
+      when 'lib'
+      then protect(link) {
+          case arg
+          when '/', '_index'            
+            label = 'All libraries'
+          when '_builtin'
+            label = 'Builtin libraries'
+          end
+          library_link(arg, label, frag)            
+        }
       when 'c'       then protect(link) { class_link(arg, label, frag) }
       when 'm'       then protect(link) { method_link(complete_spec(arg), label || arg, frag) }
       when 'd'       then protect(link) { document_link(arg, label, frag) }

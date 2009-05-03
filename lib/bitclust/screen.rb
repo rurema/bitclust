@@ -345,7 +345,8 @@ module BitClust
     end
 
     def rdcompiler
-      RDCompiler.new(@urlmapper, message_catalog(), @hlevel, @conf)
+      opt = {:catalog => message_catalog()}.merge(@conf)
+      RDCompiler.new(@urlmapper, @hlevel, opt)
     end
 
     def foreach_method_chunk(src)
@@ -489,8 +490,8 @@ module BitClust
     end
     
     def rdcompiler
-      h = {:force => true}.merge(@conf)
-      RDCompiler.new(@urlmapper, message_catalog(), @hlevel, h)
+      h = {:force => true, :catalog => message_catalog() }.merge(@conf)
+      RDCompiler.new(@urlmapper, @hlevel, h)
     end
   end
 end

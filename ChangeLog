@@ -1,3 +1,11 @@
+2009-05-03  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::initialize): 
+	  use a hash to pass catalog to rdcompiler.
+
+	* lib/bitclust/screen.rb (BitClust::DocScreen::rdcompiler) 
+	* lib/bitclust/screen.rb (BitClust::TemplateScreen::rdcompiler): ditto.
+
 2009-04-25  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* data/bitclust/template.lillia/: 
