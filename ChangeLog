@@ -1,5 +1,8 @@
 2009-05-03  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::bracket_link): 
+	  use readable labels for '/' and '_builtin'.
+
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::initialize): 
 	  use a hash to pass catalog to rdcompiler.
 
