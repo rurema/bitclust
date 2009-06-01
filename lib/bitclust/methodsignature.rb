@@ -55,7 +55,8 @@ module BitClust
     def friendly_string
       case @name
       when /\A\$/   # gvar
-        @name
+        @name +
+          (@type ? " -> #{@type}" : "")
       when "+@", "-@", "~", "!", "!@"  # unary operator
         "#{@name.sub(/@/, '')}#{@params}" + (@type ? " -> #{@type}" : "")
       when "[]"     # aref
