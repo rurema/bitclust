@@ -1,3 +1,11 @@
+2009-06-04  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* lib/bitclust/methodsignature.rb
+	(BitClust::MethodSignature#friendly_string): `command` should
+	  treat as a special case. (closes #1561)
+
+	* test/test_methodsignature.rb: add tests.
+
 2009-05-03  TAMURA Takashi  <sh@sheepman.sakura.ne.jp>
 
 	* data/bitclust/template/library: add a missing </tr>.
