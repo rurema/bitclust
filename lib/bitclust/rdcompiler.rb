@@ -380,7 +380,7 @@ module BitClust
     end
 
     def direct_url(url)
-      %Q(<a href="#{escape_html(url)}">#{escape_html(url)}</a>)
+      %Q(<a class="external" href="#{escape_html(url)}">#{escape_html(url)}</a>)
     end
 
     def reference_link(arg)
@@ -417,14 +417,14 @@ module BitClust
 
     def blade_link(ml, num)
       url = sprintf(BLADE_URL, ml, num)
-      %Q(<a href="#{escape_html(url)}">[#{escape_html("#{ml}:#{num}")}]</a>)
+      %Q(<a class="external" href="#{escape_html(url)}">[#{escape_html("#{ml}:#{num}")}]</a>)
     end
 
     RFC_URL = 'http://www.ietf.org/rfc/rfc%s.txt'
 
     def rfc_link(num)
       url = sprintf(RFC_URL, num)
-      %Q(<a href="#{escape_html(url)}">[RFC#{escape_html(num)}]</a>)
+      %Q(<a class="external" href="#{escape_html(url)}">[RFC#{escape_html(num)}]</a>)
     end
 
     opengroup_url = 'http://www.opengroup.org/onlinepubs/009695399'
@@ -434,7 +434,7 @@ module BitClust
     def man_link(spec)
       m = /(\w+)\(([123])\)/.match(spec) or return escape_html(spec)
       url = sprintf((m[2] == '1' ? MAN_CMD_URL : MAN_FCN_URL), m[1])
-      %Q(<a href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
+      %Q(<a class= "external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
     end
 
     def complete_spec(spec0)

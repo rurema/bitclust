@@ -241,6 +241,21 @@ a:hover, a:focus, a:active {
     background-color: #33a;
 }
 
+a.external {
+    background: transparent url(images/external.png) no-repeat scroll right center;
+    padding: 0 27px 0 0;
+}
+
+a.external:visited {
+    /* color: #666666; */
+    color: #33a;
+    background-color: transparent;
+}
+a.external:hover, a.external:focus, a.external:active {
+    color: #fff;
+    background-color: #33a;
+}
+
 form {
     padding: 0px;
     margin: 0px;
