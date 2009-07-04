@@ -19,7 +19,7 @@ module BitClust
 
     include HTMLUtils
     include TextUtils
-    
+
     def initialize(urlmapper, hlevel = 1, opt = {})
       @urlmapper = urlmapper
       @catalog = opt[:catalog]
@@ -46,7 +46,7 @@ module BitClust
         method_entry
       }
     ensure
-      @opt = nil      
+      @opt = nil
     end
 
     private
@@ -212,7 +212,7 @@ module BitClust
       end
       line '</dd>'
     end
-    
+
     # empty lines do not separate paragraphs.
     def dd_without_p
       line '<dd>'
@@ -278,13 +278,13 @@ module BitClust
       line '[SEE_ALSO] ' + body.join('').split(',').map {|ref| compile_text(ref.strip) }.join(",\n")
       line '</p>'
     end
-    
+
     def method_info
       line '<dl>'
-      while @f.next? and /\A\@(?!see)\w+|\A$/ =~ @f.peek 
+      while @f.next? and /\A\@(?!see)\w+|\A$/ =~ @f.peek
         header = @f.gets
         next if /\A$/ =~ header
-        cmd = header.slice!(/\A\@\w+/)   
+        cmd = header.slice!(/\A\@\w+/)
         @f.ungets(header)
         case cmd
         when '@param', '@arg'
@@ -351,12 +351,12 @@ module BitClust
       when 'lib'
       then protect(link) {
           case arg
-          when '/', '_index'            
+          when '/', '_index'
             label = 'All libraries'
           when '_builtin'
             label = 'Builtin libraries'
           end
-          library_link(arg, label, frag)            
+          library_link(arg, label, frag)
         }
       when 'c'       then protect(link) { class_link(arg, label, frag) }
       when 'm'       then protect(link) { method_link(complete_spec(arg), label || arg, frag) }
@@ -398,21 +398,21 @@ module BitClust
           title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
         else
           raise "must not happen"
-        end        
+        end
         label = @option[:database].refs[t, id, frag]
         label = title + '/' + label if label and name
         bracket_link("#{type}:#{name}", label, frag)
-      when /\A(\w+)\z/        
+      when /\A(\w+)\z/
         e = @option[:entry]
         frag = $1
         type = e.type_id.to_s
         label = @option[:database].refs[type, e.name, frag] || frag
         a_href('#' + frag, label)
       else
-        raise "must not happen" 
+        raise "must not happen"
       end
     end
-                   
+
     BLADE_URL = 'http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/%s/%s'
 
     def blade_link(ml, num)
