@@ -1,5 +1,9 @@
 2009-07-04  okkez  <okkez000@gmail.com>
 
+	* theme/default/images/external.png: add svn:mime-type image/png.
+
+2009-07-04  okkez  <okkez000@gmail.com>
+
 	* theme/default/style.css: add style "a.external".
 
 	* theme/default/images/external.png: add a png image.
