@@ -275,7 +275,7 @@ module BitClust
       cmd = header.slice!(/\A\@\w+/)
       body = [header] + @f.span(/\A\s+\S/)
       line '<p>'
-      line '[SEE_ALSO] ' + body.join('').split(',').map {|ref| compile_text(ref.strip) }.join(",\n")
+      line '[SEE_ALSO] ' + compile_text(body.join('').strip)
       line '</p>'
     end
 

@@ -1,3 +1,11 @@
+2009-07-10  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#see): do not
+	  split [[m:$,]] (closes #1754)
+
+	* test/test_rdcompiler.rb (TestRDCompiler#test_array_join): add a
+	  test.
+
 2009-07-04  okkez  <okkez000@gmail.com>
 
 	* theme/default/images/external.png: add svn:mime-type image/png.

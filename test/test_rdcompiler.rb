@@ -421,16 +421,17 @@ HERE
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
      ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
-     ['[[man:tr(1)]]',     '<a href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
-     ['[[RFC:2822]]',      '<a href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
+     ['[[man:tr(1)]]',     '<a class= "external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
+     ['[[RFC:2822]]',      '<a class="external" href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
+     ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
      ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],     
      ['[[c:String]][[c:String]]',
       '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],     
      ['[[m:File::SEPARATOR]]',          '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],     
-     ['[[url:http://i.loveruby.net]]', '<a href="http://i.loveruby.net">http://i.loveruby.net</a>'],
+     ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
      ['[[ruby-list:12345]]',
-      '<a href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
+      '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
     ].each{|src, expected|
       assert_equal expected, @c.send(:compile_text, src)
     }
@@ -447,5 +448,22 @@ HERE
     ].each{|src, expected|
       assert_match /#{expected}/, @c.send(:compile_text, src)
     }
+  end
+
+  def test_array_join
+    src = <<'HERE'
+--- join(sep = $,)    -> String
+
+@see [[m:Array#*]], [[m:$,]]
+HERE
+    expected = <<'HERE'
+<dt class="method-heading"><code>join(sep = $,) -&gt; String</code></dt>
+<dd  class="method-description">
+<p>
+[SEE_ALSO] <a href="dummy/method/Array/i/=2a">Array#*</a>, <a href="dummy/method/Kernel/v/=2c">$,</a>
+</p>
+</dd>
+HERE
+    compile_and_assert_equal(expected, src)
   end
 end
