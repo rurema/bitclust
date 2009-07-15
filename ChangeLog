@@ -1,5 +1,13 @@
 2009-07-15  okkez  <okkez000@gmail.com>
 
+	* test/test_rdcompiler.rb (TestRDCompiler#test_method): add css classes.
+	(TestRDCompiler#test_method2): ditto.
+
+	* lib/bitclust/rdcompiler.rb
+	(BitClust::RDCompiler#method_entry_chunk): remove needless space.
+
+2009-07-15  okkez  <okkez000@gmail.com>
+
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#man_link):
 	remove needless space.
 

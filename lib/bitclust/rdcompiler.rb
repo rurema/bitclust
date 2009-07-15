@@ -101,7 +101,7 @@ module BitClust
         k, v = line.sub(/\A:/, '').split(':', 2)
         props[k.strip] = v.strip
       end
-      @out.puts '<dd  class="method-description">'
+      @out.puts '<dd class="method-description">'
       while @f.next?
         case @f.peek
         when /\A===+/

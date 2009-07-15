@@ -9,7 +9,7 @@ class TestRDCompiler < Test::Unit::TestCase
   def setup
     @dummy = 'dummy'
     @u = BitClust::URLMapper.new(Hash.new{@dummy})
-    @c = BitClust::RDCompiler.new(@u, 1, {:database => BitClust::Database.dummy})
+    @c = BitClust::RDCompiler.new(@u, 1, {:database => BitClust::MethodDatabase.dummy})
   end
 
   def compile_and_assert_equal(expected, src)
@@ -170,8 +170,8 @@ bar
  text
 HERE
     expected = <<'HERE'
-<dt><code>hoge</code></dt>
-<dd>
+<dt class="method-heading"><code>hoge</code></dt>
+<dd class="method-description">
 <p>
 foo
 bar
@@ -192,8 +192,8 @@ text
 //}
 HERE
     expected = <<'HERE'
-<dt><code>&lt;=&gt;</code></dt>
-<dd>
+<dt class="method-heading"><code>self &lt;=&gt; </code></dt>
+<dd class="method-description">
 <p>
 abs
 </p>
@@ -211,8 +211,8 @@ HERE
   dsc
 HERE
     expected = <<'HERE'
-<dt><code>method</code></dt>
-<dd>
+<dt class="method-heading"><code>method</code></dt>
+<dd class="method-description">
 <dl>
 <dt>word1</dt>
 <dd>
@@ -236,13 +236,13 @@ dsc
 @see hoge
 HERE
     expected = <<'HERE'
-<dt><code>method</code></dt>
-<dd>
+<dt class="method-heading"><code>method</code></dt>
+<dd class="method-description">
 <p>
 dsc
 </p>
 <dl>
-<dt>[PARAM] hoge:</dt>
+<dt class='method-param'>[PARAM] hoge:</dt>
 <dd>
 dsc
 </dd>
@@ -272,10 +272,10 @@ HERE
            dsc3
 HERE
     expected = <<'HERE'
-<dt><code>method</code></dt>
-<dd>
+<dt class="method-heading"><code>method</code></dt>
+<dd class="method-description">
 <dl>
-<dt>[PARAM] arg:</dt>
+<dt class='method-param'>[PARAM] arg:</dt>
 <dd>
 dsc1
 </dd>
@@ -298,10 +298,10 @@ dsc3
 //}
 HERE
     expected = <<'HERE'
-<dt><code>method</code></dt>
-<dd>
+<dt class="method-heading"><code>method</code></dt>
+<dd class="method-description">
 <dl>
-<dt>[PARAM] arg:</dt>
+<dt class='method-param'>[PARAM] arg:</dt>
 <dd>
 dsc1
 <pre>
@@ -316,8 +316,8 @@ HERE
 
   end
 
-  def test_method2   
-    @c = BitClust::RDCompiler.new(@u, 1, {:force => true})   
+  def test_method2
+    @c = BitClust::RDCompiler.new(@u, 1, {:force => true})
     src = <<'HERE'
 --- hoge1
 --- hoge2
@@ -325,9 +325,9 @@ bar
 HERE
     expected = <<'HERE'
 <dl>
-<dt><code>hoge1</code></dt>
-<dt><code>hoge2</code></dt>
-<dd>
+<dt class="method-heading"><code>hoge1</code></dt>
+<dt class="method-heading"><code>hoge2</code></dt>
+<dd class="method-description">
 <p>
 bar
 </p>
@@ -337,7 +337,7 @@ HERE
     compile_and_assert_equal(expected, src)
   end
 
-  def test_ulist        
+  def test_ulist
     src =  <<'HERE'
  * hoge1
  * hoge2
@@ -433,7 +433,7 @@ HERE
      ['[[ruby-list:12345]]',
       '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
     ].each{|src, expected|
-      assert_equal expected, @c.send(:compile_text, src)
+      assert_equal expected, @c.send(:compile_text, src), src
     }
     
     [
@@ -458,7 +458,7 @@ HERE
 HERE
     expected = <<'HERE'
 <dt class="method-heading"><code>join(sep = $,) -&gt; String</code></dt>
-<dd  class="method-description">
+<dd class="method-description">
 <p>
 [SEE_ALSO] <a href="dummy/method/Array/i/=2a">Array#*</a>, <a href="dummy/method/Kernel/v/=2c">$,</a>
 </p>
