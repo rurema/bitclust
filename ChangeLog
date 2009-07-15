@@ -1,3 +1,10 @@
+2009-07-15  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#man_link):
+	remove needless space.
+
+	* test/test_rdcompiler.rb (TestRDCompiler#test_braket_link): ditto.
+
 2009-07-10  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#see): do not

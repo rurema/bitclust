@@ -434,7 +434,7 @@ module BitClust
     def man_link(spec)
       m = /(\w+)\(([123])\)/.match(spec) or return escape_html(spec)
       url = sprintf((m[2] == '1' ? MAN_CMD_URL : MAN_FCN_URL), m[1])
-      %Q(<a class= "external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
+      %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
     end
 
     def complete_spec(spec0)

@@ -421,7 +421,7 @@ HERE
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
      ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
-     ['[[man:tr(1)]]',     '<a class= "external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
+     ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
      ['[[RFC:2822]]',      '<a class="external" href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
      ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
@@ -446,7 +446,7 @@ HERE
      ['[[ref:c:Hoge]]',             'compileerror'],
      ['[[ref:ref:hoge/bar#frag]]',  'compileerror'],
     ].each{|src, expected|
-      assert_match /#{expected}/, @c.send(:compile_text, src)
+      assert_match /#{expected}/, @c.send(:compile_text, src), src
     }
   end
 
