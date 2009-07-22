@@ -1,5 +1,6 @@
 require 'bitclust/rdcompiler'
 require 'bitclust/database'
+require 'bitclust/methoddatabase'
 require 'bitclust/screen'
 require 'test/unit'
 require 'timeout'
