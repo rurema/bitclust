@@ -131,7 +131,7 @@ module BitClust
 
     def load_properties(rel)
       h = {}
-      File.open(realpath(rel)) {|f|
+      File.open(realpath(rel), 'r:EUC-JP') {|f|
         while line = f.gets
           k, v = line.strip.split('=', 2)
           break unless k

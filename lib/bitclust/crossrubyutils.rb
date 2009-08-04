@@ -70,7 +70,7 @@ module BitClust
 
     def rubys(path)
       parse_PATH(path).map {|bindir|
-        Dir.glob("#{bindir}/ruby-[12]*").map {|path| File.basename(path) }
+        Dir.glob("#{bindir}/ruby-[12t]*").map {|path| File.basename(path) }
       }\
       .flatten.uniq + ['ruby']
     end
