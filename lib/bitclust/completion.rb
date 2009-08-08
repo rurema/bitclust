@@ -71,6 +71,11 @@ GC.enable; GC.start; x
       SearchResult.new(self, pattern, cs, recs)
     end
 
+    def mspec_from_cref_mname(cref, name)
+      m = /\A(#{NameUtils::CLASS_PATH_RE})(#{NameUtils::TYPEMARK_RE})\Z/.match(cref)
+      MethodSpec.new(m[1], m[2], name)
+    end
+
     def search_methods_from_mname(pattern)
 #timer_init
       names = expand_name_narrow(method_names(), pattern.method)
@@ -80,7 +85,7 @@ GC.enable; GC.start; x
         crefs = mname2crefs_narrow(name)
 #split_time "c expand  (#{crefs.size})"
         crefs.map {|cref|
-          spec = MethodSpec.new(classid2name(cref.chop), cref[-1,1], name)
+          spec = mspec_from_cref_mname(classid2name(cref), name)
           SearchResult::Record.new(self, spec, spec)
         }
       }.flatten
