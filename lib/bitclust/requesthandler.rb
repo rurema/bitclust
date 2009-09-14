@@ -27,6 +27,8 @@ module BitClust
       _handle(Request.new(webrick_req))
     rescue WEBrick::HTTPStatus::Status
       raise
+    rescue BitClust::NotFoundError => err
+      return not_found_response(err)
     rescue => err
       return error_response(err)
     end
@@ -46,6 +48,10 @@ module BitClust
       ErrorScreen.new(err).response
     end
 
+    def not_found_response(err)
+      NotFoundScreen.new(err).response
+    end
+
     def handle_library(req)
       return library_index() unless req.library_name
       lib = @db.fetch_library(req.library_name)
@@ -62,9 +68,10 @@ module BitClust
 
     def handle_method(req)
       ms = @db.fetch_methods(req.method_spec)
+      raise MethodNotFound.new(req.method_spec.to_s) if ms.nil? || ms.empty?
       @screenmanager.method_screen(ms, @conf).response
     end
-   
+
     def library_index
       @screenmanager.library_index_screen(@db.libraries.sort, @conf).response
     end
@@ -198,7 +205,7 @@ module BitClust
         false
       end
     end
-    
+
     def type_id
       type, param = parse_path_info()
       type.intern if type

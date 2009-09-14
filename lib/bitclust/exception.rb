@@ -20,13 +20,14 @@ module BitClust
   class UserError               < Error; end
   class InvalidDatabase         < UserError; end
   class InvalidKey              < UserError; end
-  class LibraryNotFound         < UserError; end
-  class ClassNotFound           < UserError; end
-  class MethodNotFound          < UserError; end
   class InvalidScheme           < UserError; end
-  class FunctionNotFound        < UserError; end
-  class DocNotFound             < UserError; end
-  
+  class NotFoundError           < UserError; end
+  class LibraryNotFound         < NotFoundError; end
+  class ClassNotFound           < NotFoundError; end
+  class MethodNotFound          < NotFoundError; end
+  class FunctionNotFound        < NotFoundError; end
+  class DocNotFound             < NotFoundError; end
+
   module WriterError; end
   class DocumentError
     include WriterError

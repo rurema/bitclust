@@ -1,3 +1,19 @@
+2009-09-14  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/exception.rb (BitClust::NotFoundError): add new
+	error.
+	(BitClust::LibraryNotFound, BitClust::ClassNotFound)
+	(BitClust::MethodNotFound, BitClust::FunctionNotFound)
+	(BitClust::DocNotFound): change super class UserError to NotFoundError.
+
+	* lib/bitclust/screen.rb (BitClust::NotFoundScreen): add new
+	screen.
+
+	* lib/bitclust/requesthandler.rb
+	(BitClust::RequestHandler#handle_method): raise MethodNotFound
+	when cannot fetch methods.
+	(BitClust::RequestHandler#handle): handle BitClust::NotFoundError.
+
 2009-08-08  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/completion.rb

@@ -218,6 +218,34 @@ module BitClust
     end
   end
 
+  class NotFoundScreen < Screen
+    include HTMLUtils
+
+    def initialize(err)
+      @error = err
+    end
+
+    def status
+      404
+    end
+
+    def content_type
+      'text/html'
+    end
+
+    def body
+      <<-EndHTML
+<html>
+<head><title>NotFound</title></head>
+<body>
+<h1>NotFound</h1>
+<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name)})</pre>
+</body>
+</html>
+      EndHTML
+    end
+  end
+
   class TemplateScreen < Screen
     include Translatable
     include HTMLUtils
