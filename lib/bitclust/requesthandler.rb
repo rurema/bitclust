@@ -114,6 +114,8 @@ module BitClust
   class RackRequestHandler < RequestHandler
     def handle(rack_req)
       _handle(RackRequest.new(rack_req))
+    rescue BitClust::NotFoundError => err
+      return not_found_response(err)
     rescue => err
       return error_response(err)
     end
