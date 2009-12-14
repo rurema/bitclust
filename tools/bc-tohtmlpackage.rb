@@ -125,6 +125,8 @@ def main
                outputdir.to_s, {:verbose => true, :preserve => true})
   FileUtils.cp(manager_config[:themedir] + manager_config[:favicon_url],
                outputdir.to_s, {:verbose => true, :preserve => true})
+  FileUtils.cp_r(manager_config[:themedir] + 'images',
+                 outputdir.to_s, {:verbose => true, :preserve => true})
 end
 
 def encodename_package(str)
