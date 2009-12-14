@@ -1,3 +1,16 @@
+2009-12-14  okkez  <okkez000@gmail.com>
+
+	* data/bitclust/template/search: display elapsed time.
+
+	* lib/bitclust/requesthandler.rb
+	(BitClust::RequestHandler#handle_search): ditto.
+
+	* lib/bitclust/screen.rb (BitClust::SearchScreen#initialize): ditto.
+
+	* tools/bc-tohtmlpackage.rb (#main): copy images to output directory.
+
+	* theme/default/style.css: fix style problems.
+
 2009-10-13  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/requesthandler.rb
