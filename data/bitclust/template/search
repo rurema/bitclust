@@ -28,7 +28,7 @@
 <tr>
     <td></td>
     <td style="text-align:right" nowrap="nowrap">
-        <%=h _('%d Results', @entries.size) %>
+        <%=h _('%d Results', @entries.size) %> <%=h '(%.3f sec)' % @elapsed_time %>
     </td>
 </tr>
 <% unless @entries.empty? %>
@@ -50,7 +50,7 @@
                 e.names.map {|name| method_link(e.spec_string, '$' + name) }
               else
                 sigs.map {|sig|
-                  method_link(e.spec_string, 
+                  method_link(e.spec_string,
                               e.klass.name + e.typemark + sig.to_s)
                 }
               end.join("<br>\n") %></td>
@@ -60,7 +60,7 @@
 <td class="description"><%= compile_rd(src) %></td>
 <%          end           %>
 </tr>
-<%         
+<%
           end
         end
         headline_pop

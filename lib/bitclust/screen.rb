@@ -461,6 +461,7 @@ module BitClust
     def initialize(h, entries, opt)
       super h, entries, opt
       @query = opt[:q]
+      @elapsed_time = opt[:elapsed_time]
     end
 
     def body

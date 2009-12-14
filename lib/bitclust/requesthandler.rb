@@ -88,9 +88,12 @@ module BitClust
       ret = []
       q0 = req.query['q'] || ''
       q = URI.unescape(q0)
+      start = Time.now.to_i
       ret = SimpleSearcher.search_pattern(@db, q)
+      elapsed_time = Time.now.to_f - start.to_f
       c = @conf.dup
       c[:q] = q0
+      c[:elapsed_time] = elapsed_time
       @screenmanager.seach_screen(ret, c).response
     end
 
