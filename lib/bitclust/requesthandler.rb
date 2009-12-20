@@ -94,7 +94,7 @@ module BitClust
       c = @conf.dup
       c[:q] = q0
       c[:elapsed_time] = elapsed_time
-      @screenmanager.seach_screen(ret, c).response
+      @screenmanager.search_screen(ret, c).response
     end
 
     def handle_doc(req)

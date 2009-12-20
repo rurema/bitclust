@@ -61,7 +61,7 @@ module BitClust
       new_screen(OpenSearchDescriptionScreen, request_full_uri, opt)
     end
 
-    def seach_screen(result, opt)
+    def search_screen(result, opt)
       new_screen(SearchScreen, result, opt)
     end
 
