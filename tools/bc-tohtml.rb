@@ -38,7 +38,7 @@ def main
     ver = v
   }
   parser.on('--db=DB', '--database=DB', 'Set database path') {|path|
-    db = Bitclust::Database.new(path)
+    db = BitClust::Database.new(path)
   }
   parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
     baseurl = url
