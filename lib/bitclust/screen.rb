@@ -340,7 +340,7 @@ module BitClust
         ""
       else
         <<-EndForm
-        <form method="get" action="#{h(search_url())}" name="f" id="top_search">
+        <form method="get" action="#{h(search_url())}" name="top_search" id="top_search">
         <input value="" name="q" size="15">
         <input value="#{h(_('Search'))}" type="submit">
         </form>
