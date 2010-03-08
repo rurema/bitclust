@@ -18,7 +18,7 @@ module BitClust
     end
 
     def parse_file(path, filename, properties)
-      File.open(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:EUC-JP') {|f|
         return parse(f, filename)
       }
     end

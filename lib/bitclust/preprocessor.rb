@@ -43,7 +43,7 @@ module BitClust
       if path.respond_to?(:gets)
         io = wrap(path, params)
       else
-        io = wrap(File.open(path, 'r:EUC-JP'), params)
+        io = wrap(fopen(path, 'r:EUC-JP'), params)
       end
       ret = ""
       while s = io.gets
@@ -53,7 +53,7 @@ module BitClust
     end
     
     def Preprocessor.process(path, params = {})
-      File.open(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:EUC-JP') {|f|
         return wrap(f, params).to_a
       }
     end
@@ -239,7 +239,7 @@ module BitClust
   class LineCollector < LineFilter
 
     def LineCollector.process(path)
-      File.open(path) {|f|
+      fopen(path) {|f|
         return wrap(f).to_a
       }
     end

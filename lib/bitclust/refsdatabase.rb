@@ -9,7 +9,7 @@ module BitClust
   class RefsDatabase
     def self.load(src)
       if src.respond_to?(:to_str)
-        buf = File.open(src.to_str, 'r:EUC-JP'){|f| f.read}
+        buf = fopen(src.to_str, 'r:EUC-JP'){|f| f.read}
       elsif src.respond_to?(:to_io)
         buf = src.to_io.read
       else
@@ -41,7 +41,7 @@ module BitClust
     def save(s)
       if s.respond_to?(:to_str)
         path = s.to_str
-        io = File.open(path, 'w:EUC-JP')
+        io = fopen(path, 'w:EUC-JP')
       elsif s.respond_to?(:to_io)
         io = s.to_io
       else

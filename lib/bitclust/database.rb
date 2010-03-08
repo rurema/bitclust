@@ -131,7 +131,7 @@ module BitClust
 
     def load_properties(rel)
       h = {}
-      File.open(realpath(rel), 'r:EUC-JP') {|f|
+      fopen(realpath(rel), 'r:EUC-JP') {|f|
         while line = f.gets
           k, v = line.strip.split('=', 2)
           break unless k
@@ -165,7 +165,7 @@ module BitClust
 
     def atomic_write_open(rel, &block)
       tmppath = realpath(rel) + '.writing'
-      File.open(tmppath, 'wb', &block)
+      fopen(tmppath, 'wb', &block)
       File.rename tmppath, realpath(rel)
     ensure
       File.unlink tmppath  rescue nil

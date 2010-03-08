@@ -29,3 +29,12 @@ unless String.method_defined?(:bytesize)
     alias bytesize size
   end
 end
+
+def fopen(*args, &block)
+  begin
+    v = args[1].to_str
+    args[1] = v[0, v.index(':')]
+  rescue
+  end
+  File.open(*args, &block)
+end
