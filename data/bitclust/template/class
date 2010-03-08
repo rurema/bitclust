@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja-JP">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
@@ -55,7 +55,7 @@
     .each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
-<table class="entries" class="methods">
+<table class="entries methods">
 <tr>
   <th><%= _('Signature') %></th>
   <th colspan="2"><%= _('Description') %></th>
@@ -106,7 +106,7 @@
     .each do |label, entries|
       unless entries.empty?  %>
 <%=     headline(label) %>
-<table class="entries" class="methods">
+<table class="entries methods">
 <tr>
   <th><%= _('Signature') %></th>
   <th><%= _('Description') %></th>

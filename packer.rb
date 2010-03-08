@@ -111,7 +111,8 @@ unless File.exist?(readme_html)
   puts "write #{readme_html}"
   File.open(readme_html, "wb") do |f|
     f.puts <<-HTML
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <html lang="ja-JP">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=euc-jp">
