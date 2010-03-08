@@ -174,7 +174,7 @@ module BitClust
     def tesc(s)
       s || ' _ '
     end
-    private :esc
+    private :tesc
 
     def match?(m)
       (not @library or m.library.name?(@library)) and
