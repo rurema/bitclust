@@ -1,3 +1,9 @@
+2010-03-25  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* data/bitclust/template/method: translate topic path.
+
+	* template.offline/method: ditto.
+
 2009-12-14  okkez  <okkez000@gmail.com>
 
 	* data/bitclust/template/search: display elapsed time.
