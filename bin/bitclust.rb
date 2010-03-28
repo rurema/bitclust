@@ -222,7 +222,7 @@ class ListCommand < Subcommand
   def initialize
     @mode = nil
     @parser = OptionParser.new {|opt|
-      opt.banner = "Usage: #{File.basename($0, '.*')} list (--library|--class|--method)"
+      opt.banner = "Usage: #{File.basename($0, '.*')} list (--library|--class|--method|--function)"
       opt.on('--library', 'List libraries.') {
         @mode = :library
       }
@@ -231,6 +231,9 @@ class ListCommand < Subcommand
       }
       opt.on('--method', 'List methods.') {
         @mode = :method
+      }
+      opt.on('--function', 'List functions.') {
+        @mode = :function
       }
       opt.on('--help', 'Prints this message and quit.') {
         puts opt.help
@@ -242,7 +245,7 @@ class ListCommand < Subcommand
   def parse(argv)
     super
     unless @mode
-      error 'one of (--library|--class|--method) is required'
+      error 'one of (--library|--class|--method|--function) is required'
     end
   end
 
@@ -261,6 +264,10 @@ class ListCommand < Subcommand
         c.entries.sort_by {|m| m.id }.each do |m|
           puts m.label
         end
+      end
+    when :function
+      db.functions.sort_by {|f| f.name }.each do |f|
+        puts f.name
       end
     else
       raise "must not happen: @mode=#{@mode.inspect}"

@@ -1,3 +1,11 @@
+2010-03-28  wanabe  <s.wanabe@gmail.com>
+
+	* bin/bitclust.rb (ListCommand): enable "bitclust --capi list --function".
+
+	* test/test_bitclust.rb: add test of bin/bitclust.rb.
+
+	* test/db-test/: add DB for test.
+
 2010-03-25  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* data/bitclust/template/method: translate topic path.
