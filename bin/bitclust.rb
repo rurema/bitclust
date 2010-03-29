@@ -512,4 +512,4 @@ class PropertyCommand < Subcommand
 end
 
 
-main
+main if __FILE__ == $0
