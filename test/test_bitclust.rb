@@ -30,6 +30,28 @@ class TestBitClust < Test::Unit::TestCase
   end
 
   def test_list
-    assert_equal(capi("list --function"), "public_func\n")
+    assert_equal("public_func\n", capi("list --function"))
+  end
+
+  def test_loopup
+    assert_equal(<<-EOS, capi("lookup --function=public_func").chomp)
+kind: function
+header: VALUE public_func()
+filename: test.c
+
+
+This is public function.
+    EOS
+
+    assert_equal(<<-EOS, capi("lookup --function=public_func --html").chomp)
+<dl>
+<dt>kind</dt><dd>function</dd>
+<dt>header</dt><dd>VALUE public_func()</dd>
+<dt>filename</dt><dd>test.c</dd>
+</dl>
+<p>
+This is public function.
+</p>
+    EOS
   end
 end

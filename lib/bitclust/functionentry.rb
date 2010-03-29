@@ -61,6 +61,7 @@ module BitClust
     def type_label
       macro? ? 'macro' : 'function'
     end
+    alias kind type_label
 
     def header
       if callable?

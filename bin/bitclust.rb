@@ -284,7 +284,7 @@ class LookupCommand < Subcommand
     @type = nil
     @key = nil
     @parser = OptionParser.new {|opt|
-      opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method) [--html] <key>"
+      opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method|--function) [--html] <key>"
       opt.on('--library=NAME', 'Lookup library.') {|name|
         @type = :library
         @key = name
@@ -295,6 +295,10 @@ class LookupCommand < Subcommand
       }
       opt.on('--method=NAME', 'Lookup method.') {|name|
         @type = :method
+        @key = name
+      }
+      opt.on('--function=NAME', 'Lookup function.') {|name|
+        @type = :function
         @key = name
       }
       opt.on('--html', 'Show result in HTML.') {
@@ -310,7 +314,7 @@ class LookupCommand < Subcommand
   def parse(argv)
     super
     unless @type
-      error "one of --library/--class/--method is required"
+      error "one of --library/--class/--method/--function is required"
     end
     unless argv.empty?
       error "too many arguments"
@@ -330,6 +334,8 @@ class LookupCommand < Subcommand
       db.fetch_class(key)
     when :method
       db.fetch_method(BitClust::MethodSpec.parse(key))
+    when :function
+      db.fetch_function(key)
     else
       raise "must not happen: #{type.inspect}"
     end
@@ -406,6 +412,23 @@ class LookupCommand < Subcommand
            <dt>visibility</dt><dd><%= entry.visibility %></dd>
            <dt>kind</dt><dd><%= entry.kind %></dd>
            <dt>library</dt><dd><%= entry.library.name %></dd>
+           </dl>
+           <%= compile_rd(entry.source) %>
+           End
+    },
+    :function => {
+       :text => <<-End,
+           kind: <%= entry.kind %>
+           header: <%= entry.header %>
+           filename: <%= entry.filename %>
+
+           <%= entry.source %>
+           End
+       :html => <<-End
+           <dl>
+           <dt>kind</dt><dd><%= entry.kind %></dd>
+           <dt>header</dt><dd><%= entry.header %></dd>
+           <dt>filename</dt><dd><%= entry.filename %></dd>
            </dl>
            <%= compile_rd(entry.source) %>
            End
