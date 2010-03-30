@@ -198,9 +198,18 @@ module BitClust
 
     def search_pattern(db, argv)
       db ||= new_database()
-      case @target_type
+      case @target_type || db
       when :class
         find_class db, argv[0]
+      when FunctionDatabase
+        case argv.size
+        when 0
+          show_all_functions db
+        when 1
+          find_function db, argv[0]
+        else
+          raise "must not happen: #{argv.size}"
+        end
       else
         case argv.size
         when 0
@@ -224,12 +233,20 @@ module BitClust
       @view.show_class db.classes
     end
 
+    def show_all_functions(db)
+      @view.show_function db.functions
+    end
+
     def find_class(db, c)
       @view.show_class db.search_classes(c)
     end
 
     def find_method(db, c, t, m)
       @view.show_method db.search_methods(MethodNamePattern.new(c, t, m))
+    end
+
+    def find_function(db, f)
+      @view.show_function db.search_functions(f)
     end
 
     def check_method_type(t)
@@ -339,6 +356,24 @@ module BitClust
       end
     end
 
+    def show_function(fs)
+      if fs.size == 1
+        if @line
+          print_names [fs.first.label]
+        else
+          describe_function fs.first
+        end
+      else
+        if @describe_all
+          fs.sort.each do |f|
+            describe_function f
+          end
+        else
+          print_names fs.map {|f| f.label }
+        end
+      end
+    end
+
     private
 
     def print_names(names)
@@ -405,6 +440,13 @@ module BitClust
         end
       end
       puts @compiler.compile(rec.entry.source.strip)
+      puts
+    end
+
+    def describe_function(f)
+      puts "#{f.type_label} #{f.name}"
+      puts f.header
+      puts @compiler.compile(f.source.strip)
       puts
     end
 

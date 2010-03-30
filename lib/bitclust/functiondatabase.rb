@@ -9,12 +9,15 @@
 
 require 'bitclust/database'
 require 'bitclust/functionentry'
+require 'bitclust/completion'
 require 'bitclust/functionreferenceparser'
 require 'bitclust/exception'
 
 module BitClust
 
   class FunctionDatabase < Database
+
+    include Completion
 
     def initialize(prefix)
       super
@@ -51,6 +54,14 @@ module BitClust
     def update_by_file(path, filename)
       check_transaction
       FunctionReferenceParser.new(self).parse_file(path, filename, properties())
+    end
+
+    def search_functions(pattern)
+      fs = _search_functions(pattern)
+      if fs.empty?
+        raise FunctionNotFound, "no such function: #{pattern}"
+      end
+      fs
     end
 
     def open_function(id)

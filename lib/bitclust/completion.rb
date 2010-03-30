@@ -50,6 +50,10 @@ GC.enable; GC.start; x
       end
     end
 
+    def _search_functions(pattern)
+      expand_ic(functions(), pattern)
+    end
+
     def search_svar(c, pattern)
       expand(c.special_variables, pattern)\
           .map {|m| SearchResult::Record.new(self, m.spec, m.spec, m) }

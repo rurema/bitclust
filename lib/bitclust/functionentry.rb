@@ -28,6 +28,10 @@ module BitClust
       "\#<function #{@id}>"
     end
 
+    def name_match?(re)
+      re =~ name()
+    end
+
     def <=>(other)
       @id.casecmp(other.id)
     end

@@ -1,3 +1,13 @@
+2010-03-30  wanabe  <s.wanabe@gmail.com>
+
+	* lib/bitclust/searcher.rb: enable "bitclust --capi search [NAME]".
+
+	* lib/bitclust/functiondatabase.rb(search_functions): add.
+
+	* lib/bitclust/completion.rb (_search_functions): add for completion.
+
+	* lib/bitclust/functionentry.rb (name_match?): ditto.
+
 2010-03-29  wanabe  <s.wanabe@gmail.com>
 
 	* bin/bitclust.rb (LookupCommand): enable "bitclust --capi lookup
