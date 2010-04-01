@@ -33,7 +33,7 @@ class TestBitClust < Test::Unit::TestCase
     assert_equal("public_func\n", capi("list --function"))
   end
 
-  def test_loopup
+  def test_lookup
     assert_equal(<<-EOS, capi("lookup --function=public_func").chomp)
 kind: function
 header: VALUE public_func()
