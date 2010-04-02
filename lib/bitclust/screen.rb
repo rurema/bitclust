@@ -285,10 +285,22 @@ module BitClust
       @default_encoding || 'us-ascii'
     end
 
-    def run_template(id)
-      erb = ERB.new(@template_repository.load(id))
-      erb.filename = id + '.erb'
-      erb.result(binding())
+    def run_template(id, layout = true)
+      method_name = "#{id}_template".gsub('-', '_')
+      unless respond_to? method_name
+        erb = ERB.new(@template_repository.load(id))
+        erb.def_method(self.class, method_name, id + '.erb')
+      end
+      body = __send__(method_name)
+      if layout
+        unless respond_to? :layout
+          erb = ERB.new(@template_repository.load('layout'))
+          erb.def_method(self.class, 'layout', 'layout.erb')
+        end
+        layout{ body }
+      else
+        body
+      end
     end
 
     def h(str)

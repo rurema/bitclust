@@ -1,3 +1,27 @@
+2010-04-01  okkez  <okkez000@gmail.com>
+
+	* data/bitclust/template/layout: apply layout.
+
+	* data/bitclust/template/search: ditto.
+
+	* data/bitclust/template/library-index: ditto.
+
+	* data/bitclust/template/library: ditto.
+
+	* data/bitclust/template/function-index: ditto.
+
+	* data/bitclust/template/function: ditto.
+
+	* data/bitclust/template/doc: ditto.
+
+	* data/bitclust/template/class-index: ditto.
+
+	* data/bitclust/template/class: ditto.
+
+	* data/bitclust/template/method: ditto.
+
+	* lib/bitclust/screen.rb (BitClust::TemplateScreen#run_template): ditto.
+
 2010-03-30  wanabe  <s.wanabe@gmail.com>
 
 	* lib/bitclust/searcher.rb: enable "bitclust --capi search [NAME]".
