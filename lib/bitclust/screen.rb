@@ -107,11 +107,19 @@ module BitClust
       "#{@base_url}/theme/#{@theme}/style.css"
     end
 
+    def custom_css_url(css)
+      "#{@base_url}/theme/#{@theme}/#{css}"
+    end
+
     def js_url
       return @js_url if @js_url
       "#{@base_url}/theme/#{@theme}/t.js"
     end
-    
+
+    def custom_js_url(js)
+      "#{@base_url}/theme/#{@theme}/#{js}"
+    end
+
     def favicon_url
       return @favicon_url if @favicon_url
       "#{@base_url}/theme/#{@theme}/rurema.png"
@@ -286,15 +294,23 @@ module BitClust
     def h(str)
       escape_html(str.to_s)
     end
-    
+
     def css_url
       @urlmapper.css_url
+    end
+
+    def custom_css_url(css)
+      @urlmapper.custom_css_url(css)
     end
 
     def js_url
       @urlmapper.js_url
     end
-    
+
+    def custom_js_url(js)
+      @urlmapper.custom_js_url(js)
+    end
+
     def favicon_url
       @urlmapper.favicon_url
     end
