@@ -1,17 +1,7 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja-JP">
 <%
     entry = @entries.sort.first
+    @title = "#{entry.type_label} #{entry.label}"
 %>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
-  <meta http-equiv="Content-Language" content="ja-JP">
-  <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
-  <title><%=h entry.type_label %> <%=h entry.label %></title>
-</head>
-<body>
-
 <p>
 <%= manual_home_link() %>
 &gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
@@ -29,5 +19,3 @@
 <% end %>
 </dl>
 
-</body>
-</html>
