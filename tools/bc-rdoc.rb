@@ -177,7 +177,7 @@ class DiffCommand < Subcommand
       $stderr.puts 'missing BitClust database prefix.  Use --bc option'
       exit 1
     end
-    @bc = BitClust::Database.new(@bcprefix)
+    @bc = BitClust::MethodDatabase.new(@bcprefix)
     @ri = open_ri_database(@riprefix)
     unless argv.size == 1
       $stderr.puts "wrong number of arguments (#{argv.size} for 1)"

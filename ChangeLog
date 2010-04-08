@@ -1,3 +1,8 @@
+2010-04-08  okkez  <okkez000@gmail.com>
+
+	* tools/bc-rdoc.rb (DiffCommand#parse): use
+	BitClust::MethodDatabase instead of BitClust::Database
+
 2010-04-01  okkez  <okkez000@gmail.com>
 
 	* data/bitclust/template/layout: apply layout.
