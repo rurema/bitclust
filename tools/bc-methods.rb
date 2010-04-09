@@ -118,11 +118,13 @@ ORDER = { '.' => 1, '#' => 2, '::' => 3 }
 
 def m_order(m)
   m, t, c = *m.reverse.split(/(\#|\.|::)/, 2)
-  [ORDER[t], m.reverse]
+  [ORDER[t] || 0, m.reverse]
 end
 
 def defined_methods(ruby, classname)
   req = @requires.map {|lib| "-r#{lib}" }.join(' ')
+  avoid_tracer = ""
+  avoid_tracer = "Tracer.off" if @requires.include?("tracer")
   if classname == 'Object'
      `#{ruby} #{req} -e '
      c = #{classname}
@@ -151,6 +153,7 @@ def defined_methods(ruby, classname)
    '`.split
   else
     `#{ruby} #{req} -e '
+    #{avoid_tracer}
     c = #{classname}
     c.singleton_methods(false).each do |m|
       puts "#{classname}.\#{m}"

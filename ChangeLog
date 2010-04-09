@@ -1,3 +1,7 @@
+2010-04-09  okkez  <okkez000@gmail.com>
+
+	* tools/bc-methods.rb (#main): avoid tracer.
+
 2010-04-08  okkez  <okkez000@gmail.com>
 
 	* tools/bc-rdoc.rb (DiffCommand#parse): use
