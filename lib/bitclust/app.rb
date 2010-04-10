@@ -12,6 +12,7 @@ module BitClust
       datadir = options[:datadir] || File.expand_path('../../data/bitclust', File.dirname(__FILE__))
       encoding = options[:encoding] || 'euc-jp'
       viewpath = options[:viewpath]
+      capi = options[:capi]
       if options[:rack]
         request_handler_class = BitClust::RackRequestHandler
       else
@@ -22,6 +23,9 @@ module BitClust
       when String
         dbpath = File.expand_path(dbpath)
         db = BitClust::MethodDatabase.new(dbpath)
+        if capi
+          db = [db, BitClust::FunctionDatabase.new(dbpath)]
+        end
         manager = BitClust::ScreenManager.new(
           :base_url => baseurl,
           :cgi_url => File.join(baseurl, viewpath),
@@ -46,6 +50,9 @@ module BitClust
             version_viewpath = version
           end
           db = BitClust::MethodDatabase.new(dbpath)
+          if capi
+            db = [db, BitClust::FunctionDatabase.new(dbpath)]
+          end
           manager = BitClust::ScreenManager.new(
             :base_url => baseurl,
             :cgi_url => File.join(baseurl, version_viewpath),

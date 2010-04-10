@@ -1,3 +1,13 @@
+2010-04-10  wanabe  <s.wanabe@gmail.com>
+
+	* standalone.rb: enable 'ruby standalone.rb --baseurl=URL
+	  {--auto|--database=PATH} --capi'.
+
+	* lib/bitclust/app.rb (BitClust::App#initialize): enable to pass
+	  FunctionDatabase to request handler.
+
+	* lib/bitclust/requesthandler.rb: save FunctionDatabase and use.
+
 2010-04-09  okkez  <okkez000@gmail.com>
 
 	* tools/bc-methods.rb (#main): avoid tracer.

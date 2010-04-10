@@ -18,7 +18,11 @@ module BitClust
   class RequestHandler
 
     def initialize(db, manager)
-      @db = db
+      if db.is_a? Array
+        @db, @cdb = db
+      else
+        @db = db
+      end
       @screenmanager = manager
       @conf = { :database => @db }
     end
@@ -104,12 +108,12 @@ module BitClust
     
     def handle_function(req)
       return function_index() unless req.function_name
-      f = @db.fetch_function(req.function_name)
+      f = @cdb.fetch_function(req.function_name)
       @screenmanager.function_screen(f, @conf).response
     end
 
     def function_index
-      @screenmanager.function_index_screen(@db.functions.sort, @conf).response
+      @screenmanager.function_index_screen(@cdb.functions.sort, @conf).response
     end
 
   end

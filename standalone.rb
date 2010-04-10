@@ -27,9 +27,10 @@ debugp = false
 autop = false
 browser = nil
 pid_file = nil
+capi = false
 
 parser = OptionParser.new
-parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--datadir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER] [--pid-file=PATH]"
+parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--datadir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER] [--pid-file=PATH] [--capi]"
 parser.on('--bind-address=ADDR', 'Bind address') {|addr|
   params[:BindAddress] = addr
 }
@@ -72,6 +73,9 @@ parser.on('--pid-file=PATH', 'Write pid of the daemon to the specified file.') {
 parser.on('--help', 'Prints this message and quit.') {
   puts parser.help
   exit 0
+}
+parser.on('--capi', 'see also FunctionDatabase.') {|path|
+  capi = true
 }
 begin
   parser.parse!
@@ -128,7 +132,8 @@ if autop
     :datadir => datadir,
     :templatedir => templatedir,
     :theme => theme,                          
-    :encoding => encoding
+    :encoding => encoding,
+    :capi => capi
     )
   app.interfaces.each do |version, interface|
     server.mount File.join(basepath, version), interface
@@ -143,7 +148,8 @@ else
     :datadir => datadir,
     :templatedir => templatedir,                          
     :theme => theme,
-    :encoding => encoding
+    :encoding => encoding,
+    :capi => capi
     )
   app.interfaces.each do |viewpath, interface|
     server.mount viewpath, interface
