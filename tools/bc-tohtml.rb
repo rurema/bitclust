@@ -50,6 +50,9 @@ def main
     puts parser.help
     exit 0
   }
+  parser.on('--capi', 'C API mode.') {
+    @capi = true
+  }
   begin
     parser.parse!
   rescue OptionParser::ParseError => err
@@ -70,7 +73,14 @@ def main
                                         :default_encoding => 'euc-jp')
   unless @rd_file
     begin
-      lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0], {'version' => ver})
+      if @capi
+        lib = BitClust::FunctionReferenceParser.parse_file(ARGV[0], {'version' => ver})
+        unless target
+          raise NotImplementedError, "generating a C API html without --target=NAME is not implemented yet."
+        end
+      else
+        lib = BitClust::RRDParser.parse_stdlib_file(ARGV[0], {'version' => ver})
+      end
       entry = target ? lookup(lib, target) : lib
       puts manager.entry_screen(entry, {:database => db}).body
       return 
@@ -93,6 +103,8 @@ end
 
 def lookup(lib, key)
   case
+  when @capi && BitClust::NameUtils.functionname?(key)
+    lib.find {|func| func.name == key}
   when BitClust::NameUtils.method_spec?(key)
     spec = BitClust::MethodSpec.parse(key)
     if spec.constant?

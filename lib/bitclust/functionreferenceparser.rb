@@ -13,6 +13,11 @@ module BitClust
 
   class FunctionReferenceParser
 
+    def FunctionReferenceParser.parse_file(path, params = {"version" => "1.9.0"})
+      parser = new(FunctionDatabase.dummy(params))
+      parser.parse_file(path, File.basename(path, ".rd"), params)
+    end
+
     def initialize(db)
       @db = db
     end
@@ -26,6 +31,7 @@ module BitClust
     def parse(f, filename)
       @filename = filename
       file_entries LineInput.new(f)
+      @db.functions
     end
 
     private

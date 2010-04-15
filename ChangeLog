@@ -1,3 +1,14 @@
+2010-04-15  wanabe  <s.wanabe@gmail.com>
+
+	* tools/bc-tohtml.rb (main): enable 'bc-tohtml --capi file --target=NAME'.
+	  (lookup): accept function name when C API mode.
+
+	* lib/bitclust/functionreferenceparser.rb (FunctionReferenceParser.parse_file):
+	  added.
+	  (FunctionReferenceParser#parse): return array of functions.
+
+	* template.offline/function: added.
+
 2010-04-10  wanabe  <s.wanabe@gmail.com>
 
 	* standalone.rb: enable 'ruby standalone.rb --baseurl=URL
