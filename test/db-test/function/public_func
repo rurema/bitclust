@@ -1,9 +1,0 @@
-filename=test.c
-macro=false
-private=false
-type=VALUE
-name=public_func
-params=()
-
-
-This is public function.
