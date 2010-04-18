@@ -8,6 +8,7 @@
 #
 
 require 'bitclust/methoddatabase'
+require 'bitclust/functiondatabase'
 require 'bitclust/nameutils'
 require 'bitclust/methodid'
 require 'bitclust/exception'

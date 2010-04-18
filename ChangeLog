@@ -1,3 +1,8 @@
+2010-04-18  wanabe  <s.wanabe@gmail.com>
+
+	* lib/bitclust/searcher.rb: add require 'functiondatabase'.
+	  a patch from Ippei Obayashi (fix #3166).
+
 2010-04-15  wanabe  <s.wanabe@gmail.com>
 
 	* tools/bc-tohtml.rb (main): enable 'bc-tohtml --capi file --target=NAME'.
