@@ -33,7 +33,7 @@ end
 def fopen(*args, &block)
   begin
     v = args[1].to_str
-    args[1] = v[0, v.index(':')]
+    args[1] = v[0, v.index(':')] unless Object.const_defined?(:Encoding)
   rescue
   end
   File.open(*args, &block)
