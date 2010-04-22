@@ -31,10 +31,9 @@ unless String.method_defined?(:bytesize)
 end
 
 def fopen(*args, &block)
-  begin
-    v = args[1].to_str
-    args[1] = v[0, v.index(':')] unless Object.const_defined?(:Encoding)
-  rescue
+  option = args[1]
+  if option and !Object.const_defined?(:Encoding)
+    args[1] = option[0, option.index(':')]
   end
   File.open(*args, &block)
 end
