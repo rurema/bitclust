@@ -33,7 +33,7 @@ end
 def fopen(*args, &block)
   option = args[1]
   if option and !Object.const_defined?(:Encoding)
-    args[1] = option[0, option.index(':')]
+    args[1] = option.sub(/:.*\z/, '')
   end
   File.open(*args, &block)
 end
