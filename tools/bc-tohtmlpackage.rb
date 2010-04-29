@@ -56,6 +56,7 @@ def main
   outputdir = Pathname.new('./doc')
   templatedir = srcdir_root + 'data'+ 'bitclust' + 'template'
   catalogdir = nil
+  verbose = true
   parser = OptionParser.new
   parser.on('-d', '--database=PATH', 'Database prefix') do |path|
     prefix = Pathname.new(path).realpath
@@ -64,7 +65,7 @@ def main
     begin
       outputdir = Pathname.new(path).realpath
     rescue Errno::ENOENT
-      FileUtils.mkdir_p(path, :verbose => true)
+      FileUtils.mkdir_p(path, :verbose => verbose)
       retry
     end
   end
@@ -76,6 +77,9 @@ def main
   end
   parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
     $fs_casesensitive = true
+  end
+  parser.on('--[no-]quiet', 'Be quiet') do |quiet|
+    verbose = !quiet
   end
   parser.on('--help', 'Prints this message and quit') do
     puts(parser.help)
@@ -112,21 +116,23 @@ def main
     entries = db.docs + db.libraries.sort + db.classes.sort + methods.values
     entries.each_with_index do |c, i|
       create_html_file(c, manager, outputdir, db)
-      $stderr.puts("#{i}/#{entries.size} done") if i % 100 == 0
+      $stderr.puts("#{i}/#{entries.size} done") if i % 100 == 0 and verbose
     end
   end
   $bitclust_html_base = '..'
   create_file(outputdir + 'library/index.html',
-              manager.library_index_screen(db.libraries.sort, {:database => db}).body)
+              manager.library_index_screen(db.libraries.sort, {:database => db}).body,
+              :verbose => verbose)
   create_file(outputdir + 'class/index.html',
-              manager.class_index_screen(db.classes.sort, {:database => db}).body)
+              manager.class_index_screen(db.classes.sort, {:database => db}).body,
+              :verbose => verbose)
   create_index_html(outputdir)
   FileUtils.cp(manager_config[:themedir] + manager_config[:css_url],
-               outputdir.to_s, {:verbose => true, :preserve => true})
+               outputdir.to_s, {:verbose => verbose, :preserve => true})
   FileUtils.cp(manager_config[:themedir] + manager_config[:favicon_url],
-               outputdir.to_s, {:verbose => true, :preserve => true})
+               outputdir.to_s, {:verbose => verbose, :preserve => true})
   FileUtils.cp_r(manager_config[:themedir] + 'images',
-                 outputdir.to_s, {:verbose => true, :preserve => true})
+                 outputdir.to_s, {:verbose => verbose, :preserve => true})
 end
 
 def encodename_package(str)
@@ -182,12 +188,13 @@ def create_html_file_p(entry, manager, path, db)
     end
 end
 
-def create_file(path, str)
-  STDERR.print("creating #{path} ...")
+def create_file(path, str, options={})
+  verbose = options[:verbose]
+  STDERR.print("creating #{path} ...") if verbose
   path.open('w') do |f|
     f.write(str)
   end
-  STDERR.puts(" done.")
+  STDERR.puts(" done.") if verbose
 end
 
 main
