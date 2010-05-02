@@ -1,5 +1,11 @@
 2010-05-02  okkez  <okkez000@gmail.com>
 
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#bracket_link):
+	now can handle type 'f' bracket link.
+
+	* test/test_rdcompiler.rb (TestRDCompiler#test_bracket_link): fix
+	typo and add test for type 'f' bracket link.
+
 	* data/bitclust/template.lillia/layout: apply layout to lillia theme.
 
 	* data/bitclust/template.lillia/class: ditto.

@@ -412,7 +412,7 @@ HERE
     end
   end
   
-  def test_braket_link
+  def test_bracket_link
     [
      ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
      ['[[c:String ]]',     '[[c:String ]]'           ],
@@ -421,15 +421,18 @@ HERE
      ['[[m:String.new]]',  '<a href="dummy/method/String/s/new">String.new</a>'],
      ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
      ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
+     ['[[f:rb_ary_new3]]', '<a href="dummy/function/rb_ary_new3">rb_ary_new3</a>'],
+     ['[[f:/]]',           '<a href="dummy/function/">All C API</a>'],
+     ['[[f:_index]]',           '<a href="dummy/function/">All C API</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
      ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
      ['[[RFC:2822]]',      '<a class="external" href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
      ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
-     ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],     
+     ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],
      ['[[c:String]][[c:String]]',
-      '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],     
-     ['[[m:File::SEPARATOR]]',          '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],     
+      '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
+     ['[[m:File::SEPARATOR]]',          '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],
      ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
      ['[[ruby-list:12345]]',
       '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],

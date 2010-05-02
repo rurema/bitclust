@@ -360,6 +360,14 @@ module BitClust
         }
       when 'c'       then protect(link) { class_link(arg, label, frag) }
       when 'm'       then protect(link) { method_link(complete_spec(arg), label || arg, frag) }
+      when 'f'
+      then protect(link) {
+          case arg
+          when '/', '_index'
+            arg, label = '', 'All C API'
+          end
+          function_link(arg, label || arg, frag)
+        }
       when 'd'       then protect(link) { document_link(arg, label, frag) }
       when 'ref'     then protect(link) { reference_link(arg) }
       when 'url'     then direct_url(arg)
