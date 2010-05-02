@@ -32,6 +32,10 @@ module BitClust
         "/method/#{encodename_package(cname)}/#{typemark2char(tmark)}/#{encodename_package(mname)}.html"
     end
 
+    def function_url(name)
+      $bitclust_html_base + "/function/#{name.empty? ? 'index' : name}.html"
+    end
+
     def document_url(name)
       $bitclust_html_base + "/doc/#{encodename_package(name)}.html"
     end
@@ -46,6 +50,10 @@ module BitClust
 
     def library_index_url
       $bitclust_html_base + "/library/index.html"
+    end
+
+    def function_index_url
+      $bitclust_html_base + "/function/index.html"
     end
 
   end
@@ -106,6 +114,7 @@ def main
   manager_config[:urlmapper] = BitClust::URLMapperEx.new(manager_config)
 
   db = BitClust::MethodDatabase.new(prefix.to_s)
+  fdb = BitClust::FunctionDatabase.new(prefix.to_s)
   manager = BitClust::ScreenManager.new(manager_config)
   db.transaction do
     methods = {}
@@ -119,12 +128,22 @@ def main
       $stderr.puts("#{i}/#{entries.size} done") if i % 100 == 0 and verbose
     end
   end
+  fdb.transaction do
+    functions = {}
+    fdb.functions.each_with_index do |entry, i|
+      create_html_file(entry, manager, outputdir, fdb)
+      $stderr.puts("#{i} done") if i % 100 == 0 and verbose
+    end
+  end
   $bitclust_html_base = '..'
   create_file(outputdir + 'library/index.html',
               manager.library_index_screen(db.libraries.sort, {:database => db}).body,
               :verbose => verbose)
   create_file(outputdir + 'class/index.html',
               manager.class_index_screen(db.classes.sort, {:database => db}).body,
+              :verbose => verbose)
+  create_file(outputdir + 'function/index.html',
+              manager.function_index_screen(fdb.functions.sort, { :database => fdb }).body,
               :verbose => verbose)
   create_index_html(outputdir)
   FileUtils.cp(manager_config[:themedir] + manager_config[:css_url],
@@ -160,9 +179,11 @@ def create_html_file(entry, manager, outputdir, db)
     $bitclust_html_base = '..'
     path = outputdir + e.type_id.to_s + (encodename_package(e.name) + '.html')
     create_html_file_p(entry, manager, path, db)
-    return path.relative_path_from(outputdir).to_s
+    path.relative_path_from(outputdir).to_s
   when :method
-    return create_html_method_file(entry, manager, outputdir, db)
+    create_html_method_file(entry, manager, outputdir, db)
+  when :function
+    create_html_function_file(entry, manager, outputdir, db)
   else
     raise
   end
@@ -177,6 +198,14 @@ def create_html_method_file(entry, manager, outputdir, db)
            e.typechar + (encodename_package(name) + '.html')
     create_html_file_p(entry, manager, path, db)
   }
+  path.relative_path_from(outputdir).to_s
+end
+
+def create_html_function_file(entry, manager, outputdir, db)
+  path = nil
+  $bitclust_html_base = '..'
+  path = outputdir + entry.type_id.to_s + (entry.name + '.html')
+  create_html_file_p(entry, manager, path, db)
   path.relative_path_from(outputdir).to_s
 end
 
