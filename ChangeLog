@@ -1,3 +1,21 @@
+2010-05-02  okkez  <okkez000@gmail.com>
+
+	* data/bitclust/template.lillia/layout: apply layout to lillia theme.
+
+	* data/bitclust/template.lillia/class: ditto.
+
+	* data/bitclust/template.lillia/class-index: ditto.
+
+	* data/bitclust/template.lillia/doc: ditto.
+
+	* data/bitclust/template.lillia/library: ditto.
+
+	* data/bitclust/template.lillia/library-index: ditto.
+
+	* data/bitclust/template.lillia/method: ditto.
+
+	* data/bitclust/template.lillia/rd_file: ditto.
+
 2010-04-18  wanabe  <s.wanabe@gmail.com>
 
 	* lib/bitclust/searcher.rb: add require 'functiondatabase'.

@@ -1,16 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja-JP">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
-  <meta http-equiv="Content-Language" content="ja-JP">
-  <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
-  <script type="text/javascript" src="<%=h js_url() %>"></script>
-  <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
-  <title><%=h @entry.type %> <%=h @entry.name %></title>
-</head>
-
-<body>
-
+<% @title = "#{@entry.type} #{@entry.name}" %>
 <div id="main">
 
 <p>
@@ -108,6 +96,3 @@
 </div>
 
 </div>
-
-</body>
-</html>
