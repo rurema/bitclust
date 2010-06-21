@@ -1,3 +1,8 @@
+2010-06-21  okkez  <okkez000@gmail.com>
+
+	* tools/bc-checkparams.rb: add a tool to check difference between
+	signature and @param list.
+
 2010-05-02  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#bracket_link):
