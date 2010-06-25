@@ -162,8 +162,6 @@ table {
 }
 
 th {
-    align: left;
-    valign: top;
     text-align: left;
     vertical-align: top;
     background-color: #AAC;
@@ -172,8 +170,6 @@ th {
 }
 
 td {
-    align: left;
-    valign: top;
     text-align: left;
     vertical-align: top;
 }
@@ -184,8 +180,6 @@ table.entries {
 
 table.entries tr {
     /* border: 1px solid gray; */
-    align: left;
-    valign: top;
     text-align: left;
     vertical-align: top;
 }

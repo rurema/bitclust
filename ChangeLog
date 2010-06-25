@@ -1,3 +1,9 @@
+2010-06-25  okkez  <okkez000@gmail.com>
+
+	* theme/default/style.css: remove attributes align, valign (fix #55)
+
+	* theme/lillia/style.css: ditto.
+
 2010-06-21  okkez  <okkez000@gmail.com>
 
 	* tools/bc-checkparams.rb: add a tool to check difference between
