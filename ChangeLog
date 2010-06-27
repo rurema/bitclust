@@ -1,3 +1,8 @@
+2010-06-27  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/screen.rb (BitClust::URLMapper#document_url): allow
+	'-' to document_url.
+
 2010-06-25  okkez  <okkez000@gmail.com>
 
 	* theme/default/style.css: remove attributes align, valign (fix #55)
