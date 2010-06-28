@@ -230,15 +230,20 @@ $cm_comb_m += 1
 
     # squeeze result of #expand_name_wide
     def squeeze_names(result1, pattern, suffixes = nil)
-      re2 = /\A#{Regexp.quote(pattern)}#{suffix_pattern(suffixes)}\z/i
-      result2 = result1.grep(re2)
-      return result1 if result2.empty?
-      return result2 if result2.size == 1
-      re3 = /\A#{Regexp.quote(pattern)}#{suffix_pattern(suffixes)}\z/
-      result3 = result2.grep(re3)
-      return result2 if result3.empty?
-      return result3 if result3.size == 1   # no mean
-      result3
+      regexps =
+        [
+         /\A#{Regexp.quote(pattern)}.*#{suffix_pattern(suffixes)}\z/i,
+         /\A#{Regexp.quote(pattern)}#{suffix_pattern(suffixes)}\z/i,
+         /\A#{Regexp.quote(pattern)}#{suffix_pattern(suffixes)}\z/,
+        ]
+      result = result1
+      regexps.each do |re|
+        new_result = result.grep(re)
+        return result if new_result.empty?
+        return new_result if new_result.size == 1
+        result = new_result
+      end
+      return result
     end
 
     def suffix_pattern(suffixes)
