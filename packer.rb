@@ -1,4 +1,5 @@
 #!/usr/bin/ruby -Ke
+# -*- coding: euc-jp -*-
 
 require 'fileutils'
 require 'optparse'
@@ -19,6 +20,7 @@ parent_path = File.dirname(bitclust_src_path)
 output_path = File.join(parent_path, "ruby-refm-1.9.1-dynamic")
 bitclust_dest_dir = "bitclust"
 rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
+rubydoc_refm_capi_src_path = File.join(parent_path, "rubydoc/refm/capi/src/*")
 database_encoding = "euc-jp"
 database_versions = [
   "1.8.7",
@@ -85,6 +87,7 @@ database_versions.each do |version|
   unless File.exist?(database_path)
     system_verbose(ruby, "-Ke", bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{version}")
     system_verbose(ruby, "-Ke", bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
+    system_verbose(ruby, "-Ke", bitclust_command, "--database=#{database_path}", "--capi", "update", *Dir.glob(rubydoc_refm_capi_src_path).to_a)
   end
 end
 
@@ -101,6 +104,7 @@ ARGV.unshift "--bind-address=127.0.0.1"
 ARGV.unshift "--baseurl="
 ARGV.unshift "--debug"
 ARGV.unshift "--auto"
+ARGV.unshift "--capi"
 eval src, binding, standalone, 1
     RUBY
   end
@@ -134,14 +138,14 @@ Ruby リファレンスマニュアルの簡易 Web サーバシステムです。
 使い方に関しては以下の URL を参照してください。
 </p>
 <ul>
-  <li><a href="http://doc.loveruby.net/wiki/ReleasePackageHowTo.html">http://doc.loveruby.net/wiki/ReleasePackageHowTo.html</a></li>
+  <li><a href="http://redmine.ruby-lang.org/wiki/rurema/ReleasePackageHowTo">http://redmine.ruby-lang.org/wiki/rurema/ReleasePackageHowTo</a></li>
 </ul>
 
 <p>
 プロジェクト全体に関しては以下の URL を参照してください。
 </p>
 <ul>
-  <li><a href="http://doc.loveruby.net/wiki/FrontPage.html">http://doc.loveruby.net/wiki/FrontPage.html</a></li>
+  <li><a href="http://redmine.ruby-lang.org/wiki/rurema">http://redmine.ruby-lang.org/wiki/rurema</a></li>
 </ul>
 
 </body>

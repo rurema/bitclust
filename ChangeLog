@@ -1,3 +1,9 @@
+2010-10-28  okkez  <okkez000@gmail.com>
+
+	* server.rb: now can see C API
+
+	* packer.rb (#system_verbose): change URI of "rurema wiki" (fix #3885)
+
 2010-09-29  okkez  <okkez000@gmail.com>
 
 	* packer.rb: bump version 1.9.1 -> 1.9.2

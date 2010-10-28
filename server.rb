@@ -6,4 +6,5 @@ ARGV.unshift "--bind-address=127.0.0.1"
 ARGV.unshift "--baseurl="
 ARGV.unshift "--debug"
 ARGV.unshift "--auto"
+ARGV.unshift "--capi"
 eval src, binding, standalone, 1
