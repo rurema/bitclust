@@ -190,7 +190,7 @@ module BitClust
     end
 
     def default_dbpath
-      datadir = ::Config::CONFIG['datadir']
+      datadir = ::RbConfig::CONFIG['datadir']
       [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
         return path if MethodDatabase.datadir?(path)
       end
