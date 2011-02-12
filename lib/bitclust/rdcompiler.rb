@@ -288,10 +288,10 @@ module BitClust
         @f.ungets(header)
         case cmd
         when '@param', '@arg'
-          name = header.slice!(/\A\s*\w+/n) || '?'
+          name = header.slice!(/\A\s*\w+/) || '?'
           line "<dt class='method-param'>[PARAM] #{escape_html(name.strip)}:</dt>"
         when '@raise'
-          ex = header.slice!(/\A\s*[\w:]+/n) || '?'
+          ex = header.slice!(/\A\s*[\w:]+/) || '?'
           line "<dt>[EXCEPTION] #{escape_html(ex.strip)}:</dt>"
         when '@return'
           line "<dt>[RETURN]</dt>"

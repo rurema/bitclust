@@ -1,5 +1,8 @@
 2011-02-12  okkez  <okkez000@gmail.com>
 
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler#method_info):
+	unset Regexp 'n' option to reduce warnings when Ruby1.9.
+
 	* lib/bitclust.rb: set Encoding.default_external = 'euc-jp'.
 
 	* tools/bc-convert.rb: do not set $KCODE when Ruby1.9.
