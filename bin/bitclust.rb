@@ -16,7 +16,9 @@ end
 
 $LOAD_PATH.unshift srcdir_root() + 'lib'
 
-$KCODE = 'EUC'
+unless Object.const_defined?(:Encoding)
+  $KCODE = 'EUC'
+end
 
 require 'bitclust'
 require 'erb'

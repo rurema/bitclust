@@ -1,5 +1,7 @@
 2011-02-12  okkez  <okkez000@gmail.com>
 
+	* bin/bitclust.rb (#srcdir_root): reduce warnings.
+
 	* lib/bitclust/parseutils.rb (BitClust::LineStream#gets):
 	StrintIO#path is removed after Ruby1.9.
 
