@@ -22,7 +22,7 @@ require 'bitclust'
 require 'optparse'
 
 def main
-  templatedir = srcdir_root() + 'template.offline'
+  templatedir = srcdir_root() + 'data' + 'bitclust' + 'template.offline'
   target = nil
   baseurl = 'file://' + srcdir_root
   parser = OptionParser.new

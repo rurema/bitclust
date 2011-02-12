@@ -1,3 +1,11 @@
+2011-02-11  okkez  <okkez000@gmail.com>
+
+	* tools/bc-tohtml.rb (#main): fix template path.
+
+	* template.offline: move to ...
+
+	* data/bitclust/template.offline: ... this.
+
 2010-10-28  okkez  <okkez000@gmail.com>
 
 	* server.rb: now can see C API
