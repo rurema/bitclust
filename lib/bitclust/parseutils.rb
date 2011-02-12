@@ -23,7 +23,12 @@ module BitClust
     def gets
       line = @f.gets
       return nil unless line
-      line.location = Location.new(@f.path, @f.lineno)
+      if @f.respond_to?(:path)
+        path = @f.path
+      else
+        path = nil
+      end
+      line.location = Location.new(path, @f.lineno)
       line
     end
   end
