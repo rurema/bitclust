@@ -1,5 +1,11 @@
 2011-02-12  okkez  <okkez000@gmail.com>
 
+	* tools/bc-convert.rb: do not set $KCODE when Ruby1.9.
+
+	* tools/bc-tohtml.rb: ditto.
+
+	* config.in: ditto.
+
 	* bin/bitclust.rb (#srcdir_root): reduce warnings.
 
 	* lib/bitclust/parseutils.rb (BitClust::LineStream#gets):

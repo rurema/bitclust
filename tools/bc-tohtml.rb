@@ -16,7 +16,7 @@ end
 
 $LOAD_PATH.unshift srcdir_root() + 'lib'
 
-$KCODE = 'EUC'
+$KCODE = 'EUC' unless Object.const_defined?(:Encoding)
 
 require 'bitclust'
 require 'optparse'

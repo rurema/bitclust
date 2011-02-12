@@ -7,7 +7,7 @@
 @bc_srcdir = @bc_cgidir
 
 def setup_environment
-  $KCODE = 'EUC'
+  $KCODE = 'EUC' unless Object.const_defined?(:Encoding)
   $LOAD_PATH.unshift "#{@bc_srcdir}/lib"
   require 'bitclust'
 end

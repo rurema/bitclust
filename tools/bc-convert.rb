@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
+# -*- coding: euc-jp -*-
 
-$KCODE = 'EUC'
+$KCODE = 'EUC' unless Object.const_defined?(:Encoding)
 
 require 'stringio'
 require 'fileutils'
