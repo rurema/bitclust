@@ -1,3 +1,7 @@
+2011-02-12  okkez  <okkez000@gmail.com>
+
+	* test/run_test.rb: add.
+
 2011-02-11  okkez  <okkez000@gmail.com>
 
 	* tools/bc-tohtml.rb (#main): fix template path.
