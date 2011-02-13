@@ -11,6 +11,10 @@ require 'bitclust'
 require 'fileutils'
 require 'optparse'
 
+if Object.const_defined?(:Encoding)
+  Encoding.default_external = 'euc-jp'
+end
+
 module BitClust
 
   class URLMapperEx < URLMapper

@@ -1,7 +1,3 @@
-if Object.const_defined?(:Encoding)
-  Encoding.default_external = 'EUC-JP'
-end
-
 require 'bitclust/requesthandler'
 require 'bitclust/screen'
 require 'bitclust/server'
