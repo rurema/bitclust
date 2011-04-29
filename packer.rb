@@ -204,7 +204,7 @@ begin
   [
     ["7-zip32", "SevenZip", "-tzip -mx9 a #{archive_name}.zip #{archive_name}"],
     ["tar32", "Tar", "-z9 -cvf #{archive_name}.tar.gz #{archive_name}"],
-    ["tar32", "Tar", "--bzip2 -cvf #{archive_name}.tar.bz2 #{archive_name}"],
+    ["tar32", "Tar", "--xz -cvf #{archive_name}.tar.xz #{archive_name}"],
   ].each do |dllname, funcname, args|
     func = Win32API.new(dllname, funcname, ['N','P','P','N'], 'N')
     puts "#{dllname}: #{funcname} #{args}"
@@ -218,6 +218,6 @@ rescue LoadError
     system_verbose("zip", "-r", archive_name+".zip", archive_name)
   end
   ENV['GZIP'] = '--best'
-  system("tar", "--owner=root", "--group=root", "-zcvf", archive_name+".tar.gz", archive_name)
-  system("tar", "--owner=root", "--group=root", "--bzip2", "-cvf", archive_name+".tar.bz2", archive_name)
+  system_verbose("tar", "--owner=root", "--group=root", "-zcf", archive_name+".tar.gz", archive_name)
+  system_verbose("tar", "--owner=root", "--group=root", "--xz", "-cf", archive_name+".tar.xz", archive_name)
 end

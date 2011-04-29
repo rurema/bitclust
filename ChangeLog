@@ -1,3 +1,7 @@
+2011-04-29  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* packer.rb: make *.tar.xz instead of *.tar.bz2.
+
 2011-02-13  okkez  <okkez000@gmail.com>
 
 	* tools/bc-tohtmlpackage.rb: set Encoding.default_external.
