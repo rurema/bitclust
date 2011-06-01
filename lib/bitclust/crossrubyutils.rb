@@ -16,9 +16,11 @@ module BitClust
 
     def print_table(vers, table)
       thcols = ([20] + table.keys.map {|s| s.size }).max
-      print_record thcols, '', vers.map {|ver| version_id(ver) }
+      versions = vers.map {|ver| version_id(ver) }
+      width_list = versions.map{|v| v.size + 1 }
+      print_record thcols, '', versions, width_list
       crossrubyutils_sort_entries(table.keys).each do |c|
-        print_record thcols, c, vers.map {|ver| table[c][ver] ? 'o' : '-' }
+        print_record thcols, c, vers.map {|ver| table[c][ver] ? 'o' : '-' }, width_list
       end
     end
 
@@ -26,9 +28,12 @@ module BitClust
       ents.sort
     end
 
-    def print_record(thcols, th, tds)
+    def print_record(thcols, th, tds, width_list = nil)
+      unless width_list
+        width_list = Array.new(tds.size){ 4 }
+      end
       printf "%-#{thcols}s ", th
-      puts tds.map {|td| '%4s' % td }.join('')
+      puts tds.zip(width_list).map {|td, width| "%#{width}s" % td }.join('')
     end
 
     def version_id(ver)
@@ -49,6 +54,7 @@ module BitClust
     def build_crossruby_table
       ENV.delete 'RUBYOPT'
       ENV.delete 'RUBYLIB'
+      ENV.delete 'GEM_HOME'
       vers = []
       table = {}
       forall_ruby(ENV['PATH']) do |ruby, ver|
@@ -64,6 +70,7 @@ module BitClust
     def forall_ruby(path, &block)
       rubys(path)\
           .map {|ruby| [ruby, `#{ruby} --version`] }\
+          .reject {|ruby, verstr| `which #{ruby}`.include?('@') }\
           .sort_by {|ruby, verstr| verstr }\
           .each(&block)
     end

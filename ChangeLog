@@ -1,3 +1,11 @@
+2011-06-01  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/crossrubyutils.rb
+	(BitClust::CrossRubyUtils#forall_ruby): reject rvm's gemset.
+	(BitClust::CrossRubyUtils#build_crossruby_table): remove GEM_HOME
+	environment variable.
+	(BitClust::CrossRubyUtils#print_table): beautify table content.
+
 2011-04-29  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: make *.tar.xz instead of *.tar.bz2.
