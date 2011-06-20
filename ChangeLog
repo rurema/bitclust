@@ -1,3 +1,9 @@
+2011-06-21  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/libraryentry.rb
+	(BitClust::LibraryEntry#sublibrary): do not append duplicate
+	sublibraries. fixes #4901
+
 2011-06-10  okkez  <okkez000@gmail.com>
 
 	* tools/forall-ruby.rb (#main): remove GEM_HOME environment

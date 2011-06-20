@@ -118,8 +118,10 @@ module BitClust
     end
 
     def sublibrary(lib)
-      sublibraries().push lib
-      lib.is_sublibrary = true
+      unless sublibraries().include?(lib)
+        sublibraries().push lib
+        lib.is_sublibrary = true
+      end
     end
     
     def fetch_class(name)
