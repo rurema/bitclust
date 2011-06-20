@@ -59,7 +59,7 @@ module BitClust
     def labels
       [label()]
     end
-    
+
     def name?(n)
       name() == n
     end
@@ -92,7 +92,7 @@ module BitClust
 
     def all_requires(libs = {})
       requires.each{|l|
-        next if libs[l.name] 
+        next if libs[l.name]
         libs[l.name] = l
         l.all_requires(libs)
       }
@@ -104,7 +104,7 @@ module BitClust
       required_classes = (sublibraries & requires).map{|l| l.classes }.flatten
       @all_classes = (classes() + required_classes).uniq.sort
     end
-    
+
     def error_classes
       @error_classes ||= classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
     end
@@ -112,7 +112,7 @@ module BitClust
     def all_error_classes
       @all_error_classes ||= all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
     end
-    
+
     def require(lib)
       requires().push lib
     end
@@ -123,7 +123,7 @@ module BitClust
         lib.is_sublibrary = true
       end
     end
-    
+
     def fetch_class(name)
       get_class(name) or
           raise ClassNotFound, "no such class in the library #{name()}: #{name}"
