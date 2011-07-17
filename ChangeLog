@@ -1,3 +1,7 @@
+2011-07-18  okkez  <okkez000@gmail.com>
+
+	* packer.rb (#system_verbose): fix deprecated links. fixes #5040
+
 2011-07-17  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/refsdatabase.rb

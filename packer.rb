@@ -138,14 +138,14 @@ Ruby リファレンスマニュアルの簡易 Web サーバシステムです。
 使い方に関しては以下の URL を参照してください。
 </p>
 <ul>
-  <li><a href="http://redmine.ruby-lang.org/wiki/rurema/ReleasePackageHowTo">http://redmine.ruby-lang.org/wiki/rurema/ReleasePackageHowTo</a></li>
+  <li><a href="http://redmine.ruby-lang.org/projects/rurema/wiki/ReleasePackageHowTo">http://redmine.ruby-lang.org/projects/rurema/wiki/ReleasePackageHowTo</a></li>
 </ul>
 
 <p>
 プロジェクト全体に関しては以下の URL を参照してください。
 </p>
 <ul>
-  <li><a href="http://redmine.ruby-lang.org/wiki/rurema">http://redmine.ruby-lang.org/wiki/rurema</a></li>
+  <li><a href="http://redmine.ruby-lang.org/projects/rurema/wiki">http://redmine.ruby-lang.org/projects/rurema/wiki</a></li>
 </ul>
 
 </body>
