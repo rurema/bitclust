@@ -1,3 +1,9 @@
+2011-07-17  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/refsdatabase.rb
+	(BitClust::RefsDatabase#extract): allow level 5 and 6 refs.
+	(fixes #5035)
+
 2011-06-21  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/libraryentry.rb
