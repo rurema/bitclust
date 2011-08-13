@@ -77,7 +77,7 @@ module BitClust
         when /\A\#@\#/   # preprocessor comment
           ;
         when /\A\#@todo/i
-          ;
+          @buf.push line.gsub(/\A#/, '') if current_cond
         when /\A\#@include\s*\((.*?)\)/
           next unless current_cond
           begin
