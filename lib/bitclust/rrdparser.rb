@@ -119,7 +119,7 @@ module BitClust
         when 'object'
           if superclass
             # FIXME
-tty_warn "#{line.location}: singleton object class not implemented yet"
+            tty_warn "#{line.location}: singleton object class not implemented yet"
           end
           @context.define_object name
           read_object_body f
