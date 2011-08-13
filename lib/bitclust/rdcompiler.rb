@@ -126,6 +126,8 @@ module BitClust
           list
         when /@see/
           see
+        when /@todo/
+          todo
         when /\A@[a-z]/
           method_info
         else
@@ -276,6 +278,15 @@ module BitClust
       body = [header] + @f.span(/\A\s+\S/)
       line '<p>'
       line '[SEE_ALSO] ' + compile_text(body.join('').strip)
+      line '</p>'
+    end
+
+    def todo
+      header = @f.gets
+      cmd = header.slice!(/\A\@\w+/)
+      body = header
+      line '<p class="todo">'
+      line '[TODO]' + body
       line '</p>'
     end
 

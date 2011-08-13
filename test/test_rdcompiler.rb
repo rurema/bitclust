@@ -469,4 +469,46 @@ HERE
 HERE
     compile_and_assert_equal(expected, src)
   end
+
+  def test_todo
+    src = <<'HERE'
+--- puts(str)    -> String
+@todo
+
+description
+HERE
+    expected = <<'HERE'
+<dt class="method-heading"><code>puts(str) -&gt; String</code></dt>
+<dd class="method-description">
+<p class="todo">
+[TODO]
+</p>
+<p>
+description
+</p>
+</dd>
+HERE
+    compile_and_assert_equal(expected, src)
+  end
+
+  def test_todo_with_comment
+    src = <<'HERE'
+--- puts(str)    -> String
+@todo 1.9.2
+
+description
+HERE
+    expected = <<'HERE'
+<dt class="method-heading"><code>puts(str) -&gt; String</code></dt>
+<dd class="method-description">
+<p class="todo">
+[TODO] 1.9.2
+</p>
+<p>
+description
+</p>
+</dd>
+HERE
+    compile_and_assert_equal(expected, src)
+  end
 end
