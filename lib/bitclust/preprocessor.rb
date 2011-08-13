@@ -39,7 +39,7 @@ module BitClust
 
   class Preprocessor < LineFilter
 
-    def self.read(path, params = {})      
+    def self.read(path, params = {})
       if path.respond_to?(:gets)
         io = wrap(path, params)
       else
@@ -51,7 +51,7 @@ module BitClust
       end
       ret
     end
-    
+
     def Preprocessor.process(path, params = {})
       fopen(path, 'r:EUC-JP') {|f|
         return wrap(f, params).to_a
@@ -79,7 +79,7 @@ module BitClust
         when /\A\#@todo/i
           ;
         when /\A\#@include\s*\((.*?)\)/
-          next unless current_cond          
+          next unless current_cond
           begin
             file = $1.strip
             basedir = File.dirname(line.location.file)
@@ -139,7 +139,7 @@ module BitClust
     def current_cond
       @cond_stack.last
     end
-    
+
     def cond_init
       @cond_stack = [true]
     end
@@ -173,7 +173,7 @@ module BitClust
     def eval_expr(s)
       paren_open = s.scan(/\s*\(/)
       val = eval_expr_p(s)
-      while conj = read_conj(s)       
+      while conj = read_conj(s)
         case conj
         when 'and'
           val = eval_expr_p(s) && val
@@ -198,7 +198,7 @@ module BitClust
           val = val.__send__(op, eval_primary(s))
         end
       end
-      val 
+      val
     end
 
     def read_conj(s)
