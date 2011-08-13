@@ -6,7 +6,7 @@ require 'test/unit'
 require 'timeout'
 
 class TestRDCompiler < Test::Unit::TestCase
-  
+
   def setup
     @dummy = 'dummy'
     @u = BitClust::URLMapper.new(Hash.new{@dummy})
@@ -16,8 +16,8 @@ class TestRDCompiler < Test::Unit::TestCase
   def compile_and_assert_equal(expected, src)
     assert_equal expected, @c.compile(src)
   end
-  
-  def test_dlist  
+
+  def test_dlist
     src = <<'HERE'
 : t1
  c1
@@ -43,7 +43,7 @@ c2-2
 </dl>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
     src = <<HERE
 : t1
  c1
@@ -73,7 +73,7 @@ c3
 </dl>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
     src = <<HERE
 : t1
  c1
@@ -103,7 +103,7 @@ c2
 </dl>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
     src = <<HERE
 : t1
  c1
@@ -147,7 +147,7 @@ foo
 </pre>
 HERE
     compile_and_assert_equal(expected, src)
-        
+
     src = <<'HERE'
  pretext
 
@@ -160,10 +160,10 @@ pretext
 * hoge1
 </pre>
 HERE
-    compile_and_assert_equal(expected, src)    
+    compile_and_assert_equal(expected, src)
   end
 
-  def test_method  
+  def test_method
     src = <<'HERE'
 --- hoge
 foo
@@ -183,7 +183,7 @@ text
 </dd>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
     src = <<'HERE'
 --- <=>
 
@@ -263,7 +263,6 @@ dsc
 HERE
     compile_and_assert_equal(expected, src)
 
-    
     src = <<'HERE'
 --- method
 
@@ -288,7 +287,7 @@ dsc3
 </dd>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
     src = <<'HERE'
 --- method
 
@@ -350,7 +349,7 @@ HERE
 </ul>
 HERE
     compile_and_assert_equal(expected, src)
-    
+
     src = <<'HERE'
  * hoge1
 
@@ -395,7 +394,7 @@ bar</li>
 <li>hoge2</li>
 </ol>
 HERE
-    compile_and_assert_equal(expected, src)    
+    compile_and_assert_equal(expected, src)
   end
 
 
@@ -411,7 +410,7 @@ HERE
       assert @c.compile(src)
     end
   end
-  
+
   def test_bracket_link
     [
      ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
@@ -439,14 +438,14 @@ HERE
     ].each{|src, expected|
       assert_equal expected, @c.send(:compile_text, src), src
     }
-    
+
     [
      ['[[d:hoge/bar]]',             '<a href="dummy/hoge/bar">.*</a>'],
      ['[[ref:d:hoge/bar#frag]]',    '<a href="dummy/hoge/bar#frag">.*</a>'],
      ['[[ref:c:Hoge#frag]]',        '<a href="dummy/class/Hoge#frag">.*</a>'],
      ['[[ref:m:$~#frag]]',          '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
      ['[[ref:lib:jcode#frag]]',     '<a href="dummy/library/jcode#frag">.*</a>'],
-     
+
      ['[[ref:c:Hoge]]',             'compileerror'],
      ['[[ref:ref:hoge/bar#frag]]',  'compileerror'],
     ].each{|src, expected|
