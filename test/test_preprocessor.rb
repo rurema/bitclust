@@ -60,5 +60,25 @@ HERE
     ret = Preprocessor.wrap(StringIO.new(src), params).to_a
     assert_equal(expected, ret.join)
   end
+
+  def test_todo_with_condition
+    params = { 'version' => '1.9.2' }
+    src = <<HERE
+--- puts(str) -> String
+\#@since 1.9.2
+\#@todo 1.9.2
+\#@else
+\#@todo old
+\#@end
+description
+HERE
+    expected = <<HERE
+--- puts(str) -> String
+@todo 1.9.2
+description
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
 end
 
