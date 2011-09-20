@@ -31,7 +31,7 @@
 <table class="entries libraries">
 <%    cs.each do |c| %>
 <tr>
-<td class="signature"><%= class_link(c.name, "#{c.type} #{c.name}") %></td>
+<td class="signature"><%= class_link(c.realname, "#{c.type} #{c.name}") %></td>
 <td class="description"><%= compile_rd(c.synopsis_source) %></td>
 </tr>
 <%    end %>

@@ -269,6 +269,8 @@ module BitClust
     end
     private :classmap
 
+    # get a class entry if it exists, or create a new class entry object
+    # if it doesn't exist.
     def get_class(name)
       if id = intern_classname(name)
         load_class(id) or

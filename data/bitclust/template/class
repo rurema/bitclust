@@ -16,14 +16,19 @@
     myself, *supers = @entry.ancestors
     n = 0
 %>
+<% unless @entry.alias? %>
 <%= _('ancestors') %>: <%= escape_html(myself.name) %>
 <%  supers.each do |c| %>
       <%= @conf[:tochm_mode] ? "&lt;" : a_href("?a=#{n}", "<")  %> <%= class_link(c.name) %>
       <% n += 1 %>
 <%  end %>
+<% end %>
 
 <% unless @entry.extended.empty? %>
 <br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
+<% end %>
+<% unless @entry.aliases.empty? %>
+<br>aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
 <% end %>
 </p>
 <%

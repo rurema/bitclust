@@ -184,8 +184,7 @@ module BitClust
 
     def read_aliases(f)
       f.while_match(/\Aalias\s/) do |line|
-#tty_warn "#{line.location}: class alias is not implemented yet"
-        # FIXME
+        @context.alias line.split[1]
       end
     end
 
@@ -394,6 +393,18 @@ end
 
       def extend(name)
         @klass.extend @db.get_class(name)
+      end
+
+      # Add a alias +name+ to the alias list.
+      def alias(name)
+        @db.open_class(name) do |c|
+          c.type = @klass.type
+          c.library = @library
+          c.aliasof = @klass
+          c.source = "Alias of [[c:#{@klass.name}]]\n"
+          @library.add_class c
+          @klass.alias c
+        end
       end
 
       def module_function

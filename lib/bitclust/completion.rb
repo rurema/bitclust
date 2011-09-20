@@ -512,9 +512,19 @@ $cm_comb_m += 1
         @specs |= other.specs
       end
 
-      def inherited_method?
-        not @specs.any? {|spec| spec.klass == origin().klass }
+
+      def owned_method?
+        @specs.any? {|spec| spec.klass == origin().klass }
       end
+      
+      def method_of_alias_class?
+        @entry.klass.aliases.any?{|aliasclass| aliasclass.name?(class_name())}
+      end
+
+      def inherited_method?
+        !owned_method?() && !method_of_alias_class?()
+      end
+
     end
 
   end

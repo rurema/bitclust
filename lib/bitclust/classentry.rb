@@ -60,6 +60,11 @@ module BitClust
       name() == n
     end
 
+    # Return the real class name
+    def realname
+      alias? ? aliasof.name : name
+    end
+    
     def name_match?(re)
       re =~ name()
     end
@@ -77,6 +82,8 @@ module BitClust
       property :included,   '[ClassEntry]'
       property :extended,   '[ClassEntry]'
       property :library,    'LibraryEntry'
+      property :aliases,    '[ClassEntry]'
+      property :aliasof,    'ClassEntry'
       property :source,     'String'
     }
 
@@ -105,12 +112,21 @@ module BitClust
       type() == :object
     end
 
+    def alias?
+      !! aliasof()
+    end
+
     def include(m)
       included().push m
     end
 
     def extend(m)
       extended().push m
+    end
+
+    # Add a alias +c+ to the alias list.
+    def alias(c)
+      aliases().push c
     end
 
     def check_ancestor_type
@@ -360,6 +376,9 @@ module BitClust
     private
 
     def makemap(typechar, inherited_modules, ents)
+      if alias?
+        return aliasof().__send__("_#{typechar}map").dup
+      end
       s = superclass()
       map = s ? s.__send__("_#{typechar}map").dup : {}
       inherited_modules.each do |mod|

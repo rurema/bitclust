@@ -409,6 +409,11 @@ module BitClust
     end
 
     def describe_class(c)
+      if c.alias?
+        describe_class(c.aliasof)
+        return
+      end
+      
       unless c.library.name == '_builtin'
         puts "require '#{c.library.name}'"
         puts
@@ -418,6 +423,12 @@ module BitClust
         puts
         c.included.each do |mod|
           puts "include #{mod.name}"
+        end
+      end
+      unless c.aliases.empty?
+        puts
+        c.aliases.each do |al|
+          puts "alias #{al.name}"
         end
       end
       unless c.source.strip.empty?
@@ -431,15 +442,20 @@ module BitClust
         puts "require '#{rec.entry.library.name}'"
       end
       # FIXME: replace method signature by method spec
-      unless rec.inherited_method?
-        rec.names.each do |name|
-          puts name
+      if rec.method_of_alias_class?
+        rec.specs.each do |spec|
+          puts "#{rec.origin.klass}#{rec.origin.type}#{spec.method} (#{spec.klass} is an alias of #{rec.origin.klass})"
         end
-      else
+      elsif rec.inherited_method?
         rec.specs.each do |spec|
           puts "#{spec.klass}\t< #{rec.origin.klass}#{rec.origin.type}#{spec.method}"
         end
+      else
+        rec.names.each do |name|
+          puts name
+        end
       end
+        
       puts @compiler.compile(rec.entry.source.strip)
       puts
     end
