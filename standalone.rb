@@ -8,6 +8,11 @@
 require 'uri'
 require 'webrick'
 require 'optparse'
+require 'pathname'
+
+def srcdir_root
+  Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
+end
 
 params = {
   :Port => 10080
@@ -22,7 +27,7 @@ set_srcdir = lambda {|path|
   themedir ||= "#{srcdir}/theme"
   libdir ||= "#{srcdir}/lib"
 }
-set_srcdir.call File.dirname($0)
+set_srcdir.call srcdir_root
 debugp = false
 autop = false
 browser = nil

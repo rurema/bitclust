@@ -537,4 +537,4 @@ class PropertyCommand < Subcommand
 end
 
 
-main if __FILE__ == $0
+main

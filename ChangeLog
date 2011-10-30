@@ -1,5 +1,10 @@
 2011-10-31  okkez  <okkez000@gmail.com>
 
+	* standalone.rb: add srcdir_root method and use it.
+
+	* bin/bitclust.rb (PropertyCommand#exec): bin/bitclust.rb is a
+	command line tool.
+
 	* Rakefile: add gem related tasks.
 
 	* lib/bitclust/version.rb: add.
