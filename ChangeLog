@@ -1,3 +1,13 @@
+2011-10-31  okkez  <okkez000@gmail.com>
+
+	* Rakefile: add gem related tasks.
+
+	* lib/bitclust/version.rb: add.
+
+	* bitclust.gemspec (Gem): add.
+
+	* Gemfile: add.
+
 2011-08-14  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/rdcompiler.rb
