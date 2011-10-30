@@ -4,7 +4,7 @@ require 'rake'
 require "bitclust/version"
 
 Gem::Specification.new do |s|
-  s.name        = "bitclust"
+  s.name        = "bitclust-core"
   s.version     = BitClust::VERSION
   s.authors     = ["http://redmine.ruby-lang.org/projects/rurema"]
   s.email       = [""]
