@@ -1,6 +1,7 @@
 require 'test/unit'
 require 'bitclust/database'
 require 'bitclust/refsdatabase'
+require 'bitclust/rrdparser'
 require 'stringio'
 
 class Test_RefsDatabase < Test::Unit::TestCase
