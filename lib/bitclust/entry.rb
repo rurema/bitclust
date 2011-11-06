@@ -45,6 +45,11 @@ module BitClust
           #{@slots.map {|s| "h['#{s.name}'] = #{s.serializer}" }.join(sep)}
           h
         end
+
+        def unload
+          clear
+          @loaded = false
+        end
       End
       @slots.each do |slot|
         module_eval(<<-End, __FILE__, __LINE__ + 1)
