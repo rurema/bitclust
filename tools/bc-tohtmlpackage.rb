@@ -191,6 +191,7 @@ def create_html_file(entry, manager, outputdir, db)
   else
     raise
   end
+  e.unload
 end
 
 def create_html_method_file(entry, manager, outputdir, db)
