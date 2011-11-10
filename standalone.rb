@@ -27,7 +27,7 @@ set_srcdir = lambda {|path|
   themedir ||= "#{srcdir}/theme"
   libdir ||= "#{srcdir}/lib"
 }
-set_srcdir.call srcdir_root
+
 debugp = false
 autop = false
 browser = nil
@@ -89,6 +89,9 @@ rescue OptionParser::ParseError => err
   $stderr.puts parser.help
   exit 1
 end
+
+set_srcdir.call srcdir_root unless srcdir
+
 unless baseurl
   $stderr.puts "missing base URL.  Use --baseurl"
   exit 1
