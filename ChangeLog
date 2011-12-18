@@ -1,3 +1,7 @@
+2011-12-19  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* packer.rb: follow rename at r4950.
+
 2011-12-17  okkez  <okkez000gmail.com>
 
 	* lib/bitclust/subcommand (BitClust::ServerCommand): add.
