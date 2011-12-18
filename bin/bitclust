@@ -565,13 +565,17 @@ class SetupCommand < Subcommand
   def initialize
     @prepare = nil
     @cleanup = nil
+    @versions = ["1.8.7", "1.9.2", "1.9.3"]
     @parser = OptionParser.new {|opt|
       opt.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
       opt.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
         @prepare = true
       }
-      opt.on('--cleanup', 'Cleanup datebase before generage database.') {
+      opt.on('--cleanup', 'Cleanup datebase before create database.') {
         @cleanup = true
+      }
+      opt.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
+        @versions = versions.split(",")
       }
       opt.on('--help', 'Prints this message and quit.') {
         puts opt.help
@@ -604,17 +608,21 @@ class SetupCommand < Subcommand
     config_dir.mkpath
     config_path = config_dir + "config"
     rubydoc_dir = config_dir + "rubydoc"
-    versions = ["1.8.7", "1.9.2", "1.9.3"]
     @config = {
       :database_prefix => (config_dir + "db").to_s,
       :encoding => "euc-jp",
-      :versions => versions,
-      :defualt_version => versions.max,
+      :versions => @versions,
+      :defualt_version => @versions.max,
       :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
       :capi_src => (rubydoc_dir + "refm/capi/src/").to_s,
     }
     if config_path.exist?
       @config = YAML.load_file(config_path)
+      unless @config[:versions] == @versions
+        @config[:versions] = @versions
+        @config[:default_version] = @versions.max
+      end
+      generate_config(config_path, @config)
     else
       generate_config(config_path, @config)
     end
