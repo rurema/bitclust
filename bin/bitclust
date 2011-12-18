@@ -25,6 +25,7 @@ require 'erb'
 require 'find'
 require 'pp'
 require 'optparse'
+require 'yaml'
 
 def main
   Signal.trap(:PIPE, 'IGNORE') rescue nil   # Win32 does not have SIGPIPE
@@ -49,6 +50,7 @@ Subcommands:
     query       Dispatch arbitrary query.
     update      Update database.
     property    Handle database properties.
+    setup       Initialize and update database with default options.
 
 Global Options:
   EndBanner
@@ -71,6 +73,7 @@ Global Options:
   subcommands['query'] = QueryCommand.new
   subcommands['update'] = UpdateCommand.new
   subcommands['property'] = PropertyCommand.new
+  subcommands['setup'] = SetupCommand.new
   begin
     parser.order!
     if ARGV.empty?
@@ -92,9 +95,13 @@ Global Options:
     $stderr.puts cmd.help
     exit 1
   end
-  unless prefix
-    $stderr.puts "no database given. Use --database option"
-    exit 1
+  if "setup" == name
+    db = nil
+  else
+    unless prefix
+      $stderr.puts "no database given. Use --database option"
+      exit 1
+    end
   end
   unless capi
     db = BitClust::MethodDatabase.new(prefix)
@@ -536,5 +543,92 @@ class PropertyCommand < Subcommand
 
 end
 
+class SetupCommand < Subcommand
+
+  REPOSITORY_PATH = "http://jp.rubyist.net/svn/rurema/doctree/trunk"
+
+  def initialize
+    @prepare = nil
+    @cleanup = nil
+    @parser = OptionParser.new {|opt|
+      opt.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
+      opt.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
+        @prepare = true
+      }
+      opt.on('--cleanup', 'Cleanup datebase before generage database.') {
+        @cleanup = true
+      }
+      opt.on('--help', 'Prints this message and quit.') {
+        puts opt.help
+        exit 0
+      }
+    }
+  end
+
+  def exec(db, argv)
+    prepare
+    return if @prepare
+    @config[:versions].each do |version|
+      puts "Generating database for Ruby#{version}..."
+      prefix = "#{@config[:database_prefix]}-#{version}"
+      FileUtils.rm_ rf(prefix) if @cleanup
+      init_argv = ["version=#{version}", "encoding=#{@config[:encoding]}"]
+      db = BitClust::MethodDatabase.new(prefix)
+      InitCommand.new.exec(db, init_argv)
+      update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
+      argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
+      update_function_database(prefix, argv)
+    end
+  end
+
+  private
+
+  def prepare
+    home_directory = Pathname(ENV["HOME"])
+    config_dir = home_directory + ".bitclust"
+    config_dir.mkpath
+    config_path = config_dir + "config"
+    rubydoc_dir = config_dir + "rubydoc"
+    versions = ["1.8.7", "1.9.2", "1.9.3"]
+    @config = {
+      :database_prefix => (config_dir + "db").to_s,
+      :encoding => "euc-jp",
+      :versions => versions,
+      :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
+      :capi_src => (rubydoc_dir + "refm/capi/src/").to_s,
+    }
+    if config_path.exist?
+      @config = YAML.load_file(config_path)
+    else
+      generate_config(config_path, @config)
+    end
+    checkout(rubydoc_dir)
+  end
+
+  def generate_config(path, config)
+    path.open("w+", 0644) do |file|
+      file.puts config.to_yaml
+    end
+  end
+
+  def checkout(rubydoc_dir)
+    system("svn", "co", REPOSITORY_PATH, rubydoc_dir.to_s)
+  end
+
+  def update_method_database(prefix, argv)
+    db = BitClust::MethodDatabase.new(prefix)
+    cmd = UpdateCommand.new
+    cmd.parse(argv)
+    cmd.exec(db, argv)
+  end
+
+  def update_function_database(prefix, argv)
+    db = BitClust::FunctionDatabase.new(prefix)
+    cmd = UpdateCommand.new
+    cmd.parse(argv)
+    cmd.exec(db, argv)
+  end
+
+end
 
 main

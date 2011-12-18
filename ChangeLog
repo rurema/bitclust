@@ -1,3 +1,7 @@
+2011-12-11  okkez  <okkez000@gmail.com>
+
+	* bin/bitclust (SetupCommand): add.
+
 2011-10-31  okkez  <okkez000@gmail.com>
 
 	* standalone.rb: add srcdir_root method and use it.
