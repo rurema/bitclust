@@ -1,6 +1,7 @@
 2011-12-11  okkez  <okkez000@gmail.com>
 
 	* bin/bitclust (SetupCommand): add.
+	(#_main): add --version option.
 
 2011-10-31  okkez  <okkez000@gmail.com>
 

@@ -60,6 +60,10 @@ Global Options:
   parser.on('--capi', 'Process C API database.') {
     capi = true
   }
+  parser.on('--version', 'Print version and quit.') {
+    puts BitClust::VERSION
+    exit 0
+  }
   parser.on('--help', 'Prints this message and quit.') {
     puts parser.help
     exit 0
