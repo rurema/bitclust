@@ -70,14 +70,14 @@ Global Options:
   }
 
   subcommands = {}
-  subcommands['init'] = InitCommand.new
-  subcommands['list'] = ListCommand.new
-  subcommands['lookup'] = LookupCommand.new
-  subcommands['search'] = BitClust::Searcher.new
-  subcommands['query'] = QueryCommand.new
-  subcommands['update'] = UpdateCommand.new
-  subcommands['property'] = PropertyCommand.new
-  subcommands['setup'] = SetupCommand.new
+  subcommands['init']     = BitClust::InitCommand.new
+  subcommands['list']     = BitClust::ListCommand.new
+  subcommands['lookup']   = BitClust::LookupCommand.new
+  subcommands['search']   = BitClust::Searcher.new
+  subcommands['query']    = BitClust::QueryCommand.new
+  subcommands['update']   = BitClust::UpdateCommand.new
+  subcommands['property'] = BitClust::PropertyCommand.new
+  subcommands['setup']    = BitClust::SetupCommand.new
   begin
     parser.order!
     if ARGV.empty?
