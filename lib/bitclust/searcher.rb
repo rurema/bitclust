@@ -199,6 +199,7 @@ module BitClust
 
     def search_pattern(db, argv)
       db ||= new_database()
+      @view.database ||= db if @view
       case @target_type || db
       when :class
         find_class db, argv[0]
