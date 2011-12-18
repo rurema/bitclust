@@ -102,6 +102,13 @@ Global Options:
   if "setup" == name
     db = nil
   else
+    home_directory = Pathname(ENV['HOME'])
+    config_path = home_directory + ".bitclust/config"
+    if config_path.exist?
+      config = YAML.load_file(config_path)
+      version = config[:default_version]
+      prefix = "#{config[:database_prefix]}-#{version}"
+    end
     unless prefix
       $stderr.puts "no database given. Use --database option"
       exit 1
@@ -598,6 +605,7 @@ class SetupCommand < Subcommand
       :database_prefix => (config_dir + "db").to_s,
       :encoding => "euc-jp",
       :versions => versions,
+      :defualt_version => versions.max,
       :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
       :capi_src => (rubydoc_dir + "refm/capi/src/").to_s,
     }
