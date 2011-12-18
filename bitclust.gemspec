@@ -19,7 +19,7 @@ EOD
 
   s.files         = FileList["**/*"].exclude("*~", "pkg", "pkg/*")
   s.test_files    = FileList["test/**/*.rb"].exclude("*~")
-  s.executables   = ["bitclust.rb"]
+  s.executables   = ["bitclust"]
   s.require_paths = ["lib"]
 
   # specify any dependencies here; for example:
