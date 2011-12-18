@@ -37,6 +37,7 @@ end
 
 def _main
   prefix = nil
+  version = nil
   capi = false
   parser = OptionParser.new
   parser.banner = <<-EndBanner
@@ -56,6 +57,9 @@ Global Options:
   EndBanner
   parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
     prefix = path
+  }
+  parser.on('-t', '--targer=VERSION', 'Specify Ruby version.') {|v|
+    version = v
   }
   parser.on('--capi', 'Process C API database.') {
     capi = true
@@ -106,8 +110,8 @@ Global Options:
     config_path = home_directory + ".bitclust/config"
     if config_path.exist?
       config = YAML.load_file(config_path)
-      version = config[:default_version]
-      prefix = "#{config[:database_prefix]}-#{version}"
+      version ||= config[:default_version]
+      prefix ||= "#{config[:database_prefix]}-#{version}"
     end
     unless prefix
       $stderr.puts "no database given. Use --database option"
