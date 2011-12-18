@@ -78,6 +78,7 @@ Global Options:
   subcommands['update']   = BitClust::UpdateCommand.new
   subcommands['property'] = BitClust::PropertyCommand.new
   subcommands['setup']    = BitClust::SetupCommand.new
+  subcommands['server']   = BitClust::ServerCommand.new
   begin
     parser.order!
     if ARGV.empty?
@@ -99,7 +100,8 @@ Global Options:
     $stderr.puts cmd.help
     exit 1
   end
-  if "setup" == name
+  case name
+  when "sestup", "server"
     db = nil
   else
     home_directory = Pathname(ENV['HOME'])
@@ -113,11 +115,11 @@ Global Options:
       $stderr.puts "no database given. Use --database option"
       exit 1
     end
-  end
-  unless capi
-    db = BitClust::MethodDatabase.new(prefix)
-  else
-    db = BitClust::FunctionDatabase.new(prefix)
+    if capi
+      db = BitClust::FunctionDatabase.new(prefix)
+    else
+      db = BitClust::MethodDatabase.new(prefix)
+    end
   end
   cmd.exec db, ARGV
 rescue BitClust::WriterError => err
