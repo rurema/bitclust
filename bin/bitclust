@@ -101,7 +101,7 @@ Global Options:
     exit 1
   end
   case name
-  when "sestup", "server"
+  when "setup", "server"
     db = nil
   else
     home_directory = Pathname(ENV['HOME'])
