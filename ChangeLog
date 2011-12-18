@@ -1,5 +1,10 @@
 2011-12-19  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
+	* bitclust.gemspec, packer.rb: change from redmine.ruby-lang.org
+	to bugs.ruby-lang.org.
+
+2011-12-19  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
 	* packer.rb: follow rename at r4950.
 
 2011-12-17  okkez  <okkez000gmail.com>

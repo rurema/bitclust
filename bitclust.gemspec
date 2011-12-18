@@ -6,7 +6,7 @@ require "bitclust/version"
 Gem::Specification.new do |s|
   s.name        = "bitclust-core"
   s.version     = BitClust::VERSION
-  s.authors     = ["http://redmine.ruby-lang.org/projects/rurema"]
+  s.authors     = ["http://bugs.ruby-lang.org/projects/rurema"]
   s.email       = [""]
   s.homepage    = "http://doc.ruby-lang.org/ja/"
   s.summary     = %Q!BitClust is a rurema document processor.!
