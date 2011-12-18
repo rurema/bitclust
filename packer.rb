@@ -63,7 +63,7 @@ rescue OptionParser::ParseError => err
   exit 1
 end
 
-bitclust_command = File.join(bitclust_src_path, "bin/bitclust.rb")
+bitclust_command = File.join(bitclust_src_path, "bin/bitclust")
 
 def system_verbose(*args)
   puts args.inspect
@@ -164,7 +164,7 @@ database_versions.each do |version|
       f.puts(<<-CMD.gsub(/\r?\n/, "\r\n"))
 @echo off
 pushd "%~dp0"
-ruby -Ke -I bitclust/lib bitclust/bin/refe.rb -d #{database_dir} -e sjis %*
+ruby -Ke -I bitclust/lib bitclust/bin/refe -d #{database_dir} -e sjis %*
 popd
       CMD
     end
@@ -175,7 +175,7 @@ popd
       f.puts <<-SH
 #!/bin/sh
 cd "`dirname "$0"`"
-exec ruby -Ke -I bitclust/lib bitclust/bin/refe.rb -d #{database_dir} "$@"
+exec ruby -Ke -I bitclust/lib bitclust/bin/refe -d #{database_dir} "$@"
       SH
     end
   end
