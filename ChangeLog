@@ -1,7 +1,23 @@
+2011-12-17  okkez  <okkez000gmail.com>
+
+	* lib/bitclust/subcommand (BitClust::ServerCommand): add.
+
+2011-12-15  okkez  <okkez000gmail.com>
+
+	* lib/bitclust/subcommand: move subcommand classes under BitClust
+	module.
+
+2011-12-12  okkez  <okkez000gmail.com>
+
+	* bin/bitclust: split subcommands from bin/bitclust.
+	* lib/bitclust/subcommand: split subcommands from bin/bitclust.
+
 2011-12-11  okkez  <okkez000@gmail.com>
 
 	* bin/bitclust (SetupCommand): add.
 	(#_main): add --version option.
+	(#_main): read config from $HOME/.bitclust/config.
+	(#_main): add --target option.
 
 2011-10-31  okkez  <okkez000@gmail.com>
 
