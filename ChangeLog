@@ -1,3 +1,16 @@
+2012-02-12  wanabe  <s.wanabe@gmail.com>
+
+	* data/bitclust/template/library: sort classes according to
+	inheritance hierarchy. #5943
+
+	* data/bitclust/template.offline/library: ditto.
+
+	* data/bitclust/template.lillia/library: ditto.
+
+	* data/bitclust/catalog/ja_JP.EUC-JP: add "Classes", "Modules" and
+	"Objects".
+
+
 2011-12-19  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* bitclust.gemspec, packer.rb: change from redmine.ruby-lang.org

@@ -12,6 +12,8 @@ All Libraries
 ライブラリ一覧
 Builtin Library
 組み込みライブラリ
+Classes
+クラス
 Class Index
 クラス一覧
 Classes/Modules
@@ -36,8 +38,12 @@ Library Index
 ライブラリ一覧
 Method
 メソッド
+Modules
+モジュール
 Module Functions
 モジュール関数
+Objects
+オブジェクト
 Private Instance Methods
 privateメソッド
 Private Singleton Methods

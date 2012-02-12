@@ -13,24 +13,43 @@
     required_classes = (@entry.sublibraries & @entry.requires).map{|lib| lib.classes }.flatten
     all_classes = (@entry.classes + required_classes).uniq.sort
     err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
-    classes = (all_classes - err_classes).sort
+    modules = all_classes.select{|c| c.module? }.sort
+    objects = all_classes.select{|c| c.object? }.sort
+    classes = (all_classes - err_classes - modules - objects).sort
+
+    class_tree = classes.group_by{|c| c.superclass }
+    class_root = class_tree.keys.select{|c| !c || !class_tree[c.superclass]}
+    class_root.map!{|c| class_tree[c] }.flatten!
+    err_class_tree = err_classes.group_by{|c| c.superclass }
+    err_class_root = err_class_tree.keys.select{|c| !c || !err_class_tree[c.superclass]}
+    err_class_root.map!{|c| err_class_tree[c] }.flatten!
 %>
 
 
 <%= headline(_("Abstract")) %>
 <%= compile_rd(@entry.source) %>
+<% draw_tree = proc do |list, tree, indent = 0| %>
+<tr>
+<%   list.each do |c| %>
+<td class="signature" style="text-indent: <%= indent * 1.0%>em;"><span style="display:none"><%= "&nbsp;" * indent %></span>
+<%=    class_link(c.name, c.name) %></td>
+<td class="description"><%= compile_rd(c.synopsis_source) %></td>
+</tr>
 <%
-  [[classes,      _('Classes/Modules')],
-   [err_classes,  _('Exception Classes')]].each do |cs, msg|
+       tree && tree[c] && draw_tree.call(tree[c], tree, indent + 1)
+     end
+   end
+%>
+<%
+  [[class_root,     class_tree    ,  _('Classes')],
+   [modules,        nil           ,  _('Modules')],
+   [objects,        nil           ,  _('Objects')],
+   [err_class_root, err_class_tree,  _('Exception Classes')]].each do |cs, tree, msg|
     unless cs.empty?
 %>
 <%= headline(msg) %>
 <table class="entries libraries">
-<%    cs.each do |c| %>
-<tr>
-<td class="signature"><%= class_link(c.name, "#{c.type} #{c.name}") %></td>
-<td class="description"><%= compile_rd(c.synopsis_source) %></td>
-<%    end %>
+<% draw_tree.call(cs, tree) %>
 </table>
 <%
     end
