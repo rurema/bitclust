@@ -617,7 +617,7 @@ module BitClust
       set_srcdir(srcdir_root) unless @srcdir
 
       unless @baseurl
-        $stderr.puts "missing base URL.  Use --baseurl"
+        $stderr.puts "missing base URL.  Use --baseurl or check ~/.bitclust/config"
         exit 1
       end
       unless @dbpath || @autop
