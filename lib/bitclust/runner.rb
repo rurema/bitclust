@@ -105,10 +105,8 @@ Global Options:
       when "setup", "server"
         db = nil
       else
-        home_directory = Pathname(ENV['HOME'])
-        config_path = home_directory + ".bitclust/config"
-        if config_path.exist?
-          config = YAML.load_file(config_path)
+        config = load_config()
+        if config
           @version ||= config[:default_version]
           @prefix ||= "#{config[:database_prefix]}-#{@version}"
         end
@@ -126,6 +124,16 @@ Global Options:
     rescue BitClust::WriterError => err
       raise if $DEBUG
       error err.message
+    end
+
+    def load_config
+      home_directory = Pathname(ENV['HOME'])
+      config_path = home_directory + ".bitclust/config"
+      if config_path.exist?
+        YAML.load_file(config_path)
+      else
+        nil
+      end
     end
 
     def error(message)
