@@ -17,6 +17,12 @@ module BitClust
     def help
       @parser.help
     end
+
+    # TODO refactor
+    def error(message)
+      $stderr.puts "#{File.basename($0, '.*')}: error: #{message}"
+      exit 1
+    end
   end
 
 
