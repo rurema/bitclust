@@ -57,7 +57,7 @@ BANNER
   end
   unless ARGV.size == 1 || all
     $stderr.puts "wrong number of arguments"
-    $stderr.puts opts.help
+    $stderr.puts parser.help
     exit 1
   end
   classname = ARGV[0]
