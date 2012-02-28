@@ -486,7 +486,7 @@ module BitClust
         :database_prefix => (config_dir + "db").to_s,
         :encoding => "euc-jp",
         :versions => @versions,
-        :defualt_version => @versions.max,
+        :default_version => @versions.max,
         :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
         :capi_src => (rubydoc_dir + "refm/capi/src/").to_s,
         :beseurl => "http://localhost:10080",
