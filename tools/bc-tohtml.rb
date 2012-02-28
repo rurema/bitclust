@@ -24,7 +24,7 @@ require 'optparse'
 def main
   templatedir = srcdir_root() + 'data' + 'bitclust' + 'template.offline'
   target = nil
-  baseurl = 'file://' + srcdir_root
+  baseurl = 'file://' + srcdir_root.to_s
   parser = OptionParser.new
   ver = '1.9.0'
   parser.banner = "Usage: #{File.basename($0, '.*')} rdfile"
