@@ -1,6 +1,5 @@
 require 'pathname'
 require 'optparse'
-require 'bitclust/subcommand'
 
 unless Object.const_defined?(:Encoding)
   $KCODE = 'EUC'
