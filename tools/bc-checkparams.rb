@@ -30,7 +30,7 @@ def main
   end
   unless ARGV.size == 1
     $stderr.puts "wrong number of arguments"
-    $stderr.puts opts.help
+    $stderr.puts option.help
     exit 1
   end
   filename = ARGV[0]
