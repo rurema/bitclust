@@ -169,4 +169,14 @@ class TestRunner < Test::Unit::TestCase
     command.exec(@db, ["_builtin/String"])
     @runner.run(["update", "_builtin/String"])
   end
+
+  def test_run_property
+    command = mock(Object.new)
+    mock(::BitClust::PropertyCommand).new.returns(command)
+    mock(@runner).load_config.returns(@config)
+    mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
+    command.parse(["--list"])
+    command.exec(@db, ["--list"])
+    @runner.run(["property", "--list"])
+  end
 end
