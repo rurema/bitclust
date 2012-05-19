@@ -17,14 +17,14 @@ end
 
 bitclust_src_path = File.dirname(File.expand_path(__FILE__))
 parent_path = File.dirname(bitclust_src_path)
-output_path = File.join(parent_path, "ruby-refm-1.9.1-dynamic")
+output_path = File.join(parent_path, "ruby-refm-1.9.3-dynamic")
 bitclust_dest_dir = "bitclust"
 rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
 rubydoc_refm_capi_src_path = File.join(parent_path, "rubydoc/refm/capi/src/*")
 database_encoding = "euc-jp"
 database_versions = [
   "1.8.7",
-  "1.9.2",
+  "1.9.3",
 ]
 database_version_to_dir = proc {|version| "db-" + version.tr(".", "_") }
 title = "bitclust"
