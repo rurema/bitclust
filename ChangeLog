@@ -1,3 +1,8 @@
+2012-05-23  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* standalone.rb: start browser mingw, cygwin and bccwin.
+	  (fixes #6461)
+
 2012-02-29  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* packer.rb: add bitclust_libdir to avoid LoadError in bin/bitclust.
