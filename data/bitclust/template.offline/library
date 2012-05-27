@@ -1,18 +1,19 @@
 <% @title = "library #{@entry.name}" %>
 <p>
-<a href="<%= library_index_url() %>">All Libraries</a>
-&gt; library <%=h @entry.name %>
+<%= manual_home_link() %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
+&gt; <%= friendly_library_name(@entry.name) %>
 </p>
 <%
     headline_init
 %>
-<%= headline(@entry.id == '_builtin' ? '組み込みライブラリ' : "library #{@entry.name}") %>
+<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}") %>
 
 <%
     headline_push
     required_classes = (@entry.sublibraries & @entry.requires).map{|lib| lib.classes }.flatten
     all_classes = (@entry.classes + required_classes).uniq.sort
-    err_classes = all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
+    err_classes = all_classes.select {|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
     modules = all_classes.select{|c| c.module? }.sort
     objects = all_classes.select{|c| c.object? }.sort
     classes = (all_classes - err_classes - modules - objects).sort
@@ -66,6 +67,7 @@
 <tr>
 <td class="signature"><%= library_link(c.name) %></td>
 <td class="description"><%= compile_rd(c.synopsis_source) %></td>
+</tr>
 <%    end %>
 </table>
 <%
@@ -82,3 +84,4 @@
 <%    end %>
 </code></p>
 <%  end %>
+

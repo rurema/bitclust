@@ -1,3 +1,10 @@
+2012-05-27  wanabe  <s.wanabe@gmail.com>
+
+	* data/bitclust/template.offline/class: update to keep with template/.
+	  fix #5944. see #5503.
+
+	* data/bitclust/template.offline/library: ditto.
+
 2012-05-25  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* tools/bc-tohtmlpackage.rb (main): do not copy .svn in images.
