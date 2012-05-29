@@ -85,7 +85,7 @@ def build_database(prefix, doctree, version)
   db.init
   db.transaction {
     db.propset 'version', version
-    db.propset 'encoding', 'euc-jp'
+    db.propset 'encoding', 'utf-8'
   }
   db.transaction {
     db.update_by_stdlibtree doctree

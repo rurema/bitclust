@@ -35,9 +35,9 @@ class TestRunner < Test::Unit::TestCase
     mock(::BitClust::InitCommand).new.returns(command)
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
-    command.parse(["version=1.9.3", "encoding=euc-jp"])
-    command.exec(@db, ["version=1.9.3", "encoding=euc-jp"]).returns(nil)
-    @runner.run(["init", "version=1.9.3", "encoding=euc-jp"])
+    command.parse(["version=1.9.3", "encoding=utf-8"])
+    command.exec(@db, ["version=1.9.3", "encoding=utf-8"]).returns(nil)
+    @runner.run(["init", "version=1.9.3", "encoding=utf-8"])
   end
 
   def test_run_list

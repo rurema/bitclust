@@ -8,7 +8,7 @@ app = BitClust::App.new(
   :baseurl => 'http://localhost:9292',
   :dbpath => Dir.glob('db-*'),
   :datadir => File.join(a, 'data', 'bitclust'),
-  :encoding => 'euc-jp',
+  :encoding => 'utf-8',
   :viewpath => '/view',
   :rack => true
 )

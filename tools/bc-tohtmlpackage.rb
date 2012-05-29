@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# -*- coding: euc-jp -*-
+# -*- coding: utf-8 -*-
 require 'pathname'
 
 def srcdir_root
@@ -12,7 +12,7 @@ require 'fileutils'
 require 'optparse'
 
 if Object.const_defined?(:Encoding)
-  Encoding.default_external = 'euc-jp'
+  Encoding.default_external = 'utf-8'
 end
 
 module BitClust

@@ -13,7 +13,7 @@ class TestMethodDatabase < Test::Unit::TestCase
     @db.transaction {
       [
        %w[version 1.9.1],
-       %w[encoding euc-jp]
+       %w[encoding utf-8]
       ].each do |k,v|
         @db.propset(k, v)
       end

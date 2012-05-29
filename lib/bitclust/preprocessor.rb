@@ -43,7 +43,7 @@ module BitClust
       if path.respond_to?(:gets)
         io = wrap(path, params)
       else
-        io = wrap(fopen(path, 'r:EUC-JP'), params)
+        io = wrap(fopen(path, 'r:UTF-8'), params)
       end
       ret = ""
       while s = io.gets
@@ -53,7 +53,7 @@ module BitClust
     end
 
     def Preprocessor.process(path, params = {})
-      fopen(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:UTF-8') {|f|
         return wrap(f, params).to_a
       }
     end

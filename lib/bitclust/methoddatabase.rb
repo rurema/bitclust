@@ -149,7 +149,7 @@ module BitClust
     end
 
     def parse_LIBRARIES(path, properties)
-      fopen(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:UTF-8') {|f|
         BitClust::Preprocessor.wrap(f, properties).map {|line| line.strip }
       }
     end

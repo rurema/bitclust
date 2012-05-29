@@ -23,7 +23,7 @@ module BitClust
     end
 
     def parse_file(path, filename, properties)
-      fopen(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:UTF-8') {|f|
         return parse(f, filename)
       }
     end

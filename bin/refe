@@ -7,7 +7,7 @@ $LOAD_PATH.unshift((bindir + '../lib').realpath)
 
 unless defined?(::Encoding)
   # Ruby 1.8
-  $KCODE = 'EUC'
+  $KCODE = 'UTF-8'
 end
 
 require 'bitclust/searcher'

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
-# -*- coding: euc-jp -*-
+# -*- coding: utf-8 -*-
 
-$KCODE = 'EUC' unless Object.const_defined?(:Encoding)
+$KCODE = 'UTF-8' unless Object.const_defined?(:Encoding)
 
 require 'stringio'
 require 'fileutils'
@@ -150,9 +150,9 @@ def convert_href(link)
   when /\Atrap::(.*)/              then "[[trap:#{$1}]]"
   when /\Aruby 1\.\S+ feature/     then "((<#{link}>))"
   when /\Aobsolete/                then "((<obsolete>))"
-  when /\AÁÈ¤ß¹ş¤ßÊÑ¿ô\/(.*)/e     then "[[m:#{$1}]]"
-  when /\AÁÈ¤ß¹ş¤ßÄê¿ô\/(.*)/e     then "[[m:Kernel::#{$1}]]"
-  when /\AÁÈ¤ß¹ş¤ß´Ø¿ô\/(.*)/e     then "[[m:Kernel\##{$1}]]"
+  when /\Açµ„ã¿è¾¼ã¿å¤‰æ•°\/(.*)/u     then "[[m:#{$1}]]"
+  when /\Açµ„ã¿è¾¼ã¿å®šæ•°\/(.*)/u     then "[[m:Kernel::#{$1}]]"
+  when /\Açµ„ã¿è¾¼ã¿é–¢æ•°\/(.*)/u     then "[[m:Kernel\##{$1}]]"
   when /\A([\w:]+[\#\.][^|]+)\|/   then "[[m:#{$1}]]"
   when /\A(.*?)\|manual page\z/    then "[[man:#{$1}]]"
   when /\A([\w:]+)\/(.*)\z/n       then "[[m:#{$1}\##{$2}]]"

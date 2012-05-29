@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# -*- coding: euc-jp -*-
+# -*- coding: utf-8 -*-
 require 'pathname'
 def srcdir_root
   (Pathname.new(__FILE__).realpath.dirname + '..').cleanpath
@@ -46,11 +46,11 @@ Display compile progress=No
 Error log file=refm.log
 Full-text search=Yes
 Index file=refm.hhk
-Language=0x411 ÆüËÜ¸ì (ÆüËÜ)
-Title=Ruby¥ê¥Õ¥¡¥ì¥ó¥¹¥Þ¥Ë¥å¥¢¥ë
+Language=0x411 æ—¥æœ¬èªž (æ—¥æœ¬)
+Title=Rubyãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ãƒžãƒ‹ãƒ¥ã‚¢ãƒ«
 
 [WINDOWS]
-titlewindow="Ruby¥ê¥Õ¥¡¥ì¥ó¥¹¥Þ¥Ë¥å¥¢¥ë","refm.hhc","refm.hhk","doc/index.html","doc/index.html",,,,,0x21420,,0x387e,,,,,,,,0
+titlewindow="Rubyãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ãƒžãƒ‹ãƒ¥ã‚¢ãƒ«","refm.hhc","refm.hhk","doc/index.html","doc/index.html",,,,,0x21420,,0x387e,,,,,,,,0
 
 [FILES]
 <%= @html_files.join("\n") %>
@@ -168,10 +168,10 @@ end
 
 def main
   @sitemap = {
-    :library => Sitemap.new('¥é¥¤¥Ö¥é¥ê', 'library/index.html'),
+    :library => Sitemap.new('ãƒ©ã‚¤ãƒ–ãƒ©ãƒª', 'library/index.html'),
   }
-  @sitemap[:library] << Sitemap::Content.new('É¸½à¥é¥¤¥Ö¥é¥ê', 'library/_builtin.html')
-  @sitemap[:library] << Sitemap::Content.new('ÅºÉÕ¥é¥¤¥Ö¥é¥ê')
+  @sitemap[:library] << Sitemap::Content.new('æ¨™æº–ãƒ©ã‚¤ãƒ–ãƒ©ãƒª', 'library/_builtin.html')
+  @sitemap[:library] << Sitemap::Content.new('æ·»ä»˜ãƒ©ã‚¤ãƒ–ãƒ©ãƒª')
   @stdlibs = {}
   @index_contents = []
   prefix = Pathname.new('./db')

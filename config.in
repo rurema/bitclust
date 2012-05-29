@@ -7,7 +7,7 @@
 @bc_srcdir = @bc_cgidir
 
 def setup_environment
-  $KCODE = 'EUC' unless Object.const_defined?(:Encoding)
+  $KCODE = 'UTF-8' unless Object.const_defined?(:Encoding)
   $LOAD_PATH.unshift "#{@bc_srcdir}/lib"
   require 'bitclust'
 end
@@ -17,7 +17,7 @@ def bitclust_context
   manager = BitClust::ScreenManager.new(
     :baseurl => "#{@bc_urlroot}/refm/api/view",
     :datadir => "#{@bc_srcdir}/data/bitclust",
-    :encoding => 'euc-jp'
+    :encoding => 'utf-8'
   )
   BitClust::RequestHandler.new(db, manager)
 end

@@ -68,7 +68,7 @@ module BitClust
     attr_reader :db
 
     def parse_file(path, libname, params = {})
-      fopen(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:UTF-8') {|f|
         return parse(f, libname, params)
       }
     end

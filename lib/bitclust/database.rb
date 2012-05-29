@@ -131,7 +131,7 @@ module BitClust
 
     def load_properties(rel)
       h = {}
-      fopen(realpath(rel), 'r:EUC-JP') {|f|
+      fopen(realpath(rel), 'r:UTF-8') {|f|
         while line = f.gets
           k, v = line.strip.split('=', 2)
           break unless k

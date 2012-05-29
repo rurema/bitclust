@@ -10,7 +10,7 @@ module BitClust
       dbpath = options[:dbpath]
       baseurl = options[:baseurl] || ''
       datadir = options[:datadir] || File.expand_path('../../data/bitclust', File.dirname(__FILE__))
-      encoding = options[:encoding] || 'euc-jp'
+      encoding = options[:encoding] || 'utf-8'
       viewpath = options[:viewpath]
       capi = options[:capi]
       if options[:rack]
@@ -115,13 +115,13 @@ module BitClust
         raise WEBrick::HTTPStatus::NotFound
       end
       res.body = index(req)
-      res['Content-Type'] = 'text/html; charset=euc-jp'
+      res['Content-Type'] = 'text/html; charset=utf-8'
     end
 
     def call(env)
       [
         200,
-        {'Content-Type' => 'text/html; charset=euc-jp'},
+        {'Content-Type' => 'text/html; charset=utf-8'},
         index(Rack::Request.new(env))
       ]
     end

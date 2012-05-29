@@ -68,7 +68,7 @@ module BitClust
 
     def MessageCatalog.load_file(path, locale)
       h = {}
-      fopen(path, 'r:EUC-JP') {|f|
+      fopen(path, 'r:UTF-8') {|f|
         f.each do |key|
           h[key.chomp] = f.gets.chomp
         end

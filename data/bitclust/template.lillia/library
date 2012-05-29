@@ -9,7 +9,7 @@
 <%
     headline_init
 %>
-<%= headline(@entry.id == '_builtin' ? '�Ȥ߹��ߥ饤�֥��' : "library #{@entry.name}") %>
+<%= headline(@entry.id == '_builtin' ? '組み込みライブラリ' : "library #{@entry.name}") %>
 
 <%
     headline_push

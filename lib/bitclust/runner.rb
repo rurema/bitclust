@@ -2,7 +2,7 @@ require 'pathname'
 require 'optparse'
 
 unless Object.const_defined?(:Encoding)
-  $KCODE = 'EUC'
+  $KCODE = 'UTF-8'
 end
 
 def srcdir_root

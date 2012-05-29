@@ -16,7 +16,7 @@ end
 
 $LOAD_PATH.unshift srcdir_root() + 'lib'
 
-$KCODE = 'EUC' unless Object.const_defined?(:Encoding)
+$KCODE = 'UTF-8' unless Object.const_defined?(:Encoding)
 
 require 'bitclust'
 require 'optparse'
@@ -70,7 +70,7 @@ def main
                                         :templatedir => templatedir,
                                         :base_url => baseurl,
                                         :cgi_url => baseurl,
-                                        :default_encoding => 'euc-jp')
+                                        :default_encoding => 'utf-8')
   unless @rd_file
     begin
       if @capi

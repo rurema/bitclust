@@ -490,7 +490,7 @@ module BitClust
       rubydoc_dir = config_dir + "rubydoc"
       @config = {
         :database_prefix => (config_dir + "db").to_s,
-        :encoding => "euc-jp",
+        :encoding => "utf-8",
         :versions => @versions,
         :default_version => @versions.max,
         :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
@@ -550,7 +550,7 @@ module BitClust
       @baseurl = nil
       @dbpath = nil
       @srcdir = @datadir = @themedir = @theme = @templatedir = nil
-      @encoding = 'euc-jp'   # encoding of view
+      @encoding = 'utf-8'   # encoding of view
       if Object.const_defined?(:Encoding)
         Encoding.default_external = @encoding
       end

@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -Ke
+#!/usr/bin/ruby -Ku
 #
 # $Id$
 #
@@ -20,7 +20,7 @@ params = {
 baseurl = nil
 dbpath = nil
 srcdir = libdir = datadir = themedir = theme = templatedir = nil
-encoding = 'euc-jp'   # encoding of view
+encoding = 'utf-8'   # encoding of view
 set_srcdir = lambda {|path|
   srcdir = path
   datadir ||= "#{srcdir}/data/bitclust"
