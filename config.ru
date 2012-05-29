@@ -20,7 +20,7 @@ if dbpath.empty?
   app = BitClust::App.new(
     :dbpath => 'db',
     :viewpath => "/view/",
-    :rack => true,
+    :rack => true
   )
   app.interfaces.each do |viewpath, interface|
     map viewpath do
