@@ -68,7 +68,7 @@ module BitClust
     def doc_screen(d, opt)
       new_screen(DocScreen, d, opt)
     end
-    
+
     def function_screen(f, opt)
       new_screen(FunctionScreen, f, opt)
     end
@@ -157,11 +157,11 @@ module BitClust
     def search_url
       "#{@cgi_url}/search"
     end
-    
+
     def spec_url(name)
       "#{@cgi_url}/spec/#{name}"
     end
-    
+
     def document_url(name)
       raise unless %r!\A[-\w/]+\z! =~ name
       "#{@cgi_url}/#{name}"
@@ -334,7 +334,7 @@ module BitClust
     def search_url
       @urlmapper.search_url
     end
-    
+
     def library_index_url
       @urlmapper.library_index_url
     end
@@ -387,7 +387,7 @@ module BitClust
     def friendly_library_name(id)
       (id == '_builtin') ? _('Builtin Library') : _('library %s', id)
     end
-    
+
     def compile_method(m, opt = nil)
       rdcompiler().compile_method(m, opt)
     end
@@ -496,13 +496,13 @@ module BitClust
       run_template('search')
     end
   end
-  
+
   class ClassScreen < EntryBoundScreen
     def initialize(h, entry, opt)
       @alevel = opt[:level] || 0
       super(h, entry, opt)
     end
-    
+
     def body
       run_template('class')
     end
@@ -545,7 +545,7 @@ module BitClust
     def body
       run_template('doc')
     end
-    
+
     def rdcompiler
       h = {:force => true, :catalog => message_catalog() }.merge(@conf)
       RDCompiler.new(@urlmapper, @hlevel, h)

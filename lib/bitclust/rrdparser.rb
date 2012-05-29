@@ -51,7 +51,7 @@ module BitClust
       end
       return ["", source]
     end
-    
+
     def RRDParser.libname(path)
       case path
       when %r<(\A|/)_builtin/>
@@ -66,7 +66,7 @@ module BitClust
       @db = db
     end
     attr_reader :db
-    
+
     def parse_file(path, libname, params = {})
       fopen(path, 'r:EUC-JP') {|f|
         return parse(f, libname, params)
@@ -339,7 +339,7 @@ end
       def sublibrary(libname)
         @library.sublibrary @db.get_library(libname)
       end
-      
+
       def define_class(name, supername)
         if @db.properties['version'] >= "1.9.0"
           top = 'BasicObject'
@@ -516,7 +516,7 @@ end
         (@klass and @type) ? true : false
       end
     end
-  
+
   end
 
 end

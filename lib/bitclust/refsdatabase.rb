@@ -25,7 +25,7 @@ module BitClust
       }
       refs
     end
-    
+
     def initialize
       @h = {}
     end

@@ -83,19 +83,18 @@ def main
       end
       entry = target ? lookup(lib, target) : lib
       puts manager.entry_screen(entry, {:database => db}).body
-      return 
+      return
     rescue BitClust::ParseError => ex
       $stderr.puts ex.message
       $stderr.puts ex.backtrace[0], ex.backtrace[1..-1].map{|s| "\tfrom " + s}
     end
   end
 
-  
   ent = BitClust::DocEntry.new(db, ARGV[0])
   ret = BitClust::Preprocessor.read(ARGV[0], {'version' => ver})
   ent.source = ret
   puts manager.doc_screen(ent, {:database => db} ).body
-  return 
+  return
 rescue BitClust::WriterError => err
   $stderr.puts err.message
   exit 1

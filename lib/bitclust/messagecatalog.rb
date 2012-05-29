@@ -75,7 +75,7 @@ module BitClust
       }
       new(h, locale)
     end
-      
+
     def initialize(msgs, locale)
       @msgs = msgs
       @locale = locale

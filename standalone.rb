@@ -134,12 +134,12 @@ basepath = URI.parse(baseurl).path
 server = WEBrick::HTTPServer.new(params)
 
 if autop
-  app = BitClust::App.new(                          
+  app = BitClust::App.new(
     :dbpath => Dir.glob("db-*"),
     :baseurl => baseurl,
     :datadir => datadir,
     :templatedir => templatedir,
-    :theme => theme,                          
+    :theme => theme,
     :encoding => encoding,
     :capi => capi
     )
@@ -154,7 +154,7 @@ else
     :dbpath => dbpath,
     :baseurl => baseurl,
     :datadir => datadir,
-    :templatedir => templatedir,                          
+    :templatedir => templatedir,
     :theme => theme,
     :encoding => encoding,
     :capi => capi

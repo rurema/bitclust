@@ -319,7 +319,7 @@ module BitClust
       @encoding = opts[:encoding]
       @database = nil
     end
-    
+
     attr_accessor :database
 
     def show_class(cs)
@@ -414,7 +414,7 @@ module BitClust
         describe_class(c.aliasof)
         return
       end
-      
+
       unless c.library.name == '_builtin'
         puts "require '#{c.library.name}'"
         puts
@@ -456,7 +456,7 @@ module BitClust
           puts name
         end
       end
-        
+
       puts @compiler.compile(rec.entry.source.strip)
       puts
     end
