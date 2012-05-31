@@ -1,3 +1,12 @@
+2012-06-01  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* data/bitclust/template.lillia/library: display all classes.
+	  (see #6350)
+
+	* data/bitclust/template.offline/library: ditto.
+
+	* data/bitclust/template/library: ditto.
+
 2012-05-27  wanabe  <s.wanabe@gmail.com>
 
 	* data/bitclust/template.offline/class: update to keep with template/.
