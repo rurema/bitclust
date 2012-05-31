@@ -22,7 +22,7 @@
     class_root = class_tree.keys.select{|c| !c || !classes.include?(c)}
     class_root.map!{|c| class_tree[c] }.flatten!
     err_class_tree = err_classes.group_by{|c| c.superclass }
-    err_class_root = err_class_tree.keys.select{|c| !c || !err_class_tree[c.superclass]}
+    err_class_root = err_class_tree.keys.select{|c| !c || !err_classes.include?(c)}
     err_class_root.map!{|c| err_class_tree[c] }.flatten!
 %>
 
