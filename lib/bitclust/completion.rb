@@ -85,7 +85,6 @@ GC.enable; GC.start; x
       names = expand_name_narrow(method_names(), pattern.method)
 #split_time "m expandN (#{names.size})"
       records = names.map {|name|
-        spec = MethodSpec.new(nil, pattern.type, name)
         crefs = mname2crefs_narrow(name)
 #split_time "c expand  (#{crefs.size})"
         crefs.map {|cref|

@@ -1,3 +1,9 @@
+2012-06-04  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/completion.rb
+	  (BitClust::Completion::search_methods_from_mname): remove unused
+	  line. (fixes #6542)
+
 2012-06-01  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* data/bitclust/template.lillia/library: display all error
