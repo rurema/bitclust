@@ -425,6 +425,8 @@ HERE
      ['[[f:_index]]',           '<a href="dummy/function/">All C API</a>'],
      ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
      ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
+     ['[[man:sys/socket.h(header)]]', '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
+     ['[[man:fopen(3linux)]]', '<a class="external" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
      ['[[RFC:2822]]',      '<a class="external" href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
      ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
      ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
@@ -510,5 +512,23 @@ description
 </dd>
 HERE
     compile_and_assert_equal(expected, src)
+  end
+
+  
+  class BitClust::RDCompiler; public :man_url; end
+  
+  def test_man_url
+    assert_equal("http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html",
+                 @c.man_url("1", "tr"))
+    assert_equal("http://www.opengroup.org/onlinepubs/009695399/functions/fopen.html",
+                 @c.man_url("3", "fopen"))
+    assert_equal("http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html",
+                 @c.man_url("header", "sys/socket.h"))
+    assert_equal("http://man7.org/linux/man-pages/man3/fopen.3.html",
+                 @c.man_url("3linux", "fopen"))
+    assert_equal("http://www.freebsd.org/cgi/man.cgi?query=fopen&sektion=3&manpath=FreeBSD+9.0-RELEASE",
+                 @c.man_url("3freebsd", "fopen"))
+    assert_equal(nil, @c.man_url("foo", "tr"))
+    
   end
 end

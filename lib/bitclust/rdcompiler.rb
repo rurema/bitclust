@@ -449,10 +449,30 @@ module BitClust
     opengroup_url = 'http://www.opengroup.org/onlinepubs/009695399'
     MAN_CMD_URL = "#{opengroup_url}/utilities/%s.html"
     MAN_FCN_URL = "#{opengroup_url}/functions/%s.html"
-
+    MAN_HEADER_URL = "#{opengroup_url}/basedefs/%s.html"
+    MAN_LINUX_URL = "http://man7.org/linux/man-pages/man%1$s/%2$s.%1$s.html"
+    MAN_FREEBSD_URL = "http://www.freebsd.org/cgi/man.cgi?query=%2$s&sektion=%1$s&manpath=FreeBSD+9.0-RELEASE"
+    
+    def man_url(section, page)
+      case section
+      when "1"
+        sprintf(MAN_CMD_URL, page)
+      when "2", "3"
+        sprintf(MAN_FCN_URL, page)
+      when "header"
+        sprintf(MAN_HEADER_URL, page)
+      when /\A([23457])linux\Z/
+        sprintf(MAN_LINUX_URL, $1, page)
+      when /\A([1-9])freebsd\Z/
+        sprintf(MAN_FREEBSD_URL, $1, page)
+      else 
+        nil
+      end
+    end
+    
     def man_link(spec)
-      m = /(\w+)\(([123])\)/.match(spec) or return escape_html(spec)
-      url = sprintf((m[2] == '1' ? MAN_CMD_URL : MAN_FCN_URL), m[1])
+      m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(spec)
+      url = man_url(m[2], escape_html(m[1])) or return escape_html(spec)
       %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
     end
 
