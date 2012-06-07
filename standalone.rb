@@ -11,7 +11,7 @@ require 'optparse'
 require 'pathname'
 
 def srcdir_root
-  Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
+  Pathname.new(__FILE__).realpath.dirname.cleanpath
 end
 
 params = {
