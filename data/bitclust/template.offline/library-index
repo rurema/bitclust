@@ -7,26 +7,41 @@
     headline_init
 %>
 <%= headline(_("Library Index")) %>
-<table class="entries libraries">
 <%
     headline_push
-    lib = @entries.detect {|lib| lib.id == '_builtin' }
+    weight = {"Builtin" => "", "" => "\x7f\x7f"}
+    entry_table = @entries.group_by{|lib| lib.category }.to_a
+    entry_table.sort_by! do |pair|
+      category = pair[0]
+      pair.last.sort!
+      pair[0] = "Other" if category == ""
+      weight[category] || category
+    end
+    first = true
+    entry_table.each do |category, libs|
+%>
+<% if first then first = false else %> / <% end %>
+<a href="#<%= category %>"><%= h _(category) %></a>
+<%
+    end
+    entry_table.each do |category, libs|
+%>
+<span id="<%= category %>"><%= headline(_(category)) %></span>
+<table class="entries libraries">
+<%
+      libs.each do |lib|
+        next if lib.is_sublibrary
+        label = _('Builtin Library') if lib.id == '_builtin'
 %>
 <tr>
-<td class="signature"><%= library_link(lib.name, _('Builtin Library')) %></td>
+<td class="signature"><%= library_link(lib.name, label) %></td>
 <td class="description"><%= compile_rd(lib.synopsis_source) %></td>
 </tr>
 <%
-    @entries.each do |lib|
-      next if lib.id == '_builtin'
-      next if lib.is_sublibrary
+      end
 %>
-<tr>
-<td class="signature"><%= library_link(lib.name) %></td>
-<td class="description"><%= compile_rd(lib.synopsis_source) %></td>
-</tr>
+</table>
 <%
     end
     headline_pop
 %>
-</table>

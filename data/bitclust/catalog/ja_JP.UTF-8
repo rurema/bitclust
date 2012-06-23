@@ -10,24 +10,44 @@ All Functions
 関数一覧
 All Libraries
 ライブラリ一覧
+Builtin
+組み込み
 Builtin Library
 組み込みライブラリ
 Classes
 クラス
+CharacterEncoding
+文字コード
 Class Index
 クラス一覧
 Classes/Modules
 クラスとモジュール
+CommandLine
+コマンドライン
 Constants
 定数
+Database
+データベース
+Date/Time
+日付・時間
 Description
 説明
+DesignPattern
+デザインパターン
+Development
+開発
 Entry
 エントリ
 Exception Classes
 例外クラス
+File
+ファイル
+FileFormat
+ファイルフォーマット
 Function Index
 関数一覧
+I/O
+入出力
 Inherited Methods
 継承したメソッド
 Instance Methods
@@ -36,12 +56,18 @@ Library
 ライブラリ
 Library Index
 ライブラリ一覧
+Math
+数学
 Method
 メソッド
 Modules
 モジュール
 Module Functions
 モジュール関数
+Network
+ネットワーク
+Other
+その他
 Objects
 オブジェクト
 Private Instance Methods
@@ -66,6 +92,10 @@ Special Variables
 特殊変数
 Sub-Libraries
 サブライブラリ
+Text
+テキスト
+Thread
+スレッド
 ancestors
 クラスの継承リスト
 class %s
