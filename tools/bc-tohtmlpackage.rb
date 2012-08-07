@@ -123,13 +123,22 @@ def main
   db.transaction do
     methods = {}
     db.methods.each_with_index do |entry, i|
-      method_name = entry.klass.name + entry.typemark + entry.name
-      (methods[method_name] ||= []) << entry
+      entry.names.each do |name|
+        method_name = entry.klass.name + entry.typemark + name
+        (methods[method_name] ||= []) << entry
+      end
     end
-    entries = db.docs + db.libraries.sort + db.classes.sort + methods.values
+    entries = db.docs + db.libraries.sort + db.classes.sort
+    n = entries.length + methods.length
     entries.each_with_index do |c, i|
       create_html_file(c, manager, outputdir, db)
-      $stderr.puts("#{i}/#{entries.size} done") if i % 100 == 0 and verbose
+      $stderr.puts("#{i}/#{n} done") if i % 100 == 0 and verbose
+    end
+    i = entries.length
+    methods.each do |s, ents|
+      create_html_method_file(s, ents, manager, outputdir, db)
+      $stderr.puts("#{i}/#{n} done") if i % 100 == 0 and verbose
+      i += 1
     end
   end
   fdb.transaction do
@@ -191,8 +200,6 @@ def create_html_file(entry, manager, outputdir, db)
     path = outputdir + e.type_id.to_s + (encodename_package(e.name) + '.html')
     create_html_file_p(entry, manager, path, db)
     path.relative_path_from(outputdir).to_s
-  when :method
-    create_html_method_file(entry, manager, outputdir, db)
   when :function
     create_html_function_file(entry, manager, outputdir, db)
   else
@@ -201,15 +208,14 @@ def create_html_file(entry, manager, outputdir, db)
   e.unload
 end
 
-def create_html_method_file(entry, manager, outputdir, db)
+def create_html_method_file(method_name, entries, manager, outputdir, db)
   path = nil
   $bitclust_html_base = '../../..'
-  e = entry.is_a?(Array) ? entry.sort.first : entry
-  e.names.each{|name|
-    path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
-           e.typechar + (encodename_package(name) + '.html')
-    create_html_file_p(entry, manager, path, db)
-  }
+  e = entries.sort.first
+  name = method_name.sub(e.klass.name + e.typemark, "")
+  path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
+    e.typechar + (encodename_package(name) + '.html')
+  create_html_file_p(entries, manager, path, db)
   path.relative_path_from(outputdir).to_s
 end
 
