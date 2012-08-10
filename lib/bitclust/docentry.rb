@@ -68,7 +68,7 @@ module BitClust
     end
 
     def error_classes
-      classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+      classes.select{|c| c.error_class? }
     end
     
     def methods

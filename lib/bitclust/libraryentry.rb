@@ -107,11 +107,11 @@ module BitClust
     end
 
     def error_classes
-      @error_classes ||= classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+      @error_classes ||= classes.select{|c| c.error_class? }
     end
 
     def all_error_classes
-      @all_error_classes ||= all_classes.select{|c| c.ancestors.any?{|k| k.name == 'Exception' }}
+      @all_error_classes ||= all_classes.select{|c| c.error_class? }
     end
 
     def require(lib)

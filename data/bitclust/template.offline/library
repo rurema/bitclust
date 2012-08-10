@@ -13,7 +13,7 @@
     headline_push
     required_classes = (@entry.sublibraries & @entry.requires).map{|lib| lib.classes }.flatten
     all_classes = (@entry.classes + required_classes).uniq.sort
-    err_classes = all_classes.select {|c| c.ancestors.any?{|k| k.name == 'Exception' }}.sort
+    err_classes = all_classes.select {|c| c.error_class? }.sort
     modules = all_classes.select{|c| c.module? }.sort
     objects = all_classes.select{|c| c.object? }.sort
     classes = (all_classes - err_classes - modules - objects).sort
