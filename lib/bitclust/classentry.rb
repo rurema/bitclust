@@ -116,6 +116,10 @@ module BitClust
       !! aliasof()
     end
 
+    def error_class?
+      ancestors.any?{|k| k.name == 'Exception' }
+    end
+    
     def include(m)
       included().push m
     end
