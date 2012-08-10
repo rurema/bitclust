@@ -117,7 +117,11 @@ module BitClust
     end
 
     def error_class?
-      ancestors.any?{|k| k.name == 'Exception' }
+      if alias?
+        aliasof.error_class?
+      else
+        ancestors.any?{|k| k.name == 'Exception' }
+      end
     end
     
     def include(m)

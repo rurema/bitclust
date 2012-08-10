@@ -13,7 +13,7 @@ alias HogeHogeHoge
 == Class Methods
 --- bar
 = class Err < Exception
-
+alias ErrErr
 HERE
     @lib, = BitClust::RRDParser.parse(s, 'hoge')
   end
@@ -41,6 +41,8 @@ HERE
   def test_error_class_p
     assert(!@lib.fetch_class("Hoge").error_class?)
     assert(@lib.fetch_class("Err").error_class?)
+    assert(!@lib.fetch_class("HogeHoge").error_class?)
+    assert(@lib.fetch_class("ErrErr").error_class?)
   end
 end
 
