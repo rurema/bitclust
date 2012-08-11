@@ -495,7 +495,7 @@ module BitClust
         :default_version => @versions.max,
         :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
         :capi_src => (rubydoc_dir + "refm/capi/src/").to_s,
-        :beseurl => "http://localhost:10080",
+        :baseurl => "http://localhost:10080",
         :port => "10080",
         :pid_file => "/tmp/bitclust.pid",
       }

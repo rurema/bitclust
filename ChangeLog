@@ -1,3 +1,8 @@
+2012-08-11  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/subcommand.rb (BitClust::SetupCommand#prepare): fix
+	  typo. thanks dice (fixes #6856)
+
 2012-08-07  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* tools/bc-tohtmlpackage.rb (#main): support multi name
