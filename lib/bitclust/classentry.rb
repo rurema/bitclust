@@ -87,6 +87,16 @@ module BitClust
       property :source,     'String'
     }
 
+    # FIXME: do not use superclass property aliasing (#6826)
+    alias orig_superclass superclass
+    def superclass
+      if alias?
+        aliasof.superclass
+      else
+        orig_superclass
+      end
+    end
+
     def save
       super
       save_index

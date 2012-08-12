@@ -44,5 +44,10 @@ HERE
     assert(!@lib.fetch_class("HogeHoge").error_class?)
     assert(@lib.fetch_class("ErrErr").error_class?)
   end
+
+  def test_superclass
+    assert('Exception', @lib.fetch_class("Err").superclass.name)
+    assert('Exception', @lib.fetch_class("ErrErr").superclass.name)
+  end
 end
 

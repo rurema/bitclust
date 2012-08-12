@@ -1,3 +1,8 @@
+2012-08-12  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/classentry.rb (BitClust::ClassEntry#superclass):
+	  enable to return superclass from alias class. (see #6826)
+
 2012-08-11  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/subcommand.rb (BitClust::SetupCommand#prepare): fix
