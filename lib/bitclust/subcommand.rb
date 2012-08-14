@@ -659,7 +659,7 @@ module BitClust
 
       if @autop
         app = BitClust::App.new(
-          :dbpath => Dir.glob("db-*"),
+          :dbpath => Dir.glob("#{@database_prefix}-*"),
           :baseurl => @baseurl,
           :datadir => @datadir,
           :templatedir => @templatedir,
@@ -738,6 +738,7 @@ module BitClust
         @dbpath   ||= "#{config[:database_prefix]}-#{config[:default_version]}"
         @port     ||= config[:port]
         @pid_file ||= config[:pid_file]
+        @database_prefix ||= config[:database_prefix]
       end
     end
 
