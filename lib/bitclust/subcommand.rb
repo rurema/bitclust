@@ -668,7 +668,7 @@ module BitClust
           :capi => @capi
         )
         app.interfaces.each do |version, interface|
-          server.mount File.join(basepath, version), interface
+          server.mount(File.join(basepath, version), interface)
         end
         server.mount(File.join(basepath, '/'), app)
       else
