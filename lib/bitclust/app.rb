@@ -40,7 +40,7 @@ module BitClust
         dbpaths = dbpath
         @versions = []
         dbpaths.each do |dbpath|
-          next unless /db-([\d_]+)/ =~ dbpath
+          next unless /db-([\d_\.]+)/ =~ dbpath
           dbpath = File.expand_path(dbpath)
           version = $1.tr("_", ".")
           @versions << version
