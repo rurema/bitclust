@@ -194,6 +194,11 @@ module BitClust
       [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
         return path if MethodDatabase.datadir?(path)
       end
+      config_path = Pathname(ENV['HOME']) + ".bitclust" + "config"
+      if config_path.exist?
+        config = YAML.load_file(config_path)
+        return "#{config[:database_prefix]}-#{config[:default_version]}"
+      end
       nil
     end
 
