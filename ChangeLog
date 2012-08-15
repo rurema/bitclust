@@ -1,3 +1,7 @@
+2012-08-15  okkez  <okkez000@gmail.com>
+
+	* standalone.rb: remove unused file.
+
 2012-08-12  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/classentry.rb (BitClust::ClassEntry#superclass):
