@@ -83,14 +83,14 @@ Global Options:
         @parser.order!(argv)
         if argv.empty?
           $stderr.puts 'no sub-command given'
-          $stderr.puts parser.help
+          $stderr.puts @parser.help
           exit 1
         end
         name = argv.shift
         cmd = @subcommands[name] or error "no such sub-command: #{name}"
       rescue OptionParser::ParseError => err
         $stderr.puts err.message
-        $stderr.puts parser.help
+        $stderr.puts @parser.help
         exit 1
       end
       begin
