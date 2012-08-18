@@ -21,7 +21,7 @@ output_path = File.join(parent_path, "ruby-refm-1.9.3-dynamic")
 bitclust_dest_dir = "bitclust"
 rubydoc_refm_api_src_path = File.join(parent_path, "rubydoc/refm/api/src")
 rubydoc_refm_capi_src_path = File.join(parent_path, "rubydoc/refm/capi/src/*")
-database_encoding = "euc-jp"
+database_encoding = "utf-8"
 database_versions = [
   "1.8.7",
   "1.9.3",
@@ -86,9 +86,9 @@ end
 database_versions.each do |version|
   database_path = File.join(output_path, database_version_to_dir.call(version))
   unless File.exist?(database_path)
-    system_verbose(ruby, "-Ke", "-I#{bitclust_libdir}", bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{version}")
-    system_verbose(ruby, "-Ke", "-I#{bitclust_libdir}", bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
-    system_verbose(ruby, "-Ke", "-I#{bitclust_libdir}", bitclust_command, "--database=#{database_path}", "--capi", "update", *Dir.glob(rubydoc_refm_capi_src_path).to_a)
+    system_verbose(ruby, "-Ku", "-I#{bitclust_libdir}", bitclust_command, "--database=#{database_path}", "init", "encoding=#{database_encoding}", "version=#{version}")
+    system_verbose(ruby, "-Ku", "-I#{bitclust_libdir}", bitclust_command, "--database=#{database_path}", "update", "--stdlibtree=#{rubydoc_refm_api_src_path}")
+    system_verbose(ruby, "-Ku", "-I#{bitclust_libdir}", bitclust_command, "--database=#{database_path}", "--capi", "update", *Dir.glob(rubydoc_refm_capi_src_path).to_a)
   end
 end
 
@@ -97,16 +97,21 @@ unless File.exist?(server_rb)
   puts "write #{server_rb}"
   File.open(server_rb, "wb", 0755) do |f|
     f.puts <<-RUBY
-#!/usr/bin/ruby -Ke
-Dir.chdir File.dirname(__FILE__)
-standalone = "#{bitclust_dest_dir}/standalone.rb"
-src = File.read(standalone).sub(/\\$0/) { standalone.dump }
-ARGV.unshift "--bind-address=127.0.0.1"
-ARGV.unshift "--baseurl="
-ARGV.unshift "--debug"
-ARGV.unshift "--auto"
-ARGV.unshift "--capi"
-eval src, binding, standalone, 1
+#!/usr/bin/ruby -Ku
+require 'pathname'
+lib_dir = "#{bitclust_dest_dir}/lib"
+$LOAD_PATH.unshift(lib_dir)
+require "bitclust"
+require "bitclust/runner"
+argv = [
+        "server",
+        "--bind-address=127.0.0.1",
+        "--baseurl=",
+        "--debug",
+        "--auto",
+        "--capi"
+       ]
+BitClust::Runner.new.run(argv)
     RUBY
   end
 end
@@ -120,7 +125,7 @@ unless File.exist?(readme_html)
 
 <html lang="ja-JP">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=euc-jp">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="./bitclust/theme/default/style.css">
   <title>Ruby リファレンスマニュアル刷新計画</title>
