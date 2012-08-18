@@ -1,5 +1,5 @@
 #!/usr/bin/ruby -Ke
-# -*- coding: euc-jp -*-
+# -*- coding: utf-8 -*-
 
 require 'fileutils'
 require 'optparse'
@@ -123,27 +123,27 @@ unless File.exist?(readme_html)
   <meta http-equiv="Content-Type" content="text/html; charset=euc-jp">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="./bitclust/theme/default/style.css">
-  <title>Ruby ╔Й╔у╔║╔Л╔С╔╧╔ч╔к╔Е╔╒╔К╨Ч©╥╥в╡Х</title>
+  <title>Ruby Ц┐╙Ц┐∙Ц┌║Ц┐╛Ц┐ЁЦ┌╧Ц┐·Ц┐▀Ц┐╔Ц┌╒Ц┐╚Е┬╥Ф√╟Х╗┬Г■╩</title>
 </head>
 <body>
-<h1>Ruby ╔Й╔у╔║╔Л╔С╔╧╔ч╔к╔Е╔╒╔К╨Ч©╥╥в╡Х</h1>
+<h1>Ruby Ц┐╙Ц┐∙Ц┌║Ц┐╛Ц┐ЁЦ┌╧Ц┐·Ц┐▀Ц┐╔Ц┌╒Ц┐╚Е┬╥Ф√╟Х╗┬Г■╩</h1>
 
-<h2>╓Ё╓Л╓о╡©║╘</h2>
+<h2>Ц│⌠Ц┌▄Ц│╞Д╫∙О╪÷</h2>
 <p>
-Ruby ╔Й╔у╔║╔Л╔С╔╧╔ч╔к╔Е╔╒╔К╓н╢й╟в Web ╔╣║╪╔п╔╥╔╧╔ф╔Ю╓г╓╧║ё
+Ruby Ц┐╙Ц┐∙Ц┌║Ц┐╛Ц┐ЁЦ┌╧Ц┐·Ц┐▀Ц┐╔Ц┌╒Ц┐╚Ц│╝Г╟║Ф≤⌠ Web Ц┌╣Ц┐╪Ц┐░Ц┌╥Ц┌╧Ц┐├Ц┐═Ц│╖Ц│≥Ц─┌
 </p>
 
 <!--links-->
 
 <p>
-╩х╓╓йЩ╓к╢ь╓╥╓ф╓о╟й╡╪╓н URL ╓Р╩╡╬х╓╥╓ф╓╞╓ю╓╣╓╓║ё
+Д╫©Ц│└Ф√╧Ц│╚И√╒Ц│≈Ц│╕Ц│╞Д╩╔Д╦▀Ц│╝ URL Ц┌▓Е▐┌Г┘╖Ц│≈Ц│╕Ц│▐Ц│═Ц│∙Ц│└Ц─┌
 </p>
 <ul>
   <li><a href="http://bugs.ruby-lang.org/projects/rurema/wiki/ReleasePackageHowTo">http://bugs.ruby-lang.org/projects/rurema/wiki/ReleasePackageHowTo</a></li>
 </ul>
 
 <p>
-╔в╔М╔╦╔╖╔╞╔ха╢бн╓к╢ь╓╥╓ф╓о╟й╡╪╓н URL ╓Р╩╡╬х╓╥╓ф╓╞╓ю╓╣╓╓║ё
+Ц┐≈Ц┐╜Ц┌╦Ц┌╖Ц┌╞Ц┐┬Е┘╗Д╫⌠Ц│╚И√╒Ц│≈Ц│╕Ц│╞Д╩╔Д╦▀Ц│╝ URL Ц┌▓Е▐┌Г┘╖Ц│≈Ц│╕Ц│▐Ц│═Ц│∙Ц│└Ц─┌
 </p>
 <ul>
   <li><a href="http://bugs.ruby-lang.org/projects/rurema/wiki">http://bugs.ruby-lang.org/projects/rurema/wiki</a></li>
