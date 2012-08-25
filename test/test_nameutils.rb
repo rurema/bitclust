@@ -163,7 +163,7 @@ class TestNameUtils < Test::Unit::TestCase
 
     assert_equal false, methodname?("")
     assert_equal true,  methodname?("!=")
-    assert_equal false, methodname?("!~")
+    assert_equal true,  methodname?("!~")
     assert_equal false, methodname?("&&")
     assert_equal false, methodname?("||")
     assert_equal false, methodname?("++")

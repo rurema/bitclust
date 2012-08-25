@@ -1,3 +1,8 @@
+2012-08-25  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/nameutils.rb (BitClust::NameUtils): add #!~ to
+	  methodname (fixes #6915)
+
 2012-08-15  okkez  <okkez000@gmail.com>
 
 	* standalone.rb: remove unused file.
