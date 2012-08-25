@@ -9,7 +9,7 @@ def srcdir_root
   Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
 end
 
-$LOAD_PATH.unshift srcdir_root() + 'lib'
+$LOAD_PATH.unshift((srcdir_root() + 'lib').to_s)
 
 require 'bitclust'
 require 'bitclust/subcommand'

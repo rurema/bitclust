@@ -1,5 +1,10 @@
 2012-08-25  Sho Hashimoto  <sho-h@netlab.jp>
 
+	* lib/bitclust/runner.rb: do not push Pathname object to
+	  $LOAD_PATH. (fixes #6925)
+
+2012-08-25  Sho Hashimoto  <sho-h@netlab.jp>
+
 	* lib/bitclust/subcommand.rb (BitClust::ServerCommand#parse): fix
 	  instance method reference. (fixes #6924)
 
