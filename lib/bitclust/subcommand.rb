@@ -634,7 +634,7 @@ module BitClust
       end
       if @pid_file
         if File.exist?(@pid_file)
-          $stderr.puts "There is still #{pid_file}.  Is another process running?"
+          $stderr.puts "There is still #{@pid_file}.  Is another process running?"
           exit 1
         end
         @pid_file = File.expand_path(@pid_file)
