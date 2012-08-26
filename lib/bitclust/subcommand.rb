@@ -545,6 +545,7 @@ module BitClust
       require 'uri'
 
       @params = {
+        :BindAddress => "0.0.0.0",
         :Port => 10080
       }
       @baseurl = nil
