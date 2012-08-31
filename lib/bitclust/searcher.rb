@@ -16,6 +16,7 @@ require 'uri'
 require 'rbconfig'
 require 'optparse'
 require 'nkf'
+require 'yaml'
 
 module BitClust
 
