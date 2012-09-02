@@ -1,3 +1,8 @@
+2012-09-02  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/subcommand.rb (BitClust::SetupCommand#prepare): do
+	not overwrite config.yml if exist it. fix #6949
+
 2012-08-26  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/subcommand.rb (BitClust::ServerCommand#initialize):

@@ -501,11 +501,14 @@ module BitClust
       }
       if config_path.exist?
         @config = YAML.load_file(config_path)
-        unless @config[:versions] == @versions
-          @config[:versions] = @versions
-          @config[:default_version] = @versions.max
+        unless @config[:versions].sort == @versions.sort
+          print("overwrite config file? > [y/N]")
+          if /\Ay\z/i =~ $stdin.gets.chomp
+            @config[:versions] = @versions
+            @config[:default_version] = @versions.max
+            generate_config(config_path, @config)
+          end
         end
-        generate_config(config_path, @config)
       else
         generate_config(config_path, @config)
       end
