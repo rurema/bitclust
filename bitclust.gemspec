@@ -17,7 +17,8 @@ EOD
 
   s.rubyforge_project = ""
 
-  s.files         = FileList["**/*"].exclude("*~", "pkg", "vendor")
+  s.files         = FileList["ChangeLog", "Gemfile", "README", "Rakefile", "bitclust.gemspec",
+                             "data/**/*", "lib/**/*.rb", "theme/**/*"].exclude("*~")
   s.test_files    = FileList["test/**/*.rb"].exclude("*~")
   s.executables   = ["bitclust"]
   s.require_paths = ["lib"]
