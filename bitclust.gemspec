@@ -17,7 +17,7 @@ EOD
 
   s.rubyforge_project = ""
 
-  s.files         = FileList["**/*"].exclude("*~", "pkg", "pkg/*")
+  s.files         = FileList["**/*"].exclude("*~", "pkg", "vendor")
   s.test_files    = FileList["test/**/*.rb"].exclude("*~")
   s.executables   = ["bitclust"]
   s.require_paths = ["lib"]
