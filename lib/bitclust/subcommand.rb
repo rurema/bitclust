@@ -718,7 +718,7 @@ module BitClust
       exit if $".include?("exerb/mkexy.rb")
       if @autop && !@browser
         case RUBY_PLATFORM
-        when /mswin/
+        when /mswin(?!ce)|mingw|cygwin|bccwin/
           @browser = "start"
         end
       end
