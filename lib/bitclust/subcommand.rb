@@ -522,8 +522,13 @@ module BitClust
     end
 
     def checkout(rubydoc_dir)
-      # FIXME Is this working on Windows?
-      unless system("which svn > /dev/null")
+      case RUBY_PLATFORM
+      when /mswin(?!ce)|mingw|cygwin|bccwin/
+        cmd = "svn help > NUL 2> NUL"
+      else
+        cmd = "svn help > /dev/null 2> /dev/null"
+      end
+      unless system(cmd)
         warn "svn command is not found. Please install Subversion."
         exit 1
       end

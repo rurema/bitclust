@@ -1,3 +1,8 @@
+2012-09-16  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/subcommand.rb (BitClust::SetupCommand#checkout):
+	  check svn installed Windows, too. (see #7026)
+
 2012-09-15  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/subcommand.rb (BitClust::ServerCommand#exec): start
