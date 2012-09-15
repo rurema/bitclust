@@ -470,7 +470,7 @@ module BitClust
       @config[:versions].each do |version|
         puts "Generating database for Ruby#{version}..."
         prefix = "#{@config[:database_prefix]}-#{version}"
-        FileUtils.rm_ rf(prefix) if @cleanup
+        FileUtils.rm_rf(prefix) if @cleanup
         init_argv = ["version=#{version}", "encoding=#{@config[:encoding]}"]
         db = BitClust::MethodDatabase.new(prefix)
         InitCommand.new.exec(db, init_argv)
