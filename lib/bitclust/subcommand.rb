@@ -522,6 +522,11 @@ module BitClust
     end
 
     def checkout(rubydoc_dir)
+      # FIXME Is this working on Windows?
+      unless system("which svn > /dev/null")
+        warn "svn command is not found. Please install Subversion."
+        exit 1
+      end
       system("svn", "co", REPOSITORY_PATH, rubydoc_dir.to_s)
     end
 
