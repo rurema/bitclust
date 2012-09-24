@@ -1,3 +1,29 @@
+2012-09-24  okkez  <okkez000@gmail.com>
+
+	* lib/bitclust/subcommand.rb: split subcommands.
+
+	* lib/bitclust/subcommands/update_command.rb: split update
+	subcommand.
+
+	* lib/bitclust/subcommands/setup_command.rb: split setup
+	subcommand.
+
+	* lib/bitclust/subcommands/server_command.rb: split server
+	subcommand.
+
+	* lib/bitclust/subcommands/query_command.rb: split query
+	subcommand.
+
+	* lib/bitclust/subcommands/property_command.rb: split property
+	subcommand.
+
+	* lib/bitclust/subcommands/lookup_command.rb: split lookup
+	subcommand.
+
+	* lib/bitclust/subcommands/list_command.rb: split list subcommand.
+
+	* lib/bitclust/subcommands/init_command.rb: split init subcommand.
+
 2012-09-16  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/subcommand.rb (BitClust::SetupCommand#checkout):
