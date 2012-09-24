@@ -43,7 +43,7 @@ module BitClust
       @in_transaction = false
       @properties_dirty = false
     end
-    
+
     def dummy?
       not @prefix
     end
