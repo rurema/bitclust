@@ -16,7 +16,7 @@ class TestRunner < Test::Unit::TestCase
 
   def test_run_setup
     command = mock(Object.new)
-    mock(::BitClust::SetupCommand).new.returns(command)
+    mock(::BitClust::Subcommands::SetupCommand).new.returns(command)
     command.parse([])
     command.exec(nil, []).returns(nil)
     @runner.run(["setup"])
