@@ -759,3 +759,9 @@ module BitClust
   end
 
 end
+
+module BitClust
+  module Subcommands
+  end
+end
+
