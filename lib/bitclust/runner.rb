@@ -5,11 +5,11 @@ unless Object.const_defined?(:Encoding)
   $KCODE = 'UTF-8'
 end
 
-def srcdir_root
+def libdir
   Pathname.new(__FILE__).realpath.dirname.parent.cleanpath
 end
 
-$LOAD_PATH.unshift((srcdir_root() + 'lib').to_s)
+$LOAD_PATH.unshift(libdir.to_s)
 
 require 'bitclust'
 require 'bitclust/subcommand'
