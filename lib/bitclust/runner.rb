@@ -71,9 +71,9 @@ Global Options:
         exit 0
       }
       @subcommands = {
-        'lookup'   => BitClust::LookupCommand.new,
         'init'     => BitClust::Subcommands::InitCommand.new,
         'list'     => BitClust::Subcommands::ListCommand.new,
+        'lookup'   => BitClust::Subcommands::LookupCommand.new,
         'search'   => BitClust::Searcher.new,
         'query'    => BitClust::QueryCommand.new,
         'property' => BitClust::PropertyCommand.new,
