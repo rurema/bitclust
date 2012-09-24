@@ -14,6 +14,11 @@ $LOAD_PATH.unshift(libdir.to_s)
 require 'bitclust'
 require 'bitclust/subcommand'
 
+subcommands_dir = libdir + "bitclust/subcommands"
+Dir.glob(File.join(subcommands_dir.to_s, "*.rb")) do |entry|
+  require "bitclust/subcommands/#{File.basename(entry, ".rb")}"
+end
+
 module BitClust
   class Runner
     def initialize
@@ -66,9 +71,9 @@ Global Options:
         exit 0
       }
       @subcommands = {
-        'init'     => BitClust::InitCommand.new,
         'list'     => BitClust::ListCommand.new,
         'lookup'   => BitClust::LookupCommand.new,
+        'init'     => BitClust::Subcommands::InitCommand.new,
         'search'   => BitClust::Searcher.new,
         'query'    => BitClust::QueryCommand.new,
         'update'   => BitClust::UpdateCommand.new,
