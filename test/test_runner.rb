@@ -92,7 +92,7 @@ class TestRunner < Test::Unit::TestCase
 
   def test_run_property
     command = mock(Object.new)
-    mock(::BitClust::PropertyCommand).new.returns(command)
+    mock(::BitClust::Subcommands::PropertyCommand).new.returns(command)
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["--list"])
