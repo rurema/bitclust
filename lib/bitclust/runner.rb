@@ -76,10 +76,10 @@ Global Options:
         'init'     => BitClust::Subcommands::InitCommand.new,
         'search'   => BitClust::Searcher.new,
         'query'    => BitClust::QueryCommand.new,
-        'update'   => BitClust::UpdateCommand.new,
         'property' => BitClust::PropertyCommand.new,
         'setup'    => BitClust::SetupCommand.new,
         'server'   => BitClust::ServerCommand.new,
+        'update'   => BitClust::Subcommands::UpdateCommand.new,
       }
     end
 

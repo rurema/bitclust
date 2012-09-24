@@ -82,7 +82,7 @@ class TestRunner < Test::Unit::TestCase
 
   def test_run_update
     command = mock(Object.new)
-    mock(::BitClust::UpdateCommand).new.returns(command)
+    mock(::BitClust::Subcommands::UpdateCommand).new.returns(command)
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["_builtin/String"])
