@@ -75,11 +75,11 @@ Global Options:
         'list'     => BitClust::Subcommands::ListCommand.new,
         'lookup'   => BitClust::Subcommands::LookupCommand.new,
         'search'   => BitClust::Searcher.new,
-        'server'   => BitClust::ServerCommand.new,
         'query'    => BitClust::Subcommands::QueryCommand.new,
         'update'   => BitClust::Subcommands::UpdateCommand.new,
         'property' => BitClust::Subcommands::PropertyCommand.new,
         'setup'    => BitClust::Subcommands::SetupCommand.new,
+        'server'   => BitClust::Subcommands::ServerCommand.new,
       }
     end
 

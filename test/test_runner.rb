@@ -24,7 +24,7 @@ class TestRunner < Test::Unit::TestCase
 
   def test_run_server
     command = mock(Object.new)
-    mock(::BitClust::ServerCommand).new.returns(command)
+    mock(::BitClust::Subcommands::ServerCommand).new.returns(command)
     command.parse([])
     command.exec(nil, []).returns(nil)
     @runner.run(["server"])
