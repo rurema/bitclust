@@ -34,9 +34,9 @@ HERE
     db = BitClust::FunctionDatabase.new(@tmpdir)
     cmd = case command
           when "lookup"
-            BitClust::LookupCommand.new
+            BitClust::Subcommands::LookupCommand.new
           when "list"
-            BitClust::ListCommand.new
+            BitClust::Subcommands::ListCommand.new
           else
             raise "must not happen! command=#{command}"
           end
