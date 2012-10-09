@@ -193,7 +193,7 @@ module BitClust::Subcommands
     private
 
     def srcdir_root
-      Pathname.new(__FILE__).realpath.dirname.parent.parent.cleanpath
+      Pathname.new(__FILE__).realpath.dirname.parent.parent.parent.cleanpath
     end
 
     def set_srcdir(dir)
