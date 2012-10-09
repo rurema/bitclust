@@ -1,3 +1,9 @@
+2012-10-09  Ippei Obayashi  <ohai@kmc.gr.jp>
+
+	* lib/bitclust/subcommands/server_command.rb
+	(BitClust::Subcommands::ServerCommand#initialize): fix set_srcdir call
+	(BitClust::Subcommands::ServerCommand#srcdir_root): fix default srcdir
+
 2012-09-24  okkez  <okkez000@gmail.com>
 
 	* lib/bitclust/subcommand.rb: split subcommands.
