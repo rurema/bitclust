@@ -49,7 +49,7 @@ module BitClust::Subcommands
         @dbpath = path
       }
       @parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
-        @set_srcdir.call path
+        set_srcdir(path)
       }
       @parser.on('--datadir=PATH', 'BitClust data directory.') {|path|
         @datadir = path
