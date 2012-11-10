@@ -458,6 +458,29 @@ module BitClust
     def body
       run_template('library')
     end
+
+    def draw_tree(cs, &block)
+      return if cs.empty?
+      if cs.first.class?
+        tree = cs.group_by{|c| c.superclass }
+        tree.each {|key, list| list.sort_by!{|c| c ? c.name : "" } }
+        roots = tree.keys.select{|c| !c || !cs.include?(c) }
+        roots.map!{|c| tree[c] }.flatten!
+      else
+        tree = {}
+        roots = cs
+      end
+      draw_treed_entries(roots, tree, &block)
+    end
+
+    private
+
+    def draw_treed_entries(entries, tree, indent = 0, &block)
+      entries.each do |c|
+        yield c, indent
+        draw_treed_entries(tree[c], tree, indent + 1, &block) if tree[c]
+      end
+    end
   end
 
   class ClassIndexScreen < IndexScreen

@@ -114,6 +114,14 @@ module BitClust
       @all_error_classes ||= all_classes.select{|c| c.error_class? }
     end
 
+    def all_modules
+      @all_modules ||= all_classes.select{|c| c.module? }.sort
+    end
+
+    def all_objects
+      @all_objects ||= all_classes.select{|c| c.object? }.sort
+    end
+
     def require(lib)
       requires().push lib
     end
