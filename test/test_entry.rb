@@ -38,7 +38,7 @@ HERE
     assert_equal('Hoge', @lib.fetch_class("HogeHoge").realname)
   end
 
-  def test_error_class_p
+  def test_error_class?
     assert(!@lib.fetch_class("Hoge").error_class?)
     assert(@lib.fetch_class("Err").error_class?)
     assert(!@lib.fetch_class("HogeHoge").error_class?)
