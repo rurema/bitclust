@@ -241,7 +241,7 @@ class TestNameUtils < Test::Unit::TestCase
     end
     #marks = (0..255).map {|a| (0..255).map {|b| a.chr + b.chr } }.flatten
     marks = (0..127).map {|a| (0..127).map {|b| a.chr + b.chr } }.flatten
-    (marks - %w( . # .# $ :: )).each do |m|
+    (marks - typemarks).each do |m|
       data_set[m] = [false, m]
     end
     data_set
