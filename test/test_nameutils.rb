@@ -5,179 +5,204 @@ class TestNameUtils < Test::Unit::TestCase
 
   include BitClust::NameUtils
 
-  def test_libname?
-    assert_equal true, libname?("_builtin")
-    assert_equal true, libname?("fileutils")
-    assert_equal true, libname?("socket")
-    assert_equal true, libname?("open-uri")
-    assert_equal true, libname?("net/http")
-    assert_equal true, libname?("racc/cparse")
-    assert_equal true, libname?("test/unit/testcase")
-    assert_equal false, libname?("")
-    assert_equal false, libname?("fileutils ")
-    assert_equal false, libname?(" fileutils")
-    assert_equal false, libname?("file utils")
-    assert_equal false, libname?("fileutils\n")
-    assert_equal false, libname?("fileutils\t")
-    assert_equal false, libname?("fileutils.rb")
-    assert_equal false, libname?("English.rb")
-    assert_equal false, libname?("socket.so")
-    assert_equal false, libname?("net/http.rb")
-    assert_equal false, libname?("racc/cparse.so")
+  data("_builtin"                       => [true, "_builtin"],
+       "fileutils"                      => [true, "fileutils"],
+       "socket"                         => [true, "socket"],
+       "open-uri"                       => [true, "open-uri"],
+       "net/http"                       => [true, "net/http"],
+       "racc/cparse"                    => [true, "racc/cparse"],
+       "test/unit/testcase"             => [true, "test/unit/testcase"],
+       "empty string"                   => [false, ""],
+       "following space"                => [false, "fileutils "],
+       "leading space"                  => [false, " fileutils"],
+       "split by space"                 => [false, "file utils"],
+       "following new line"             => [false, "fileutils\n"],
+       "folowing tab"                   => [false, "fileutils\t"],
+       "with extension .rb"             => [false, "fileutils.rb"],
+       "CamelCase with extension .rb"   => [false, "English.rb"],
+       "with extension .so"             => [false, "socket.so"],
+       "sub library with extension .rb" => [false, "net/http.rb"],
+       "sub library with extension .so" => [false, "racc/cparse.so"])
+  def test_libname?(data)
+    expected, target = data
+    assert_equal(expected, libname?(target))
   end
 
-  def test_libname2id
-    assert_equal "_builtin", libname2id("_builtin")
-    assert_equal "fileutils", libname2id("fileutils")
-    assert_equal "socket", libname2id("socket")
-    assert_equal "English", libname2id("English")
-    assert_equal "open=2duri", libname2id("open-uri")
-    assert_equal "net.http", libname2id("net/http")
-    assert_equal "racc.cparse", libname2id("racc/cparse")
-    assert_equal "test.unit.testcase", libname2id("test/unit/testcase")
+  data("_builtin"           => ["_builtin",           "_builtin"],
+       "fileutils"          => ["fileutils",          "fileutils"],
+       "socket"             => ["socket",             "socket"],
+       "English"            => ["English",            "English"],
+       "open-uri"           => ["open=2duri",         "open-uri"],
+       "net/http"           => ["net.http",           "net/http"],
+       "racc/cparse"        => ["racc.cparse",        "racc/cparse"],
+       "test/unit/testcase" => ["test.unit.testcase", "test/unit/testcase"])
+  def test_libname2id(data)
+    expected, target = data
+    assert_equal(expected, libname2id(target))
   end
 
-  def test_libid2name
-    assert_equal "_builtin", libid2name("_builtin")
-    assert_equal "fileutils", libid2name("fileutils")
-    assert_equal "socket", libid2name("socket")
-    assert_equal "English", libid2name("English")
-    assert_equal "open-uri", libid2name("open=2duri")
-    assert_equal "net/http", libid2name("net.http")
-    assert_equal "racc/cparse", libid2name("racc.cparse")
-    assert_equal "test/unit/testcase", libid2name("test.unit.testcase")
+  data("_builtin"           => ["_builtin",           "_builtin"],
+       "fileutils"          => ["fileutils",          "fileutils"],
+       "socket"             => ["socket",             "socket"],
+       "English"            => ["English",            "English"],
+       "open=2duri"         => ["open-uri",           "open=2duri"],
+       "net.http"           => ["net/http",           "net.http"],
+       "racc.cparse"        => ["racc/cparse",        "racc.cparse"],
+       "test.unit.testcase" => ["test/unit/testcase", "test.unit.testcase"])
+  def test_libid2name(data)
+    expected, target = data
+    assert_equal(expected, libid2name(target))
   end
 
-  def test_classname?
-    assert_equal true, classname?("fatal")
-    assert_equal true, classname?("Array")
-    assert_equal true, classname?("String")
-    assert_equal true, classname?("Net::HTTP")
-    assert_equal true, classname?("Test::Unit::TestCase")
-    assert_equal false, classname?("")
-    assert_equal false, classname?("Array ")
-    assert_equal false, classname?(" Array")
-    assert_equal false, classname?("Test Case")
-    assert_equal false, classname?("TestCase\n")
-    assert_equal false, classname?("\tTestCase")
-    assert_equal false, classname?("string")
-    assert_equal false, classname?("stringScanner")
-    assert_equal false, classname?("net/http")
-    assert_equal false, classname?("net.http")
-    assert_equal false, classname?("open-uri")
+  data("fatal"                => [true,  "fatal"],
+       "Array"                => [true,  "Array"],
+       "String"               => [true,  "String"],
+       "Net::HTTP"            => [true,  "Net::HTTP"],
+       "Test::Unit::TestCase" => [true,  "Test::Unit::TestCase"],
+       "empty string"         => [false, ""],
+       "following space"      => [false, "Array "],
+       "leading space"        => [false, " Array"],
+       "split by space"       => [false, "Test Case"],
+       "following new line"   => [false, "TestCase\n"],
+       "leading tab"          => [false, "\tTestCase"],
+       "small case"           => [false, "string"],
+       "camelCase"            => [false, "stringScanner"],
+       "libname"              => [false, "net/http"],
+       "libid"                => [false, "net.http"],
+       "libname with '-'"     => [false, "open-uri"])
+  def test_classname?(data)
+    expected, target = data
+    assert_equal(expected, classname?(target))
   end
 
-  def test_classname2id
-    assert_equal "Array", classname2id("Array")
-    assert_equal "String", classname2id("String")
-    assert_equal "Net=HTTP", classname2id("Net::HTTP")
-    assert_equal "Test=Unit=TestCase", classname2id("Test::Unit::TestCase")
+  data("Array"                => ["Array",              "Array"],
+       "String"               => ["String",             "String"],
+       "Net::HTTP"            => ["Net=HTTP",           "Net::HTTP"],
+       "Test::Unit::TestCase" => ["Test=Unit=TestCase", "Test::Unit::TestCase"])
+  def test_classname2id(data)
+    expected, target = data
+    assert_equal(expected, classname2id(target))
   end
 
-  def test_classid2name
-    assert_equal "Array", classid2name("Array")
-    assert_equal "String", classid2name("String")
-    assert_equal "Net::HTTP", classid2name("Net=HTTP")
-    assert_equal "Test::Unit::TestCase", classid2name("Test=Unit=TestCase")
+    data("Array"              => ["Array",                "Array"],
+         "String"             => ["String",               "String"],
+         "Net=HTTP"           => ["Net::HTTP",            "Net=HTTP"],
+         "Test=Unit=TestCase" => ["Test::Unit::TestCase", "Test=Unit=TestCase"])
+  def test_classid2name(data)
+    expected, target = data
+    assert_equal(expected, classid2name(target))
   end
 
-  def test_method_spec?
-    assert_equal true, method_spec?("String#index")
-    assert_equal true, method_spec?("CGI#accept")
-    assert_equal true, method_spec?("Net::HTTP#ca_path")
-    assert_equal true, method_spec?("FileUtils.#cp")
+  data("String#index"      => [true, "String#index"],
+       "CGI#accept"        => [true, "CGI#accept"],
+       "Net::HTTP#ca_path" => [true, "Net::HTTP#ca_path"],
+       "FileUtils.#cp"     => [true, "FileUtils.#cp"])
+  def test_method_spec?(data)
+    expected, target = data
+    assert_equal(expected, method_spec?(target))
   end
 
-  def test_methodid2spec
-    assert_equal "String#index", methodid2specstring("String/i.index._builtin")
-    assert_equal "CGI#accept", methodid2specstring("CGI/i.accept.cgi")
-    assert_equal "Net::HTTP#ca_path", methodid2specstring("Net=HTTP/i.ca_path.net.http")
-    assert_equal "FileUtils.#cp", methodid2specstring("FileUtils/m.cp.fileutils")
+  data("String/i.index._builtin"     => ["String#index",      "String/i.index._builtin"],
+       "CGI/i.accept.cgi"            => ["CGI#accept",        "CGI/i.accept.cgi"],
+       "Net=HTTP/i.ca_path.net.http" => ["Net::HTTP#ca_path", "Net=HTTP/i.ca_path.net.http"],
+       "FileUtils/m.cp.fileutils"    => ["FileUtils.#cp",     "FileUtils/m.cp.fileutils"])
+  def test_methodid2spec(data)
+    expected, target = data
+    assert_equal(expected, methodid2specstring(target))
   end
 
-  def test_methodid2libid
-    assert_equal "_builtin",   methodid2libid("String/i.index._builtin")
-    assert_equal "cgi",        methodid2libid("CGI/i.accept.cgi")
-    assert_equal "net.http",   methodid2libid("Net=HTTP/i.ca_path.net.http")
-    assert_equal "open=2duri", methodid2libid("OpenURI/m.open.open=2duri")
+  data("String/i.index._builtin"     => ["_builtin",   "String/i.index._builtin"],
+       "CGI/i.accept.cgi"            => ["cgi",        "CGI/i.accept.cgi"],
+       "Net=HTTP/i.ca_path.net.http" => ["net.http",   "Net=HTTP/i.ca_path.net.http"],
+       "OpenURI/m.open.open=2duri"   => ["open=2duri", "OpenURI/m.open.open=2duri"])
+  def test_methodid2libid(data)
+    expected, target = data
+    assert_equal(expected, methodid2libid(target))
   end
 
-  def test_methodid2classid
-    assert_equal "String", methodid2classid("String/i.index._builtin")
-    assert_equal "CGI", methodid2classid("CGI/i.accept.cgi")
-    assert_equal "Net=HTTP", methodid2classid("Net=HTTP/i.ca_path.net.http")
+  data("String/i.index._builtin"     => ["String",   "String/i.index._builtin"],
+       "CGI/i.accept.cgi"            => ["CGI",      "CGI/i.accept.cgi"],
+       "Net=HTTP/i.ca_path.net.http" => ["Net=HTTP", "Net=HTTP/i.ca_path.net.http"])
+  def test_methodid2classid(data)
+    expected, target = data
+    assert_equal(expected, methodid2classid(target))
   end
 
-  def test_methodid2typename
-    assert_equal :instance_method, methodid2typename("String/i.index._builtin")
-    assert_equal :instance_method, methodid2typename("CGI/i.accept.cgi")
-    assert_equal :instance_method, methodid2typename("Net=HTTP/i.ca_path.net.http")
-    assert_equal :singleton_method, methodid2typename("String/s.new._builtin")
+    data("String/i.index._builtin"     => [:instance_method,  "String/i.index._builtin"],
+         "CGI/i.accept.cgi"            => [:instance_method,  "CGI/i.accept.cgi"],
+         "Net=HTTP/i.ca_path.net.http" => [:instance_method,  "Net=HTTP/i.ca_path.net.http"],
+         "String/s.new._builtin"       => [:singleton_method, "String/s.new._builtin"])
+  def test_methodid2typename(data)
+    expected, target = data
+    assert_equal(expected, methodid2typename(target))
   end
 
-  def test_methodid2mname
-    assert_equal "index", methodid2mname("String/i.index._builtin")
-    assert_equal "accept", methodid2mname("CGI/i.accept.cgi")
-    assert_equal "ca_path", methodid2mname("Net=HTTP/i.ca_path.net.http")
+  data("String/i.index._builtin"     => ["index",   "String/i.index._builtin"],
+       "CGI/i.accept.cgi"            => ["accept",  "CGI/i.accept.cgi"],
+       "Net=HTTP/i.ca_path.net.http" => ["ca_path", "Net=HTTP/i.ca_path.net.http"])
+  def test_methodid2mname(data)
+    expected, target = data
+    assert_equal(expected, methodid2mname(target))
   end
 
-  def test_methodname?
-    assert_equal true, methodname?("index")
-    assert_equal true, methodname?("accept")
-    assert_equal true, methodname?("get")
-    assert_equal true, methodname?("Array")
-    assert_equal true, methodname?("getIndex")
-    assert_equal true, methodname?("PROXY")
-    assert_equal true, methodname?("HTTP_PROXY")
-    assert_equal true, methodname?("gsub!")
-    assert_equal true, methodname?("empty?")
-    assert_equal true, methodname?("instance_eval")
-    assert_equal true, methodname?("__send")
-    assert_equal true, methodname?("__send__")
-    assert_equal true, methodname?("__send!")
-    assert_equal true, methodname?("+")
-    assert_equal true, methodname?("-")
-    assert_equal true, methodname?("*")
-    assert_equal true, methodname?("/")
-    assert_equal true, methodname?("&")
-    assert_equal true, methodname?("|")
-    assert_equal true, methodname?("^")
-    assert_equal true, methodname?("`")
-    assert_equal true, methodname?(">>")
-    assert_equal true, methodname?("<<")
-    assert_equal true, methodname?("+@")
-    assert_equal true, methodname?("-@")
-    assert_equal true, methodname?("!")
-    assert_equal true, methodname?("!@")
-    assert_equal true, methodname?("~")
-    assert_equal true, methodname?("**")
-    assert_equal true, methodname?("<")
-    assert_equal true, methodname?(">")
-    assert_equal true, methodname?("<=")
-    assert_equal true, methodname?(">=")
-    assert_equal true, methodname?("==")
-    assert_equal true, methodname?("===")
-    assert_equal true, methodname?("=~")
-    assert_equal true, methodname?("[]")
-    assert_equal true, methodname?("[]=")
-
-    assert_equal false, methodname?("")
-    assert_equal true,  methodname?("!=")
-    assert_equal true,  methodname?("!~")
-    assert_equal false, methodname?("&&")
-    assert_equal false, methodname?("||")
-    assert_equal false, methodname?("++")
-    assert_equal false, methodname?(">>>")
-    assert_equal false, methodname?("***")
-    assert_equal false, methodname?("====")
-    assert_equal false, methodname?("#accept")
-    assert_equal false, methodname?(".new")
-    assert_equal false, methodname?(".#cp")
-    assert_equal false, methodname?("$gvar")
-    assert_equal false, methodname?("CGI#accept")
-    assert_equal false, methodname?("String.new")
-    assert_equal false, methodname?("Net::HTTP.get")
-    assert_equal false, methodname?("Net::HTTP.new")
+    data("index"         => [true,  "index"],
+         "accept"        => [true,  "accept"],
+         "get"           => [true,  "get"],
+         "Array"         => [true,  "Array"],
+         "getIndex"      => [true,  "getIndex"],
+         "PROXY"         => [true,  "PROXY"],
+         "HTTP_PROXY"    => [true,  "HTTP_PROXY"],
+         "gsub!"         => [true,  "gsub!"],
+         "empty? "       => [true,  "empty?"],
+         "instance_eval" => [true,  "instance_eval"],
+         "__send"        => [true,  "__send"],
+         "__send__"      => [true,  "__send__"],
+         "__send!"       => [true,  "__send!"],
+         "+"             => [true,  "+"],
+         "-"             => [true,  "-"],
+         "*"             => [true,  "*"],
+         "/"             => [true,  "/"],
+         "&"             => [true,  "&"],
+         "|"             => [true,  "|"],
+         "^"             => [true,  "^"],
+         "`"             => [true,  "`"],
+         ">>"            => [true,  ">>"],
+         "<<"            => [true,  "<<"],
+         "+@"            => [true,  "+@"],
+         "-@"            => [true,  "-@"],
+         "!"             => [true,  "!"],
+         "!@"            => [true,  "!@"],
+         "~"             => [true,  "~"],
+         "**"            => [true,  "**"],
+         "<"             => [true,  "<"],
+         ">"             => [true,  ">"],
+         "<="            => [true,  "<="],
+         ">="            => [true,  ">="],
+         "=="            => [true,  "=="],
+         "==="           => [true,  "==="],
+         "=~"            => [true,  "=~"],
+         "[]"            => [true,  "[]"],
+         "[]="           => [true,  "[]="],
+         ""              => [false, ""],
+         "!="            => [true,  "!="],
+         "!~"            => [true,  "!~"],
+         "&&"            => [false, "&&"],
+         "||"            => [false, "||"],
+         "++"            => [false, "++"],
+         ">>>"           => [false, ">>>"],
+         "***"           => [false, "***"],
+         "===="          => [false, "===="],
+         "#accept"       => [false, "#accept"],
+         ".new"          => [false, ".new"],
+         ".#cp"          => [false, ".#cp"],
+         "$gvar"         => [false, "$gvar"],
+         "CGI#accept"    => [false, "CGI#accept"],
+         "String.new"    => [false, "String.new"],
+         "Net::HTTP.get" => [false, "Net::HTTP.get"],
+         "Net::HTTP.new" => [false, "Net::HTTP.new"])
+  def test_methodname?(data)
+    expected, target = data
+    assert_equal(expected, methodname?(target))
   end
 
   def test_build_method_id
@@ -191,134 +216,167 @@ class TestNameUtils < Test::Unit::TestCase
   #               split_method_id("String/i.index._builtin")
   #end
 
-  def test_typename?
-    assert_equal true, typename?(:instance_method)
-    assert_equal true, typename?(:singleton_method)
-    assert_equal true, typename?(:module_function)
-    assert_equal true, typename?(:constant)
-    assert_equal true, typename?(:special_variable)
-    assert_equal false, typename?(:instance_eval)
-    assert_equal false, typename?(:instance)
-    assert_equal false, typename?(:singleton)
-    assert_equal false, typename?("i")
-    assert_equal false, typename?("s")
-    assert_equal false, typename?(:i)
-    assert_equal false, typename?(:s)
+  data(:instance_method  => [true,  :instance_method],
+       :singleton_method => [true,  :singleton_method],
+       :module_function  => [true,  :module_function],
+       :constant         => [true,  :constant],
+       :special_variable => [true,  :special_variable],
+       :instance_eval    => [false, :instance_eval],
+       :instance         => [false, :instance],
+       :singleton        => [false, :singleton],
+       "i"               => [false, "i"],
+       "s"               => [false, "s"],
+       :i                => [false, :i],
+       :s                => [false, :s])
+  def test_typename?(data)
+    expected, target = data
+    assert_equal(expected, typename?(target))
   end
 
-  def test_typemark?
-    assert_equal true, typemark?('.')
-    assert_equal true, typemark?('#')
-    assert_equal true, typemark?('.#')
-    assert_equal true, typemark?('$')
-    assert_equal true, typemark?('::')
+  data do
+    data_set = {}
+    typemarks = [".", "#", ".#", "$", "::"]
+    typemarks.each do |mark|
+      data_set[mark] = [true, mark]
+    end
     #marks = (0..255).map {|a| (0..255).map {|b| a.chr + b.chr } }.flatten
     marks = (0..127).map {|a| (0..127).map {|b| a.chr + b.chr } }.flatten
     (marks - %w( . # .# $ :: )).each do |m|
-      assert_equal false, typemark?(m)
+      data_set[m] = [false, m]
     end
+    data_set
+  end
+  def test_typemark?(data)
+    expected, target = data
+    assert_equal(expected, typemark?(target))
   end
 
-  def test_typechar?
+  data do
+    data_set = {}
     typechars = %w( i s m c v )
-    typechars.each do |c|
-      assert_equal true, typechar?(c)
+    typechars.each do |char|
+      data_set[char] = [true, char]
     end
-    ((0..255).map {|b| b.chr } - typechars).each do |c|
-      assert_equal false, typechar?(c)
+    ((0..255).map {|b| b.chr } - typechars).each do |char|
+      data_set[char] = [false, char]
     end
+    data_set
+  end
+  def test_typechar?(data)
+    expected, target = data
+    assert_equal(expected, typechar?(target))
   end
 
-  def test_typename2char
-    assert_equal 's', typename2char(:singleton_method)
-    assert_equal 'i', typename2char(:instance_method)
-    assert_equal 'm', typename2char(:module_function)
-    assert_equal 'c', typename2char(:constant)
-    assert_equal 'v', typename2char(:special_variable)
+  data(:singleton_method => ["s", :singleton_method],
+       :instance_method  => ["i", :instance_method],
+       :module_function  => ["m", :module_function],
+       :constant         => ["c", :constant],
+       :special_variable => ["v", :special_variable])
+  def test_typename2char(data)
+    expected, target = data
+    assert_equal(expected, typename2char(target))
   end
 
-  def test_typechar2name
-    assert_equal :singleton_method, typechar2name('s')
-    assert_equal :instance_method,  typechar2name('i')
-    assert_equal :module_function,  typechar2name('m')
-    assert_equal :constant,         typechar2name('c')
-    assert_equal :special_variable, typechar2name('v')
+  data("s" => [:singleton_method, "s"],
+       "i" => [:instance_method,  "i"],
+       "m" => [:module_function,  "m"],
+       "c" => [:constant,         "c"],
+       "v" => [:special_variable, "v"])
+  def test_typechar2name(data)
+    expected, target = data
+    assert_equal(expected, typechar2name(target))
   end
 
-  def test_typemark2char
-    assert_equal 's',  typemark2char('.')
-    assert_equal 'i',  typemark2char('#')
-    assert_equal 'm',  typemark2char('.#')
-    assert_equal 'c',  typemark2char('::')
-    assert_equal 'v',  typemark2char('$')
+  data("."  => ["s", "."],
+       "#"  => ["i", "#"],
+       ".#" => ["m", ".#"],
+       "::" => ["c", "::"],
+       "$"  => ["v", "$"])
+  def test_typemark2char(data)
+    expected, target = data
+    assert_equal(expected, typemark2char(target))
   end
 
-  def test_typechar2mark
-    assert_equal '.',   typechar2mark('s')
-    assert_equal '#',   typechar2mark('i')
-    assert_equal '.#',  typechar2mark('m')
-    assert_equal '::',  typechar2mark('c')
-    assert_equal '$',   typechar2mark('v')
+  data("s" => [".",  "s"],
+       "i" => ["#",  "i"],
+       "m" => [".#", "m"],
+       "c" => ["::", "c"],
+       "v" => ["$",  "v"])
+  def test_typechar2mark(data)
+    expected, target = data
+    assert_equal(expected, typechar2mark(target))
   end
 
-  def test_encodename_url
-    assert_equal "Array",      encodename_url("Array")
-    assert_equal "String",     encodename_url("String")
-    assert_equal "index",      encodename_url("index")
-    assert_equal "=2a",        encodename_url("*")
-    assert_equal "=2a=2a",     encodename_url("**")
-    assert_equal "open=2duri", encodename_url("open-uri")
-    assert_equal "net=2ehttp", encodename_url("net.http")
+  data("Array"    => ["Array",      "Array"],
+       "String"   => ["String",     "String"],
+       "index"    => ["index",      "index"],
+       "*"        => ["=2a",        "*"],
+       "**"       => ["=2a=2a",     "**"],
+       "open-uri" => ["open=2duri", "open-uri"],
+       "net.http" => ["net=2ehttp", "net.http"])
+  def test_encodename_url(data)
+    expected, target = data
+    assert_equal(expected, encodename_url(target))
   end
 
-  def test_decodename_url
-    assert_equal "Array",      decodename_url("Array")
-    assert_equal "String",     decodename_url("String")
-    assert_equal "index",      decodename_url("index")
-    assert_equal "*",          decodename_url("=2a")
-    assert_equal "**",         decodename_url("=2a=2a")
-    assert_equal "open-uri",   decodename_url("open=2duri")
-    assert_equal "net.http",   decodename_url("net=2ehttp")
+  data("Array"      => ["Array",    "Array"],
+       "String"     => ["String",   "String"],
+       "index"      => ["index",    "index"],
+       "=2a"        => ["*",        "=2a"],
+       "=2a=2a"     => ["**",       "=2a=2a"],
+       "open=2duri" => ["open-uri", "open=2duri"],
+       "net=2ehttp" => ["net.http", "net=2ehttp"])
+  def test_decodename_url(data)
+    expected, target = data
+    assert_equal(expected, decodename_url(target))
   end
 
+  data("Array"      => ["-array",        "Array"],
+       "String"     => ["-string",       "String"],
+       "CGI"        => ["-c-g-i",        "CGI"],
+       "=2a"        => ["=2a",           "=2a"],
+       "=2a=2a"     => ["=2a=2a",        "=2a=2a"],
+       "open=2duri" => ["open=2duri",    "open=2duri"],
+       "Net=HTTP"   => ["-net=-h-t-t-p", "Net=HTTP"])
   def test_encodeid
-    assert_equal "-array",        encodeid("Array")
-    assert_equal "-string",       encodeid("String")
-    assert_equal "-c-g-i",        encodeid("CGI")
-    assert_equal "=2a",           encodeid("=2a")
-    assert_equal "=2a=2a",        encodeid("=2a=2a")
-    assert_equal "open=2duri",    encodeid("open=2duri")
-    assert_equal "-net=-h-t-t-p", encodeid("Net=HTTP")
+    expected, target = data
+    assert_equal(expected, encodeid(target))
   end
 
+  data("-array"        => ["Array",      "-array"],
+       "-string"       => ["String",     "-string"],
+       "-c-g-i"        => ["CGI",        "-c-g-i"],
+       "=2a"           => ["=2a",        "=2a"],
+       "=2a=2a"        => ["=2a=2a",     "=2a=2a"],
+       "open=2duri"    => ["open=2duri", "open=2duri"],
+       "-net=-h-t-t-p" => ["Net=HTTP",   "-net=-h-t-t-p"])
   def test_decodeid
-    assert_equal "Array",      decodeid("-array")
-    assert_equal "String",     decodeid("-string")
-    assert_equal "CGI",        decodeid("-c-g-i")
-    assert_equal "=2a",        decodeid("=2a")
-    assert_equal "=2a=2a",     decodeid("=2a=2a")
-    assert_equal "open=2duri", decodeid("open=2duri")
-    assert_equal "Net=HTTP",   decodeid("-net=-h-t-t-p")
+    expected, target = data
+    assert_equal(expected, decodeid(target))
   end
 
+  data("Array"    => ["-array",     "Array"],
+       "String"   => ["-string",    "String"],
+       "index"    => ["index",      "index"],
+       "*"        => ["=2a",        "*"],
+       "**"       => ["=2a=2a",     "**"],
+       "open-uri" => ["open=2duri", "open-uri"],
+       "net.http" => ["net=2ehttp", "net.http"])
   def test_encodename_fs
-    assert_equal "-array",     encodename_fs("Array")
-    assert_equal "-string",    encodename_fs("String")
-    assert_equal "index",      encodename_fs("index")
-    assert_equal "=2a",        encodename_fs("*")
-    assert_equal "=2a=2a",     encodename_fs("**")
-    assert_equal "open=2duri", encodename_fs("open-uri")
-    assert_equal "net=2ehttp", encodename_fs("net.http")
+    expected, target = data
+    assert_equal(expected, encodename_fs(target))
   end
 
+  data("-array"     => ["Array",    "-array"],
+       "-string"    => ["String",   "-string"],
+       "index"      => ["index",    "index"],
+       "=2a"        => ["*",        "=2a"],
+       "=2a=2a"     => ["**",       "=2a=2a"],
+       "open=2duri" => ["open-uri", "open=2duri"],
+       "net=2ehttp" => ["net.http", "net=2ehttp"])
   def test_decodename_fs
-    assert_equal "Array",      decodename_fs("-array")
-    assert_equal "String",     decodename_fs("-string")
-    assert_equal "index",      decodename_fs("index")
-    assert_equal "*",          decodename_fs("=2a")
-    assert_equal "**",         decodename_fs("=2a=2a")
-    assert_equal "open-uri",   decodename_fs("open=2duri")
-    assert_equal "net.http",   decodename_fs("net=2ehttp")
+    expected, target = data
+    assert_equal(expected, decodename_fs(target))
   end
 
 end
