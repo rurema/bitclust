@@ -206,6 +206,8 @@ module BitClust
           # nop
         when '@return'
           # nop
+        when '@todo'
+          # nop
         else
           $stderr.puts "[UNKNOWN_META_INFO] #{cmd}"
         end
