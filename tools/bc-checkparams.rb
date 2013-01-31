@@ -201,7 +201,7 @@ module BitClust
         case cmd
         when '@param', '@arg'
           name = header.slice!(/\A\s*\w+/) || '?'
-          params << name
+          params << name.strip
         when '@raise'
           # nop
         when '@return'
