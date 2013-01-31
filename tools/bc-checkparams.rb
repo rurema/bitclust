@@ -200,7 +200,7 @@ module BitClust
         @f.ungets(header)
         case cmd
         when '@param', '@arg'
-          name = header.slice!(/\A\s*\w+/n) || '?'
+          name = header.slice!(/\A\s*\w+/) || '?'
           params << name
         when '@raise'
           # nop
