@@ -193,21 +193,21 @@ module BitClust
 
     def read_includes(f, reopen = false)
       f.while_match(/\Ainclude\s/) do |line|
-tty_warn "#{line.location}: dynamic include is not implemented yet" if reopen
+        tty_warn "#{line.location}: dynamic include is not implemented yet" if reopen
         @context.include line.split[1]          unless reopen # FIXME
       end
     end
 
     def read_extends(f, reopen = false)
       f.while_match(/\Aextend\s/) do |line|
-tty_warn "#{line.location}: dynamic extend is not implemented yet" if reopen
+        tty_warn "#{line.location}: dynamic extend is not implemented yet" if reopen
         @context.extend line.split[1]           unless reopen # FIXME
       end
     end
 
-def tty_warn(msg)
-  $stderr.puts msg if $stderr.tty?
-end
+    def tty_warn(msg)
+      $stderr.puts msg if $stderr.tty?
+    end
 
     def read_level2_blocks(f)
       read_entries f
