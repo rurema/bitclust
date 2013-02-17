@@ -121,7 +121,8 @@ module BitClust
 
     # private module function
     def split_method_id(id)
-      return *id.split(%r<[/\.]>, 4)
+      c, rest = id.split("/")
+      return *[c, *rest.split(%r<[/\.]>, 3)]
     end
 
     NAME_TO_MARK = {

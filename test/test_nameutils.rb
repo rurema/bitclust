@@ -110,7 +110,8 @@ class TestNameUtils < Test::Unit::TestCase
   data("String/i.index._builtin"     => ["String#index",      "String/i.index._builtin"],
        "CGI/i.accept.cgi"            => ["CGI#accept",        "CGI/i.accept.cgi"],
        "Net=HTTP/i.ca_path.net.http" => ["Net::HTTP#ca_path", "Net=HTTP/i.ca_path.net.http"],
-       "FileUtils/m.cp.fileutils"    => ["FileUtils.#cp",     "FileUtils/m.cp.fileutils"])
+       "FileUtils/m.cp.fileutils"    => ["FileUtils.#cp",     "FileUtils/m.cp.fileutils"],
+       "ARGF.class/i.filename.ARGF"  => ["ARGF.class#filename", "ARGF.class/i.filename.ARGF"])
   def test_methodid2spec(data)
     expected, target = data
     assert_equal(expected, methodid2specstring(target))
