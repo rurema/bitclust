@@ -99,7 +99,9 @@ class TestNameUtils < Test::Unit::TestCase
   data("String#index"      => [true, "String#index"],
        "CGI#accept"        => [true, "CGI#accept"],
        "Net::HTTP#ca_path" => [true, "Net::HTTP#ca_path"],
-       "FileUtils.#cp"     => [true, "FileUtils.#cp"])
+       "FileUtils.#cp"     => [true, "FileUtils.#cp"],
+       "ARGF.class#path"   => [true, "ARGF.class#path"],
+       "ARGF.class"        => [false, "ARGF.class"])
   def test_method_spec?(data)
     expected, target = data
     assert_equal(expected, method_spec?(target))

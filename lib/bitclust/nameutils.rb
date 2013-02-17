@@ -50,6 +50,7 @@ module BitClust
     end
 
     def method_spec?(str)
+      return false if str == "ARGF.class"
       (/\A#{METHOD_SPEC_RE}\z/o =~ str) ? true : false
     end
 
