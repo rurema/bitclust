@@ -59,6 +59,7 @@ class TestNameUtils < Test::Unit::TestCase
        "String"               => [true,  "String"],
        "Net::HTTP"            => [true,  "Net::HTTP"],
        "Test::Unit::TestCase" => [true,  "Test::Unit::TestCase"],
+       "ARGF.class"           => [true,  "ARGF.class"],
        "empty string"         => [false, ""],
        "following space"      => [false, "Array "],
        "leading space"        => [false, " Array"],
@@ -78,7 +79,8 @@ class TestNameUtils < Test::Unit::TestCase
   data("Array"                => ["Array",              "Array"],
        "String"               => ["String",             "String"],
        "Net::HTTP"            => ["Net=HTTP",           "Net::HTTP"],
-       "Test::Unit::TestCase" => ["Test=Unit=TestCase", "Test::Unit::TestCase"])
+       "Test::Unit::TestCase" => ["Test=Unit=TestCase", "Test::Unit::TestCase"],
+       "ARGF.class"           => ["ARGF.class",         "ARGF.class"])
   def test_classname2id(data)
     expected, target = data
     assert_equal(expected, classname2id(target))
@@ -87,7 +89,8 @@ class TestNameUtils < Test::Unit::TestCase
     data("Array"              => ["Array",                "Array"],
          "String"             => ["String",               "String"],
          "Net=HTTP"           => ["Net::HTTP",            "Net=HTTP"],
-         "Test=Unit=TestCase" => ["Test::Unit::TestCase", "Test=Unit=TestCase"])
+         "Test=Unit=TestCase" => ["Test::Unit::TestCase", "Test=Unit=TestCase"],
+         "ARGF.class"         => ["ARGF.class",           "ARGF.class"])
   def test_classid2name(data)
     expected, target = data
     assert_equal(expected, classid2name(target))
