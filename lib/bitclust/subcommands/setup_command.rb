@@ -16,7 +16,7 @@ module BitClust::Subcommands
     def initialize
       @prepare = nil
       @cleanup = nil
-      @versions = ["1.8.7", "1.9.3"]
+      @versions = ["1.8.7", "1.9.3", "2.0.0"]
       @parser = OptionParser.new {|opt|
         opt.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
         opt.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
