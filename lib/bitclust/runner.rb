@@ -56,7 +56,7 @@ Global Options:
       @parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
         @prefix = path
       }
-      @parser.on('-t', '--targer=VERSION', 'Specify Ruby version.') {|v|
+      @parser.on('-t', '--target=VERSION', 'Specify Ruby version.') {|v|
         @version = v
       }
       @parser.on('--capi', 'Process C API database.') {
