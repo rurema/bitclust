@@ -186,7 +186,7 @@ module BitClust::Subcommands
           @browser = "start"
         end
       end
-      system("#{browser} http://localhost:#{params[:Port]}/") if @browser
+      system("#{@browser} http://localhost:#{@params[:Port]}/") if @browser
       server.start
     end
 
