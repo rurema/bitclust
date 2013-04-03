@@ -30,4 +30,6 @@ EOD
   # s.add_runtime_dependency "rest-client"
   s.add_runtime_dependency "bitclust-core", "= #{BitClust::VERSION}"
   s.add_development_dependency "test-unit", ">= 2.3.0"
+  s.add_development_dependency "test-unit-notify"
+  s.add_development_dependency "test-unit-rr"
 end
