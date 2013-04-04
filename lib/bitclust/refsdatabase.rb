@@ -51,6 +51,7 @@ module BitClust
       @h.each{|k, v|
         io.write(  [k, v].flatten.map{|e| e.gsub(/,/, '\\,') }.join(',') + "\n" )
       }
+      io.close
     end
 
     def extract(entry)
