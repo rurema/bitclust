@@ -25,8 +25,9 @@ def main
   templatedir = srcdir_root() + 'data' + 'bitclust' + 'template.offline'
   target = nil
   baseurl = 'file://' + srcdir_root.to_s
-  parser = OptionParser.new
   ver = '1.9.0'
+  db = BitClust::Database.dummy({'version' => ver})
+  parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0, '.*')} rdfile"
   parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
     target = name
@@ -65,7 +66,6 @@ def main
     exit 1
   end
 
-  db ||= BitClust::Database.dummy({'version' => ver})
   manager = BitClust::ScreenManager.new(
                                         :templatedir => templatedir,
                                         :base_url => baseurl,
