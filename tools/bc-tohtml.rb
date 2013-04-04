@@ -26,7 +26,7 @@ def main
   target = nil
   baseurl = 'file://' + srcdir_root.to_s
   ver = '1.9.0'
-  db = BitClust::Database.dummy({'version' => ver})
+  db = BitClust::MethodDatabase.dummy({'version' => ver})
   parser = OptionParser.new
   parser.banner = "Usage: #{File.basename($0, '.*')} rdfile"
   parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
@@ -39,7 +39,7 @@ def main
     ver = v
   }
   parser.on('--db=DB', '--database=DB', 'Set database path') {|path|
-    db = BitClust::Database.new(path)
+    db = BitClust::MethodDatabase.new(path)
   }
   parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
     baseurl = url
