@@ -122,6 +122,11 @@ module BitClust
       "#{t == '#' ? '' : t}#{m}"
     end
 
+    def index_id(name, remove_prefix = true)
+      name = name.sub(/^\$/, '') if remove_prefix
+      "#{methodid2typechar(@id)}_#{encodename_fs(name).gsub(/=/, '--')}".upcase
+    end
+
     def labels
       c, t, m, lib = methodid2specparts(@id)
       names().map {|name| "#{c}#{t}#{name}" }

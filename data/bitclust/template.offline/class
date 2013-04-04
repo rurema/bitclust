@@ -38,14 +38,34 @@
 
 <%
     ents =  @entry.partitioned_entries(@alevel)
+    items =
     [[_('Singleton Methods'),         ents.singleton_methods          ],
      [_('Instance Methods'),          ents.instance_methods           ],
      [_('Private Singleton Methods'), ents.private_singleton_methods  ],
      [_('Private Instance Methods'),  ents.private_instance_methods   ],
      [_('Module Functions'),          ents.module_functions           ],
      [_('Constants'),                 ents.constants                  ],
-     [_('Special Variables'),         ents.special_variables          ]]\
-    .each do |label, entries|
+     [_('Special Variables'),         ents.special_variables          ,'$']] %>
+<%= headline(_("Index")) %>
+<dl>
+<% items.each do |label, entries, prefix| next if entries.empty? %>
+<dt><%= label %></dt>
+<dd>
+<%
+  entries.each do |m|
+    m.names.each do |mname|
+%>
+<a href="#<%= m.index_id(mname, false) %>"><%= "#{prefix}#{mname}" %></a>
+<%
+    end
+  end
+%>
+</dd>
+<% end %>
+</dl>
+
+<%
+    items.each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
 <dl>
