@@ -1,3 +1,10 @@
+2013-04-06  Sho Hashimoto  <sho-h@netlab.jp>
+
+	* lib/bitclust/nameutils.rb
+	(BitClust::NameUtils::CLASS_NAME_RE): support main and
+	*::compatible class. (see #8186)
+	(BitClust::NameUtils::CLASS_PATH_RE): ditto.
+
 2012-10-09  Ippei Obayashi  <ohai@kmc.gr.jp>
 
 	* lib/bitclust/subcommands/server_command.rb

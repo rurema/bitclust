@@ -60,6 +60,7 @@ class TestNameUtils < Test::Unit::TestCase
        "Net::HTTP"            => [true,  "Net::HTTP"],
        "Test::Unit::TestCase" => [true,  "Test::Unit::TestCase"],
        "ARGF.class"           => [true,  "ARGF.class"],
+       "Complex::compatible"  => [true,  "Complex::compatible"],
        "empty string"         => [false, ""],
        "following space"      => [false, "Array "],
        "leading space"        => [false, " Array"],
@@ -80,7 +81,8 @@ class TestNameUtils < Test::Unit::TestCase
        "String"               => ["String",             "String"],
        "Net::HTTP"            => ["Net=HTTP",           "Net::HTTP"],
        "Test::Unit::TestCase" => ["Test=Unit=TestCase", "Test::Unit::TestCase"],
-       "ARGF.class"           => ["ARGF.class",         "ARGF.class"])
+       "ARGF.class"           => ["ARGF.class",         "ARGF.class"],
+       "Complex::compatible"  => ["Complex=compatible", "Complex::compatible"])
   def test_classname2id(data)
     expected, target = data
     assert_equal(expected, classname2id(target))
@@ -90,7 +92,8 @@ class TestNameUtils < Test::Unit::TestCase
        "String"             => ["String",               "String"],
        "Net=HTTP"           => ["Net::HTTP",            "Net=HTTP"],
        "Test=Unit=TestCase" => ["Test::Unit::TestCase", "Test=Unit=TestCase"],
-       "ARGF.class"         => ["ARGF.class",           "ARGF.class"])
+       "ARGF.class"         => ["ARGF.class",           "ARGF.class"],
+       "Complex=compatible" => ["Complex::compatible",  "Complex=compatible"])
   def test_classid2name(data)
     expected, target = data
     assert_equal(expected, classid2name(target))

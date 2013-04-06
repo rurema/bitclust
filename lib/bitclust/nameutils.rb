@@ -18,8 +18,8 @@ module BitClust
     LIBNAME_RE     = %r<[\w\-]+(/[\w\-]+)*>
     CONST_RE       = /[A-Z]\w*/
     CONST_PATH_RE  = /#{CONST_RE}(?:::#{CONST_RE})*/
-    CLASS_NAME_RE  = /(?:#{CONST_RE}|fatal|ARGF.class)/
-    CLASS_PATH_RE  = /(?:#{CONST_PATH_RE}|fatal|ARGF.class)/
+    CLASS_NAME_RE  = /(?:#{CONST_RE}(?:::compatible)?|fatal|ARGF.class|main)/
+    CLASS_PATH_RE  = /(?:#{CONST_PATH_RE}(?:::compatible)?|fatal|ARGF.class|main)/
     METHOD_NAME_RE = /\w+[?!=]?|===|==|=~|<=>|<=|>=|!=|!|!@|!~|\[\]=|\[\]|\*\*|>>|<<|\+@|\-@|[~+\-*\/%&|^<>`]/
     TYPEMARK_RE    = /(?:\.|\#|\.\#|::|\$)/
     METHOD_SPEC_RE = /#{CLASS_PATH_RE}#{TYPEMARK_RE}#{METHOD_NAME_RE}/
