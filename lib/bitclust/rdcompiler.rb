@@ -93,8 +93,10 @@ module BitClust
 
     def method_entry_chunk
       @out.puts '<dl>' if @option[:force]
+      first = true
       @f.while_match(/\A---/) do |line|
-        method_signature line
+        method_signature(line, first)
+        first = false
       end
       props = {}
       @f.while_match(/\A:/) do |line|
@@ -327,14 +329,12 @@ module BitClust
       f.span(%r<\A(?!---|=|//emlist\{|@[a-z])\S>)
     end
 
-    def method_signature(sig_line)
+    def method_signature(sig_line, first)
       # FIXME: check parameters, types, etc.
       sig = MethodSignature.parse(sig_line)
-      if @method.respond_to?(:index_id)
-        string %Q(<dt class="method-heading" id="#{@method.index_id(sig.name)}"><code>)
-      else
-        string %Q(<dt class="method-heading"><code>)
-      end
+      string %Q(<dt class="method-heading")
+      string %Q( id="#{@method.index_id(sig.name)}") if first
+      string '><code>'
       string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
