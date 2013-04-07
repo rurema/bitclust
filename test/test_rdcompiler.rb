@@ -43,7 +43,9 @@ c2-2
 </dl>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_dlist_with_empty_line
     src = <<HERE
 : t1
  c1
@@ -73,7 +75,9 @@ c3
 </dl>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_dlist_with_emlist
     src = <<HERE
 : t1
  c1
@@ -103,7 +107,9 @@ c2
 </dl>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_dlist_with_paragraph
     src = <<HERE
 : t1
  c1
