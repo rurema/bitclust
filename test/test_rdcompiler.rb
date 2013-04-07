@@ -189,7 +189,9 @@ text
 </dd>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_method_with_emlist
     src = <<'HERE'
 --- <=>
 
@@ -210,7 +212,9 @@ text
 </dd>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_method_with_dlist
     src = <<'HERE'
 --- method
 
@@ -231,7 +235,9 @@ dsc
 </dd>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_method_with_tags
     src = <<'HERE'
 --- method
 dsc
@@ -268,7 +274,9 @@ dsc
 </dd>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_method_with_formatted_text
     src = <<'HERE'
 --- method
 
@@ -293,7 +301,9 @@ dsc3
 </dd>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_method_with_param_and_emlist
     src = <<'HERE'
 --- method
 
@@ -319,7 +329,6 @@ dsc3
 </dd>
 HERE
     assert_compiled_source(expected, src)
-
   end
 
   def test_method2
