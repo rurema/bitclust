@@ -338,7 +338,7 @@ module BitClust
       string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
-      if @opt
+      if first
         string '<span class="permalink">['
         string a_href(@urlmapper.method_url(methodid2specstring(@method.id)), "permalink")
         string ']</span>'
