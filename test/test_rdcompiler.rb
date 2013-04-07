@@ -17,6 +17,13 @@ class TestRDCompiler < Test::Unit::TestCase
     assert_equal(expected, @c.compile(src))
   end
 
+  def assert_compiled_method_source(expected, src)
+    method_entry = Object.new
+    mock(method_entry).source{ src }
+    mock(method_entry).defined?.any_times{ true }
+    assert_equal(expected, @c.compile_method(method_entry))
+  end
+
   def test_dlist
     src = <<'HERE'
 : t1
