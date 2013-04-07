@@ -195,7 +195,7 @@ text
 </pre>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_method_with_emlist
@@ -218,7 +218,7 @@ text
 </pre>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_method_with_dlist
@@ -241,7 +241,7 @@ dsc
 </dl>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_method_with_tags
@@ -280,7 +280,7 @@ dsc
 </p>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_method_with_formatted_text
@@ -307,7 +307,7 @@ dsc3
 </pre>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_method_with_param_and_emlist
@@ -335,7 +335,7 @@ dsc3
 </dl>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_method2
@@ -356,7 +356,7 @@ bar
 </dd>
 </dl>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_ulist
@@ -486,7 +486,7 @@ HERE
 </p>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_todo
@@ -507,7 +507,7 @@ description
 </p>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
   def test_todo_with_comment
@@ -528,7 +528,7 @@ description
 </p>
 </dd>
 HERE
-    assert_compiled_source(expected, src)
+    assert_compiled_method_source(expected, src)
   end
 
 
