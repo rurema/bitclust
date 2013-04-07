@@ -527,17 +527,31 @@ HERE
 
   class BitClust::RDCompiler; public :man_url; end
 
-  def test_man_url
-    assert_equal("http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html",
-                 @c.man_url("1", "tr"))
-    assert_equal("http://www.opengroup.org/onlinepubs/009695399/functions/fopen.html",
-                 @c.man_url("3", "fopen"))
-    assert_equal("http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html",
-                 @c.man_url("header", "sys/socket.h"))
-    assert_equal("http://man7.org/linux/man-pages/man3/fopen.3.html",
-                 @c.man_url("3linux", "fopen"))
-    assert_equal("http://www.freebsd.org/cgi/man.cgi?query=fopen&sektion=3&manpath=FreeBSD+9.0-RELEASE",
-                 @c.man_url("3freebsd", "fopen"))
-    assert_equal(nil, @c.man_url("foo", "tr"))
+  data("tr(1)" => {
+         :params => ["1", "tr"],
+         :expected => "http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html"
+       },
+       "fopen(3)" => {
+         :params => ["3", "fopen"],
+         :expected => "http://www.opengroup.org/onlinepubs/009695399/functions/fopen.html"
+       },
+       "sys/socket.h(header)" => {
+         :params => ["header", "sys/socket.h"],
+         :expected => "http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html"
+       },
+       "fopen(3linux)" => {
+         :params => ["3linux", "fopen"],
+         :expected => "http://man7.org/linux/man-pages/man3/fopen.3.html"
+       },
+       "fopen(3freebsd)" => {
+         :params => ["3freebsd", "fopen"],
+         :expected => "http://www.freebsd.org/cgi/man.cgi?query=fopen&sektion=3&manpath=FreeBSD+9.0-RELEASE"
+       },
+       "tr(foo)" => {
+         :params => ["foo", "tr"],
+         :expected => nil
+       })
+  def test_man_url(data)
+    assert_equal(data[:expected], @c.man_url(*data[:params]))
   end
 end
