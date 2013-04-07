@@ -330,7 +330,11 @@ module BitClust
     def method_signature(sig_line)
       # FIXME: check parameters, types, etc.
       sig = MethodSignature.parse(sig_line)
-      string %Q( <dt class="method-heading" id="#{@method.index_id(sig.name)}"><code>)
+      if @method.respond_to?(:index_id)
+        string %Q(<dt class="method-heading" id="#{@method.index_id(sig.name)}"><code>)
+      else
+        string %Q(<dt class="method-heading"><code>)
+      end
       string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
