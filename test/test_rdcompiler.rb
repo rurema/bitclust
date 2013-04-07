@@ -13,7 +13,7 @@ class TestRDCompiler < Test::Unit::TestCase
     @c = BitClust::RDCompiler.new(@u, 1, {:database => BitClust::MethodDatabase.dummy})
   end
 
-  def compile_and_assert_equal(expected, src)
+  def assert_compiled_source(expected, src)
     assert_equal(expected, @c.compile(src))
   end
 
@@ -42,7 +42,7 @@ c2-2
 </dd>
 </dl>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<HERE
 : t1
@@ -72,7 +72,7 @@ c3
 </dd>
 </dl>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<HERE
 : t1
@@ -102,7 +102,7 @@ c2
 </dd>
 </dl>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<HERE
 : t1
@@ -128,7 +128,7 @@ c2
 text
 </p>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
   def test_pre
@@ -146,7 +146,7 @@ hoge
 foo
 </pre>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
  pretext
@@ -160,7 +160,7 @@ pretext
 * hoge1
 </pre>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
   def test_method
@@ -182,7 +182,7 @@ text
 </pre>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
 --- <=>
@@ -203,7 +203,7 @@ text
 </pre>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
 --- method
@@ -224,7 +224,7 @@ dsc
 </dl>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
 --- method
@@ -261,7 +261,7 @@ dsc
 </p>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
 --- method
@@ -286,7 +286,7 @@ dsc3
 </pre>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
 --- method
@@ -312,7 +312,7 @@ dsc3
 </dl>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
   end
 
@@ -334,7 +334,7 @@ bar
 </dd>
 </dl>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
   def test_ulist
@@ -348,7 +348,7 @@ HERE
 <li>hoge2</li>
 </ul>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
  * hoge1
@@ -363,7 +363,7 @@ HERE
 <li>hoge2</li>
 </ul>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
     src = <<'HERE'
  * hoge1
@@ -377,7 +377,7 @@ bar</li>
 <li>hoge2</li>
 </ul>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
 
   end
 
@@ -394,7 +394,7 @@ bar</li>
 <li>hoge2</li>
 </ol>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
 
@@ -469,7 +469,7 @@ HERE
 </p>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
   def test_todo
@@ -490,7 +490,7 @@ description
 </p>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
   def test_todo_with_comment
@@ -511,7 +511,7 @@ description
 </p>
 </dd>
 HERE
-    compile_and_assert_equal(expected, src)
+    assert_compiled_source(expected, src)
   end
 
 
