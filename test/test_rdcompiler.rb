@@ -426,48 +426,43 @@ HERE
     end
   end
 
-  def test_bracket_link
-    [
-     ['[[c:String]]',      '<a href="dummy/class/String">String</a>'           ],
-     ['[[c:String ]]',     '[[c:String ]]'           ],
-     ['[[String]]',        '[[String]]'              ],
-     ['[[c:File::Stat]]',  '<a href="dummy/class/File=Stat">File::Stat</a>'    ],
-     ['[[m:String.new]]',  '<a href="dummy/method/String/s/new">String.new</a>'],
-     ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
-     ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
-     ['[[f:rb_ary_new3]]', '<a href="dummy/function/rb_ary_new3">rb_ary_new3</a>'],
-     ['[[f:/]]',           '<a href="dummy/function/">All C API</a>'],
-     ['[[f:_index]]',           '<a href="dummy/function/">All C API</a>'],
-     ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
-     ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
-     ['[[man:sys/socket.h(header)]]', '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
-     ['[[man:fopen(3linux)]]', '<a class="external" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
-     ['[[RFC:2822]]',      '<a class="external" href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
-     ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
-     ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
-     ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],
-     ['[[c:String]][[c:String]]',
-      '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
-     ['[[m:File::SEPARATOR]]',          '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],
-     ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
-     ['[[ruby-list:12345]]',
-      '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
-    ].each{|src, expected|
-      assert_equal expected, @c.send(:compile_text, src), src
-    }
+  data("class"               => ['[[c:String]]',      '<a href="dummy/class/String">String</a>'],
+       "with garbage"        => ['[[c:String ]]',     '[[c:String ]]'],
+       "missing type"        => ['[[String]]',        '[[String]]'],
+       "nested class"        => ['[[c:File::Stat]]',  '<a href="dummy/class/File=Stat">File::Stat</a>'],
+       "singleton method"    => ['[[m:String.new]]',  '<a href="dummy/method/String/s/new">String.new</a>'],
+       "instance method"     => ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
+       "indexer"             => ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
+       "C API"               => ['[[f:rb_ary_new3]]', '<a href="dummy/function/rb_ary_new3">rb_ary_new3</a>'],
+       "C API root"          => ['[[f:/]]',           '<a href="dummy/function/">All C API</a>'],
+       "C API index"         => ['[[f:_index]]',      '<a href="dummy/function/">All C API</a>'],
+       "standard library"    => ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
+       "man command"         => ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
+       "man header"          => ['[[man:sys/socket.h(header)]]', '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
+       "man system call"     => ['[[man:fopen(3linux)]]', '<a class="external" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
+       "RFC"                 => ['[[RFC:2822]]',      '<a class="external" href="http://www.ietf.org/rfc/rfc2822.txt">[RFC2822]</a>'],
+       "special var $~"      => ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
+       "special var $,"      => ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
+       "extra close bracket" => ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],
+       "continuity"          => ['[[c:String]][[c:String]]', '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
+       "constant"            => ['[[m:File::SEPARATOR]]', '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],
+       "url"                 => ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
+       "ruby-list"           => ['[[ruby-list:12345]]', '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],)
+  def test_bracket_link(data)
+    target, expected = data
+    assert_equal(expected, @c.send(:compile_text, target), target)
+  end
 
-    [
-     ['[[d:hoge/bar]]',             '<a href="dummy/hoge/bar">.*</a>'],
-     ['[[ref:d:hoge/bar#frag]]',    '<a href="dummy/hoge/bar#frag">.*</a>'],
-     ['[[ref:c:Hoge#frag]]',        '<a href="dummy/class/Hoge#frag">.*</a>'],
-     ['[[ref:m:$~#frag]]',          '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
-     ['[[ref:lib:jcode#frag]]',     '<a href="dummy/library/jcode#frag">.*</a>'],
-
-     ['[[ref:c:Hoge]]',             'compileerror'],
-     ['[[ref:ref:hoge/bar#frag]]',  'compileerror'],
-    ].each{|src, expected|
-      assert_match /#{expected}/, @c.send(:compile_text, src), src
-    }
+  data("doc"             => ['[[d:hoge/bar]]',            '<a href="dummy/hoge/bar">.*</a>'],
+       "ref doc"         => ['[[ref:d:hoge/bar#frag]]',   '<a href="dummy/hoge/bar#frag">.*</a>'],
+       "ref class"       => ['[[ref:c:Hoge#frag]]',       '<a href="dummy/class/Hoge#frag">.*</a>'],
+       "ref special var" => ['[[ref:m:$~#frag]]',         '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
+       "ref library"     => ['[[ref:lib:jcode#frag]]',    '<a href="dummy/library/jcode#frag">.*</a>'],
+       "ref class"       => ['[[ref:c:Hoge]]',            'compileerror'],
+       "ref ref"         => ['[[ref:ref:hoge/bar#frag]]', 'compileerror'],)
+  def test_bracket_link_doc(data)
+    target, expected = data
+    assert_match(/#{expected}/, @c.send(:compile_text, target), target)
   end
 
   def test_array_join
