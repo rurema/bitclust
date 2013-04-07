@@ -20,6 +20,7 @@ class TestRDCompiler < Test::Unit::TestCase
   def assert_compiled_method_source(expected, src)
     method_entry = Object.new
     mock(method_entry).source{ src }
+    mock(method_entry).index_id(anything).any_times{ "dummy" }
     mock(method_entry).defined?.any_times{ true }
     assert_equal(expected, @c.compile_method(method_entry))
   end
@@ -184,7 +185,7 @@ bar
  text
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>hoge</code></dt>
+<dt class="method-heading" id="dummy"><code>hoge</code></dt>
 <dd class="method-description">
 <p>
 foo
@@ -208,7 +209,7 @@ text
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>self &lt;=&gt; </code></dt>
+<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code></dt>
 <dd class="method-description">
 <p>
 abs
@@ -229,7 +230,7 @@ HERE
   dsc
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>method</code></dt>
+<dt class="method-heading" id="dummy"><code>method</code></dt>
 <dd class="method-description">
 <dl>
 <dt>word1</dt>
@@ -256,7 +257,7 @@ dsc
 @see hoge
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>method</code></dt>
+<dt class="method-heading" id="dummy"><code>method</code></dt>
 <dd class="method-description">
 <p>
 dsc
@@ -293,7 +294,7 @@ HERE
            dsc3
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>method</code></dt>
+<dt class="method-heading" id="dummy"><code>method</code></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
@@ -321,7 +322,7 @@ dsc3
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>method</code></dt>
+<dt class="method-heading" id="dummy"><code>method</code></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
@@ -347,7 +348,7 @@ bar
 HERE
     expected = <<'HERE'
 <dl>
-<dt class="method-heading"><code>hoge1</code></dt>
+<dt class="method-heading" id="dummy"><code>hoge1</code></dt>
 <dt class="method-heading"><code>hoge2</code></dt>
 <dd class="method-description">
 <p>
@@ -479,7 +480,7 @@ HERE
 @see [[m:Array#*]], [[m:$,]]
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>join(sep = $,) -&gt; String</code></dt>
+<dt class="method-heading" id="dummy"><code>join(sep = $,) -&gt; String</code></dt>
 <dd class="method-description">
 <p>
 [SEE_ALSO] <a href="dummy/method/Array/i/=2a">Array#*</a>, <a href="dummy/method/Kernel/v/=2c">$,</a>
@@ -497,7 +498,7 @@ HERE
 description
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>puts(str) -&gt; String</code></dt>
+<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code></dt>
 <dd class="method-description">
 <p class="todo">
 [TODO]
@@ -518,7 +519,7 @@ HERE
 description
 HERE
     expected = <<'HERE'
-<dt class="method-heading"><code>puts(str) -&gt; String</code></dt>
+<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code></dt>
 <dd class="method-description">
 <p class="todo">
 [TODO] 1.9.2
