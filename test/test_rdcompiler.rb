@@ -514,9 +514,9 @@ HERE
     compile_and_assert_equal(expected, src)
   end
 
-  
+
   class BitClust::RDCompiler; public :man_url; end
-  
+
   def test_man_url
     assert_equal("http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html",
                  @c.man_url("1", "tr"))
@@ -529,6 +529,5 @@ HERE
     assert_equal("http://www.freebsd.org/cgi/man.cgi?query=fopen&sektion=3&manpath=FreeBSD+9.0-RELEASE",
                  @c.man_url("3freebsd", "fopen"))
     assert_equal(nil, @c.man_url("foo", "tr"))
-    
   end
 end
