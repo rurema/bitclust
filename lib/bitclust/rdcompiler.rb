@@ -338,6 +338,11 @@ module BitClust
       string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
+      if @opt
+        string '<span class="permalink">['
+        string a_href(@urlmapper.method_url(methodid2specstring(@method.id)), "permalink")
+        string ']</span>'
+      end
       if @method and not @method.defined?
         line %Q( <span class="kindinfo">[#{@method.kind} by #{library_link(@method.library.name)}]</span>)
       end
