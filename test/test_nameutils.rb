@@ -347,7 +347,7 @@ class TestNameUtils < Test::Unit::TestCase
        "=2a=2a"     => ["=2a=2a",        "=2a=2a"],
        "open=2duri" => ["open=2duri",    "open=2duri"],
        "Net=HTTP"   => ["-net=-h-t-t-p", "Net=HTTP"])
-  def test_encodeid
+  def test_encodeid(data)
     expected, target = data
     assert_equal(expected, encodeid(target))
   end
@@ -359,7 +359,7 @@ class TestNameUtils < Test::Unit::TestCase
        "=2a=2a"        => ["=2a=2a",     "=2a=2a"],
        "open=2duri"    => ["open=2duri", "open=2duri"],
        "-net=-h-t-t-p" => ["Net=HTTP",   "-net=-h-t-t-p"])
-  def test_decodeid
+  def test_decodeid(data)
     expected, target = data
     assert_equal(expected, decodeid(target))
   end
@@ -371,7 +371,7 @@ class TestNameUtils < Test::Unit::TestCase
        "**"       => ["=2a=2a",     "**"],
        "open-uri" => ["open=2duri", "open-uri"],
        "net.http" => ["net=2ehttp", "net.http"])
-  def test_encodename_fs
+  def test_encodename_fs(data)
     expected, target = data
     assert_equal(expected, encodename_fs(target))
   end
@@ -383,7 +383,7 @@ class TestNameUtils < Test::Unit::TestCase
        "=2a=2a"     => ["**",       "=2a=2a"],
        "open=2duri" => ["open-uri", "open=2duri"],
        "net=2ehttp" => ["net.http", "net=2ehttp"])
-  def test_decodename_fs
+  def test_decodename_fs(data)
     expected, target = data
     assert_equal(expected, decodename_fs(target))
   end
