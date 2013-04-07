@@ -14,7 +14,7 @@ class TestRDCompiler < Test::Unit::TestCase
   end
 
   def compile_and_assert_equal(expected, src)
-    assert_equal expected, @c.compile(src)
+    assert_equal(expected, @c.compile(src))
   end
 
   def test_dlist
