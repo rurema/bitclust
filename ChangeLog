@@ -1,3 +1,10 @@
+2013-04-12  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
+
+	* lib/bitclust/subcommands/setup_command.rb (BitClust::SetupCommand#checkout):
+	use result of system directly instead of calling "svn help" with
+	redirects. because it may cause permission problem on cygwin.
+	see https://twitter.com/higaki/status/322542075927212034
+
 2013-04-06  Sho Hashimoto  <sho-h@netlab.jp>
 
 	* lib/bitclust/nameutils.rb

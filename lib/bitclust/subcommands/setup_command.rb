@@ -93,17 +93,10 @@ module BitClust::Subcommands
     end
 
     def checkout(rubydoc_dir)
-      case RUBY_PLATFORM
-      when /mswin(?!ce)|mingw|cygwin|bccwin/
-        cmd = "svn help > NUL 2> NUL"
-      else
-        cmd = "svn help > /dev/null 2> /dev/null"
-      end
-      unless system(cmd)
-        warn "svn command is not found. Please install Subversion."
+      unless system("svn", "co", REPOSITORY_PATH, rubydoc_dir.to_s)
+        warn "svn command failed. Please install Subversion or check your PATH."
         exit 1
       end
-      system("svn", "co", REPOSITORY_PATH, rubydoc_dir.to_s)
     end
 
     def update_method_database(prefix, argv)
