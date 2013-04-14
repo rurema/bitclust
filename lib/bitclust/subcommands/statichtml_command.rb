@@ -5,6 +5,7 @@
 #
 
 require 'fileutils'
+require 'progressbar'
 
 require 'bitclust'
 require 'bitclust/subcommand'
@@ -121,25 +122,37 @@ module BitClust::Subcommands
             (methods[method_name] ||= []) << entry
           end
         end
+
         entries = db.docs + db.libraries.sort + db.classes.sort
-        n = entries.length + methods.length
-        entries.each_with_index do |c, i|
-          create_html_file(c, manager, @outputdir, db)
-          $stderr.puts("#{i}/#{n} done") if i % 100 == 0 and @verbose
+        progressbar = ProgressBar.new("entries", entries.size)
+        entries.each do |entry|
+          create_html_file(entry, manager, @outputdir, db)
+          progressbar.title.replace([entry].flatten.first.name)
+          progressbar.inc
         end
-        i = entries.length
-        methods.each do |s, ents|
-          create_html_method_file(s, ents, manager, @outputdir, db)
-          $stderr.puts("#{i}/#{n} done") if i % 100 == 0 and @verbose
-          i += 1
+        progressbar.title.replace("entries")
+        progressbar.finish
+
+        progressbar = ProgressBar.new("methods", methods.size)
+        methods.each do |method_name, method_entries|
+          create_html_method_file(method_name, method_entries, manager, @outputdir, db)
+          progressbar.title.replace(method_name)
+          progressbar.inc
         end
+        progressbar.title.replace("methods")
+        progressbar.finish
       end
+
       fdb.transaction do
         functions = {}
+        progressbar = ProgressBar.new("capi", fdb.functions.size)
         fdb.functions.each_with_index do |entry, i|
           create_html_file(entry, manager, @outputdir, fdb)
-          $stderr.puts("#{i} done") if i % 100 == 0 and @verbose
+          progressbar.title.replace(entry.name)
+          progressbar.inc
         end
+        progressbar.title.replace("capi")
+        progressbar.finish
       end
 
       $bitclust_html_base = '..'
