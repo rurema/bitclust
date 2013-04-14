@@ -174,13 +174,11 @@ EOS
       @html_files = []
       db.transaction do
         methods = {}
-        pb = ProgressBar.new('method', db.methods.size)
         db.methods.each do |entry|
           method_name = entry.klass.name + entry.typemark + entry.name
           (methods[method_name] ||= []) << entry
-          pb.inc
         end
-        pb.finish
+
         entries = db.docs + db.libraries.sort + db.classes.sort + methods.values.sort
         pb = ProgressBar.new('entry', entries.size)
         entries.each_with_index do |c, i|
