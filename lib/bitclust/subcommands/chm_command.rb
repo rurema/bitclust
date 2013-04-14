@@ -175,7 +175,7 @@ EOS
       db.transaction do
         methods = {}
         pb = ProgressBar.new('method', db.methods.size)
-        db.methods.each_with_index do |entry, i|
+        db.methods.each do |entry|
           method_name = entry.klass.name + entry.typemark + entry.name
           (methods[method_name] ||= []) << entry
           pb.inc
