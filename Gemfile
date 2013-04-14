@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
 gem "rake"
+gem "progressbar"
 
 # Specify your gem's dependencies in bitclust.gemspec
 gemspec :name => "bitclust"

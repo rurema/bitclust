@@ -30,4 +30,5 @@ EOD
   s.add_development_dependency "test-unit-notify"
   s.add_development_dependency "test-unit-rr"
   s.add_runtime_dependency "rack"
+  s.add_runtime_dependency "progressbar"
 end
