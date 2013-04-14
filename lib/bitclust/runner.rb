@@ -52,6 +52,7 @@ Subcommands:
     setup       Initialize and update database with default options.
     statichtml  Generate static HTML files.
     htmlfile    Generate a static HTML file for test.
+    chm         Generate static HMLT files for CHM.
 
 Global Options:
   EndBanner
@@ -84,6 +85,7 @@ Global Options:
         'server'      => BitClust::Subcommands::ServerCommand.new,
         'statichtml'  => BitClust::Subcommands::StatichtmlCommand.new,
         'htmlfile'    => BitClust::Subcommands::HtmlfileCommand.new,
+        'chm'         => BitClust::Subcommands::ChmCommand.new,
       }
     end
 
