@@ -124,16 +124,8 @@ module BitClust::Subcommands
         end
 
         entries = db.docs + db.libraries.sort + db.classes.sort
-
-        progressbar = ProgressBar.new("methods", methods.size)
-        methods.each do |method_name, method_entries|
-          create_html_method_file(method_name, method_entries, manager, @outputdir, db)
-          progressbar.title.replace(method_name)
-          progressbar.inc
-        end
-        progressbar.title.replace("methods")
-        progressbar.finish
         create_html_entries(entries, manager, db)
+        create_html_methods(methods, manager, db)
       end
 
       fdb.transaction do
@@ -200,6 +192,18 @@ module BitClust::Subcommands
       progressbar.title.replace("entries")
       progressbar.finish
     end
+
+    def create_html_methods(methods, manager, db)
+      progressbar = ProgressBar.new("methods", methods.size)
+      methods.each do |method_name, method_entries|
+        create_html_method_file(method_name, method_entries, manager, @outputdir, db)
+        progressbar.title.replace(method_name)
+        progressbar.inc
+      end
+      progressbar.title.replace("methods")
+      progressbar.finish
+    end
+
     def create_index_html(outputdir)
       path = outputdir + 'index.html'
       File.open(path, 'w'){|io|
