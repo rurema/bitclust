@@ -130,14 +130,7 @@ module BitClust::Subcommands
 
       fdb.transaction do
         functions = {}
-        progressbar = ProgressBar.new("capi", fdb.functions.size)
-        fdb.functions.each do |entry|
-          create_html_file(entry, manager, @outputdir, fdb)
-          progressbar.title.replace(entry.name)
-          progressbar.inc
-        end
-        progressbar.title.replace("capi")
-        progressbar.finish
+        create_html_entries("capi", fdb.functions, manager, fdb)
       end
 
       $bitclust_html_base = '..'
