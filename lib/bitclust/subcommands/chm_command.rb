@@ -181,7 +181,7 @@ EOS
 
         entries = db.docs + db.libraries.sort + db.classes.sort + methods.values.sort
         pb = ProgressBar.new('entry', entries.size)
-        entries.each_with_index do |c, i|
+        entries.each do |c|
           filename = create_html_file(c, manager, @outputdir, db)
           @html_files << filename
           e = c.is_a?(Array) ? c.sort.first : c
