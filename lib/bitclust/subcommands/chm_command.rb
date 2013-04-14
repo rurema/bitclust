@@ -6,23 +6,7 @@ require 'bitclust/subcommand'
 require 'fileutils'
 # TODO Remove this line when we drop 1.8 support
 require 'kconv'
-
-begin
-  require 'progressbar'
-rescue LoadError
-  class ProgressBar
-    def initialize(title, total, out = STDERR)
-      @title, @total, @out = title, total, out
-    end
-    attr_reader :title
-
-    def inc(step = 1)
-    end
-
-    def finish
-    end
-  end
-end
+require 'progressbar'
 
 module BitClust::Subcommands
   class ChmCommand < BitClust::Subcommand
