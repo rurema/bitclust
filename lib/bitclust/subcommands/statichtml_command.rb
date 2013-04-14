@@ -9,6 +9,7 @@ require 'progressbar'
 
 require 'bitclust'
 require 'bitclust/subcommand'
+require 'bitclust/silent_progress_bar'
 
 module BitClust::Subcommands
   class StatichtmlCommand < BitClust::Subcommand
@@ -177,7 +178,11 @@ module BitClust::Subcommands
 
     def create_html_entries(title, entries, manager, db)
       original_title = title.dup
-      progressbar = ProgressBar.new(title, entries.size)
+      if @verbose
+        progressbar = ProgressBar.new(title, entries.size)
+      else
+        progressbar = BitClust::SilentProgressBar.new(title, entries.size)
+      end
       entries.each do |entry|
         create_html_file(entry, manager, @outputdir, db)
         progressbar.title.replace([entry].flatten.first.name)
@@ -189,7 +194,11 @@ module BitClust::Subcommands
 
     def create_html_methods(title, methods, manager, db)
       original_title = title.dup
-      progressbar = ProgressBar.new(title, methods.size)
+      if @verbose
+        progressbar = ProgressBar.new(title, methods.size)
+      else
+        progressbar = BitClust::SilentProgressBar.new(title, methods.size)
+      end
       methods.each do |method_name, method_entries|
         create_html_method_file(method_name, method_entries, manager, @outputdir, db)
         progressbar.title.replace(method_name)
