@@ -23,6 +23,10 @@ module BitClust
       $stderr.puts "#{File.basename($0, '.*')}: error: #{message}"
       exit 1
     end
+
+    def srcdir_root
+      Pathname.new(__FILE__).realpath.dirname.parent.parent
+    end
   end
 end
 
