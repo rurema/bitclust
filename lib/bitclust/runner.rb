@@ -50,6 +50,7 @@ Subcommands:
     update      Update database.
     property    Handle database properties.
     setup       Initialize and update database with default options.
+    statichtml  Generate static HTML files.
 
 Global Options:
   EndBanner
@@ -80,6 +81,7 @@ Global Options:
         'property' => BitClust::Subcommands::PropertyCommand.new,
         'setup'    => BitClust::Subcommands::SetupCommand.new,
         'server'   => BitClust::Subcommands::ServerCommand.new,
+        'statichtml'  => BitClust::Subcommands::StatichtmlCommand.new,
       }
     end
 
