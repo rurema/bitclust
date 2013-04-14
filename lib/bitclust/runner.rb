@@ -72,15 +72,15 @@ Global Options:
         exit 0
       }
       @subcommands = {
-        'init'     => BitClust::Subcommands::InitCommand.new,
-        'list'     => BitClust::Subcommands::ListCommand.new,
-        'lookup'   => BitClust::Subcommands::LookupCommand.new,
-        'search'   => BitClust::Searcher.new,
-        'query'    => BitClust::Subcommands::QueryCommand.new,
-        'update'   => BitClust::Subcommands::UpdateCommand.new,
-        'property' => BitClust::Subcommands::PropertyCommand.new,
-        'setup'    => BitClust::Subcommands::SetupCommand.new,
-        'server'   => BitClust::Subcommands::ServerCommand.new,
+        'init'        => BitClust::Subcommands::InitCommand.new,
+        'list'        => BitClust::Subcommands::ListCommand.new,
+        'lookup'      => BitClust::Subcommands::LookupCommand.new,
+        'search'      => BitClust::Searcher.new,
+        'query'       => BitClust::Subcommands::QueryCommand.new,
+        'update'      => BitClust::Subcommands::UpdateCommand.new,
+        'property'    => BitClust::Subcommands::PropertyCommand.new,
+        'setup'       => BitClust::Subcommands::SetupCommand.new,
+        'server'      => BitClust::Subcommands::ServerCommand.new,
         'statichtml'  => BitClust::Subcommands::StatichtmlCommand.new,
       }
     end
