@@ -124,8 +124,8 @@ module BitClust::Subcommands
         end
 
         entries = db.docs + db.libraries.sort + db.classes.sort
-        create_html_entries(entries, manager, db)
-        create_html_methods(methods, manager, db)
+        create_html_entries("entries", entries, manager, db)
+        create_html_methods("methods", methods, manager, db)
       end
 
       fdb.transaction do
@@ -182,25 +182,27 @@ module BitClust::Subcommands
       @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
     end
 
-    def create_html_entries(entries, manager, db)
-      progressbar = ProgressBar.new("entries", entries.size)
+    def create_html_entries(title, entries, manager, db)
+      original_title = title.dup
+      progressbar = ProgressBar.new(title, entries.size)
       entries.each do |entry|
         create_html_file(entry, manager, @outputdir, db)
         progressbar.title.replace([entry].flatten.first.name)
         progressbar.inc
       end
-      progressbar.title.replace("entries")
+      progressbar.title.replace(original_title)
       progressbar.finish
     end
 
-    def create_html_methods(methods, manager, db)
-      progressbar = ProgressBar.new("methods", methods.size)
+    def create_html_methods(title, methods, manager, db)
+      original_title = title.dup
+      progressbar = ProgressBar.new(title, methods.size)
       methods.each do |method_name, method_entries|
         create_html_method_file(method_name, method_entries, manager, @outputdir, db)
         progressbar.title.replace(method_name)
         progressbar.inc
       end
-      progressbar.title.replace("methods")
+      progressbar.title.replace(original_title)
       progressbar.finish
     end
 
