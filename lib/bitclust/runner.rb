@@ -56,7 +56,7 @@ Subcommands:
     ancestors   Compare class/module's ancestors between Ruby and DB.
 
 Global Options:
-  EndBanner
+      EndBanner
       @parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
         @prefix = path
       }
