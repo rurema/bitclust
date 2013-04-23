@@ -10,6 +10,14 @@ require 'yaml'
 module BitClust
 
   class Subcommand
+    def initialize
+      @parser = OptionParser.new
+      @parser.on_tail("-h", "--help", "Print this message and quit."){
+        $stderr.puts help
+        exit 0
+      }
+    end
+
     def parse(argv)
       @parser.parse! argv
     end
