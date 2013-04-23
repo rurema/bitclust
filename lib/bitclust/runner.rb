@@ -53,6 +53,7 @@ Subcommands:
     statichtml  Generate static HTML files.
     htmlfile    Generate a static HTML file for test.
     chm         Generate static HMLT files for CHM.
+    ancestors   Compare class/module's ancestors between Ruby and DB.
 
 Global Options:
   EndBanner
