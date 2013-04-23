@@ -14,29 +14,29 @@ module BitClust::Subcommands
       @format = :text
       @type = nil
       @key = nil
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method|--function) [--html] <key>"
-        opt.on('--library=NAME', 'Lookup library.') {|name|
+      @parser = OptionParser.new {|parser|
+        parser.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method|--function) [--html] <key>"
+        parser.on('--library=NAME', 'Lookup library.') {|name|
           @type = :library
           @key = name
         }
-        opt.on('--class=NAME', 'Lookup class.') {|name|
+        parser.on('--class=NAME', 'Lookup class.') {|name|
           @type = :class
           @key = name
         }
-        opt.on('--method=NAME', 'Lookup method.') {|name|
+        parser.on('--method=NAME', 'Lookup method.') {|name|
           @type = :method
           @key = name
         }
-        opt.on('--function=NAME', 'Lookup function.') {|name|
+        parser.on('--function=NAME', 'Lookup function.') {|name|
           @type = :function
           @key = name
         }
-        opt.on('--html', 'Show result in HTML.') {
+        parser.on('--html', 'Show result in HTML.') {
           @format = :html
         }
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
+        parser.on('--help', 'Prints this message and quit.') {
+          puts parser.help
           exit 0
         }
       }
