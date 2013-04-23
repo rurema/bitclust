@@ -10,32 +10,27 @@ require 'bitclust/subcommand'
 module BitClust::Subcommands
   class HtmlfileCommand < BitClust::Subcommand
     def initialize
+      super
       @target = nil
       @templatedir = srcdir_root + "data/bitclust/template.offline"
       @baseurl = "file://" + srcdir_root.to_s
       @version = "2.0.0"
-      @parser = OptionParser.new do |parser|
-        parser.banner = "Usage: #{File.basename($0, '.*')} htmlfile [options] rdfile"
-        parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
-          @target = name
-        }
-        parser.on('--force', '-f', 'Force to use rd_file template.') {|name|
-          @rd_file = true
-        }
-        parser.on('--ruby_version=VER', '--ruby=VER', 'Set Ruby version') {|version|
-          @version = version
-        }
-        parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
-          @baseurl = url
-        }
-        parser.on('--templatedir=PATH', 'Template directory') {|path|
-          @templatedir = path
-        }
-        parser.on('--help', 'Prints this message and quit.') {
-          $stderr.puts parser.help
-          exit 0
-        }
-      end
+      @parser.banner = "Usage: #{File.basename($0, '.*')} htmlfile [options] rdfile"
+      @parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
+        @target = name
+      }
+      @parser.on('--force', '-f', 'Force to use rd_file template.') {|name|
+        @rd_file = true
+      }
+      @parser.on('--ruby_version=VER', '--ruby=VER', 'Set Ruby version') {|version|
+        @version = version
+      }
+      @parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
+        @baseurl = url
+      }
+      @parser.on('--templatedir=PATH', 'Template directory') {|path|
+        @templatedir = path
+      }
     end
 
     def exec(argv, options)
