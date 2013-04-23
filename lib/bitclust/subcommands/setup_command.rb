@@ -61,14 +61,14 @@ module BitClust::Subcommands
       rubydoc_dir = config_dir + "rubydoc"
       @config = {
         :database_prefix => (config_dir + "db").to_s,
-        :encoding => "utf-8",
-        :versions => @versions,
+        :encoding        => "utf-8",
+        :versions        => @versions,
         :default_version => @versions.max,
-        :stdlibtree => (rubydoc_dir + "refm/api/src").to_s,
-        :capi_src => (rubydoc_dir + "refm/capi/src/").to_s,
-        :baseurl => "http://localhost:10080",
-        :port => "10080",
-        :pid_file => "/tmp/bitclust.pid",
+        :stdlibtree      => (rubydoc_dir + "refm/api/src").to_s,
+        :capi_src        => (rubydoc_dir + "refm/capi/src/").to_s,
+        :baseurl         => "http://localhost:10080",
+        :port            => "10080",
+        :pid_file        => "/tmp/bitclust.pid",
       }
       if config_path.exist?
         @config = YAML.load_file(config_path)
