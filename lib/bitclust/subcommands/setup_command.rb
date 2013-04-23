@@ -46,8 +46,8 @@ module BitClust::Subcommands
         init_options = { :prefix => prefix }
         InitCommand.new.exec(init_argv, init_options)
         update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
-        argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
-        update_function_database(prefix, argv)
+        update_argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
+        update_function_database(prefix, update_argv)
       end
     end
 
