@@ -11,22 +11,17 @@ require 'bitclust/subcommand'
 module BitClust::Subcommands
   class PropertyCommand < BitClust::Subcommand
     def initialize
+      super
       @mode = nil
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} property [options]"
-        opt.on('--list', 'List all properties.') {
-          @mode = :list
-        }
-        opt.on('--get', 'Get property value.') {
-          @mode = :get
-        }
-        opt.on('--set', 'Set property value.') {
-          @mode = :set
-        }
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
-          exit 0
-        }
+      @parser.banner = "Usage: #{File.basename($0, '.*')} property [options]"
+      @parser.on('--list', 'List all properties.') {
+        @mode = :list
+      }
+      @parser.on('--get', 'Get property value.') {
+        @mode = :get
+      }
+      @parser.on('--set', 'Set property value.') {
+        @mode = :set
       }
     end
 
