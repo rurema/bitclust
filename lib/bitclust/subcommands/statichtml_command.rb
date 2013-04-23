@@ -75,9 +75,6 @@ module BitClust::Subcommands
       @themedir = srcdir_root + "theme/default"
       @parser = OptionParser.new {|opt|
         opt.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
-        opt.on('-d', '--database=PATH', 'Database prefix') do |path|
-          @prefix = Pathname.new(path).realpath
-        end
         opt.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
             @outputdir = Pathname.new(path).realpath
@@ -108,11 +105,12 @@ module BitClust::Subcommands
       }
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
       create_manager_config
 
-      db = BitClust::MethodDatabase.new(@prefix.to_s)
-      fdb = BitClust::FunctionDatabase.new(@prefix.to_s)
+      prefix = options[:prefix]
+      db = BitClust::MethodDatabase.new(prefix.to_s)
+      fdb = BitClust::FunctionDatabase.new(prefix.to_s)
       manager = BitClust::ScreenManager.new(@manager_config)
 
       db.transaction do
