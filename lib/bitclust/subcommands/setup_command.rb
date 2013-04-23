@@ -43,8 +43,8 @@ module BitClust::Subcommands
         prefix = "#{@config[:database_prefix]}-#{version}"
         FileUtils.rm_rf(prefix) if @cleanup
         init_argv = ["version=#{version}", "encoding=#{@config[:encoding]}"]
-        db = BitClust::MethodDatabase.new(prefix)
-        InitCommand.new.exec(db, init_argv)
+        init_options = { :prefix => prefix }
+        InitCommand.new.exec(init_argv, init_options)
         update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
         argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
         update_function_database(prefix, argv)
@@ -100,17 +100,23 @@ module BitClust::Subcommands
     end
 
     def update_method_database(prefix, argv)
-      db = BitClust::MethodDatabase.new(prefix)
+      options = {
+        :prefix => prefix,
+        :capi => false,
+      }
       cmd = UpdateCommand.new
       cmd.parse(argv)
-      cmd.exec(db, argv)
+      cmd.exec(argv, options)
     end
 
     def update_function_database(prefix, argv)
-      db = BitClust::FunctionDatabase.new(prefix)
+      options = {
+        :prefix => prefix,
+        :capi => true,
+      }
       cmd = UpdateCommand.new
       cmd.parse(argv)
-      cmd.exec(db, argv)
+      cmd.exec(argv, options)
     end
   end
 end
