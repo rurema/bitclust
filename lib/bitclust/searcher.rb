@@ -34,34 +34,34 @@ module BitClust
       @target_type = nil
       @listen_url = nil
       @foreground = false
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{@name} <pattern>"
+      @parser = OptionParser.new {|parser|
+        parser.banner = "Usage: #{@name} <pattern>"
         unless cmd == 'bitclust'
-          opt.on('-d', '--database=URL', "Database location (default: #{dblocation_name()})") {|loc|
+          parser.on('-d', '--database=URL', "Database location (default: #{dblocation_name()})") {|loc|
             url = (/:/ =~ loc) ? loc : "file://#{File.expand_path(loc)}"
             @dblocation = URI.parse(url)
           }
-          opt.on('--server=URL', 'Spawns BitClust database server and listen URL.  Requires --database option with local path.') {|url|
+          parser.on('--server=URL', 'Spawns BitClust database server and listen URL.  Requires --database option with local path.') {|url|
             require 'bitclust/server'   # require here for speed
             @listen_url = url
           }
-          opt.on('--foreground', 'Do not become daemon (for debug)') {
+          parser.on('--foreground', 'Do not become daemon (for debug)') {
             @foreground = true
           }
         end
-        opt.on('-a', '--all', 'Prints descriptions for all matched entries.') {
+        parser.on('-a', '--all', 'Prints descriptions for all matched entries.') {
           @describe_all = true
         }
-        opt.on('-l', '--line', 'Prints one entry in one line.') {
+        parser.on('-l', '--line', 'Prints one entry in one line.') {
           @linep = true
         }
-        opt.on('-e', '--encoding=ENCODING', 'Select encoding.') {|enc|
+        parser.on('-e', '--encoding=ENCODING', 'Select encoding.') {|enc|
           @encoding = enc
         }
-        opt.on('--class', 'Search class or module.') {
+        parser.on('--class', 'Search class or module.') {
           @target_type = :class
         }
-        opt.on('--version', 'Prints version and quit.') {
+        parser.on('--version', 'Prints version and quit.') {
           if cmd == 'bitclust'
             puts "BitClust -- Next generation reference manual interface"
             exit 1
@@ -70,8 +70,8 @@ module BitClust
             exit 1
           end
         }
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
+        parser.on('--help', 'Prints this message and quit.') {
+          puts parser.help
           exit 0
         }
       }
