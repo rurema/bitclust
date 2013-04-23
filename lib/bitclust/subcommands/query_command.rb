@@ -12,13 +12,8 @@ module BitClust::Subcommands
   class QueryCommand < BitClust::Subcommand
 
     def initialize
-      @parser = OptionParser.new {|parser|
-        parser.banner = "Usage: #{File.basename($0, '.*')} query <ruby-script>"
-        parser.on('--help', 'Prints this message and quit.') {
-          puts parser.help
-          exit 0
-        }
-      }
+      super
+      @parser.banner = "Usage: #{File.basename($0, '.*')} query <ruby-script>"
     end
 
     def exec(argv, options)
