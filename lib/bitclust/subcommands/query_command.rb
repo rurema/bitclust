@@ -12,10 +12,10 @@ module BitClust::Subcommands
   class QueryCommand < BitClust::Subcommand
 
     def initialize
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} query <ruby-script>"
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
+      @parser = OptionParser.new {|parser|
+        parser.banner = "Usage: #{File.basename($0, '.*')} query <ruby-script>"
+        parser.on('--help', 'Prints this message and quit.') {
+          puts parser.help
           exit 0
         }
       }
@@ -24,9 +24,9 @@ module BitClust::Subcommands
     def parse(argv)
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
       argv.each do |query|
-        #pp eval(query)   # FIXME: causes ArgumentError
+        # pp eval(query)   # FIXME: causes ArgumentError
         p eval(query)
       end
     end
