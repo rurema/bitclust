@@ -14,24 +14,19 @@ module BitClust::Subcommands
     REPOSITORY_PATH = "http://jp.rubyist.net/svn/rurema/doctree/trunk"
 
     def initialize
+      super
       @prepare = nil
       @cleanup = nil
       @versions = ["1.8.7", "1.9.3", "2.0.0"]
-      @parser = OptionParser.new {|parser|
-        parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
-        parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
-          @prepare = true
-        }
-        parser.on('--cleanup', 'Cleanup datebase before create database.') {
-          @cleanup = true
-        }
-        parser.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
-          @versions = versions.split(",")
-        }
-        parser.on('--help', 'Prints this message and quit.') {
-          puts parser.help
-          exit 0
-        }
+      @parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
+      @parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
+        @prepare = true
+      }
+      @parser.on('--cleanup', 'Cleanup datebase before create database.') {
+        @cleanup = true
+      }
+      @parser.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
+        @versions = versions.split(",")
       }
     end
 
