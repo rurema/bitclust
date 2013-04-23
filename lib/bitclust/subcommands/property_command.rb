@@ -51,7 +51,9 @@ module BitClust::Subcommands
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
+      prefix = options[:prefix]
+      db = BitClust::MethodDatabase.new(prefix)
       case @mode
       when :list
         db.properties.each do |key, val|
