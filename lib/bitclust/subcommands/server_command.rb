@@ -13,6 +13,7 @@ require 'bitclust/subcommand'
 module BitClust::Subcommands
   class ServerCommand < BitClust::Subcommand
     def initialize
+      super
       require 'webrick'
       require 'uri'
 
@@ -34,7 +35,6 @@ module BitClust::Subcommands
       @pid_file = nil
       @capi = false
 
-      @parser = OptionParser.new
       @parser.banner = "#{$0} [--bind-address=ADDR] [--port=NUM] --baseurl=URL --database=PATH [--srcdir=PATH] [--datadir=PATH] [--themedir=PATH] [--debug] [--auto] [--browser=BROWSER] [--pid-file=PATH] [--capi]"
       @parser.on('--bind-address=ADDR', 'Bind address') {|addr|
         @params[:BindAddress] = addr
@@ -74,10 +74,6 @@ module BitClust::Subcommands
       }
       @parser.on('--pid-file=PATH', 'Write pid of the daemon to the specified file.') {|path|
         @pid_file = path
-      }
-      @parser.on('--help', 'Prints this message and quit.') {
-        puts @parser.help
-        exit 0
       }
       @parser.on('--capi', 'see also FunctionDatabase.') {|path|
         @capi = true
