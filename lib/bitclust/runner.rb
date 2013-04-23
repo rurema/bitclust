@@ -112,32 +112,20 @@ Global Options:
         $stderr.puts cmd.help
         exit 1
       end
-      # TODO Remove this case expression
-      case name
-      when "init", "list", "lookup", "query", "update", "property", "ancestors", "htmlfile", "statichtml", "chm", "setup", "server", "search"
-        options = {
-          :prefix => @prefix,
-          :capi   => @capi
-        }
-        cmd.exec(argv, options)
-        return
-      else
-        config = load_config()
-        if config
-          @version ||= config[:default_version]
-          @prefix ||= "#{config[:database_prefix]}-#{@version}"
-        end
-        unless @prefix
-          $stderr.puts "no database given. Use --database option"
-          exit 1
-        end
-        if @capi
-          db = BitClust::FunctionDatabase.new(@prefix)
-        else
-          db = BitClust::MethodDatabase.new(@prefix)
-        end
+      config = load_config()
+      if config
+        @version ||= config[:default_version]
+        @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
-      cmd.exec(db, argv)
+      unless @prefix
+        $stderr.puts "no database given. Use --database option"
+        exit 1
+      end
+      options = {
+        :prefix => @prefix,
+        :capi   => @capi
+      }
+      cmd.exec(argv, options)
     rescue BitClust::WriterError => err
       raise if $DEBUG
       error err.message
