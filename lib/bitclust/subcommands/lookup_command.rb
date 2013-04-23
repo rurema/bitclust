@@ -28,7 +28,7 @@ module BitClust::Subcommands
           @type = :method
           @key = name
         }
-        parser.on('--function=NAME', 'Lookup function.') {|name|
+        parser.on('--function=NAME', 'Lookup function. (C API)') {|name|
           @type = :function
           @key = name
         }
