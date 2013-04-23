@@ -36,13 +36,14 @@ module BitClust::Subcommands
       end
     end
 
-    def exec(db, argv)
-      db.transaction {
+    def exec(argv, options)
+      super
+      @db.transaction {
         if @root
-          db.update_by_stdlibtree @root
+          @db.update_by_stdlibtree @root
         end
         argv.each do |path|
-          db.update_by_file path, @library || guess_library_name(path)
+          @db.update_by_file path, @library || guess_library_name(path)
         end
       }
     end
