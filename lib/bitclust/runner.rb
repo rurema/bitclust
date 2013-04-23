@@ -41,19 +41,23 @@ module BitClust
       @parser.banner = <<-EndBanner
 Usage: #{File.basename($0, '.*')} [global options] <subcommand> [options] [args]
 
-Subcommands:
+Subcommands(for users):
     init        Initialize database.
+    update      Update database.
+    setup       Initialize and update database with default options.
     list        List libraries/classes/methods in database.
     lookup      Lookup a library/class/method from database.
     search      Search classes/methods from database.
-    query       Dispatch arbitrary query.
-    update      Update database.
-    property    Handle database properties.
-    setup       Initialize and update database with default options.
-    statichtml  Generate static HTML files.
-    htmlfile    Generate a static HTML file for test.
-    chm         Generate static HMLT files for CHM.
+
+Subcommands(for developers):
     ancestors   Compare class/module's ancestors between Ruby and DB.
+    htmlfile    Generate a static HTML file for test.
+    query       Dispatch arbitrary query.
+    property    Handle database properties.
+
+Subcommands(for packagers):
+    statichtml  Generate static HTML files.
+    chm         Generate static HTML files for CHM.
 
 Global Options:
       EndBanner
