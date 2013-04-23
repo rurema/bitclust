@@ -86,6 +86,7 @@ Global Options:
         'statichtml'  => BitClust::Subcommands::StatichtmlCommand.new,
         'htmlfile'    => BitClust::Subcommands::HtmlfileCommand.new,
         'chm'         => BitClust::Subcommands::ChmCommand.new,
+        'ancestors'   => BitClust::Subcommands::AncestorsCommand.new,
       }
     end
 
@@ -115,7 +116,7 @@ Global Options:
       case name
       when "setup", "server"
         db = nil
-      when "init", "list", "lookup", "query", "update", "property"
+      when "init", "list", "lookup", "query", "update", "property", "ancestors"
         options = {
           :prefix => @prefix,
           :capi   => @capi
