@@ -149,9 +149,6 @@ EOS
       @index_contents = []
       @parser = OptionParser.new do |parser|
         parser.banner = "Usage: #{File.basename($0, '.*')} chm [options]"
-        parser.on('-d', '--database=PATH', 'Database prefix') do |path|
-          @prefix = Pathname.new(path).realpath
-        end
         parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
             @outputdir = Pathname.new(path).realpath
@@ -167,9 +164,10 @@ EOS
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
       create_manager_config
-      db = BitClust::MethodDatabase.new(@prefix.to_s)
+      prefix = options[:prefix]
+      db = BitClust::MethodDatabase.new(prefix.to_s)
       manager = BitClust::ScreenManager.new(@manager_config)
       @html_files = []
       db.transaction do
