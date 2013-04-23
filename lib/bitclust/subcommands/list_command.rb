@@ -23,7 +23,7 @@ module BitClust::Subcommands
         parser.on('--method', 'List methods.') {
           @mode = :method
         }
-        parser.on('--function', 'List functions.') {
+        parser.on('--function', 'List functions (C API).') {
           @mode = :function
         }
         parser.on('--help', 'Prints this message and quit.') {
