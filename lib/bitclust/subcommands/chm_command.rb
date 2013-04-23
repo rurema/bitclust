@@ -140,6 +140,7 @@ EOS
     end
 
     def initialize
+      super
       @sitemap = {
         :library => Sitemap.new('ライブラリ', 'library/index.html'),
       }
@@ -147,19 +148,13 @@ EOS
       @sitemap[:library] << Sitemap::Content.new('添付ライブラリ')
       @stdlibs = {}
       @index_contents = []
-      @parser = OptionParser.new do |parser|
-        parser.banner = "Usage: #{File.basename($0, '.*')} chm [options]"
-        parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
-          begin
-            @outputdir = Pathname.new(path).realpath
-          rescue Errno::ENOENT
-            FileUtils.mkdir_p(path, :verbose => true)
-            retry
-          end
-        end
-        parser.on('--help', 'Prints this message and quit') do
-          puts(parser.help)
-          exit(0)
+      @parser.banner = "Usage: #{File.basename($0, '.*')} chm [options]"
+      @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
+        begin
+          @outputdir = Pathname.new(path).realpath
+        rescue Errno::ENOENT
+          FileUtils.mkdir_p(path, :verbose => true)
+          retry
         end
       end
     end
