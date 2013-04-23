@@ -69,40 +69,35 @@ module BitClust::Subcommands
       if Object.const_defined?(:Encoding)
         Encoding.default_external = 'utf-8'
       end
+      super
       @verbose = true
       @catalogdir = nil
       @templatedir = srcdir_root + "data/bitclust/template.offline"
       @themedir = srcdir_root + "theme/default"
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
-        opt.on('-o', '--outputdir=PATH', 'Output directory') do |path|
-          begin
-            @outputdir = Pathname.new(path).realpath
-          rescue Errno::ENOENT
-            FileUtils.mkdir_p(path, :verbose => @verbose)
-            retry
-          end
+      @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
+      @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
+        begin
+          @outputdir = Pathname.new(path).realpath
+        rescue Errno::ENOENT
+          FileUtils.mkdir_p(path, :verbose => @verbose)
+          retry
         end
-        opt.on('--catalog=PATH', 'Catalog directory') do |path|
-          @catalogdir = Pathname.new(path).realpath
-        end
-        opt.on('--templatedir=PATH', 'Template directory') do |path|
-          @templatedir = Pathname.new(path).realpath
-        end
-        opt.on('--themedir=PATH', 'Theme directory') do |path|
-          @themedir = Pathname.new(path).realpath
-        end
-        opt.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
-          $fs_casesensitive = true
-        end
-        opt.on('--[no-]quiet', 'Be quiet') do |quiet|
-          @verbose = !quiet
-        end
-        opt.on('--help', 'Prints this message and quit') do
-          puts(opt.help)
-          exit(0)
-        end
-      }
+      end
+      @parser.on('--catalog=PATH', 'Catalog directory') do |path|
+        @catalogdir = Pathname.new(path).realpath
+      end
+      @parser.on('--templatedir=PATH', 'Template directory') do |path|
+        @templatedir = Pathname.new(path).realpath
+      end
+      @parser.on('--themedir=PATH', 'Theme directory') do |path|
+        @themedir = Pathname.new(path).realpath
+      end
+      @parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
+        $fs_casesensitive = true
+      end
+      @parser.on('--[no-]quiet', 'Be quiet') do |quiet|
+        @verbose = !quiet
+      end
     end
 
     def exec(argv, options)
