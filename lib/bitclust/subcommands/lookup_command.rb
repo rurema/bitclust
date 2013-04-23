@@ -11,34 +11,29 @@ require 'bitclust/subcommand'
 module BitClust::Subcommands
   class LookupCommand < BitClust::Subcommand
     def initialize
+      super
       @format = :text
       @type = nil
       @key = nil
-      @parser = OptionParser.new {|parser|
-        parser.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method|--function) [--html] <key>"
-        parser.on('--library=NAME', 'Lookup library.') {|name|
-          @type = :library
-          @key = name
-        }
-        parser.on('--class=NAME', 'Lookup class.') {|name|
-          @type = :class
-          @key = name
-        }
-        parser.on('--method=NAME', 'Lookup method.') {|name|
-          @type = :method
-          @key = name
-        }
-        parser.on('--function=NAME', 'Lookup function. (C API)') {|name|
-          @type = :function
-          @key = name
-        }
-        parser.on('--html', 'Show result in HTML.') {
-          @format = :html
-        }
-        parser.on('--help', 'Prints this message and quit.') {
-          puts parser.help
-          exit 0
-        }
+      @parser.banner = "Usage: #{File.basename($0, '.*')} lookup (--library|--class|--method|--function) [--html] <key>"
+      @parser.on('--library=NAME', 'Lookup library.') {|name|
+        @type = :library
+        @key = name
+      }
+      @parser.on('--class=NAME', 'Lookup class.') {|name|
+        @type = :class
+        @key = name
+      }
+      @parser.on('--method=NAME', 'Lookup method.') {|name|
+        @type = :method
+        @key = name
+      }
+      @parser.on('--function=NAME', 'Lookup function. (C API)') {|name|
+        @type = :function
+        @key = name
+      }
+      @parser.on('--html', 'Show result in HTML.') {
+        @format = :html
       }
     end
 
