@@ -12,22 +12,22 @@ module BitClust::Subcommands
   class ListCommand < BitClust::Subcommand
     def initialize
       @mode = nil
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} list (--library|--class|--method|--function)"
-        opt.on('--library', 'List libraries.') {
+      @parser = OptionParser.new {|parser|
+        parser.banner = "Usage: #{File.basename($0, '.*')} list (--library|--class|--method|--function)"
+        parser.on('--library', 'List libraries.') {
           @mode = :library
         }
-        opt.on('--class', 'List classes.') {
+        parser.on('--class', 'List classes.') {
           @mode = :class
         }
-        opt.on('--method', 'List methods.') {
+        parser.on('--method', 'List methods.') {
           @mode = :method
         }
-        opt.on('--function', 'List functions.') {
+        parser.on('--function', 'List functions.') {
           @mode = :function
         }
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
+        parser.on('--help', 'Prints this message and quit.') {
+          puts parser.help
           exit 0
         }
       }
