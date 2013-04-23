@@ -17,19 +17,19 @@ module BitClust::Subcommands
       @prepare = nil
       @cleanup = nil
       @versions = ["1.8.7", "1.9.3", "2.0.0"]
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
-        opt.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
+      @parser = OptionParser.new {|parser|
+        parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
+        parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
           @prepare = true
         }
-        opt.on('--cleanup', 'Cleanup datebase before create database.') {
+        parser.on('--cleanup', 'Cleanup datebase before create database.') {
           @cleanup = true
         }
-        opt.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
+        parser.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
           @versions = versions.split(",")
         }
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
+        parser.on('--help', 'Prints this message and quit.') {
+          puts parser.help
           exit 0
         }
       }
