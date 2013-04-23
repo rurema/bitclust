@@ -10,13 +10,13 @@ module BitClust::Subcommands
     include BitClust::CrossRubyUtils
 
     def initialize
+      super
       @prefix = nil
       @requires = []
       @version = RUBY_VERSION
       @all = false
       @verbose = false
-      @parser = OptionParser.new do |parser|
-        parser.banner =<<-BANNER
+      @parser.banner = <<-BANNER
 Usage: #{File.basename($0, '.*')} ancestors [-r<lib>] [--ruby=<VER>] --db=PATH <classname>
        #{File.basename($0, '.*')} ancestors [-r<lib>] [--ruby=<VER>] --db=PATH --all
 NG Sample:
@@ -25,27 +25,22 @@ NG Sample:
   + FooModule (The Ruby have this class/module in ancestors of the class)
   - BarModule (The Database have this class/module in ancestors of the class)
 Options:
-        BANNER
-        parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
-          @prefix = path
-        }
-        parser.on('-r LIB', 'Requires library LIB') {|lib|
-          @requires.push lib
-        }
-        parser.on('--ruby=[VER]', "The version of Ruby interpreter"){|ver|
-          @version = ver
-        }
-        parser.on('-v', '--verbose', 'Show differences'){
-          @verbose = true
-        }
-        parser.on('--all', 'Check anccestors for all classes'){
-          @all = true
-        }
-        parser.on('--help', 'Prints this message and quit.') {
-          puts parser.help
-          exit 0
-        }
-      end
+      BANNER
+      @parser.on('-d', '--database=PATH', 'Database prefix.') {|path|
+        @prefix = path
+      }
+      @parser.on('-r LIB', 'Requires library LIB') {|lib|
+        @requires.push lib
+      }
+      @parser.on('--ruby=[VER]', "The version of Ruby interpreter"){|ver|
+        @version = ver
+      }
+      @parser.on('-v', '--verbose', 'Show differences'){
+        @verbose = true
+      }
+      @parser.on('--all', 'Check anccestors for all classes'){
+        @all = true
+      }
     end
 
     def exec(argv, options)
