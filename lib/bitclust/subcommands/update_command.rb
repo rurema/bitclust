@@ -12,20 +12,15 @@ module BitClust::Subcommands
   class UpdateCommand < BitClust::Subcommand
 
     def initialize
+      super
       @root = nil
       @library = nil
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} update [<file>...]"
-        opt.on('--stdlibtree=ROOT', 'Process stdlib source directory tree.') {|path|
-          @root = path
-        }
-        opt.on('--library-name=NAME', 'Use NAME for library name in file mode.') {|name|
-          @library = name
-        }
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
-          exit 0
-        }
+      @parser.banner = "Usage: #{File.basename($0, '.*')} update [<file>...]"
+      @parser.on('--stdlibtree=ROOT', 'Process stdlib source directory tree.') {|path|
+        @root = path
+      }
+      @parser.on('--library-name=NAME', 'Use NAME for library name in file mode.') {|name|
+        @library = name
       }
     end
 
