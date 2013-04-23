@@ -35,7 +35,7 @@ module BitClust::Subcommands
       }
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
       prepare
       return if @prepare
       @config[:versions].each do |version|
