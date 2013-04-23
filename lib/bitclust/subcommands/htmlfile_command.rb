@@ -14,7 +14,6 @@ module BitClust::Subcommands
       @templatedir = srcdir_root + "data/bitclust/template.offline"
       @baseurl = "file://" + srcdir_root.to_s
       @version = "2.0.0"
-      @db = BitClust::MethodDatabase.dummy({'version' => @version})
       @parser = OptionParser.new do |parser|
         parser.banner = "Usage: #{File.basename($0, '.*')} htmlfile [options] rdfile"
         parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
@@ -26,17 +25,11 @@ module BitClust::Subcommands
         parser.on('--ruby_version=VER', '--ruby=VER', 'Set Ruby version') {|version|
           @version = version
         }
-        parser.on('--db=DB', '--database=DB', 'Set database path') {|path|
-          @db = BitClust::MethodDatabase.new(path)
-        }
         parser.on('--baseurl=URL', 'Base URL of generated HTML') {|url|
           @baseurl = url
         }
         parser.on('--templatedir=PATH', 'Template directory') {|path|
           @templatedir = path
-        }
-        parser.on('--capi', 'C API mode.') {
-          @capi = true
         }
         parser.on('--help', 'Prints this message and quit.') {
           $stderr.puts parser.help
@@ -45,7 +38,12 @@ module BitClust::Subcommands
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
+      db = BitClust::MethodDatabase.dummy({'version' => @version})
+      if options[:prefix]
+        db = BitClust::MethodDatabase.new(options[:prefix])
+      end
+      @capi = options[:capi]
       target_file = argv[0]
       options = { 'version' => @version }
       manager = BitClust::ScreenManager.new(:templatedir => @templatedir,
@@ -64,7 +62,7 @@ module BitClust::Subcommands
             lib = BitClust::RRDParser.parse_stdlib_file(target_file, options)
           end
           entry = @target ? lookup(lib, @target) : lib
-          puts manager.entry_screen(entry, { :database => @db }).body
+          puts manager.entry_screen(entry, { :database => db }).body
           return
         rescue BitClust::ParseError => ex
           $stderr.puts ex.message
@@ -76,7 +74,7 @@ module BitClust::Subcommands
         entry = BitClust::DocEntry.new(db, target_file)
         source = BitClust::Preprocessor.read(target_file, options)
         entry.source = source
-        puts manager.doc_screen(entry, { :database => @db }).body
+        puts manager.doc_screen(entry, { :database => db }).body
       rescue BitClust::WriterError => ex
         $stderr.puts ex.message
         exit 1
