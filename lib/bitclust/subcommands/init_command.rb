@@ -22,7 +22,9 @@ module BitClust::Subcommands
 
     STANDARD_PROPERTIES = %w( encoding version )
 
-    def exec(db, argv)
+    def exec(argv, options)
+      prefix = options[:prefix]
+      db = BitClust::MethodDatabase.new(prefix)
       db.init
       db.transaction {
         argv.each do |kv|

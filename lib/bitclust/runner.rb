@@ -111,9 +111,16 @@ Global Options:
         $stderr.puts cmd.help
         exit 1
       end
+      # TODO Remove this case expression
       case name
       when "setup", "server"
         db = nil
+      when "init"
+        options = {
+          :prefix => @prefix
+        }
+        cmd.exec(argv, options)
+        return
       else
         config = load_config()
         if config
