@@ -88,7 +88,8 @@ module BitClust
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options = {})
+      db = nil
       if @listen_url
         spawn_server db
       else
