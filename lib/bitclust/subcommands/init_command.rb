@@ -11,10 +11,10 @@ require 'bitclust/subcommand'
 module BitClust::Subcommands
   class InitCommand < BitClust::Subcommand
     def initialize
-      @parser = OptionParser.new {|opt|
-        opt.banner = "Usage: #{File.basename($0, '.*')} init [KEY=VALUE ...]"
-        opt.on('--help', 'Prints this message and quit.') {
-          puts opt.help
+      @parser = OptionParser.new {|parser|
+        parser.banner = "Usage: #{File.basename($0, '.*')} init [KEY=VALUE ...]"
+        parser.on('--help', 'Prints this message and quit.') {
+          puts parser.help
           exit 0
         }
       }
