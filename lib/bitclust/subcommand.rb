@@ -33,6 +33,12 @@ module BitClust
       exit 1
     end
 
+    def option_error(message)
+      $stderr.puts message
+      $stderr.puts help
+      exit 1
+    end
+
     def srcdir_root
       Pathname.new(__FILE__).realpath.dirname.parent.parent
     end
