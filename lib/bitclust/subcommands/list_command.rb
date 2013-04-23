@@ -40,7 +40,13 @@ module BitClust::Subcommands
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
+      prefix = options[:prefix]
+      if options[:capi]
+        db = BitClust::FunctionDatabase.new(prefix)
+      else
+        db = BitClust::MethodDatabase.new(prefix)
+      end
       case @mode
       when :library
         db.libraries.map {|lib| lib.name }.sort.each do |name|

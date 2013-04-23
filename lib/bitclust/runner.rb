@@ -115,9 +115,10 @@ Global Options:
       case name
       when "setup", "server"
         db = nil
-      when "init"
+      when "init", "list"
         options = {
-          :prefix => @prefix
+          :prefix => @prefix,
+          :capi   => @capi
         }
         cmd.exec(argv, options)
         return
