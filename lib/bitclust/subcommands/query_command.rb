@@ -21,9 +21,6 @@ module BitClust::Subcommands
       }
     end
 
-    def parse(argv)
-    end
-
     def exec(argv, options)
       argv.each do |query|
         # pp eval(query)   # FIXME: causes ArgumentError
