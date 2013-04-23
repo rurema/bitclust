@@ -52,7 +52,13 @@ module BitClust::Subcommands
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
+      prefix = options[:prefix]
+      if options[:capi]
+        db = BitClust::FunctionDatabase.new(prefix)
+      else
+        db = BitClust::MethodDatabase.new(prefix)
+      end
       entry = fetch_entry(db, @type, @key)
       puts fill_template(get_template(@type, @format), entry)
     end

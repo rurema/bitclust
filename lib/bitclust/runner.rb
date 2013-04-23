@@ -115,7 +115,7 @@ Global Options:
       case name
       when "setup", "server"
         db = nil
-      when "init", "list"
+      when "init", "list", "lookup"
         options = {
           :prefix => @prefix,
           :capi   => @capi
