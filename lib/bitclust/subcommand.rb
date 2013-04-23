@@ -18,6 +18,15 @@ module BitClust
       @parser.help
     end
 
+    def exec(argv, options)
+      prefix = options[:prefix]
+      if options[:capi]
+        @db = BitClust::FunctionDatabase.new(prefix)
+      else
+        @db = BitClust::MethodDatabase.new(prefix)
+      end
+    end
+
     # TODO refactor
     def error(message)
       $stderr.puts "#{File.basename($0, '.*')}: error: #{message}"
