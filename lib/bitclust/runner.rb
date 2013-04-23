@@ -114,9 +114,7 @@ Global Options:
       end
       # TODO Remove this case expression
       case name
-      when "server"
-        db = nil
-      when "init", "list", "lookup", "query", "update", "property", "ancestors", "htmlfile", "statichtml", "chm", "setup"
+      when "init", "list", "lookup", "query", "update", "property", "ancestors", "htmlfile", "statichtml", "chm", "setup", "server"
         options = {
           :prefix => @prefix,
           :capi   => @capi

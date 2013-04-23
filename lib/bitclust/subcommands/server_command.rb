@@ -114,7 +114,7 @@ module BitClust::Subcommands
       end
     end
 
-    def exec(db, argv)
+    def exec(argv, options)
       require 'bitclust/app'
       if @debugp
         @params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::DEBUG)
