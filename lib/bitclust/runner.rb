@@ -54,7 +54,7 @@ Subcommands(for developers):
     htmlfile    Generate a static HTML file for test.
     query       Dispatch arbitrary query.
     property    Handle database properties.
-    preproc     Preprocess source.
+    preproc     Preprocess source file.
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
