@@ -55,6 +55,7 @@ Subcommands(for developers):
     query       Dispatch arbitrary query.
     property    Handle database properties.
     preproc     Preprocess source file.
+    extract     Extract method entries from source file.
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
@@ -94,6 +95,7 @@ Global Options:
         'chm'         => BitClust::Subcommands::ChmCommand.new,
         'ancestors'   => BitClust::Subcommands::AncestorsCommand.new,
         'preproc'     => BitClust::Subcommands::PreprocCommand.new,
+        'extract'     => BitClust::Subcommands::ExtractCommand.new,
       }
     end
 
