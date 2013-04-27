@@ -56,6 +56,7 @@ Subcommands(for developers):
     property    Handle database properties.
     preproc     Preprocess source file.
     extract     Extract method entries from source file.
+    classes     Display defined classes for all ruby.
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
@@ -96,6 +97,7 @@ Global Options:
         'ancestors'   => BitClust::Subcommands::AncestorsCommand.new,
         'preproc'     => BitClust::Subcommands::PreprocCommand.new,
         'extract'     => BitClust::Subcommands::ExtractCommand.new,
+        'classes'     => BitClust::Subcommands::ClassesCommand.new,
       }
     end
 
