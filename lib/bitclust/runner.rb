@@ -57,6 +57,7 @@ Subcommands(for developers):
     preproc     Preprocess source file.
     extract     Extract method entries from source file.
     classes     Display defined classes for all ruby.
+    methods     Display defined methods for all ruby.
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
@@ -98,6 +99,7 @@ Global Options:
         'preproc'     => BitClust::Subcommands::PreprocCommand.new,
         'extract'     => BitClust::Subcommands::ExtractCommand.new,
         'classes'     => BitClust::Subcommands::ClassesCommand.new,
+        'methods'     => BitClust::Subcommands::MethodsCommand.new,
       }
     end
 
