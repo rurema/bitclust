@@ -36,7 +36,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["version=1.9.3", "encoding=utf-8"])
-    command.exec(@db, ["version=1.9.3", "encoding=utf-8"]).returns(nil)
+    command.exec(["version=1.9.3", "encoding=utf-8"], {:prefix=>@prefix, :capi => false}).returns(nil)
     @runner.run(["init", "version=1.9.3", "encoding=utf-8"])
   end
 
@@ -46,7 +46,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["--library"])
-    command.exec(@db, ["--library"])
+    command.exec(["--library"], {:prefix=>@prefix, :capi => false})
     @runner.run(["list", "--library"])
   end
 
@@ -56,7 +56,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["--library=optparse"])
-    command.exec(@db, ["--library=optparse"])
+    command.exec(["--library=optparse"], {:prefix=>@prefix, :capi => false})
     @runner.run(["list", "--library=optparse"])
   end
 
@@ -66,7 +66,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["String#gsub"])
-    command.exec(@db, ["String#gsub"])
+    command.exec(["String#gsub"], {:prefix=>@prefix, :capi => false})
     @runner.run(["search", "String#gsub"])
   end
 
@@ -76,7 +76,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["db.properties"])
-    command.exec(@db, ["db.properties"])
+    command.exec(["db.properties"], {:prefix=>@prefix, :capi => false})
     @runner.run(["query", "db.properties"])
   end
 
@@ -86,7 +86,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["_builtin/String"])
-    command.exec(@db, ["_builtin/String"])
+    command.exec(["_builtin/String"], {:prefix=>@prefix, :capi => false})
     @runner.run(["update", "_builtin/String"])
   end
 
@@ -96,7 +96,7 @@ class TestRunner < Test::Unit::TestCase
     mock(@runner).load_config.returns(@config)
     mock(BitClust::MethodDatabase).new(@prefix).returns(@db)
     command.parse(["--list"])
-    command.exec(@db, ["--list"])
+    command.exec(["--list"], {:prefix=>@prefix, :capi => false})
     @runner.run(["property", "--list"])
   end
 end
