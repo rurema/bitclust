@@ -44,7 +44,7 @@ HERE
     $stdout = @out
     begin
       cmd.parse(argv)
-      cmd.exec(db, argv)
+      cmd.exec(argv, {:prefix => @tmpdir, :capi => true})
     ensure
       $stdout = STDOUT
     end
