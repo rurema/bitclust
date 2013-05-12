@@ -5,9 +5,10 @@ require 'bitclust'
 require 'bitclust/crossrubyutils'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class MethodsCommand < BitClust::Subcommand
-    include BitClust::CrossRubyUtils
+module BitClust
+  module Subcommands
+  class MethodsCommand < Subcommand
+    include CrossRubyUtils
 
     def initialize
       super
@@ -54,7 +55,7 @@ module BitClust::Subcommands
           raise "Not found Ruby interpreter of the given version"
         end
         keys = defined_methods(ruby, classname)
-        lib = BitClust::RRDParser.parse_stdlib_file(@target, { 'version' => @version })
+        lib = RRDParser.parse_stdlib_file(@target, { 'version' => @version })
         c = lib.fetch_class(classname)
         list0 = lib.classes.find_all{|c0| /\A#{classname}\b/o =~ c0.name }
         list0 = c.entries + list0
@@ -153,5 +154,6 @@ module BitClust::Subcommands
       end
       `#{ruby} #{req} -e '#{script}'`.split
     end
+  end
   end
 end

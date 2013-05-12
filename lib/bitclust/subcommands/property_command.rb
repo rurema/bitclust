@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class PropertyCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class PropertyCommand < Subcommand
     def initialize
       super
       @mode = nil
@@ -48,7 +49,7 @@ module BitClust::Subcommands
 
     def exec(argv, options)
       prefix = options[:prefix]
-      db = BitClust::MethodDatabase.new(prefix)
+      db = MethodDatabase.new(prefix)
       case @mode
       when :list
         db.properties.each do |key, val|
@@ -67,5 +68,6 @@ module BitClust::Subcommands
         raise "must not happen: #{@mode}"
       end
     end
+  end
   end
 end

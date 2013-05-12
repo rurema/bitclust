@@ -5,9 +5,10 @@ require 'pathname'
 require 'optparse'
 require 'set'
 
-module BitClust::Subcommands
-  class AncestorsCommand < BitClust::Subcommand
-    include BitClust::CrossRubyUtils
+module BitClust
+  module Subcommands
+  class AncestorsCommand < Subcommand
+    include CrossRubyUtils
 
     def initialize
       super
@@ -45,7 +46,7 @@ Options:
 
     def exec(argv, options)
       classname = argv[0]
-      db = BitClust::MethodDatabase.new(@prefix)
+      db = MethodDatabase.new(@prefix)
       ruby = get_ruby(@version)
       if classname && !@all
         check_ancestors(db, ruby, @requires, classname)
@@ -78,7 +79,7 @@ Options:
       p a
       begin
         b = db.fetch_class(classname).ancestors.map(&:name)
-      rescue BitClust::ClassNotFound => ex
+      rescue ClassNotFound => ex
         $stderr.puts ex.backtrace
         $stderr.puts "class not found in database : #{classname}"
         b = []
@@ -138,5 +139,6 @@ Options:
     '`
       output.split
     end
+  end
   end
 end

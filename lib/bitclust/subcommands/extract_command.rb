@@ -4,8 +4,9 @@ require 'optparse'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class ExtractCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class ExtractCommand < Subcommand
 
     def initialize
       super
@@ -19,13 +20,13 @@ module BitClust::Subcommands
       success = true
       argv.each do |path|
         begin
-          lib = BitClust::RRDParser.parse_stdlib_file(path)
+          lib = RRDParser.parse_stdlib_file(path)
           if @check_only
             $stderr.puts "#{path}: OK"
           else
             show_library lib
           end
-        rescue BitClust::WriterError => err
+        rescue WriterError => err
           raise if $DEBUG
           $stderr.puts "#{File.basename($0, '.*')}: FAIL: #{err.message}"
           success = false
@@ -49,5 +50,6 @@ module BitClust::Subcommands
         end
       end
     end
+  end
   end
 end

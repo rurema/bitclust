@@ -11,9 +11,10 @@ require 'bitclust'
 require 'bitclust/subcommand'
 require 'bitclust/silent_progress_bar'
 
-module BitClust::Subcommands
-  class StatichtmlCommand < BitClust::Subcommand
-    class URLMapperEx < BitClust::URLMapper
+module BitClust
+  module Subcommands
+  class StatichtmlCommand < Subcommand
+    class URLMapperEx < URLMapper
       def library_url(name)
         if name == '/'
           $bitclust_html_base + "/library/index.html"
@@ -58,9 +59,9 @@ module BitClust::Subcommands
 
       def encodename_package(str)
         if $fs_casesensitive
-          BitClust::NameUtils.encodename_url(str)
+          NameUtils.encodename_url(str)
         else
-          BitClust::NameUtils.encodename_fs(str)
+          NameUtils.encodename_fs(str)
         end
       end
     end
@@ -104,9 +105,9 @@ module BitClust::Subcommands
       create_manager_config
 
       prefix = options[:prefix]
-      db = BitClust::MethodDatabase.new(prefix.to_s)
-      fdb = BitClust::FunctionDatabase.new(prefix.to_s)
-      manager = BitClust::ScreenManager.new(@manager_config)
+      db = MethodDatabase.new(prefix.to_s)
+      fdb = FunctionDatabase.new(prefix.to_s)
+      manager = ScreenManager.new(@manager_config)
 
       db.transaction do
         methods = {}
@@ -174,7 +175,7 @@ module BitClust::Subcommands
       if @verbose
         progressbar = ProgressBar.new(title, entries.size)
       else
-        progressbar = BitClust::SilentProgressBar.new(title, entries.size)
+        progressbar = SilentProgressBar.new(title, entries.size)
       end
       entries.each do |entry|
         create_html_file(entry, manager, @outputdir, db)
@@ -190,7 +191,7 @@ module BitClust::Subcommands
       if @verbose
         progressbar = ProgressBar.new(title, methods.size)
       else
-        progressbar = BitClust::SilentProgressBar.new(title, methods.size)
+        progressbar = SilentProgressBar.new(title, methods.size)
       end
       methods.each do |method_name, method_entries|
         create_html_method_file(method_name, method_entries, manager, @outputdir, db)
@@ -265,10 +266,11 @@ HERE
 
     def encodename_package(str)
       if $fs_casesensitive
-        BitClust::NameUtils.encodename_url(str)
+        NameUtils.encodename_url(str)
       else
-        BitClust::NameUtils.encodename_fs(str)
+        NameUtils.encodename_fs(str)
       end
     end
+  end
   end
 end

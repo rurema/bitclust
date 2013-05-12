@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class UpdateCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class UpdateCommand < Subcommand
 
     def initialize
       super
@@ -57,5 +58,6 @@ module BitClust::Subcommands
       File.basename(path, '.rd')
     end
 
+  end
   end
 end

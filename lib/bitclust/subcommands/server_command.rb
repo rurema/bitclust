@@ -10,8 +10,9 @@ require 'uri'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class ServerCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class ServerCommand < Subcommand
     def initialize
       super
       require 'webrick'
@@ -127,7 +128,7 @@ module BitClust::Subcommands
       server = WEBrick::HTTPServer.new(@params)
 
       if @autop
-        app = BitClust::App.new(
+        app = App.new(
           :dbpath => Dir.glob("#{@database_prefix}-*"),
           :baseurl => @baseurl,
           :datadir => @datadir,
@@ -142,7 +143,7 @@ module BitClust::Subcommands
         server.mount(File.join(basepath, '/'), app)
       else
         viewpath = File.join(basepath, 'view')
-        app = BitClust::App.new(
+        app = App.new(
           :viewpath => viewpath,
           :dbpath => @dbpath,
           :baseurl => @baseurl,
@@ -210,5 +211,6 @@ module BitClust::Subcommands
         @database_prefix ||= config[:database_prefix]
       end
     end
+  end
   end
 end

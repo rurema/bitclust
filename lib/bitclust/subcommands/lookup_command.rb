@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class LookupCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class LookupCommand < Subcommand
     def initialize
       super
       @format = :text
@@ -60,7 +61,7 @@ module BitClust::Subcommands
       when :class
         db.fetch_class(key)
       when :method
-        db.fetch_method(BitClust::MethodSpec.parse(key))
+        db.fetch_method(MethodSpec.parse(key))
       when :function
         db.fetch_function(key)
       else
@@ -74,7 +75,7 @@ module BitClust::Subcommands
 
     def get_template(type, format)
       template = TEMPLATE[type][format]
-      BitClust::TextUtils.unindent_block(template.lines).join('')
+      TextUtils.unindent_block(template.lines).join('')
     end
 
     TEMPLATE = {
@@ -163,10 +164,11 @@ module BitClust::Subcommands
     }
 
     def compile_rd(src)
-      umap = BitClust::URLMapper.new(:base_url => 'http://example.com',
+      umap = URLMapper.new(:base_url => 'http://example.com',
                                      :cgi_url  => 'http://example.com/view')
-      compiler = BitClust::RDCompiler.new(umap, 2)
+      compiler = RDCompiler.new(umap, 2)
       compiler.compile(src)
     end
+  end
   end
 end

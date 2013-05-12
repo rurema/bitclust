@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class InitCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class InitCommand < Subcommand
     def initialize
       super
       @parser.banner = "Usage: #{File.basename($0, '.*')} init [KEY=VALUE ...]"
@@ -19,7 +20,7 @@ module BitClust::Subcommands
 
     def exec(argv, options)
       prefix = options[:prefix]
-      db = BitClust::MethodDatabase.new(prefix)
+      db = MethodDatabase.new(prefix)
       db.init
       db.transaction {
         argv.each do |kv|
@@ -41,6 +42,7 @@ module BitClust::Subcommands
         end
       end
     end
+  end
   end
 end
 

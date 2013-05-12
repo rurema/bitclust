@@ -3,9 +3,10 @@ require 'optparse'
 
 require 'bitclust/crossrubyutils'
 
-module BitClust::Subcommands
-  class ClassesCommand < BitClust::Subcommand
-    include BitClust::CrossRubyUtils
+module BitClust
+  module Subcommands
+  class ClassesCommand < Subcommand
+    include CrossRubyUtils
 
     def initialize
       super
@@ -67,5 +68,6 @@ module BitClust::Subcommands
       output = `#{ruby} -e '#{script}'`
       output.split
     end
+  end
   end
 end

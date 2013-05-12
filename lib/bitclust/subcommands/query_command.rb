@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class QueryCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class QueryCommand < Subcommand
 
     def initialize
       super
@@ -22,5 +23,6 @@ module BitClust::Subcommands
         p eval(query)
       end
     end
+  end
   end
 end

@@ -3,8 +3,9 @@ require 'optparse'
 
 require 'bitclust/rrdparser'
 
-module BitClust::Subcommands
-  class PreprocCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class PreprocCommand < Subcommand
 
     def initialize
       super
@@ -19,15 +20,16 @@ module BitClust::Subcommands
     def exec(argv, options)
       argv.each do |path|
         File.open(path) {|file|
-          BitClust::Preprocessor.wrap(file, @params).each do |line|
+          Preprocessor.wrap(file, @params).each do |line|
             puts line
           end
         }
       end
-    rescue BitClust::WriterError => err
+    rescue WriterError => err
       $stderr.puts err.message
       exit 1
     end
 
+  end
   end
 end

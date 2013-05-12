@@ -8,8 +8,9 @@ require 'fileutils'
 require 'kconv'
 require 'progressbar'
 
-module BitClust::Subcommands
-  class ChmCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class ChmCommand < Subcommand
 
     HHP_SKEL = <<EOS
 [OPTIONS]
@@ -116,7 +117,7 @@ EOS
       end
     end
 
-    class URLMapperEx < ::BitClust::URLMapper
+    class URLMapperEx < URLMapper
       def library_url(name)
         if name == '/'
           "/library/index.html"
@@ -162,8 +163,8 @@ EOS
     def exec(argv, options)
       create_manager_config
       prefix = options[:prefix]
-      db = BitClust::MethodDatabase.new(prefix.to_s)
-      manager = BitClust::ScreenManager.new(@manager_config)
+      db = MethodDatabase.new(prefix.to_s)
+      manager = ScreenManager.new(@manager_config)
       @html_files = []
       db.transaction do
         methods = {}
@@ -238,10 +239,10 @@ EOS
       e = entry.is_a?(Array) ? entry.sort.first : entry
       path = case e.type_id
              when :library, :class, :doc
-               outputdir + e.type_id.to_s + (BitClust::NameUtils.encodename_fs(e.name) + '.html')
+               outputdir + e.type_id.to_s + (NameUtils.encodename_fs(e.name) + '.html')
              when :method
-               outputdir + e.type_id.to_s + BitClust::NameUtils.encodename_fs(e.klass.name) +
-                 e.typechar + (BitClust::NameUtils.encodename_fs(e.name) + '.html')
+               outputdir + e.type_id.to_s + NameUtils.encodename_fs(e.klass.name) +
+                 e.typechar + (NameUtils.encodename_fs(e.name) + '.html')
              else
                raise
              end
@@ -262,5 +263,6 @@ EOS
       end
       $stderr.puts(" done.")
     end
+  end
   end
 end

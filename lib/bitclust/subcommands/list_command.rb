@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class ListCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class ListCommand < Subcommand
     def initialize
       super
       @mode = nil
@@ -60,5 +61,6 @@ module BitClust::Subcommands
         raise "must not happen: @mode=#{@mode.inspect}"
       end
     end
+  end
   end
 end

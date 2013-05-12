@@ -8,8 +8,9 @@ require 'yaml'
 require 'bitclust'
 require 'bitclust/subcommand'
 
-module BitClust::Subcommands
-  class SetupCommand < BitClust::Subcommand
+module BitClust
+  module Subcommands
+  class SetupCommand < Subcommand
 
     REPOSITORY_PATH = "http://jp.rubyist.net/svn/rurema/doctree/trunk"
 
@@ -113,5 +114,6 @@ module BitClust::Subcommands
       cmd.parse(argv)
       cmd.exec(argv, options)
     end
+  end
   end
 end
