@@ -104,39 +104,40 @@ Options:
       end
 
       def defined_classes(ruby, lib, rejects)
-        output = `#{ruby} -e '
-        def class_extent
-          result = []
-          ObjectSpace.each_object(Module) do |c|
-            result.push c
+        script = <<-SCRIPT
+          def class_extent
+            result = []
+            ObjectSpace.each_object(Module) do |c|
+              result.push c
+            end
+            result
           end
-          result
-        end
 
-        %w(#{rejects.join(" ")}).each do |lib|
-          begin
-            require lib
-          rescue LoadError
+          %w(#{rejects.join(" ")}).each do |lib|
+            begin
+              require lib
+            rescue LoadError
+            end
           end
-        end
-        if "#{lib}" == "_builtin"
-          class_extent().each do |c|
-            puts c
+          if "#{lib}" == "_builtin"
+            class_extent().each do |c|
+              puts c
+            end
+          else
+            before = class_extent()
+            begin
+              require "#{lib}"
+            rescue LoadError
+              $stderr.puts "\#{RUBY_VERSION} (\#{RUBY_RELEASE_DATE}): library not exist: #{lib}"
+              exit
+            end
+            after = class_extent()
+            (after - before).each do |c|
+              puts c
+            end
           end
-        else
-          before = class_extent()
-          begin
-            require "#{lib}"
-          rescue LoadError
-            $stderr.puts "\#{RUBY_VERSION} (\#{RUBY_RELEASE_DATE}): library not exist: #{lib}"
-            exit
-          end
-          after = class_extent()
-          (after - before).each do |c|
-            puts c
-          end
-        end
-        '`
+        SCRIPT
+        output = `#{ruby} -e '#{script}'`
         output.split
       end
     end
