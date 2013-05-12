@@ -55,7 +55,7 @@
   entries.each do |m|
     m.names.each do |mname|
 %>
-<a href="#<%= m.index_id(mname, false) %>"><%= "#{prefix}#{mname}" %></a>
+<a href="#<%= m.index_id %>"><%= "#{prefix}#{mname}" %></a>
 <%
     end
   end

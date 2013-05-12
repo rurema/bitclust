@@ -20,7 +20,7 @@ class TestRDCompiler < Test::Unit::TestCase
   def assert_compiled_method_source(expected, src)
     method_entry = Object.new
     mock(method_entry).source{ src }
-    mock(method_entry).index_id(anything).any_times{ "dummy" }
+    mock(method_entry).index_id.any_times{ "dummy" }
     mock(method_entry).defined?.any_times{ true }
     mock(method_entry).id.any_times{ "String/i.index._builtin" }
     assert_equal(expected, @c.compile_method(method_entry))

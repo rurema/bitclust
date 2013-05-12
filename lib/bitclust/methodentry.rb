@@ -122,8 +122,7 @@ module BitClust
       "#{t == '#' ? '' : t}#{m}"
     end
 
-    def index_id(name, remove_prefix = true)
-      name = name.sub(/^\$/, '') if remove_prefix
+    def index_id
       "#{methodid2typechar(@id)}_#{encodename_fs(name).gsub(/=/, '--')}".upcase
     end
 

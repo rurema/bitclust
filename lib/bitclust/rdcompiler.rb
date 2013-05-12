@@ -333,7 +333,7 @@ module BitClust
       # FIXME: check parameters, types, etc.
       sig = MethodSignature.parse(sig_line)
       string %Q(<dt class="method-heading")
-      string %Q( id="#{@method.index_id(sig.name)}") if first
+      string %Q( id="#{@method.index_id}") if first
       string '><code>'
       string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
