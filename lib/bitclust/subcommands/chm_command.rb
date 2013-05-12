@@ -6,7 +6,7 @@ require 'bitclust/subcommand'
 require 'fileutils'
 # TODO Remove this line when we drop 1.8 support
 require 'kconv'
-require 'progressbar'
+require 'bitclust/progress_bar'
 
 module BitClust
   module Subcommands
