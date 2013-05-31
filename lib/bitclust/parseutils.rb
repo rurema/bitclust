@@ -15,6 +15,8 @@ end
 
 module BitClust
 
+  # Provides line-wise access to a file with :file and :line.
+  # Used by Preprocessor
   class LineStream
     def initialize(f)
       @f = f
@@ -33,6 +35,8 @@ module BitClust
     end
   end
 
+  # Encapsulates :file and :line.
+  # Used by LineStream(above)
   class Location
     def initialize(file, line)
       @file = file
@@ -51,6 +55,7 @@ module BitClust
     end
   end
 
+  # Utilities for parsing 
   module ParseUtils
     def parse_error(msg, line)
       raise ParseError, "#{line.location}: #{msg}: #{line.inspect}"

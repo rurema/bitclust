@@ -1,3 +1,7 @@
+#
+# Compatibility for older rubies
+#
+
 unless Object.method_defined?(:__send)
   class Object
     alias __send __send__

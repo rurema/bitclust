@@ -9,6 +9,7 @@
 
 module BitClust
 
+  # Provides methods to use MessageCatalog
   module Translatable
 
     private
@@ -27,6 +28,9 @@ module BitClust
 
   end
 
+  # Tiny implementation of message catalog (I18N)
+  # see data/bitclust/catalog/ja_JP.UTF-8
+  #
   # FIXME: support automatic encoding-conversion
   class MessageCatalog
 

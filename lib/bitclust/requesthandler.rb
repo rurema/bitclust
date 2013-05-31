@@ -1,4 +1,4 @@
-#
+
 # bitclust/requesthandler.rb
 #
 # Copyright (c) 2006-2008 Minero Aoki
@@ -15,6 +15,7 @@ require 'bitclust/simplesearcher'
 
 module BitClust
 
+  # Actions of BitClust server.
   class RequestHandler
 
     def initialize(db, manager)

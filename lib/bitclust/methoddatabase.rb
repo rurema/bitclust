@@ -20,6 +20,7 @@ require 'fileutils'
 
 module BitClust
 
+  # Database for Ruby entries (library, class, method).
   class MethodDatabase < Database
 
     include Completion
@@ -343,6 +344,8 @@ module BitClust
     # Method Entry
     #
 
+    # Return existing/newly created MethodEntry from the given MethodID
+    #
     # FIXME: see kind
     def open_method(id)
       check_transaction

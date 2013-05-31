@@ -18,6 +18,7 @@ require 'webrick/server'
 
 module BitClust
 
+  # Body of Refe server (spanwed by `refe --server`).
   class Server
 
     def initialize(db)

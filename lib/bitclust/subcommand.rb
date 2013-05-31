@@ -9,6 +9,7 @@ require 'yaml'
 
 module BitClust
 
+  # Base class for bitclust subcommands.
   class Subcommand
     def initialize
       @parser = OptionParser.new

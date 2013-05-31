@@ -12,6 +12,7 @@ require 'strscan'
 
 module BitClust
 
+  # Superclass of Preprocessor
   class LineFilter
 
     include ParseUtils
@@ -37,6 +38,7 @@ module BitClust
   end
 
 
+  # Handle pragmas like #@todo, #@include, #@since, etc.
   class Preprocessor < LineFilter
 
     def self.read(path, params = {})
@@ -236,6 +238,7 @@ module BitClust
   end
 
 
+  # Used by tools/stattodo.rb
   class LineCollector < LineFilter
 
     def LineCollector.process(path)

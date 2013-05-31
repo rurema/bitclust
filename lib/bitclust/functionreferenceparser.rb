@@ -11,8 +11,12 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Parser for C API reference file (refm/capi/src/*)
+  # Much simpler than Ruby API reference parser(RRDParser)
+  # because C APIs does not have library, class, etc.
   class FunctionReferenceParser
 
+    # Returns an array of FunctionEntry
     def FunctionReferenceParser.parse_file(path, params = {"version" => "1.9.0"})
       parser = new(FunctionDatabase.dummy(params))
       parser.parse_file(path, File.basename(path, ".rd"), params)
@@ -71,6 +75,8 @@ module BitClust
 
   end
 
+  # Represents C function signature
+  # (Used internally in this file)
   FunctionHeader = Struct.new(:macro, :private, :type, :name, :params)
 
 end

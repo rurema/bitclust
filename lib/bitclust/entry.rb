@@ -13,6 +13,7 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Ancestor of entry classes.
   class Entry
 
     include NameUtils
@@ -70,6 +71,13 @@ module BitClust
       @slots.push Property.new(name, type)
     end
 
+    # Used to define specific property of each entry class.
+    #
+    # Example
+    #   persistent_properties {
+    #     property :requires, '[LibraryEntry]'
+    #     property :classes,  '[ClassEntry]'
+    #     ...
     class Property
       def initialize(name, type)
         @name = name

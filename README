@@ -14,8 +14,19 @@ License
   Ruby License.
 
 
-Maintainer
-----------
+Glossary
+--------
 
-  Minero Aoki <aamine@loveruby.net>
-
+* "entry" 
+  * Each target of documentation.
+  * classes: Entry LibraryEntry ClassEntry MethodEntry DocEntry FunctionEntry
+* "screen"
+  * View class.
+  * Used by BitClust server, chm_command, statichtml_command, etc.
+* "singleton object" 
+  * ARGF, main, etc.
+* "BitClust server"
+  * HTTP server application to view refenence on browser.
+* "Refe server"
+  * DRb server spawned by refe --server.
+  * Expose BitClust DB via DRuby.

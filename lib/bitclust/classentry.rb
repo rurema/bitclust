@@ -12,7 +12,7 @@ require 'bitclust/exception'
 
 module BitClust
 
-  # Represents a class, a module and a singleton object.
+  # Represents a class, a module or a singleton object (like ARGF, main, etc.).
   class ClassEntry < Entry
 
     include Enumerable

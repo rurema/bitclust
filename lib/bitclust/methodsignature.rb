@@ -12,6 +12,8 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Represents detailed signature of a method in a class/module.
+  # Includes parameters, block specification and return type.
   class MethodSignature
 
     include NameUtils

@@ -15,6 +15,7 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Database for C API functions.
   class FunctionDatabase < Database
 
     include Completion

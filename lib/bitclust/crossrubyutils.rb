@@ -6,6 +6,8 @@
 
 module BitClust
 
+  # Provides utility methods like print_crossruby_table.
+  # Used by subcommands "ancestors" "classes" etc.
   module CrossRubyUtils
 
     private

@@ -13,6 +13,9 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Represents infomation to identify a method (library, class/module,
+  # type and name.)
+  #
   # A MethodID has #library, #klass, #typename, and method name.
   # #library, #klass, #typename must be an object.
   class MethodID

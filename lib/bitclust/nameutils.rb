@@ -11,6 +11,7 @@ require 'bitclust/compat'
 
 module BitClust
 
+  # Utilities for conversion among names, ids and URL fragments.
   module NameUtils
 
     module_function

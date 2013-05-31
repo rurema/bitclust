@@ -6,6 +6,8 @@
 #
 
 module BitClust
+
+  # Corresponds to db-x.y.z/refs file.
   class RefsDatabase
     def self.load(src)
       if src.respond_to?(:to_str)

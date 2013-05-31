@@ -10,6 +10,7 @@
 
 require 'stringio'
 
+# Utility class for line-wise file parsing
 class LineInput
 
   def LineInput.for_string(s)

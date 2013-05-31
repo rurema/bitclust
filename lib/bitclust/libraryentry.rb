@@ -12,6 +12,7 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Entry for libraries ("_builtin", "yaml", etc.)
   class LibraryEntry < Entry
 
     include Enumerable

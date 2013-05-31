@@ -1,5 +1,6 @@
 
 module BitClust
+  # Null-object version of ProgressBar.
   class SilentProgressBar
 
     attr_reader :title

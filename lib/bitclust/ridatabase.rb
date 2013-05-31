@@ -5,6 +5,8 @@ require 'rdoc/ri/ri_paths'
 class ApplicationError < StandardError; end
 class RiClassNotFound < ApplicationError; end
 
+# Handle RDoc(ri) database for tools/bc-rdoc.rb and
+# `bitclust methods --diff`.
 class RiDatabase
   def RiDatabase.open_system_db
     new(RI::Paths.path(true, false, false, false), RUBY_VERSION)

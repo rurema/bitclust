@@ -20,6 +20,7 @@ Dir.glob(File.join(subcommands_dir.to_s, "*.rb")) do |entry|
 end
 
 module BitClust
+  # Body of bin/bitclust.
   class Runner
     def initialize
     end

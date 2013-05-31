@@ -11,6 +11,7 @@ require 'bitclust/nameutils'
 
 module BitClust
 
+  # Utility functions for HTML tag generation
   module HTMLUtils
 
     include NameUtils

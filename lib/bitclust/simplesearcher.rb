@@ -2,6 +2,8 @@ require 'bitclust/nameutils'
 require 'bitclust/methodid'
 
 module BitClust
+  # Tiny search engine for BitClust server.
+  # Note: loads all the entries onto memory, so first search will be slow.
   module SimpleSearcher
     include NameUtils
 

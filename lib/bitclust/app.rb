@@ -3,6 +3,10 @@ require 'bitclust/interface'
 
 module BitClust
 
+  # Main class of BitClust server application.
+  # Actual actions are implemneted by RequestHandler.
+  #
+  # Supports Rack and WEBrick.
   class App
 
     def initialize(options)

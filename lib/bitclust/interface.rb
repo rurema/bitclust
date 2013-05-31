@@ -16,6 +16,7 @@ end
 
 module BitClust
 
+  # Web server interface for BitClust server
   class Interface
 
     def initialize(webrick_conf = {})

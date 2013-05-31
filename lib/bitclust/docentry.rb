@@ -12,6 +12,7 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Entry for general documents (doc/**/*.rd, etc.)
   class DocEntry < Entry
 
     def self.type_id

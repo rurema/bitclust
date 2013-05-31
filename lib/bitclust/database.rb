@@ -12,6 +12,10 @@ require 'bitclust/exception'
 
 module BitClust
 
+  # Abstract class for BitClust DB.
+  # Each entry is written in a file.
+  #
+  # Has subclass MethodDatabase (Ruby stuff) and FunctionDatabase (C stuff).
   class Database
 
     include NameUtils

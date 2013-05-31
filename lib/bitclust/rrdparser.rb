@@ -18,6 +18,7 @@ require 'bitclust/methoddatabase'
 
 module BitClust
 
+  # Parser for Ruby API reference file (refm/api/src/*)
   class RRDParser
 
     include NameUtils

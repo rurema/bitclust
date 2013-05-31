@@ -15,6 +15,7 @@ require 'stringio'
 
 module BitClust
 
+  # Compiles doc into HTML.
   class RDCompiler
 
     include HTMLUtils

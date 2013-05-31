@@ -12,7 +12,8 @@ require 'bitclust/exception'
 
 module BitClust
 
-  # Represents a method, a constant, and a special variable.
+  # Entry for methods(instance methods/singleton methods/module_functions),
+  # constants and special variables(like $!).
   class MethodEntry < Entry
 
     def MethodEntry.type_id

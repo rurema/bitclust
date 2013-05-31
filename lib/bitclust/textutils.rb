@@ -9,6 +9,7 @@
 
 module BitClust
 
+  # Utility for tweaking text.
   module TextUtils
 
     module_function

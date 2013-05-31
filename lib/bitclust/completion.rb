@@ -9,6 +9,8 @@
 
 module BitClust
 
+  # Provides completion search methods like _search_classes, _search_methods. 
+  # Included by MethodDatabase and FunctionDatabase.
   module Completion
 
     private
@@ -395,6 +397,8 @@ $cm_comb_m += 1
   end
 
 
+  # Represents result of completion search.
+  # Has many SearchResult::Record.
   class SearchResult
 
     def SearchResult.empty(db, pattern)
@@ -445,6 +449,7 @@ $cm_comb_m += 1
       @records.sort.each(&block)
     end
 
+    # Wraps an Entry.
     class Record
       def initialize(db, spec, origin = nil, entry = nil)
         @db = db

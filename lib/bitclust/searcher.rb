@@ -20,6 +20,7 @@ require 'yaml'
 
 module BitClust
 
+  # Body of bin/refe.
   class Searcher
 
     include NameUtils
