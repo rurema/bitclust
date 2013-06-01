@@ -17,16 +17,18 @@ class TestRunner < Test::Unit::TestCase
   def test_run_setup
     command = mock(Object.new)
     mock(::BitClust::Subcommands::SetupCommand).new.returns(command)
+    mock(@runner).load_config.returns(@config)
     command.parse([])
-    command.exec(nil, []).returns(nil)
+    command.exec([], {:prefix => @prefix, :capi => false}).returns(nil)
     @runner.run(["setup"])
   end
 
   def test_run_server
     command = mock(Object.new)
     mock(::BitClust::Subcommands::ServerCommand).new.returns(command)
+    mock(@runner).load_config.returns(@config)
     command.parse([])
-    command.exec(nil, []).returns(nil)
+    command.exec([], {:prefix => @prefix, :capi => false}).returns(nil)
     @runner.run(["server"])
   end
 
