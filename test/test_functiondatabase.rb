@@ -1,6 +1,6 @@
 require 'test/unit'
 require 'bitclust'
-require 'bitclust/functiondatabase'
+require 'bitclust/database/functiondatabase'
 require 'tmpdir'
 require 'fileutils'
 
@@ -22,7 +22,7 @@ some text
 some text
 HERE
     end
-    @db = BitClust::FunctionDatabase.new(prefix)
+    @db = BitClust::Database::FunctionDatabase.new(prefix)
     @db.transaction {
       @db.update_by_file(src, src)
     }
@@ -48,7 +48,7 @@ HERE
   end
 
   def test_search_functions__nonexistent
-    assert_raise(BitClust::FunctionNotFound) do
+    assert_raise(BitClust::Database::FunctionNotFound) do
       @db.search_functions('nonexistent')
     end
   end
