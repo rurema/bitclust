@@ -12,7 +12,7 @@ module BitClust
   module Subcommands
     class SetupCommand < Subcommand
 
-      REPOSITORY_PATH = "http://jp.rubyist.net/svn/rurema/doctree/trunk"
+      REPOSITORY_PATH = "https://github.com/rurema/doctree.git"
 
       def initialize
         super
@@ -103,8 +103,24 @@ module BitClust
       end
 
       def checkout(rubydoc_dir)
-        unless system("svn", "co", REPOSITORY_PATH, rubydoc_dir.to_s)
-          warn "svn command failed. Please install Subversion or check your PATH."
+        if (rubydoc_dir + ".svn").exist?
+          warn "Remove old repository data."
+          warn "Use --purge option."
+          help
+          exit 1
+        end
+
+        succeeded = false
+        if (rubydoc_dir + ".git").exist?
+          Dir.chdir(rubydoc_dir) do
+            succeeded = system("git", "pull", "--rebase")
+          end
+        else
+          succeeded = system("git", "clone", "--depth", "10", REPOSITORY_PATH, rubydoc_dir.to_s)
+        end
+
+        unless succeeded
+          warn "git command failed. Please install Git or check your PATH."
           exit 1
         end
       end
