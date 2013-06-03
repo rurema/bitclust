@@ -18,6 +18,7 @@ module BitClust
         super
         @prepare = nil
         @cleanup = nil
+        @purge = nil
         @versions = ["1.8.7", "1.9.3", "2.0.0"]
         @parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
         @parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
@@ -26,12 +27,16 @@ module BitClust
         @parser.on('--cleanup', 'Cleanup datebase before create database.') {
           @cleanup = true
         }
+        @parser.on('--purge', 'Purge all downloaded and generated files and exit.') {
+          @purge = true
+        }
         @parser.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
           @versions = versions.split(",")
         }
       end
 
       def exec(argv, options)
+        purge if @purge
         prepare
         return if @prepare
         @config[:versions].each do |version|
@@ -48,6 +53,15 @@ module BitClust
       end
 
       private
+
+      def purge
+        home_directory = Pathname(ENV["HOME"])
+        config_dir = home_directory + ".bitclust"
+        print "Remove all generated files..."
+        FileUtils.rm_rf(config_dir.to_s)
+        puts "done!"
+        exit 0
+      end
 
       def prepare
         home_directory = Pathname(ENV["HOME"])
