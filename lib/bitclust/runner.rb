@@ -131,10 +131,6 @@ Global Options:
         @version ||= config[:default_version]
         @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
-      unless @prefix
-        $stderr.puts "no database given. Use --database option"
-        exit 1
-      end
       options = {
         :prefix => @prefix,
         :capi   => @capi

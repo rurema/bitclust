@@ -29,6 +29,7 @@ module BitClust
 
     def exec(argv, options)
       prefix = options[:prefix]
+      error("no database given. Use --database option") unless prefix
       if options[:capi]
         @db = BitClust::FunctionDatabase.new(prefix)
       else
