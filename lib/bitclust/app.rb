@@ -126,7 +126,7 @@ module BitClust
       [
         200,
         {'Content-Type' => 'text/html; charset=utf-8'},
-        index(Rack::Request.new(env))
+        [index(Rack::Request.new(env))]
       ]
     end
   end
