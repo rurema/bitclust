@@ -322,7 +322,7 @@ module BitClust
         {
           'Content-Type' => @screen.content_type,
         },
-        @screen.body
+        [@screen.body]
       ]
     end
 
