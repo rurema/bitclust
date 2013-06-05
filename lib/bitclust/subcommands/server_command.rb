@@ -40,7 +40,7 @@ module BitClust
         @parser.on('--bind-address=ADDR', 'Bind address') {|addr|
           @params[:BindAddress] = addr
         }
-        @parser.on('--port=NUM', 'Listening port number') {|num|
+        @parser.on('--port=NUM', "Listening port number (default: #{@params[:Port]})") {|num|
           @params[:Port] = num.to_i
         }
         @parser.on('--baseurl=URL', 'The base URL to host.') {|url|
