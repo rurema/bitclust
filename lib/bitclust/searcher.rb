@@ -444,8 +444,23 @@ module BitClust
         puts
         puts @compiler.compile(c.source.strip)
       end
+
+      print_methods(c, :module_function, "* Module functions")
+      print_methods(c, :singleton_method, "* Singleton methods")
+      print_methods(c, :instance_method, "* Instance methods")
+      print_methods(c, :constant, "* Constants")
+      print_methods(c, :special_variable, "* Special variables")
     end
 
+    def print_methods(c, typename, title)
+      methods = c.methods.select{|m| m.typename == typename }
+      return if methods.empty?
+
+      puts
+      puts title
+      print_names methods.map{|m| m.name }
+    end
+    
     def describe_method(rec)
       unless rec.entry.library.name == '_builtin'
         puts "require '#{rec.entry.library.name}'"
