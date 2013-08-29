@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    bitclust-core (0.7.0)
+    bitclust-core (0.8.0)
       progressbar
       rack
-    bitclust-dev (0.7.0)
-      bitclust-core (= 0.7.0)
-    refe2 (0.7.0)
-      bitclust-core (= 0.7.0)
+    bitclust-dev (0.8.0)
+      bitclust-core (= 0.8.0)
+    refe2 (0.8.0)
+      bitclust-core (= 0.8.0)
 
 GEM
   remote: http://rubygems.org/
