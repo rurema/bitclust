@@ -565,6 +565,14 @@ module BitClust
 
   class DocScreen < EntryBoundScreen
 
+    def breadcrumb_title
+      if /ascii/ =~ @conf[:encoding]
+        @entry.name
+      else
+        @entry.title
+      end
+    end
+
     def body
       run_template('doc')
     end

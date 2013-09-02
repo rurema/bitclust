@@ -5,7 +5,7 @@
 <%= _('Ruby %s Reference Manual', ruby_version()) %>
 <% else %>
 <%= manual_home_link() %>
-&gt; <%=h @entry.name %>
+&gt; <%=h breadcrumb_title %>
 <% end %>
 </p>
 <% headline_init %>
