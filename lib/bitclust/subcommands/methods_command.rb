@@ -137,6 +137,19 @@ module BitClust
               puts "#{classname}\#{m}"
             end
           SCRIPT
+        when 'ARGF'
+          script = <<-SCRIPT
+            c = #{classname}.class
+            c.singleton_methods(false).each do |m|
+              puts "\#{c.to_s}.\#{m}"
+            end
+            c.instance_methods(false).each do |m|
+              puts "\#{c.to_s}\\#\#{m}"
+            end
+            c.ancestors.map {|mod| mod.constants }.inject {|r,n| r - n }.each do |m|
+              puts "\#{c.to_s}::\#{m}"
+            end
+          SCRIPT
         else
           script = <<-SCRIPT
             #{avoid_tracer}
