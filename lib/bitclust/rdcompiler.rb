@@ -486,6 +486,19 @@ module BitClust
       %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
     end
 
+    def rdoc_url(method_id, version)
+      cname, tmark, mname, libname = methodid2specparts(method_id)
+      tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
+      cname = cname.gsub('::', '/')
+      id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
+
+      if libname == '_builtin'
+        "http://ruby-doc.org/core-#{version}/#{cname}.html##{id}"
+      else
+        "http://ruby-doc.org/stdlib-#{version}/libdoc/#{libname}/rdoc/#{cname}.html##{id}"
+      end
+    end
+
     def complete_spec(spec0)
       case spec0
       when /\A\$/

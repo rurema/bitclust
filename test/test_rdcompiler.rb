@@ -563,4 +563,41 @@ HERE
   def test_man_url(data)
     assert_equal(data[:expected], @c.man_url(*data[:params]))
   end
+
+  class BitClust::RDCompiler; public :rdoc_url; end
+  data("String#index" => {
+          :params => ["String/i.index._builtin", "2.0.0"],
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-index"
+       },
+       "String.new" => {
+          :params => ["String/s.new._builtin", "2.0.0"],
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-c-new"
+       },
+       "String#<=>" => {
+          :params => ["String/i.=3c=3d=3e._builtin", "2.0.0"],
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-3C-3D-3E"
+       },
+       "String#empty?" => {
+          :params => ["String/i.empty=3f._builtin", "2.0.0"],
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-empty-3F"
+       },
+       "String#index v1.9.3" => {
+          :params => ["String/i.index._builtin", "1.9.3"],
+          :expected => "http://ruby-doc.org/core-1.9.3/String.html#method-i-index"
+       },
+       "String#index v1.8.7" => {
+          :params => ["String/i.index._builtin", "1.8.7"],
+          :expected => "http://ruby-doc.org/core-1.8.7/String.html#method-i-index"
+       },
+       "File::Stat#file?" => {
+          :params => ["File=Stat/i.file=3f._builtin", "2.0.0"],
+          :expected => "http://ruby-doc.org/core-2.0.0/File/Stat.html#method-i-file-3F"
+       },
+       "Net::HTTP#get" => {
+          :params => ["Net=HTTP/i.get.net.http", "2.0.0"],
+          :expected => "http://ruby-doc.org/stdlib-2.0.0/libdoc/net/http/rdoc/Net/HTTP.html#method-i-get"
+       })
+  def test_rdoc_url(data)
+    assert_equal(data[:expected], @c.rdoc_url(*data[:params]))
+  end
 end
