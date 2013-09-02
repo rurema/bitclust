@@ -59,7 +59,7 @@ module BitClust
       when /\A\$/   # gvar
         @name + (@type ? " -> #{@type}" : "")
       when "+@", "-@", "~", "!", "!@"  # unary operator
-        "#{@name.sub(/@/, '')}#{@params}" + (@type ? " -> #{@type}" : "")
+        "#{@name.sub(/@/, '')} self" + (@type ? " -> #{@type}" : "")
       when "[]"     # aref
         "self[#{@params}]" + (@type ? " -> #{@type}" : "")
       when "[]="    # aset
