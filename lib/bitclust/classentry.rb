@@ -64,7 +64,7 @@ module BitClust
     def realname
       alias? ? aliasof.name : name
     end
-    
+
     def name_match?(re)
       re =~ name()
     end
@@ -133,7 +133,7 @@ module BitClust
         ancestors.any?{|k| k.name == 'Exception' }
       end
     end
-    
+
     def include(m)
       included().push m
     end
@@ -208,7 +208,7 @@ module BitClust
           .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
       ret = @entries
       ancestors[1..level].each{|c| ret += c.entries }
-      ret 
+      ret
     end
 
     alias methods entries
