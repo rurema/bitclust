@@ -499,6 +499,11 @@ module BitClust
       end
     end
 
+    def rdoc_link(method_id, version)
+      # TODO: implement
+      ""
+    end
+
     def complete_spec(spec0)
       case spec0
       when /\A\$/

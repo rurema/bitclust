@@ -600,4 +600,13 @@ HERE
   def test_rdoc_url(data)
     assert_equal(data[:expected], @c.rdoc_url(*data[:params]))
   end
+
+  class BitClust::RDCompiler; public :rdoc_link; end
+  data("String#index" => {
+          :params => ["String/i.index._builtin", "2.0.0"],
+          :expected => %Q(<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>)
+       })
+  def test_rdoc_link(data)
+    assert_equal(data[:expected], @c.rdoc_link(*data[:params]))
+  end
 end
