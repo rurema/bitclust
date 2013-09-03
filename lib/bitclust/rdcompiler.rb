@@ -38,13 +38,23 @@ module BitClust
       }
     end
 
+    def compile_function(f, opt = nil)
+      @opt = opt
+      @type = :function
+      setup(f.source) {
+        entry
+      }
+    ensure
+      @opt = nil
+    end
+
     # FIXME
     def compile_method(m, opt = nil)
       @opt = opt
       @type = :method
       @method = m
       setup(m.source) {
-        method_entry
+        entry
       }
     ensure
       @opt = nil
@@ -63,7 +73,7 @@ module BitClust
       while @f.next?
         case @f.peek
         when /\A---/
-          method_entry_chunk
+          entry_chunk
         when /\A=+/
           headline @f.gets
         when /\A\s+\*\s/
@@ -86,13 +96,13 @@ module BitClust
       end
     end
 
-    def method_entry
+    def entry
       while @f.next?
-        method_entry_chunk
+        entry_chunk
       end
     end
 
-    def method_entry_chunk
+    def entry_chunk
       @out.puts '<dl>' if @option[:force]
       first = true
       @f.while_match(/\A---/) do |line|
@@ -103,8 +113,8 @@ module BitClust
       @f.while_match(/\A:/) do |line|
         k, v = line.sub(/\A:/, '').split(':', 2)
         props[k.strip] = v.strip
-      end
-      @out.puts '<dd class="method-description">'
+      end if @type == :method
+      @out.puts %Q(<dd class="#{@type.to_s}-description">)
       while @f.next?
         case @f.peek
         when /\A===+/
@@ -113,7 +123,7 @@ module BitClust
           if @option[:force]
             break
           else
-            raise "method entry includes headline: #{@f.peek.inspect}"
+            raise "#{@type.to_s} entry includes headline: #{@f.peek.inspect}"
           end
         when /\A---/
           break
@@ -132,12 +142,12 @@ module BitClust
         when /@todo/
           todo
         when /\A@[a-z]/
-          method_info
+          entry_info
         else
           if @f.peek.strip.empty?
             @f.gets
           else
-            method_entry_paragraph
+            entry_paragraph
           end
         end
       end
@@ -293,7 +303,7 @@ module BitClust
       line '</p>'
     end
 
-    def method_info
+    def entry_info
       line '<dl>'
       while @f.next? and /\A\@(?!see)\w+|\A$/ =~ @f.peek
         header = @f.gets
@@ -303,7 +313,7 @@ module BitClust
         case cmd
         when '@param', '@arg'
           name = header.slice!(/\A\s*\w+/) || '?'
-          line "<dt class='method-param'>[PARAM] #{escape_html(name.strip)}:</dt>"
+          line "<dt class='#{@type.to_s}-param'>[PARAM] #{escape_html(name.strip)}:</dt>"
         when '@raise'
           ex = header.slice!(/\A\s*[\w:]+/) || '?'
           line "<dt>[EXCEPTION] #{escape_html(ex.strip)}:</dt>"
@@ -318,15 +328,15 @@ module BitClust
     end
 
     # FIXME: parse @param, @return, ...
-    def method_entry_paragraph
+    def entry_paragraph
       line '<p>'
-      read_method_entry_paragraph(@f).each do |line|
+      read_entry_paragraph(@f).each do |line|
         line compile_text(line.strip)
       end
       line '</p>'
     end
 
-    def read_method_entry_paragraph(f)
+    def read_entry_paragraph(f)
       f.span(%r<\A(?!---|=|//emlist\{|@[a-z])\S>)
     end
 

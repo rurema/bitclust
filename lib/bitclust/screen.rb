@@ -392,8 +392,8 @@ module BitClust
       rdcompiler().compile_method(m, opt)
     end
 
-    def compile_function(f)
-      compile_rd(f.source)
+    def compile_function(f, opt = nil)
+      rdcompiler().compile_function(f, opt)
     end
 
     def compile_rd(src)
