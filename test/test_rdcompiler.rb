@@ -567,47 +567,56 @@ HERE
 
   class BitClust::RDCompiler; public :rdoc_url; end
   data("String#index" => {
-          :params => ["String/i.index._builtin", "2.0.0"],
+          :method_id => "String/i.index._builtin",
+          :version => "2.0.0",
           :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-index"
        },
        "String.new" => {
-          :params => ["String/s.new._builtin", "2.0.0"],
+          :method_id => "String/s.new._builtin",
+          :version => "2.0.0",
           :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-c-new"
        },
        "String#<=>" => {
-          :params => ["String/i.=3c=3d=3e._builtin", "2.0.0"],
+          :method_id => "String/i.=3c=3d=3e._builtin",
+          :version => "2.0.0",
           :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-3C-3D-3E"
        },
        "String#empty?" => {
-          :params => ["String/i.empty=3f._builtin", "2.0.0"],
+          :method_id => "String/i.empty=3f._builtin",
+          :version => "2.0.0",
           :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-empty-3F"
        },
        "String#index v1.9.3" => {
-          :params => ["String/i.index._builtin", "1.9.3"],
+          :method_id => "String/i.index._builtin",
+          :version => "1.9.3",
           :expected => "http://ruby-doc.org/core-1.9.3/String.html#method-i-index"
        },
        "String#index v1.8.7" => {
-          :params => ["String/i.index._builtin", "1.8.7"],
+          :method_id => "String/i.index._builtin",
+          :version => "1.8.7",
           :expected => "http://ruby-doc.org/core-1.8.7/String.html#method-i-index"
        },
        "File::Stat#file?" => {
-          :params => ["File=Stat/i.file=3f._builtin", "2.0.0"],
+          :method_id => "File=Stat/i.file=3f._builtin",
+          :version => "2.0.0",
           :expected => "http://ruby-doc.org/core-2.0.0/File/Stat.html#method-i-file-3F"
        },
        "Net::HTTP#get" => {
-          :params => ["Net=HTTP/i.get.net.http", "2.0.0"],
+          :method_id => "Net=HTTP/i.get.net.http",
+          :version => "2.0.0",
           :expected => "http://ruby-doc.org/stdlib-2.0.0/libdoc/net/http/rdoc/Net/HTTP.html#method-i-get"
        })
   def test_rdoc_url(data)
-    assert_equal(data[:expected], @c.rdoc_url(*data[:params]))
+    assert_equal(data[:expected], @c.rdoc_url(data[:method_id], data[:version]))
   end
 
   class BitClust::RDCompiler; public :rdoc_link; end
   data("String#index" => {
-          :params => ["String/i.index._builtin", "2.0.0"],
+          :method_id => "String/i.index._builtin",
+          :version => "2.0.0",
           :expected => %Q(<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>)
        })
   def test_rdoc_link(data)
-    assert_equal(data[:expected], @c.rdoc_link(*data[:params]))
+    assert_equal(data[:expected], @c.rdoc_link(data[:method_id], data[:version]))
   end
 end
