@@ -340,6 +340,19 @@ class TestNameUtils < Test::Unit::TestCase
     assert_equal(expected, decodename_url(target))
   end
 
+  data("Array"    => ["Array",      "Array"],
+       "String"   => ["String",     "String"],
+       "index"    => ["index",      "index"],
+       "*"        => ["2A",         "*"],
+       "**"       => ["2A-2A",      "**"],
+       "<=>"      => ["3C-3D-3E",   "<=>"],
+       "open-uri" => ["open-2Duri", "open-uri"],
+       "net.http" => ["net.http",   "net.http"])
+  def test_encodename_rdocurl(data)
+    expected, target = data
+    assert_equal(expected, encodename_rdocurl(target))
+  end
+
   data("Array"      => ["-array",        "Array"],
        "String"     => ["-string",       "String"],
        "CGI"        => ["-c-g-i",        "CGI"],

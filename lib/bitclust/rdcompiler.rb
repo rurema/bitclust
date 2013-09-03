@@ -352,6 +352,8 @@ module BitClust
       if first
         string '<span class="permalink">['
         string a_href(@urlmapper.method_url(methodid2specstring(@method.id)), "permalink")
+        string ']['
+        string rdoc_link(@method.id, @option[:database].properties["version"])
         string ']</span>'
       end
       if @method and not @method.defined?
@@ -494,6 +496,23 @@ module BitClust
       m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(spec)
       url = man_url(m[2], escape_html(m[1])) or return escape_html(spec)
       %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
+    end
+
+    def rdoc_url(method_id, version)
+      cname, tmark, mname, libname = methodid2specparts(method_id)
+      tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
+      cname = cname.gsub('::', '/')
+      id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
+
+      if libname == '_builtin'
+        "http://ruby-doc.org/core-#{version}/#{cname}.html##{id}"
+      else
+        "http://ruby-doc.org/stdlib-#{version}/libdoc/#{libname}/rdoc/#{cname}.html##{id}"
+      end
+    end
+
+    def rdoc_link(method_id, version)
+      a_href rdoc_url(method_id, version), "rdoc"
     end
 
     def complete_spec(spec0)

@@ -10,7 +10,8 @@ class TestRDCompiler < Test::Unit::TestCase
   def setup
     @dummy = 'dummy'
     @u = BitClust::URLMapper.new(Hash.new{@dummy})
-    @c = BitClust::RDCompiler.new(@u, 1, {:database => BitClust::MethodDatabase.dummy})
+    @db = BitClust::MethodDatabase.dummy("version" => "2.0.0")
+    @c = BitClust::RDCompiler.new(@u, 1, {:database => @db})
   end
 
   def assert_compiled_source(expected, src)
@@ -186,7 +187,7 @@ bar
  text
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>hoge</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>hoge</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 foo
@@ -210,7 +211,7 @@ text
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 abs
@@ -231,7 +232,7 @@ HERE
   dsc
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt>word1</dt>
@@ -258,7 +259,7 @@ dsc
 @see hoge
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 dsc
@@ -295,7 +296,7 @@ HERE
            dsc3
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
@@ -323,7 +324,7 @@ dsc3
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
@@ -341,7 +342,7 @@ HERE
   end
 
   def test_method2
-    @c = BitClust::RDCompiler.new(@u, 1, {:force => true})
+    @c = BitClust::RDCompiler.new(@u, 1, {:database => @db, :force => true})
     src = <<'HERE'
 --- hoge1
 --- hoge2
@@ -349,7 +350,7 @@ bar
 HERE
     expected = <<'HERE'
 <dl>
-<dt class="method-heading" id="dummy"><code>hoge1</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>hoge1</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dt class="method-heading"><code>hoge2</code></dt>
 <dd class="method-description">
 <p>
@@ -481,7 +482,7 @@ HERE
 @see [[m:Array#*]], [[m:$,]]
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>join(sep = $,) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>join(sep = $,) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 [SEE_ALSO] <a href="dummy/method/Array/i/=2a">Array#*</a>, <a href="dummy/method/Kernel/v/=2c">$,</a>
@@ -499,7 +500,7 @@ HERE
 description
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p class="todo">
 [TODO]
@@ -520,7 +521,7 @@ HERE
 description
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p class="todo">
 [TODO] 1.9.2
@@ -562,5 +563,60 @@ HERE
        })
   def test_man_url(data)
     assert_equal(data[:expected], @c.man_url(*data[:params]))
+  end
+
+  class BitClust::RDCompiler; public :rdoc_url; end
+  data("String#index" => {
+          :method_id => "String/i.index._builtin",
+          :version => "2.0.0",
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-index"
+       },
+       "String.new" => {
+          :method_id => "String/s.new._builtin",
+          :version => "2.0.0",
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-c-new"
+       },
+       "String#<=>" => {
+          :method_id => "String/i.=3c=3d=3e._builtin",
+          :version => "2.0.0",
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-3C-3D-3E"
+       },
+       "String#empty?" => {
+          :method_id => "String/i.empty=3f._builtin",
+          :version => "2.0.0",
+          :expected => "http://ruby-doc.org/core-2.0.0/String.html#method-i-empty-3F"
+       },
+       "String#index v1.9.3" => {
+          :method_id => "String/i.index._builtin",
+          :version => "1.9.3",
+          :expected => "http://ruby-doc.org/core-1.9.3/String.html#method-i-index"
+       },
+       "String#index v1.8.7" => {
+          :method_id => "String/i.index._builtin",
+          :version => "1.8.7",
+          :expected => "http://ruby-doc.org/core-1.8.7/String.html#method-i-index"
+       },
+       "File::Stat#file?" => {
+          :method_id => "File=Stat/i.file=3f._builtin",
+          :version => "2.0.0",
+          :expected => "http://ruby-doc.org/core-2.0.0/File/Stat.html#method-i-file-3F"
+       },
+       "Net::HTTP#get" => {
+          :method_id => "Net=HTTP/i.get.net.http",
+          :version => "2.0.0",
+          :expected => "http://ruby-doc.org/stdlib-2.0.0/libdoc/net/http/rdoc/Net/HTTP.html#method-i-get"
+       })
+  def test_rdoc_url(data)
+    assert_equal(data[:expected], @c.rdoc_url(data[:method_id], data[:version]))
+  end
+
+  class BitClust::RDCompiler; public :rdoc_link; end
+  data("String#index" => {
+          :method_id => "String/i.index._builtin",
+          :version => "2.0.0",
+          :expected => %Q(<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>)
+       })
+  def test_rdoc_link(data)
+    assert_equal(data[:expected], @c.rdoc_link(data[:method_id], data[:version]))
   end
 end

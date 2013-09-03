@@ -211,6 +211,12 @@ module BitClust
     def decodename_url(str)
       str.gsub(/=[\da-h]{2}/ni) {|s| s[1,2].hex.chr }
     end
+    
+    # string -> encoded string in a rdoc way
+    def encodename_rdocurl(str)
+      str = str.gsub(/[^A-Za-z0-9_.]/n) {|ch| sprintf('-%02X', ch[0].ord) }
+      str.sub(/^-/, '')
+    end
 
     # case-sensitive ID -> encoded string (encode only [A-Z])
     def encodeid(str)
