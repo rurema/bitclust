@@ -10,7 +10,8 @@ class TestRDCompiler < Test::Unit::TestCase
   def setup
     @dummy = 'dummy'
     @u = BitClust::URLMapper.new(Hash.new{@dummy})
-    @c = BitClust::RDCompiler.new(@u, 1, {:database => BitClust::MethodDatabase.dummy})
+    @db = BitClust::MethodDatabase.dummy("version" => "2.0.0")
+    @c = BitClust::RDCompiler.new(@u, 1, {:database => @db})
   end
 
   def assert_compiled_source(expected, src)
@@ -186,7 +187,7 @@ bar
  text
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>hoge</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>hoge</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 foo
@@ -210,7 +211,7 @@ text
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 abs
@@ -231,7 +232,7 @@ HERE
   dsc
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt>word1</dt>
@@ -258,7 +259,7 @@ dsc
 @see hoge
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 dsc
@@ -295,7 +296,7 @@ HERE
            dsc3
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
@@ -323,7 +324,7 @@ dsc3
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
@@ -341,7 +342,7 @@ HERE
   end
 
   def test_method2
-    @c = BitClust::RDCompiler.new(@u, 1, {:force => true})
+    @c = BitClust::RDCompiler.new(@u, 1, {:database => @db, :force => true})
     src = <<'HERE'
 --- hoge1
 --- hoge2
@@ -349,7 +350,7 @@ bar
 HERE
     expected = <<'HERE'
 <dl>
-<dt class="method-heading" id="dummy"><code>hoge1</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>hoge1</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dt class="method-heading"><code>hoge2</code></dt>
 <dd class="method-description">
 <p>
@@ -481,7 +482,7 @@ HERE
 @see [[m:Array#*]], [[m:$,]]
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>join(sep = $,) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>join(sep = $,) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p>
 [SEE_ALSO] <a href="dummy/method/Array/i/=2a">Array#*</a>, <a href="dummy/method/Kernel/v/=2c">$,</a>
@@ -499,7 +500,7 @@ HERE
 description
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p class="todo">
 [TODO]
@@ -520,7 +521,7 @@ HERE
 description
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>puts(str) -&gt; String</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://ruby-doc.org/core-2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <p class="todo">
 [TODO] 1.9.2

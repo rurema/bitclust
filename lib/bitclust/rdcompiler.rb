@@ -342,6 +342,8 @@ module BitClust
       if first
         string '<span class="permalink">['
         string a_href(@urlmapper.method_url(methodid2specstring(@method.id)), "permalink")
+        string ']['
+        string rdoc_link(@method.id, @option[:database].properties["version"])
         string ']</span>'
       end
       if @method and not @method.defined?
