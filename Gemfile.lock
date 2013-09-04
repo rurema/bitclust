@@ -10,17 +10,17 @@ PATH
       bitclust-core (= 0.8.0)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     progressbar (0.20.0)
     rack (1.5.2)
-    rake (10.0.4)
-    rr (1.1.0)
+    rake (10.1.0)
+    rr (1.1.2)
     test-unit (2.5.5)
     test-unit-notify (1.0.1)
       test-unit (>= 2.4.9)
-    test-unit-rr (1.0.2)
-      rr (>= 1.0.2)
+    test-unit-rr (1.0.3)
+      rr (>= 1.1.1)
       test-unit (>= 2.5.2)
 
 PLATFORMS
