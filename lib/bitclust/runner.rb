@@ -62,6 +62,7 @@ Subcommands(for developers):
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
+    epub        Generate EPUB file.
     chm         Generate static HTML files for CHM.
 
 Global Options:
@@ -96,6 +97,7 @@ Global Options:
         'statichtml'  => BitClust::Subcommands::StatichtmlCommand.new,
         'htmlfile'    => BitClust::Subcommands::HtmlfileCommand.new,
         'chm'         => BitClust::Subcommands::ChmCommand.new,
+        'epub'        => BitClust::Subcommands::EPUBCommand.new,
         'ancestors'   => BitClust::Subcommands::AncestorsCommand.new,
         'preproc'     => BitClust::Subcommands::PreprocCommand.new,
         'extract'     => BitClust::Subcommands::ExtractCommand.new,
