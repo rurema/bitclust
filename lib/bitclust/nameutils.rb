@@ -217,7 +217,7 @@ module BitClust
       str = str.gsub(/[^A-Za-z0-9_.]/n) {|ch|
         sprintf('-%02X', ch[0].ord)
       }
-      str.sub(/^-/, '')
+      str.sub(/\A-/, '')
     end
 
     # case-sensitive ID -> encoded string (encode only [A-Z])
