@@ -382,7 +382,7 @@ module BitClust
       arg = _arg.rstrip
       case type
       when 'lib'
-      then protect(link) {
+        protect(link) {
           case arg
           when '/', '_index'
             label = 'All libraries'
@@ -391,20 +391,26 @@ module BitClust
           end
           library_link(arg, label, frag)
         }
-      when 'c'       then protect(link) { class_link(arg, label, frag) }
-      when 'm'       then protect(link) { method_link(complete_spec(arg), label || arg, frag) }
+      when 'c'
+        protect(link) { class_link(arg, label, frag) }
+      when 'm'
+        protect(link) { method_link(complete_spec(arg), label || arg, frag) }
       when 'f'
-      then protect(link) {
+        protect(link) {
           case arg
           when '/', '_index'
             arg, label = '', 'All C API'
           end
           function_link(arg, label || arg, frag)
         }
-      when 'd'       then protect(link) { document_link(arg, label, frag) }
-      when 'ref'     then protect(link) { reference_link(arg) }
-      when 'url'     then direct_url(arg)
-      when 'man'     then man_link(arg)
+      when 'd'
+        protect(link) { document_link(arg, label, frag) }
+      when 'ref'
+        protect(link) { reference_link(arg) }
+      when 'url'
+        direct_url(arg)
+      when 'man'
+        man_link(arg)
       when 'rfc', 'RFC'
         rfc_link(arg)
       when 'ruby-list', 'ruby-dev', 'ruby-ext', 'ruby-talk', 'ruby-core'
