@@ -512,7 +512,7 @@ module BitClust
     end
 
     def rdoc_link(method_id, version)
-      a_href rdoc_url(method_id, version), "rdoc"
+      a_href(rdoc_url(method_id, version), "rdoc")
     end
 
     def complete_spec(spec0)
