@@ -474,7 +474,7 @@ module BitClust
     MAN_HEADER_URL = "#{opengroup_url}/basedefs/%s.html"
     MAN_LINUX_URL = "http://man7.org/linux/man-pages/man%1$s/%2$s.%1$s.html"
     MAN_FREEBSD_URL = "http://www.freebsd.org/cgi/man.cgi?query=%2$s&sektion=%1$s&manpath=FreeBSD+9.0-RELEASE"
-    
+
     def man_url(section, page)
       case section
       when "1"
@@ -487,11 +487,11 @@ module BitClust
         sprintf(MAN_LINUX_URL, $1, page)
       when /\A([1-9])freebsd\Z/
         sprintf(MAN_FREEBSD_URL, $1, page)
-      else 
+      else
         nil
       end
     end
-    
+
     def man_link(spec)
       m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(spec)
       url = man_url(m[2], escape_html(m[1])) or return escape_html(spec)
