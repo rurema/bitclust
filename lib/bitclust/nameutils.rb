@@ -214,7 +214,9 @@ module BitClust
 
     # string -> encoded string in a rdoc way
     def encodename_rdocurl(str)
-      str = str.gsub(/[^A-Za-z0-9_.]/n) {|ch| sprintf('-%02X', ch[0].ord) }
+      str = str.gsub(/[^A-Za-z0-9_.]/n) {|ch|
+        sprintf('-%02X', ch[0].ord)
+      }
       str.sub(/^-/, '')
     end
 
