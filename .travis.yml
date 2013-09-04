@@ -1,7 +1,7 @@
 rvm:
   - 1.9.3
   - 2.0.0
-  - ruby-head
+#  - ruby-head
 notifications:
   recipients:
     - ruby-reference-manual-diff@ml.fdiary.net
