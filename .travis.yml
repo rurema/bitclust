@@ -2,8 +2,6 @@ rvm:
   - 1.9.3
   - 2.0.0
   - ruby-head
-gemfile:
-  - Gemfile
 notifications:
   recipients:
     - okkez000@gmail.com
