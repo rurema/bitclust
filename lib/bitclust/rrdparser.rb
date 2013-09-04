@@ -194,15 +194,21 @@ module BitClust
 
     def read_includes(f, reopen = false)
       f.while_match(/\Ainclude\s/) do |line|
-        tty_warn "#{line.location}: dynamic include is not implemented yet" if reopen
-        @context.include line.split[1]          unless reopen # FIXME
+        if reopen
+          @context.dynamic_include(line.split[1])
+        else
+          @context.include(line.split[1])
+        end
       end
     end
 
     def read_extends(f, reopen = false)
       f.while_match(/\Aextend\s/) do |line|
-        tty_warn "#{line.location}: dynamic extend is not implemented yet" if reopen
-        @context.extend line.split[1]           unless reopen # FIXME
+        if reopen
+          @context.dynamic_extend(line.split[1])
+        else
+          @context.extend(line.split[1])
+        end
       end
     end
 
@@ -401,6 +407,14 @@ module BitClust
 
       def extend(name)
         @klass.extend @db.get_class(name)
+      end
+
+      def dynamic_include(name)
+        @klass.dynamic_include(@db.get_class(name), @library)
+      end
+
+      def dynamic_extend(name)
+        @klass.dynamic_extend(@db.get_class(name), @library)
       end
 
       # Add a alias +name+ to the alias list.

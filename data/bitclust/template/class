@@ -30,6 +30,20 @@
 <% unless @entry.aliases.empty? %>
 <br>aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
 <% end %>
+<% unless @entry.dynamically_included.empty? %>
+<br> dynamic include:
+ <%= @entry.dynamically_included.map{|m| 
+       class_link(m.name) + " (by " + library_link(m.library.name) + ")"
+     }.join(", ")
+ %>
+<% end %>
+<% unless @entry.dynamically_extended.empty? %>
+<br> dynamic extend:
+ <%= @entry.dynamically_extended.map{|m| 
+       class_link(m.name) + " (by " + library_link(m.library.name) + ")"
+     }.join(", ")
+ %>
+<% end %>
 </p>
 <%
     headline_push
