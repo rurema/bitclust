@@ -20,7 +20,7 @@ module BitClust
         html_options = @options.dup
         html_options[:outputdir] = contents_directory
         generate_html(html_options)
-        FileUtils.remove_entry_secure(epub_directory) unless @options[:keep]
+        FileUtils.rm_r(epub_directory, {:secure => true}) unless @options[:keep]
       end
 
       def copy_static_files(templatedir, epub_directory)
