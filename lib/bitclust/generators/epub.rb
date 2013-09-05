@@ -13,14 +13,19 @@ module BitClust
       CONTENTS_DIR_NAME = 'OEBPS'
 
       def generate
-        epub_directory = Dir.mktmpdir("epub-temp-", @options[:outputdir])
-        epub_directory = Pathname.new(epub_directory)
-        contents_directory = epub_directory + CONTENTS_DIR_NAME
-        copy_static_files(@options[:templatedir], epub_directory)
-        html_options = @options.dup
-        html_options[:outputdir] = contents_directory
-        generate_html(html_options)
-        FileUtils.rm_r(epub_directory, {:secure => true}) unless @options[:keep]
+        make_tmp_dir("epub-temp-", @options[:outputdir], @options[:keep]) do |epub_directory|
+          contents_directory = epub_directory + CONTENTS_DIR_NAME
+          copy_static_files(@options[:templatedir], epub_directory)
+          html_options = @options.dup
+          html_options[:outputdir] = contents_directory
+          generate_html(html_options)
+        end
+      end
+
+      def make_tmp_dir(prefix, path, keep)
+        dir_path = Dir.mktmpdir(prefix, path)
+        yield Pathname.new(dir_path)
+        FileUtils.rm_r(dir_path, {:secure => true}) unless keep
       end
 
       def copy_static_files(template_directory, epub_directory)
