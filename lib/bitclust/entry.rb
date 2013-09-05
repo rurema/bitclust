@@ -205,6 +205,7 @@ module BitClust
     end
 
     def restore_entries(str, klass)
+      return [] if str.nil?
       str.split(',').map {|id| klass.load(@db, id) }
     end
 

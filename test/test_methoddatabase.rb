@@ -50,12 +50,25 @@ class TestMethodDatabase < Test::Unit::TestCase
     assert_equal 'AAA', result.records.first.entry.name
   end
 
+  def test_dynamic_include
+    assert_equal(["BazA"],
+                 @db.get_class("A").dynamically_included.map{|m| m.name})
+    assert_equal(["BazB"],
+                 @db.get_class("B").dynamically_included.map{|m| m.name})
+  end
+
   private
   def setup_files
     FileUtils.mkdir_p("#{@root}/_builtin")
+
     File.open("#{@root}/LIBRARIES", 'w+') do |file|
       file.puts '_builtin'
+      file.puts 'dyn_include_open_a'
+      file.puts 'dyn_include_reopen_a'
+      file.puts 'dyn_include_reopen_b'
+      file.puts 'dyn_include_open_b'
     end
+
     File.open("#{@root}/_builtin.rd", 'w+') do |file|
       file.puts <<'HERE'
 description
@@ -76,6 +89,26 @@ description
 aaa
 
 HERE
+    end
+
+    File.open("#{@root}/dyn_include_open_a.rd", 'w+') do |file|
+      file.puts "= class A"
+    end
+
+    File.open("#{@root}/dyn_include_reopen_a.rd", 'w+') do |file|
+      file.puts "= module BazA"
+      file.puts "= reopen A"
+      file.puts "include BazA"
+    end
+
+    File.open("#{@root}/dyn_include_open_b.rd", 'w+') do |file|
+      file.puts "= class B"
+    end
+
+    File.open("#{@root}/dyn_include_reopen_b.rd", 'w+') do |file|
+      file.puts "= module BazB"
+      file.puts "= reopen B"
+      file.puts "include BazB"
     end
   end
 end
