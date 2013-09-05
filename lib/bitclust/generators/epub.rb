@@ -23,11 +23,11 @@ module BitClust
         FileUtils.rm_r(epub_directory, {:secure => true}) unless @options[:keep]
       end
 
-      def copy_static_files(templatedir, epub_directory)
-        FileUtils.cp(templatedir + "mimetype", epub_directory)
-        FileUtils.cp(templatedir + "nav.xhtml", epub_directory)
+      def copy_static_files(template_directory, epub_directory)
+        FileUtils.cp(template_directory + "mimetype", epub_directory)
+        FileUtils.cp(template_directory + "nav.xhtml", epub_directory)
         FileUtils.mkdir_p(epub_directory + "META-INF")
-        FileUtils.cp(templatedir + "container.xml", epub_directory + "META-INF")
+        FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF")
       end
 
       def generate_html(options)
