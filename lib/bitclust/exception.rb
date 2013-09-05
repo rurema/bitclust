@@ -17,7 +17,6 @@ module BitClust
   class WrongInclude            < DocumentError; end
   class InvalidLink             < DocumentError; end
   class InvalidAncestor         < DocumentError; end
-  class InvalidLibrary          < DocumentError; end
   class UserError               < Error; end
   class InvalidDatabase         < UserError; end
   class InvalidKey              < UserError; end

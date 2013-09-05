@@ -81,8 +81,6 @@ module BitClust
       property :superclass, 'ClassEntry'
       property :included,   '[ClassEntry]'
       property :extended,   '[ClassEntry]'
-      property :dynamically_included, '[ClassEntry]'
-      property :dynamically_extended, '[ClassEntry]'
       property :library,    'LibraryEntry'
       property :aliases,    '[ClassEntry]'
       property :aliasof,    'ClassEntry'
@@ -142,24 +140,6 @@ module BitClust
 
     def extend(m)
       extended().push m
-    end
-
-    # Add a module +m+ to the dynamically included module list.
-    def dynamic_include(m, lib)
-      if m.library != lib
-        message = "dynamically included module #{m.name} should be defined in the module #{lib.name}"
-        raise InvalidLibrary, message
-      end
-      dynamically_included().push m
-    end
-
-    # Add a module +m+ to the dynamically extended module list.
-    def dynamic_extend(m, lib)
-      if m.library != lib
-        message = "dynamically extended module #{m.name} should be defined in the module #{lib.name}"
-        raise InvalidLibrary, message
-      end
-      dynamically_extended().push m
     end
 
     # Add a alias +c+ to the alias list.
