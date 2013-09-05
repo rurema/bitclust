@@ -12,9 +12,9 @@ module BitClust
       end
 
       def copy_static_files(templatedir, outputdir)
-        FileUtils.copy(templatedir + "/mimetype", outputdir)
-        FileUtils.mkdir(outputdir + "/META-INF")
-        FileUtils.copy(templatedir + "/container.xml", outputdir + "/META-INF")
+        FileUtils.copy(templatedir + "mimetype", outputdir)
+        FileUtils.mkdir(outputdir + "META-INF")
+        FileUtils.copy(templatedir + "container.xml", outputdir + "META-INF")
       end
     end
   end
