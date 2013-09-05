@@ -26,6 +26,9 @@
 <% unless @entry.extended.empty? %>
 <br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
 <% end %>
+<% unless @entry.aliases.empty? %>
+<br>aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
+<% end %>
 </p>
 
 <% headline_push %>
