@@ -25,6 +25,7 @@ module BitClust
 
       def copy_static_files(templatedir, epub_directory)
         FileUtils.cp(templatedir + "mimetype", epub_directory)
+        FileUtils.cp(templatedir + "nav.xhtml", epub_directory)
         FileUtils.mkdir_p(epub_directory + "META-INF")
         FileUtils.cp(templatedir + "container.xml", epub_directory + "META-INF")
       end
