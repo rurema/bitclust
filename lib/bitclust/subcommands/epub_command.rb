@@ -30,7 +30,7 @@ module BitClust
                    "Base name of generated EPUB file [#{@filename}]") do |filename|
           @filename = filename
         end
-        @parser.on('--[no]-keep', 'Keep all generated files (for debug) [false]') do |keep|
+        @parser.on('--[no-]keep', 'Keep all generated files (for debug) [false]') do |keep|
           @keep = keep
         end
         @parser.on('--catalog=PATH', 'Catalog directory') do |path|
