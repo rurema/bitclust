@@ -32,6 +32,7 @@ module BitClust
         FileUtils.mkdir_p(contents_directory)
         FileUtils.copy(themedir + CSS_NAME, contents_directory)
         FileUtils.copy(themedir + FAVICON_NAME, contents_directory)
+        FileUtils.cp_r(themedir + 'images', contents_directory)
       end
     end
   end
