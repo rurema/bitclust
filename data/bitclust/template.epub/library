@@ -1,0 +1,75 @@
+<% @title = "library #{@entry.name}" %>
+<p>
+<%= manual_home_link() %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
+&gt; <%= friendly_library_name(@entry.name) %>
+</p>
+<%
+    headline_init
+%>
+<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}") %>
+
+<%
+    headline_push
+    all_classes = @entry.all_classes
+    err_classes = @entry.all_error_classes.sort
+    modules = @entry.all_modules
+    objects = @entry.all_objects
+    classes = all_classes - err_classes - modules - objects
+%>
+
+
+<%= headline(_("Abstract")) %>
+<%= compile_rd(@entry.source) %>
+<%
+  [[classes,      _('Classes')],
+   [modules,      _('Modules')],
+   [objects,      _('Objects')],
+   [err_classes,  _('Exception Classes')]].each do |cs, msg|
+    unless cs.empty?
+%>
+<%= headline(msg) %>
+<table class="entries libraries">
+<%    draw_tree(cs) do |c, indent| %>
+<tr>
+<td class="signature" style="text-indent: <%= indent * 1.0%>em;">
+<span style="display:none"><%= "&nbsp;" * indent %></span>
+<%= class_link(c.name, c.name) %>
+</td>
+<td class="description"><%= compile_rd(c.synopsis_source) %></td>
+</tr>
+<%    end %>
+</table>
+<%
+    end
+  end
+%>
+<%
+  [[@entry.requires.sort, _('Required Libraries')],
+   [(@entry.sublibraries - @entry.requires).sort, _('Sub-Libraries')]].each do |cs, msg|
+    unless cs.empty?
+%>
+<%= headline(msg) %>
+<table class="entries libraries">
+<%    cs.each do |c| %>
+<tr>
+<td class="signature"><%= library_link(c.name) %></td>
+<td class="description"><%= compile_rd(c.synopsis_source) %></td>
+</tr>
+<%    end %>
+</table>
+<%
+    end
+  end
+%>
+<%
+    ents = @entry.methods.sort
+    unless ents.empty? %>
+<%= headline(_("Added/Redefined Methods")) %>
+<p><code>
+<%    ents.each do |m| %>
+<%= link_to_method(m, true) %>
+<%    end %>
+</code></p>
+<%  end %>
+

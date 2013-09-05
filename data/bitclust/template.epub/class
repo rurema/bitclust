@@ -1,0 +1,87 @@
+<% @title = "#{@entry.type} #{@entry.name}" %>
+<p>
+<%= manual_home_link() %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
+&gt; <%= friendly_library_link(@entry.library.name) %>
+&gt; <%=h _(@entry.type.to_s + ' %s', @entry.name) %>
+</p>
+
+<%
+    headline_init
+%>
+<%= headline("#{@entry.type} #{@entry.name}" + @entry.ancestors[1..@alevel].map{|c| " + #{c.name}" }.join) %>
+<p>
+<%
+    myself, *supers = @entry.ancestors
+    n = 0
+%>
+<% unless @entry.alias? %>
+<%= _('ancestors') %>: <%= escape_html(myself.name) %>
+<%  supers.each do |c| %>
+      <%= @conf[:tochm_mode] ? "&lt;" : a_href("?a=#{n}", "<")  %> <%= class_link(c.name) %>
+      <% n += 1 %>
+<%  end %>
+<% end %>
+
+<% unless @entry.extended.empty? %>
+<br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
+<% end %>
+<% unless @entry.aliases.empty? %>
+<br>aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
+<% end %>
+</p>
+<%
+    headline_push
+%>
+<%= headline(_("Abstract")) %>
+<%= compile_rd(@entry.source) %>
+
+<%
+    ents =  @entry.partitioned_entries(@alevel)
+    items =
+    [[_('Singleton Methods'),         ents.singleton_methods          ],
+     [_('Instance Methods'),          ents.instance_methods           ],
+     [_('Private Singleton Methods'), ents.private_singleton_methods  ],
+     [_('Private Instance Methods'),  ents.private_instance_methods   ],
+     [_('Module Functions'),          ents.module_functions           ],
+     [_('Constants'),                 ents.constants                  ],
+     [_('Special Variables'),         ents.special_variables          ,'$']] %>
+<%= headline(_("Index")) %>
+<dl>
+<% items.each do |label, entries, prefix| next if entries.empty? %>
+<dt><%= label %></dt>
+<dd>
+<%
+  entries.each do |m|
+    m.names.each do |mname|
+%>
+<a href="#<%= m.index_id %>"><%= "#{prefix}#{mname}" %></a>
+<%
+    end
+  end
+%>
+</dd>
+<% end %>
+</dl>
+
+<%
+    items.each do |label, entries|
+      unless entries.empty? %>
+<%=     headline(label) %>
+<dl>
+<%
+        headline_push
+        entries.each do |m|
+%>
+<%=       compile_method(m) %>
+<%
+        end
+        headline_pop
+%>
+</dl>
+<%
+      end
+    end
+    headline_pop
+%>
+

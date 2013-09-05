@@ -1,6 +1,8 @@
 require 'fileutils'
 require 'tmpdir'
 
+require 'bitclust/subcommands/statichtml_command'
+
 module BitClust
   module Generators
     class EPUB
@@ -15,7 +17,9 @@ module BitClust
         epub_directory = Pathname.new(epub_directory)
         contents_directory = epub_directory + CONTENTS_DIR_NAME
         copy_static_files(@options[:templatedir], epub_directory)
-        copy_assets(@options[:themedir], contents_directory)
+        html_options = @options.dup
+        html_options[:outputdir] = contents_directory
+        generate_html(html_options)
         FileUtils.remove_entry_secure(epub_directory) unless @options[:keep]
       end
 
@@ -25,14 +29,17 @@ module BitClust
         FileUtils.cp(templatedir + "container.xml", epub_directory + "META-INF")
       end
 
-      CSS_NAME = 'style.css'
-      FAVICON_NAME = 'rurema.png'
-
-      def copy_assets(themedir, contents_directory)
-        FileUtils.mkdir_p(contents_directory)
-        FileUtils.cp(themedir + CSS_NAME, contents_directory)
-        FileUtils.cp(themedir + FAVICON_NAME, contents_directory)
-        FileUtils.cp_r(themedir + 'images', contents_directory)
+      def generate_html(options)
+        argv = ["--outputdir=#{options[:outputdir]}",
+                "--templatedir=#{options[:templatedir]}",
+                "--catalog=#{options[:catalog]}",
+                "--themedir=#{options[:themedir]}"]
+        argv << "--fs-casesensitive" if options[:fs_casesensitive]
+        argv << "--quiet" unless options[:verbose]
+        
+        cmd = BitClust::Subcommands::StatichtmlCommand.new
+        cmd.parse(argv)
+        cmd.exec(argv, options)
       end
     end
   end
