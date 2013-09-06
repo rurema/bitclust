@@ -1,0 +1,24 @@
+<% @title = _('Function Index') %>
+<p>
+<%= manual_home_link() %>
+&gt; <%= _('All Functions') %>
+</p>
+<%
+    headline_init
+%>
+<%= headline(_("Function Index")) %>
+<table class="entries functions">
+<%
+    headline_push
+    @entries.each do |f|
+%>
+<tr>
+<td class="signature"><%= function_link(f.name) %></td>
+<td class="description"><%= compile_rd(f.synopsis_source) %></td>
+</tr>
+<%
+    end
+    headline_pop
+%>
+</table>
+

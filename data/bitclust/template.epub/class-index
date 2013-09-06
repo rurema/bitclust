@@ -1,0 +1,28 @@
+<% @title = _('Class Index') %>
+<p>
+<%= manual_home_link() %>
+&gt; <%= _('All Classes') %>
+</p>
+<%
+    headline_init
+%>
+<%= headline(_("Class Index")) %>
+<p>
+<%= @entries.size %> classes/modules in database
+</p>
+<%
+    headline_push
+    @entries.each do |c|
+%>
+<%= headline_noescape("#{c.type} #{class_link(c.name)}") %>
+<p>
+<%
+      c.entries.sort.each do |m| %>
+<%= link_to_method(m) %>
+<%    end %>
+</p>
+<%
+    end
+    headline_pop
+%>
+</ul>
