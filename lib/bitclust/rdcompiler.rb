@@ -76,10 +76,10 @@ module BitClust
           entry_chunk
         when /\A=+/
           headline @f.gets
-        when /\A\s+\*\s/
-          ulist
-        when /\A\s+\(\d+\)\s/
-          olist
+        when /\A(\s+)\*\s/, /\A(\s+)\(\d+\)\s/
+          @item_stack = []
+          item_list($1.size)
+          raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when %r<\A//emlist\{>
           emlist
         when /\A:\s/
@@ -127,10 +127,10 @@ module BitClust
           end
         when /\A---/
           break
-        when /\A\s+\*\s/
-          ulist
-        when /\A\s+\(\d+\)\s/
-          olist
+        when /\A(\s+)\*\s/, /\A(\s+)\(\d+\)\s/
+          @item_stack = []
+          item_list($1.size)
+          raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when /\A:\s/
           dlist
         when %r<\A//emlist\{>
@@ -165,6 +165,47 @@ module BitClust
     def h(level, label, frag = nil)
       name = frag ? "id='#{escape_html(frag)}'" : ""
       "<h#{level} #{name}>#{label}</h#{level}>"
+    end
+
+    def item_list(level = 0, indent = true)
+      open_tag = nil
+      close_tag = nil
+      pattern = nil
+      case @f.peek
+      when /\A(\s+)\*\s/
+        open_tag  =  "<ul>"
+        close_tag = "</ul>"
+      when /\A(\s+)\(\d+\)\s/
+        open_tag  = "<ol>"
+        close_tag = "</ol>"
+      end
+      if indent
+        line open_tag
+        @item_stack.push(close_tag)
+      end
+      @f.while_match(/\A(\s+)(?:\*\s|\(\d+\))/) do |line|
+        string "<li>"
+        @item_stack.push("</li>")
+        string compile_text(line.sub(/\A(\s+)(?:\*|\(\d+\))/, '').strip)
+        if /\A(\s+)(?!\*\s|\(\d+\))\S/ =~ @f.peek
+          @f.while_match(/\A\s+(?!\*\s|\(\d+\))\S/) do |cont|
+            nl
+            string compile_text(cont.strip)
+          end
+          line @item_stack.pop # current level li
+        elsif /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level < $1.size
+          item_list($1.size)
+          line @item_stack.pop # current level ul or ol
+        elsif /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level > $1.size
+          line @item_stack.pop # current level li
+          line @item_stack.pop # current level ul or ol
+          line @item_stack.pop # previous level li
+          item_list($1.size, false)
+        else
+          line @item_stack.pop # current level li
+        end
+      end
+      line @item_stack.pop unless @item_stack.empty?
     end
 
     def ulist

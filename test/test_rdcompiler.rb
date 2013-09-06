@@ -410,6 +410,29 @@ HERE
 
   end
 
+  def test_ulist_nested
+    src = <<HERE
+  * hoge1
+    * fuga1
+  * hoge2
+    * fuga2
+HERE
+    expected = <<HERE
+<ul>
+<li>hoge1<ul>
+<li>fuga1</li>
+</ul>
+</li>
+<li>hoge2<ul>
+<li>fuga2</li>
+</ul>
+</li>
+</ul>
+
+HERE
+    assert_compiled_source(expected, src)
+  end
+
   def test_olist
     src = <<'HERE'
  (1) hoge1
@@ -422,6 +445,87 @@ HERE
 bar</li>
 <li>hoge2</li>
 </ol>
+HERE
+    assert_compiled_source(expected, src)
+  end
+
+  def test_olist_nested
+    src = <<HERE
+  (1) hoge1
+    (11) fuga1
+  (2) hoge2
+    (12) fuga2
+HERE
+    expected = <<HERE
+<ol>
+<li>hoge1<ol>
+<li>fuga1</li>
+</ol>
+</li>
+<li>hoge2<ol>
+<li>fuga2</li>
+</ol>
+</li>
+</ol>
+
+HERE
+    assert_compiled_source(expected, src)
+  end
+
+  def test_ulist_olist_nested
+    src = <<HERE
+  * hoge1
+    (1) fuga1
+    (2) fuga2
+  * hoge2
+    (1) boo1
+    (2) boo2
+HERE
+    expected = <<HERE
+<ul>
+<li>hoge1<ol>
+<li>fuga1</li>
+<li>fuga2</li>
+</ol>
+</li>
+<li>hoge2<ol>
+<li>boo1</li>
+<li>boo2</li>
+</ol>
+</li>
+</ul>
+
+HERE
+    assert_compiled_source(expected, src)
+  end
+
+  def test_olist_nested_3level
+    src = <<HERE
+  (1) hoge1
+    (11) fuga1
+      (111) boo1
+  (2) hoge2
+    (22) fuga2
+      (222) boo2
+HERE
+    expected = <<HERE
+<ol>
+<li>hoge1<ol>
+<li>fuga1<ol>
+<li>boo1</li>
+</ol>
+</li>
+<li>hoge2<ol>
+<li>fuga2<ol>
+<li>boo2</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
 HERE
     assert_compiled_source(expected, src)
   end
