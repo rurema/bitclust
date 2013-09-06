@@ -51,7 +51,17 @@ module BitClust
       end
 
       def exec(argv, options)
-        # TODO implement
+        generator = BitClust::Generators::EPUB.new(:prefix           => options[:prefix],
+                                                   :capi             => options[:capi],
+                                                   :outputdir        => @outputdir,
+                                                   :catalog          => @catalog,
+                                                   :templatedir      => @templatedir,
+                                                   :themedir         => @themedir,
+                                                   :fs_casesensitive => $fs_casesensitive,
+                                                   :verbose          => @verbose,
+                                                   :keep             => @keep,
+                                                   :filename         => @filename)
+        generator.generate
       end
     end
   end
