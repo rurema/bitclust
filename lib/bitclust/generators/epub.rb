@@ -62,6 +62,7 @@ module BitClust
             :path => path
           }
         end
+        items.sort_by!{|item| item[:path] }
         contents = ERB.new(File.read(template_directory + "contents"), nil, "-").result(binding)
         open(epub_directory + "contents.opf", "w") do |f|
           f.write contents
