@@ -42,7 +42,7 @@ module BitClust
           @themedir = Pathname.new(path).realpath
         end
         @parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
-          $fs_casesensitive = true
+          @fs_casesensitive = true
         end
         @parser.on('--[no-]quiet', 'Be quiet') do |quiet|
           @verbose = !quiet
@@ -56,7 +56,7 @@ module BitClust
                                                    :catalog          => @catalog,
                                                    :templatedir      => @templatedir,
                                                    :themedir         => @themedir,
-                                                   :fs_casesensitive => $fs_casesensitive,
+                                                   :fs_casesensitive => @fs_casesensitive,
                                                    :verbose          => @verbose,
                                                    :keep             => @keep,
                                                    :filename         => @filename)
