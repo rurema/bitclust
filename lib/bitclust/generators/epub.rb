@@ -43,7 +43,7 @@ module BitClust
                 "--themedir=#{options[:themedir]}"]
         argv << "--fs-casesensitive" if options[:fs_casesensitive]
         argv << "--quiet" unless options[:verbose]
-        
+
         cmd = BitClust::Subcommands::StatichtmlCommand.new
         cmd.parse(argv)
         cmd.exec(argv, options)
@@ -57,7 +57,7 @@ module BitClust
           relative_paths << absolute_path.relative_path_from(absolute_path_to_search)
         end
         relative_paths
-      end 
+      end
     end
   end
 end
