@@ -27,7 +27,7 @@ module BitClust
           end
         end
         @parser.on('-f', '--filename=FILENAME',
-                   "Base name of generated EPUB file [#{@filename}]") do |filename|
+                   "Filename of generated EPUB file [#{@filename}]") do |filename|
           @filename = filename
         end
         @parser.on('--[no-]keep', 'Keep all generated files (for debug) [false]') do |keep|
