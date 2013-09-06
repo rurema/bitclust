@@ -208,34 +208,6 @@ module BitClust
       line @item_stack.pop unless @item_stack.empty?
     end
 
-    def ulist
-      @out.puts '<ul>'
-      @f.while_match(/\A\s+\*\s/) do |line|
-        string '<li>'
-        string compile_text(line.sub(/\A\s+\*/, '').strip)
-        @f.while_match(/\A\s+[^\*\s]/) do |cont|
-          nl
-          string compile_text(cont.strip)
-        end
-        line '</li>'
-      end
-      line '</ul>'
-    end
-
-    def olist
-      @out.puts '<ol>'
-      @f.while_match(/\A\s+\(\d+\)/) do |line|
-        string '<li>'
-        string compile_text(line.sub(/\A\s+\(\d+\)/, '').strip)
-        @f.while_match(/\A\s+(?!\(\d+\))\S/) do |cont|
-          string "\n"
-          string compile_text(cont.strip)
-        end
-        line '</li>'
-      end
-      line '</ol>'
-    end
-
     def dlist
       line '<dl>'
       while @f.next? and /\A:/ =~ @f.peek
