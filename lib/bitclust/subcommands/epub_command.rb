@@ -4,8 +4,6 @@ require 'date'
 require 'bitclust'
 require 'bitclust/subcommand'
 require 'bitclust/generators/epub'
-require 'bitclust/progress_bar'
-require 'bitclust/silent_progress_bar'
 
 module BitClust
   module Subcommands
