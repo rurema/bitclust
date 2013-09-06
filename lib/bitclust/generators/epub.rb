@@ -70,8 +70,8 @@ module BitClust
 
       def pack_epub(output_path, epub_directory)
         Dir.chdir(epub_directory.to_s) do
-          system("zip -0 -X mimetype")
-          system("zip -x  ./*")
+          system("zip -0 -X #{output_path} mimetype")
+          system("zip -r #{output_path} ./* -x mimetype")
         end
       end
 
