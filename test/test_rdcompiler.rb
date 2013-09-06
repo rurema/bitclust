@@ -362,7 +362,7 @@ HERE
     assert_compiled_method_source(expected, src)
   end
 
-  def test_ulist
+  def test_ulist_simple
     src =  <<'HERE'
  * hoge1
  * hoge2
@@ -374,7 +374,9 @@ HERE
 </ul>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_ulist_multiple_list
     src = <<'HERE'
  * hoge1
 
@@ -389,7 +391,9 @@ HERE
 </ul>
 HERE
     assert_compiled_source(expected, src)
+  end
 
+  def test_ulist_continuous_line
     src = <<'HERE'
  * hoge1
    bar
@@ -421,7 +425,6 @@ bar</li>
 HERE
     assert_compiled_source(expected, src)
   end
-
 
   def test_invalid_case
         src = <<HERE
