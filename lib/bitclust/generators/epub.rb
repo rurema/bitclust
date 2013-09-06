@@ -48,6 +48,16 @@ module BitClust
         cmd.parse(argv)
         cmd.exec(argv, options)
       end
+
+      def glob_relative_path(path, pattern)
+        relative_paths = []
+        absolute_path_to_search = Pathname.new(path).realpath
+        Dir.glob(absolute_path_to_search + pattern) do |absolute_path|
+          absolute_path = Pathname.new(absolute_path)
+          relative_paths << absolute_path.relative_path_from(absolute_path_to_search)
+        end
+        relative_paths
+      end 
     end
   end
 end
