@@ -1,0 +1,21 @@
+<%
+    entry = @entries.sort.first
+    @title = "#{entry.type_label} #{entry.label}"
+%>
+<p>
+<%= manual_home_link() %>
+&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
+&gt; <%= friendly_library_link(entry.library.name) %>
+&gt; <%= class_link(entry.klass.name, _(entry.klass.type.to_s + ' %s', entry.klass.name)) %>
+&gt; <% if entry.typename == :special_variable %>$<% end %><%=h entry.name %>
+<% unless entry.really_public? %>(<%= entry.visibility %>)<% end %>
+</p>
+
+<% headline_init %>
+<%= headline("#{entry.type_label} #{entry.label}") %>
+<dl class="methodlist">
+<% @entries.sort.each do |ent| %>
+<%= compile_method(ent) %>
+<% end %>
+</dl>
+

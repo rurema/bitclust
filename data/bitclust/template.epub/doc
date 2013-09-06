@@ -1,0 +1,13 @@
+<% @title = @entry.title %>
+<p>
+<% if @entry.name == 'index' %>
+<%= _('Ruby %s Reference Manual', ruby_version()) %>
+<% else %>
+<%= manual_home_link() %>
+&gt; <%=h breadcrumb_title %>
+<% end %>
+</p>
+<% headline_init %>
+<%= headline(@entry.title) %>
+<% headline_push %>
+<%= compile_rd(@entry.source) %>
