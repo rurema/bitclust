@@ -93,6 +93,10 @@ module BitClust
           NameUtils.decodename_fs(str)
         end
       end
+
+      def last_modified
+        Time.now.strftime("%Y-%m-%dT%H:%M:%SZ")
+      end
     end
   end
 end
