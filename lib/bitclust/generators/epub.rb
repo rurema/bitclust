@@ -26,7 +26,7 @@ module BitClust
         dir_path = Dir.mktmpdir(prefix, path)
         yield Pathname.new(dir_path)
       ensure
-        FileUtils.rm_r(dir_path, {:secure => true}) unless keep
+        FileUtils.rm_r(dir_path, :secure => true) unless keep
       end
 
       def copy_static_files(template_directory, epub_directory)
