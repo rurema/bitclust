@@ -25,6 +25,7 @@ module BitClust
       def make_tmp_dir(prefix, path, keep)
         dir_path = Dir.mktmpdir(prefix, path)
         yield Pathname.new(dir_path)
+      ensure
         FileUtils.rm_r(dir_path, {:secure => true}) unless keep
       end
 
