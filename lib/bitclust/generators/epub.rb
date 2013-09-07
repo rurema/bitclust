@@ -9,13 +9,13 @@ module BitClust
     class EPUB
       def initialize(options = {})
         @options = options.dup
-        @outputdir = options[:outputdir]
-        @templatedir = options[:templatedir]
-        @catalog = options[:catalog]
-        @themedir = options[:themedir]
+        @outputdir        = options[:outputdir]
+        @templatedir      = options[:templatedir]
+        @catalog          = options[:catalog]
+        @themedir         = options[:themedir]
         @fs_casesensitive = options[:fs_casesensitive]
-        @keep = options[:keep]
-        @verbose = options[:verbose]
+        @keep             = options[:keep]
+        @verbose          = options[:verbose]
       end
 
       CONTENTS_DIR_NAME = 'OEBPS'
