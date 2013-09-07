@@ -10,6 +10,10 @@ module BitClust
       def initialize(options = {})
         @options = options.dup
         @outputdir = options[:outputdir]
+        @templatedir = options[:templatedir]
+        @catalog = options[:catalog]
+        @themedir = options[:themedir]
+        @fs_casesensitive = options[:fs_casesensitive]
         @keep = options[:keep]
         @verbose = options[:verbose]
       end
@@ -19,7 +23,7 @@ module BitClust
       def generate
         make_epub_directory do |epub_directory|
           contents_directory = epub_directory + CONTENTS_DIR_NAME
-          copy_static_files(@options[:templatedir], epub_directory)
+          copy_static_files(@templatedir, epub_directory)
 
           html_options = @options.dup
           html_options[:outputdir] = contents_directory
@@ -38,22 +42,22 @@ module BitClust
       end
 
       def copy_static_files(template_directory, epub_directory)
-        FileUtils.cp(template_directory + "mimetype", epub_directory, :verbose => @options[:verbose])
-        FileUtils.cp(template_directory + "nav.xhtml", epub_directory, :verbose => @options[:verbose])
-        FileUtils.mkdir_p(epub_directory + "META-INF", :verbose => @options[:verbose])
-        FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF", :verbose => @options[:verbose])
+        FileUtils.cp(template_directory + "mimetype", epub_directory, :verbose => @verbose)
+        FileUtils.cp(template_directory + "nav.xhtml", epub_directory, :verbose => @verbose)
+        FileUtils.mkdir_p(epub_directory + "META-INF", :verbose => @verbose)
+        FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF", :verbose => @verbose)
       end
 
       def generate_xhtml_files(options)
         argv = [
-          "--outputdir=#{options[:outputdir]}",
-          "--templatedir=#{options[:templatedir]}",
-          "--catalog=#{options[:catalog]}",
-          "--themedir=#{options[:themedir]}",
+          "--outputdir=#{@outputdir}",
+          "--templatedir=#{@templatedir}",
+          "--catalog=#{@catalog}",
+          "--themedir=#{@themedir}",
           "--suffix=.xhtml",
         ]
-        argv << "--fs-casesensitive" if options[:fs_casesensitive]
-        argv << "--quiet" unless options[:verbose]
+        argv << "--fs-casesensitive" if @fs_casesensitive
+        argv << "--quiet" unless @verbose
 
         cmd = BitClust::Subcommands::StatichtmlCommand.new
         cmd.parse(argv)
