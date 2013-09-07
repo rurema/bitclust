@@ -42,10 +42,12 @@ module BitClust
       end
 
       def generate_html(options)
-        argv = ["--outputdir=#{options[:outputdir]}",
-                "--templatedir=#{options[:templatedir]}",
-                "--catalog=#{options[:catalog]}",
-                "--themedir=#{options[:themedir]}"]
+        argv = [
+          "--outputdir=#{options[:outputdir]}",
+          "--templatedir=#{options[:templatedir]}",
+          "--catalog=#{options[:catalog]}",
+          "--themedir=#{options[:themedir]}",
+        ]
         argv << "--fs-casesensitive" if options[:fs_casesensitive]
         argv << "--quiet" unless options[:verbose]
 
