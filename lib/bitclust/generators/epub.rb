@@ -14,7 +14,7 @@ module BitClust
       CONTENTS_DIR_NAME = 'OEBPS'
 
       def generate
-        make_tmp_dir("epub-temp-", @options[:outputdir], @options[:keep]) do |epub_directory|
+        make_epub_directory("epub-temp-", @options[:outputdir], @options[:keep]) do |epub_directory|
           contents_directory = epub_directory + CONTENTS_DIR_NAME
           copy_static_files(@options[:templatedir], epub_directory)
 
@@ -27,7 +27,7 @@ module BitClust
         end
       end
 
-      def make_tmp_dir(prefix, path, keep)
+      def make_epub_directory(prefix, path, keep)
         dir_path = Dir.mktmpdir(prefix, path)
         yield Pathname.new(dir_path)
       ensure
