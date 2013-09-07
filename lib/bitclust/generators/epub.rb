@@ -12,6 +12,7 @@ module BitClust
         @prefix           = options[:prefix]
         @capi             = options[:capi]
         @outputdir        = options[:outputdir]
+        @filename         = options[:filename]
         @templatedir      = options[:templatedir]
         @catalog          = options[:catalog]
         @themedir         = options[:themedir]
@@ -28,7 +29,7 @@ module BitClust
           copy_static_files(epub_directory)
           generate_xhtml_files(contents_directory)
           generate_contents_opf(epub_directory)
-          pack_epub(@options[:outputdir] + @options[:filename], epub_directory)
+          pack_epub(epub_directory)
         end
       end
 
@@ -81,10 +82,11 @@ module BitClust
         end
       end
 
-      def pack_epub(output_path, epub_directory)
+      def pack_epub(epub_directory)
+        epub_filename = @outputdir + @filename
         Dir.chdir(epub_directory.to_s) do
-          system("zip -0 -X #{output_path} mimetype")
-          system("zip -r #{output_path} ./* -x mimetype")
+          system("zip -0 -X #{epub_filename} mimetype")
+          system("zip -r #{epub_filename} ./* -x mimetype")
         end
       end
 
