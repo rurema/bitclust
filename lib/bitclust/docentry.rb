@@ -50,7 +50,7 @@ module BitClust
     def labels
       [label()]
     end
-    
+
     def name?(n)
       name() == n
     end
@@ -71,7 +71,7 @@ module BitClust
     def error_classes
       classes.select{|c| c.error_class? }
     end
-    
+
     def methods
       @db.methods
     end
