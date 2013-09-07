@@ -15,46 +15,54 @@ module BitClust
   module Subcommands
     class StatichtmlCommand < Subcommand
       class URLMapperEx < URLMapper
+
+        attr_accessor :bitclust_html_base
+
+        def initialize(h)
+          super
+          @bitclust_html_base = ""
+        end
+
         def library_url(name)
           if name == '/'
-            $bitclust_html_base + "/library/index.html"
+            @bitclust_html_base + "/library/index.html"
           else
-            $bitclust_html_base + "/library/#{encodename_package(name)}.html"
+            @bitclust_html_base + "/library/#{encodename_package(name)}.html"
           end
         end
 
         def class_url(name)
-          $bitclust_html_base + "/class/#{encodename_package(name)}.html"
+          @bitclust_html_base + "/class/#{encodename_package(name)}.html"
         end
 
         def method_url(spec)
           cname, tmark, mname = *split_method_spec(spec)
-          $bitclust_html_base +
+          @bitclust_html_base +
             "/method/#{encodename_package(cname)}/#{typemark2char(tmark)}/#{encodename_package(mname)}.html"
         end
 
         def function_url(name)
-          $bitclust_html_base + "/function/#{name.empty? ? 'index' : name}.html"
+          @bitclust_html_base + "/function/#{name.empty? ? 'index' : name}.html"
         end
 
         def document_url(name)
-          $bitclust_html_base + "/doc/#{encodename_package(name)}.html"
+          @bitclust_html_base + "/doc/#{encodename_package(name)}.html"
         end
 
         def css_url
-          $bitclust_html_base + "/" + @css_url
+          @bitclust_html_base + "/" + @css_url
         end
 
         def favicon_url
-          $bitclust_html_base + "/" + @favicon_url
+          @bitclust_html_base + "/" + @favicon_url
         end
 
         def library_index_url
-          $bitclust_html_base + "/library/index.html"
+          @bitclust_html_base + "/library/index.html"
         end
 
         def function_index_url
-          $bitclust_html_base + "/function/index.html"
+          @bitclust_html_base + "/function/index.html"
         end
 
         def encodename_package(str)
@@ -128,7 +136,7 @@ module BitClust
           create_html_entries("capi", fdb.functions, manager, fdb)
         end
 
-        $bitclust_html_base = '..'
+        @url_mapper.bitclust_html_base = '..'
         create_file(@outputdir + 'library/index.html',
                     manager.library_index_screen(db.libraries.sort, {:database => db}).body,
                     :verbose => @verbose)
@@ -168,6 +176,7 @@ module BitClust
           :tochm_mode  => true
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
+        @url_mapper = @manager_config[:urlmapper]
       end
 
       def create_html_entries(title, entries, manager, db)
@@ -216,7 +225,7 @@ HERE
         e = entry.is_a?(Array) ? entry.sort.first : entry
         case e.type_id
         when :library, :class, :doc
-          $bitclust_html_base = '..'
+          @url_mapper.bitclust_html_base = '..'
           path = outputdir + e.type_id.to_s + (encodename_package(e.name) + '.html')
           create_html_file_p(entry, manager, path, db)
           path.relative_path_from(outputdir).to_s
@@ -230,7 +239,7 @@ HERE
 
       def create_html_method_file(method_name, entries, manager, outputdir, db)
         path = nil
-        $bitclust_html_base = '../../..'
+        @url_mapper.bitclust_html_base = '../../..'
         e = entries.sort.first
         name = method_name.sub(e.klass.name + e.typemark, "")
         path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
@@ -241,7 +250,7 @@ HERE
 
       def create_html_function_file(entry, manager, outputdir, db)
         path = nil
-        $bitclust_html_base = '..'
+        @url_mapper.bitclust_html_base = '..'
         path = outputdir + entry.type_id.to_s + (entry.name + '.html')
         create_html_file_p(entry, manager, path, db)
         path.relative_path_from(outputdir).to_s
