@@ -27,7 +27,7 @@ module BitClust
           contents_directory = epub_directory + CONTENTS_DIR_NAME
           copy_static_files(epub_directory)
           generate_xhtml_files(contents_directory)
-          generate_contents_file(epub_directory)
+          generate_contents_opf(epub_directory)
           pack_epub(@options[:outputdir] + @options[:filename], epub_directory)
         end
       end
@@ -66,7 +66,7 @@ module BitClust
         cmd.exec(argv, options)
       end
 
-      def generate_contents_file(epub_directory)
+      def generate_contents_opf(epub_directory)
         items = []
         glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.xhtml").each do |path|
           items << {
