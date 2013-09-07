@@ -7,6 +7,7 @@
 require 'fileutils'
 
 require 'bitclust'
+require 'bitclust/nameutils'
 require 'bitclust/subcommand'
 require 'bitclust/progress_bar'
 require 'bitclust/silent_progress_bar'
@@ -14,7 +15,10 @@ require 'bitclust/silent_progress_bar'
 module BitClust
   module Subcommands
     class StatichtmlCommand < Subcommand
+      include NameUtils
+
       class URLMapperEx < URLMapper
+        include NameUtils
 
         attr_accessor :bitclust_html_base
 
@@ -68,9 +72,9 @@ module BitClust
 
         def encodename_package(str)
           if @fs_casesensitive
-            NameUtils.encodename_url(str)
+            encodename_url(str)
           else
-            NameUtils.encodename_fs(str)
+            encodename_fs(str)
           end
         end
       end
@@ -277,9 +281,9 @@ HERE
 
       def encodename_package(str)
         if @fs_casesensitive
-          NameUtils.encodename_url(str)
+          encodename_url(str)
         else
-          NameUtils.encodename_fs(str)
+          encodename_fs(str)
         end
       end
     end
