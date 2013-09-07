@@ -20,7 +20,7 @@ module BitClust
 
           html_options = @options.dup
           html_options[:outputdir] = contents_directory
-          generate_html(html_options)
+          generate_xhtml_files(html_options)
 
           generate_contents_file(@options[:templatedir], epub_directory, @options[:fs_casesensitive])
           pack_epub(@options[:outputdir] + @options[:filename], epub_directory)
@@ -41,7 +41,7 @@ module BitClust
         FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF", :verbose => @options[:verbose])
       end
 
-      def generate_html(options)
+      def generate_xhtml_files(options)
         argv = [
           "--outputdir=#{options[:outputdir]}",
           "--templatedir=#{options[:templatedir]}",
