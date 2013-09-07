@@ -136,7 +136,7 @@ module BitClust
           create_html_entries("capi", fdb.functions, manager, fdb)
         end
 
-        @url_mapper.bitclust_html_base = '..'
+        @urlmapper.bitclust_html_base = '..'
         create_file(@outputdir + 'library/index.html',
                     manager.library_index_screen(db.libraries.sort, {:database => db}).body,
                     :verbose => @verbose)
@@ -176,7 +176,7 @@ module BitClust
           :tochm_mode  => true
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
-        @url_mapper = @manager_config[:urlmapper]
+        @urlmapper = @manager_config[:urlmapper]
       end
 
       def create_html_entries(title, entries, manager, db)
@@ -225,7 +225,7 @@ HERE
         e = entry.is_a?(Array) ? entry.sort.first : entry
         case e.type_id
         when :library, :class, :doc
-          @url_mapper.bitclust_html_base = '..'
+          @urlmapper.bitclust_html_base = '..'
           path = outputdir + e.type_id.to_s + (encodename_package(e.name) + '.html')
           create_html_file_p(entry, manager, path, db)
           path.relative_path_from(outputdir).to_s
@@ -239,7 +239,7 @@ HERE
 
       def create_html_method_file(method_name, entries, manager, outputdir, db)
         path = nil
-        @url_mapper.bitclust_html_base = '../../..'
+        @urlmapper.bitclust_html_base = '../../..'
         e = entries.sort.first
         name = method_name.sub(e.klass.name + e.typemark, "")
         path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
@@ -250,7 +250,7 @@ HERE
 
       def create_html_function_file(entry, manager, outputdir, db)
         path = nil
-        @url_mapper.bitclust_html_base = '..'
+        @urlmapper.bitclust_html_base = '..'
         path = outputdir + entry.type_id.to_s + (entry.name + '.html')
         create_html_file_p(entry, manager, path, db)
         path.relative_path_from(outputdir).to_s
