@@ -71,7 +71,7 @@ module BitClust
         items = []
         glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.xhtml").each do |path|
           items << {
-            :id => decodename_package(path.basename(".*").to_s, @fs_casesensitive),
+            :id => decodename_package(path.basename(".*").to_s),
             :path => path
           }
         end
@@ -100,8 +100,8 @@ module BitClust
         relative_paths
       end
 
-      def decodename_package(str, fs_casesensitive)
-        if fs_casesensitive
+      def decodename_package(str)
+        if @fs_casesensitive
           NameUtils.decodename_url(str)
         else
           NameUtils.decodename_fs(str)
