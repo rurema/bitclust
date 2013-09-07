@@ -25,7 +25,7 @@ module BitClust
       def generate
         make_epub_directory do |epub_directory|
           contents_directory = epub_directory + CONTENTS_DIR_NAME
-          copy_static_files(@templatedir, epub_directory)
+          copy_static_files(epub_directory)
           generate_xhtml_files(contents_directory)
           generate_contents_file(@options[:templatedir], epub_directory, @options[:fs_casesensitive])
           pack_epub(@options[:outputdir] + @options[:filename], epub_directory)
@@ -39,11 +39,12 @@ module BitClust
         FileUtils.rm_r(dir, :secure => true, :verbose => @verbose) unless @keep
       end
 
-      def copy_static_files(template_directory, epub_directory)
-        FileUtils.cp(template_directory + "mimetype", epub_directory, :verbose => @verbose)
-        FileUtils.cp(template_directory + "nav.xhtml", epub_directory, :verbose => @verbose)
-        FileUtils.mkdir_p(epub_directory + "META-INF", :verbose => @verbose)
-        FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF", :verbose => @verbose)
+      def copy_static_files(epub_directory)
+        FileUtils.cp(@templatedir + "mimetype", epub_directory, :verbose => @verbose)
+        FileUtils.cp(@templatedir + "nav.xhtml", epub_directory, :verbose => @verbose)
+        meta_inf_directory = epub_directory + "META-INF"
+        FileUtils.mkdir_p(meta_inf_directory, :verbose => @verbose)
+        FileUtils.cp(@templatedir + "container.xml", meta_inf_directory, :verbose => @verbose)
       end
 
       def generate_xhtml_files(contents_directory)
