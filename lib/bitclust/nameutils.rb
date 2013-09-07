@@ -242,6 +242,9 @@ module BitClust
       }
     end
 
+    def html_filename(basename, suffix)
+      "#{basename}#{suffix}"
+    end
   end
 
 end
