@@ -21,6 +21,7 @@ module BitClust
         def initialize(h)
           super
           @bitclust_html_base = ""
+          @suffix = h[:suffix]
         end
 
         def library_url(name)
@@ -177,6 +178,7 @@ module BitClust
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]
+        @suffix = @manager_config[:suffix]
       end
 
       def create_html_entries(title, entries, manager, db)
