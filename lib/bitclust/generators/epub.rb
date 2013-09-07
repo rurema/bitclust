@@ -31,14 +31,14 @@ module BitClust
         dir_path = Dir.mktmpdir(prefix, path)
         yield Pathname.new(dir_path)
       ensure
-        FileUtils.rm_r(dir_path, :secure => true) unless keep
+        FileUtils.rm_r(dir_path, :secure => true, :verbose => @options[:verbose]) unless keep
       end
 
       def copy_static_files(template_directory, epub_directory)
-        FileUtils.cp(template_directory + "mimetype", epub_directory)
-        FileUtils.cp(template_directory + "nav.xhtml", epub_directory)
-        FileUtils.mkdir_p(epub_directory + "META-INF")
-        FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF")
+        FileUtils.cp(template_directory + "mimetype", epub_directory, :verbose => @options[:verbose])
+        FileUtils.cp(template_directory + "nav.xhtml", epub_directory, :verbose => @options[:verbose])
+        FileUtils.mkdir_p(epub_directory + "META-INF", :verbose => @options[:verbose])
+        FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF", :verbose => @options[:verbose])
       end
 
       def generate_html(options)
