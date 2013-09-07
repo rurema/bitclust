@@ -30,28 +30,31 @@ module BitClust
 
         def library_url(name)
           if name == '/'
-            @bitclust_html_base + "/library/index.html"
+            @bitclust_html_base + "/library/#{html_filename("index", @suffix)}"
           else
-            @bitclust_html_base + "/library/#{encodename_package(name)}.html"
+            @bitclust_html_base + "/library/#{html_filename(encodename_package(name), @suffix)}"
           end
         end
 
         def class_url(name)
-          @bitclust_html_base + "/class/#{encodename_package(name)}.html"
+          @bitclust_html_base + "/class/#{html_filename(encodename_package(name), @suffix)}"
         end
 
         def method_url(spec)
           cname, tmark, mname = *split_method_spec(spec)
+          filename = html_filename(encodename_package(mname), @suffix)
           @bitclust_html_base +
-            "/method/#{encodename_package(cname)}/#{typemark2char(tmark)}/#{encodename_package(mname)}.html"
+            "/method/#{encodename_package(cname)}/#{typemark2char(tmark)}/#{filename}"
         end
 
         def function_url(name)
-          @bitclust_html_base + "/function/#{name.empty? ? 'index' : name}.html"
+          filename = html_filename(name.empty? ? 'index' : name, @suffix)
+          @bitclust_html_base + "/function/#{filename}"
         end
 
         def document_url(name)
-          @bitclust_html_base + "/doc/#{encodename_package(name)}.html"
+          filename = html_filename(encodename_package(name), @suffix)
+          @bitclust_html_base + "/doc/#{filename}"
         end
 
         def css_url
@@ -63,11 +66,11 @@ module BitClust
         end
 
         def library_index_url
-          @bitclust_html_base + "/library/index.html"
+          @bitclust_html_base + "/library/#{html_filename("index", @suffix)}"
         end
 
         def function_index_url
-          @bitclust_html_base + "/function/index.html"
+          @bitclust_html_base + "/function/#{html_filename("index", @suffix)}"
         end
 
         def encodename_package(str)
@@ -88,6 +91,7 @@ module BitClust
         @catalogdir = nil
         @templatedir = srcdir_root + "data/bitclust/template.offline"
         @themedir = srcdir_root + "theme/default"
+        @suffix = ".html"
         @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
         @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
@@ -105,6 +109,9 @@ module BitClust
         end
         @parser.on('--themedir=PATH', 'Theme directory') do |path|
           @themedir = Pathname.new(path).realpath
+        end
+        @parser.on('--suffix=SUFFIX', 'Suffix for each (X)HTML file [.html]') do |suffix|
+          @suffix = suffix
         end
         @parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
           @fs_casesensitive = true
@@ -142,13 +149,13 @@ module BitClust
         end
 
         @urlmapper.bitclust_html_base = '..'
-        create_file(@outputdir + 'library/index.html',
+        create_file(@outputdir + "library/#{html_filename("index", @suffix)}",
                     manager.library_index_screen(db.libraries.sort, {:database => db}).body,
                     :verbose => @verbose)
-        create_file(@outputdir + 'class/index.html',
+        create_file(@outputdir + "class/#{html_filename("index", @suffix)}",
                     manager.class_index_screen(db.classes.sort, {:database => db}).body,
                     :verbose => @verbose)
-        create_file(@outputdir + 'function/index.html',
+        create_file(@outputdir + "function/#{html_filename("index", @suffix)}",
                     manager.function_index_screen(fdb.functions.sort, { :database => fdb }).body,
                     :verbose => @verbose)
         create_index_html(@outputdir)
@@ -172,7 +179,7 @@ module BitClust
       def create_manager_config
         @manager_config = {
           :catalogdir  => @catalogdir,
-          :suffix      => '.html',
+          :suffix      => @suffix,
           :templatedir => @templatedir,
           :themedir    => @themedir,
           :css_url     => 'style.css',
@@ -182,7 +189,6 @@ module BitClust
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]
-        @suffix = @manager_config[:suffix]
       end
 
       def create_html_entries(title, entries, manager, db)
@@ -218,11 +224,12 @@ module BitClust
       end
 
       def create_index_html(outputdir)
-        path = outputdir + 'index.html'
+        index_filename = html_filename("index", @suffix)
+        path = outputdir + index_filename
         File.open(path, 'w'){|io|
           io.write <<HERE
-<meta http-equiv="refresh" content="0; URL=doc/index.html">
-<a href="doc/index.html">Go</a>
+<meta http-equiv="refresh" content="0; URL=doc/#{index_filename}">
+<a href="doc/#{index_filename}">Go</a>
 HERE
         }
       end
@@ -232,7 +239,7 @@ HERE
         case e.type_id
         when :library, :class, :doc
           @urlmapper.bitclust_html_base = '..'
-          path = outputdir + e.type_id.to_s + (encodename_package(e.name) + '.html')
+          path = outputdir + e.type_id.to_s + html_filename(encodename_package(e.name), @suffix)
           create_html_file_p(entry, manager, path, db)
           path.relative_path_from(outputdir).to_s
         when :function
@@ -249,7 +256,7 @@ HERE
         e = entries.sort.first
         name = method_name.sub(e.klass.name + e.typemark, "")
         path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
-          e.typechar + (encodename_package(name) + '.html')
+          e.typechar + html_filename(encodename_package(name), @suffix)
         create_html_file_p(entries, manager, path, db)
         path.relative_path_from(outputdir).to_s
       end
@@ -257,7 +264,7 @@ HERE
       def create_html_function_file(entry, manager, outputdir, db)
         path = nil
         @urlmapper.bitclust_html_base = '..'
-        path = outputdir + entry.type_id.to_s + (entry.name + '.html')
+        path = outputdir + entry.type_id.to_s + html_filename(entry.name, @suffix)
         create_html_file_p(entry, manager, path, db)
         path.relative_path_from(outputdir).to_s
       end
