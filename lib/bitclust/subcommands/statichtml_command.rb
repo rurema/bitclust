@@ -58,7 +58,7 @@ module BitClust
         end
 
         def encodename_package(str)
-          if $fs_casesensitive
+          if @fs_casesensitive
             NameUtils.encodename_url(str)
           else
             NameUtils.encodename_fs(str)
@@ -94,7 +94,7 @@ module BitClust
           @themedir = Pathname.new(path).realpath
         end
         @parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
-          $fs_casesensitive = true
+          @fs_casesensitive = true
         end
         @parser.on('--[no-]quiet', 'Be quiet') do |quiet|
           @verbose = !quiet
@@ -265,7 +265,7 @@ HERE
       end
 
       def encodename_package(str)
-        if $fs_casesensitive
+        if @fs_casesensitive
           NameUtils.encodename_url(str)
         else
           NameUtils.encodename_fs(str)
