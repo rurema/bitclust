@@ -47,6 +47,7 @@ module BitClust
           "--templatedir=#{options[:templatedir]}",
           "--catalog=#{options[:catalog]}",
           "--themedir=#{options[:themedir]}",
+          "--suffix=.xhtml",
         ]
         argv << "--fs-casesensitive" if options[:fs_casesensitive]
         argv << "--quiet" unless options[:verbose]
@@ -58,7 +59,7 @@ module BitClust
 
       def generate_contents_file(template_directory, epub_directory, fs_casesensitive)
         items = []
-        glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.html").each do |path|
+        glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.xhtml").each do |path|
           items << {
             :id => decodename_package(path.basename(".*").to_s, fs_casesensitive),
             :path => path
