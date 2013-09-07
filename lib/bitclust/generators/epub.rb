@@ -33,6 +33,8 @@ module BitClust
         end
       end
 
+      private
+
       def make_epub_directory
         dir = Dir.mktmpdir("epub-", @outputdir)
         yield Pathname.new(dir)
