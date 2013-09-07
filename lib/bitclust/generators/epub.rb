@@ -9,6 +9,8 @@ module BitClust
     class EPUB
       def initialize(options = {})
         @options = options.dup
+        @prefix           = options[:prefix]
+        @capi             = options[:capi]
         @outputdir        = options[:outputdir]
         @templatedir      = options[:templatedir]
         @catalog          = options[:catalog]
@@ -24,11 +26,7 @@ module BitClust
         make_epub_directory do |epub_directory|
           contents_directory = epub_directory + CONTENTS_DIR_NAME
           copy_static_files(@templatedir, epub_directory)
-
-          html_options = @options.dup
-          html_options[:outputdir] = contents_directory
-          generate_xhtml_files(html_options)
-
+          generate_xhtml_files(contents_directory)
           generate_contents_file(@options[:templatedir], epub_directory, @options[:fs_casesensitive])
           pack_epub(@options[:outputdir] + @options[:filename], epub_directory)
         end
@@ -48,9 +46,9 @@ module BitClust
         FileUtils.cp(template_directory + "container.xml", epub_directory + "META-INF", :verbose => @verbose)
       end
 
-      def generate_xhtml_files(options)
+      def generate_xhtml_files(contents_directory)
         argv = [
-          "--outputdir=#{@outputdir}",
+          "--outputdir=#{contents_directory}",
           "--templatedir=#{@templatedir}",
           "--catalog=#{@catalog}",
           "--themedir=#{@themedir}",
@@ -58,7 +56,10 @@ module BitClust
         ]
         argv << "--fs-casesensitive" if @fs_casesensitive
         argv << "--quiet" unless @verbose
-
+        options = {
+          :prefix => @prefix,
+          :capi   => @capi,
+        }
         cmd = BitClust::Subcommands::StatichtmlCommand.new
         cmd.parse(argv)
         cmd.exec(argv, options)
