@@ -180,10 +180,10 @@ module BitClust
       f.skip_blank_lines
       read_extends f
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A=|\A---/).join('').rstrip
+      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       @context.visibility = :public
       @context.type = :singleton_method
-      read_entries f
+      read_level2_blocks f
     end
 
     def read_aliases(f)

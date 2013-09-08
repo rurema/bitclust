@@ -1,3 +1,8 @@
+2013-09-08  Sho Hashimoto  <sho.hsmt@gmail.com>
+
+	* lib/bitclust/rrdparser.rb (BitClust::RRDParser#read_object_body):
+	support level 3 or more refs to object. (see #7900)
+
 2013-04-12  Kazuhiro NISHIYAMA  <zn@mbf.nifty.com>
 
 	* lib/bitclust/subcommands/setup_command.rb (BitClust::SetupCommand#checkout):

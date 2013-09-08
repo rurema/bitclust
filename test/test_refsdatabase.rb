@@ -37,6 +37,11 @@ a a a a
 ====[a:e4] E4
 =====[a:e5] E5
 ======[a:e6] E6
+= object ARGF
+===[a:f3] F3
+====[a:f4] F4
+=====[a:f5] F5
+======[a:f6] F6
 HERE
 
   S2 = <<HERE
@@ -71,6 +76,9 @@ HERE
     end
     ['e3', 'e4', 'e5', 'e6'].each do |s|
       assert_equal(s.upcase, db.refs['method',  'Kernel$spespe', s])
+    end
+    ['f3', 'f4', 'f5', 'f6'].each do |s|
+      assert_equal(s.upcase, db.refs['class',  'ARGF', s])
     end
   end
 end
