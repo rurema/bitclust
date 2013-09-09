@@ -111,7 +111,7 @@ module BitClust
       end
 
       def last_modified
-        Time.now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        Time.now.iso8601
       end
     end
   end
