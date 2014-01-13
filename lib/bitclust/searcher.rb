@@ -98,6 +98,10 @@ module BitClust
       end
     end
 
+    def help
+      @parser.help
+    end
+
     private
 
     def server_mode_check(argv)
