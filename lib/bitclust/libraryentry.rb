@@ -24,6 +24,7 @@ module BitClust
     def initialize(db, id)
       super db
       @id = id
+      @name = libid2name(@id)
       if saved?
         @classmap = nil
         @methodmap = nil
@@ -36,7 +37,9 @@ module BitClust
       init_properties
     end
 
-    attr_reader :id
+    attr_reader :id, :name
+
+    alias label name
 
     def ==(other)
       @id == other.id
@@ -51,11 +54,6 @@ module BitClust
     def <=>(other)
       @id.casecmp(other.id)
     end
-
-    def name
-      libid2name(@id)
-    end
-    alias label name
 
     def labels
       [label()]
