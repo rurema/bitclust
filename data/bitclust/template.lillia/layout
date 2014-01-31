@@ -6,7 +6,7 @@
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
   <script type="text/javascript" src="<%=h js_url() %>"></script>
   <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
-  <title><%=h @title %></title>
+  <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
 </head>
 <body>
 <%= yield %>
