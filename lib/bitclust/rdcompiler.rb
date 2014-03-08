@@ -523,11 +523,7 @@ module BitClust
       cname = cname.gsub('::', '/')
       id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
 
-      if libname == '_builtin'
-        "http://ruby-doc.org/core-#{version}/#{cname}.html##{id}"
-      else
-        "http://ruby-doc.org/stdlib-#{version}/libdoc/#{libname}/rdoc/#{cname}.html##{id}"
-      end
+      "http://docs.ruby-lang.org/en/#{version}/#{cname}.html##{id}"
     end
 
     def rdoc_link(method_id, version)
