@@ -1,3 +1,8 @@
+2014-03-08  Sho Hashimoto  <sho.hsmt@gmail.com>
+
+	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::rdoc_url):
+	  change rdoc link target.
+
 2013-09-08  Sho Hashimoto  <sho.hsmt@gmail.com>
 
 	* lib/bitclust/rrdparser.rb (BitClust::RRDParser#read_object_body):
