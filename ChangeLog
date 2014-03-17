@@ -1,3 +1,9 @@
+2014-03-16  Sho Hashimoto  <sho.hsmt@gmail.com>
+
+	* lib/bitclust/functionreferenceparser.rb
+	  (BitClust::FunctionReferenceParser::parse_file): support version
+	  branching.
+
 2014-03-08  Sho Hashimoto  <sho.hsmt@gmail.com>
 
 	* lib/bitclust/rdcompiler.rb (BitClust::RDCompiler::rdoc_url):

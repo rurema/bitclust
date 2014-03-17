@@ -28,13 +28,14 @@ module BitClust
 
     def parse_file(path, filename, properties)
       fopen(path, 'r:UTF-8') {|f|
-        return parse(f, filename)
+        return parse(f, filename, properties)
       }
     end
 
-    def parse(f, filename)
+    def parse(f, filename, params = {})
       @filename = filename
-      file_entries LineInput.new(f)
+      s = Preprocessor.read(f, params)
+      file_entries LineInput.for_string(s)
       @db.functions
     end
 
