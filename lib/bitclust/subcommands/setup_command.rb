@@ -64,7 +64,7 @@ module BitClust
       end
 
       def prepare
-        home_directory = Pathname(ENV["HOME"])
+        home_directory = Pathname(ENV["HOME"]).expand_path
         config_dir = home_directory + ".bitclust"
         config_dir.mkpath
         config_path = config_dir + "config"
