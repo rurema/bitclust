@@ -26,6 +26,7 @@ module BitClust
           super
           @bitclust_html_base = ""
           @suffix = h[:suffix]
+          @fs_casesensitive = h[:fs_casesensitive]
         end
 
         def library_url(name)
@@ -185,7 +186,8 @@ module BitClust
           :css_url     => 'style.css',
           :favicon_url => 'rurema.png',
           :cgi_url     => '',
-          :tochm_mode  => true
+          :tochm_mode  => true,
+          :fs_casesensitive => @fs_casesensitive
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]
