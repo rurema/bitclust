@@ -1,3 +1,8 @@
+2016-01-10  Sho Hashimoto  <sho.hsmt@gmail.com>
+
+	* lib/bitclust/screen.rb (BitClust::URLMapper#document_url):
+	  allow dot for document_url.
+
 2014-03-16  Sho Hashimoto  <sho.hsmt@gmail.com>
 
 	* lib/bitclust/functionreferenceparser.rb
