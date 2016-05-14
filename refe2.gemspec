@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require 'rake'
 require "bitclust/version"
 
 Gem::Specification.new do |s|
@@ -17,7 +16,7 @@ This is tools for Rubyists.
 EOD
 
   s.rubyforge_project = ""
-  s.files         = FileList["bin/refe", "lib/bitclust.rb"]
+  s.files         = Dir["bin/refe", "lib/bitclust.rb"]
   s.executables   = ["refe"]
   s.require_paths = ["lib"]
 

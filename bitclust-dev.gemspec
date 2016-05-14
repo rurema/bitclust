@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require 'rake'
 require "bitclust/version"
 
 Gem::Specification.new do |s|
@@ -18,10 +17,10 @@ EOD
 
   s.rubyforge_project = ""
 
-  s.files         = FileList["tools/*", "lib/bitclust.rb"]
-  s.executables   = FileList["tools/*"].
-    exclude("ToDoHistory", "check-signature.rb").
-    map{|v| File.basename(v) }
+  s.files         = Dir["tools/*", "lib/bitclust.rb"]
+  s.executables   = Dir["tools/*"].
+    map{|v| File.basename(v) }.
+    select{|f| !%w(ToDoHistory check-signature.rb).include? f}
   s.require_paths = ["lib"]
   s.bindir        = "tools"
 
