@@ -1,6 +1,7 @@
 rvm:
-  - 2.0.0
+  - 2.3.1
 #  - ruby-head
 notifications:
   recipients:
     - ruby-reference-manual-diff@ml.fdiary.net
+    - okkez000@gmail.com
