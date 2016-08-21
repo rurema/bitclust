@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require 'rake'
 require "bitclust/version"
 
 Gem::Specification.new do |s|
@@ -17,9 +16,9 @@ EOD
 
   s.rubyforge_project = ""
 
-  s.files         = FileList["ChangeLog", "Gemfile", "README", "Rakefile", "bitclust.gemspec",
-                             "data/**/*", "lib/**/*.rb", "theme/**/*"].exclude("*~")
-  s.test_files    = FileList["test/**/*.rb"].exclude("*~")
+  s.files         = Dir["ChangeLog", "Gemfile", "README", "Rakefile", "bitclust.gemspec",
+                             "data/**/*", "lib/**/*.rb", "theme/**/*"].select{|f| !(f =~ /.*~/)}
+  s.test_files    = Dir["test/**/*.rb"].select{|f| !(f =~ /.*~/)}
   s.executables   = ["bitclust"]
   s.require_paths = ["lib"]
 
