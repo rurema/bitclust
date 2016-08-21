@@ -5,6 +5,9 @@
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
   <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
+  <% if @conf[:canonical_base_url] %>
+  <link rel="canonical" href="<%= canonical_url() %>">
+  <% end %>
   <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
 </head>
 <body>

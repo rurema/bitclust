@@ -27,6 +27,7 @@ module BitClust
           @bitclust_html_base = ""
           @suffix = h[:suffix]
           @fs_casesensitive = h[:fs_casesensitive]
+          @canonical_base_url = h[:canonical_base_url]
         end
 
         def library_url(name)
@@ -74,6 +75,10 @@ module BitClust
           @bitclust_html_base + "/function/#{html_filename("index", @suffix)}"
         end
 
+        def canonical_url(current_url)
+          (@canonical_base_url + "/#{current_url}").sub(@bitclust_html_base, "").sub(/([^:])\/\/+/, "\\1/")
+        end
+
         def encodename_package(str)
           if @fs_casesensitive
             encodename_url(str)
@@ -116,6 +121,9 @@ module BitClust
         end
         @parser.on('--fs-casesensitive', 'Filesystem is case-sensitive') do
           @fs_casesensitive = true
+        end
+        @parser.on('--canonical-base-url=URL', 'Canonical base URL') do |url|
+          @canonical_base_url = url
         end
         @parser.on('--[no-]quiet', 'Be quiet') do |quiet|
           @verbose = !quiet
@@ -187,7 +195,8 @@ module BitClust
           :favicon_url => 'rurema.png',
           :cgi_url     => '',
           :tochm_mode  => true,
-          :fs_casesensitive => @fs_casesensitive
+          :fs_casesensitive => @fs_casesensitive,
+          :canonical_base_url => @canonical_base_url
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]

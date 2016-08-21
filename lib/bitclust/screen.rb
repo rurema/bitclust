@@ -166,6 +166,10 @@ module BitClust
       raise unless %r!\A[-\w/]+\z! =~ name
       "#{@cgi_url}/#{name}"
     end
+
+    def canonical_url(current_url)
+      current_url
+    end
   end
 
 
@@ -327,6 +331,14 @@ module BitClust
       @urlmapper.favicon_url
     end
 
+    def current_url
+      raise NotImplementedError, "Must implement this method in subclass"
+    end
+
+    def canonical_url
+      @urlmapper.canonical_url(current_url)
+    end
+
     def opensearchdescription_url
       @urlmapper.opensearchdescription_url
     end
@@ -452,6 +464,10 @@ module BitClust
     def body
       run_template('library-index')
     end
+
+    def current_url
+      @urlmapper.library_index_url
+    end
   end
 
   class LibraryScreen < EntryBoundScreen
@@ -473,6 +489,10 @@ module BitClust
       draw_treed_entries(roots, tree, &block)
     end
 
+    def current_url
+      @urlmapper.library_url(@entry.name)
+    end
+
     private
 
     def draw_treed_entries(entries, tree, indent = 0, &block)
@@ -486,6 +506,10 @@ module BitClust
   class ClassIndexScreen < IndexScreen
     def body
       run_template('class-index')
+    end
+
+    def current_url
+      @urlmapper.class_url(@entries.first.name)
     end
   end
 
@@ -529,6 +553,10 @@ module BitClust
     def body
       run_template('class')
     end
+
+    def current_url
+      @urlmapper.class_url(@entry.name)
+    end
   end
 
   class MethodScreen < TemplateScreen
@@ -549,17 +577,31 @@ module BitClust
     def body
       run_template('method')
     end
+
+    def current_url
+      ent = @entries.first
+      spec = ent ? ent.spec_string : ""
+      @urlmapper.method_url(spec)
+    end
   end
 
   class FunctionScreen < EntryBoundScreen
     def body
       run_template('function')
     end
+
+    def current_url
+      @urlmapper.function_url(@entry.name)
+    end
   end
 
   class FunctionIndexScreen < IndexScreen
     def body
       run_template('function-index')
+    end
+
+    def current_url
+      @urlmapper.function_index_url
     end
   end
 
@@ -580,6 +622,10 @@ module BitClust
     def rdcompiler
       h = {:force => true, :catalog => message_catalog() }.merge(@conf)
       RDCompiler.new(@urlmapper, @hlevel, h)
+    end
+
+    def current_url
+      @urlmapper.document_url(@entry.name)
     end
   end
 end
