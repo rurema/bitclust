@@ -19,8 +19,8 @@ EOD
 
   s.files         = Dir["tools/*", "lib/bitclust.rb"]
   s.executables   = Dir["tools/*"].
-    map{|v| File.basename(v) }.
-    select{|f| !%w(ToDoHistory check-signature.rb).include? f}
+    map {|v| File.basename(v) }.
+    reject {|f| %w(ToDoHistory check-signature.rb).include?(f) }
   s.require_paths = ["lib"]
   s.bindir        = "tools"
 
