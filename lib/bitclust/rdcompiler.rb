@@ -170,7 +170,6 @@ module BitClust
     def item_list(level = 0, indent = true)
       open_tag = nil
       close_tag = nil
-      pattern = nil
       case @f.peek
       when /\A(\s+)\*\s/
         open_tag  =  "<ul>"
