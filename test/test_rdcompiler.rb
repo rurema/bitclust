@@ -530,6 +530,28 @@ HERE
     assert_compiled_source(expected, src)
   end
 
+  def test_olist_ulist
+    src = <<HERE
+  (1) aaa
+  (1) bbb
+  (1) ccc
+    * xxx
+    * yyy
+HERE
+    expected = <<HERE
+<ol>
+<li>aaa</li>
+<li>bbb</li>
+<li>ccc<ul>
+<li>xxx</li>
+<li>yyy</li>
+</ul>
+</li>
+</ol>
+HERE
+    assert_compiled_source(expected, src)
+  end
+
   def test_invalid_case
         src = <<HERE
 : t1
