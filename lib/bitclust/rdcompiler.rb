@@ -427,6 +427,8 @@ module BitClust
         rfc_link(arg)
       when 'ruby-list', 'ruby-dev', 'ruby-ext', 'ruby-talk', 'ruby-core'
         blade_link(type, arg)
+      when 'feature', 'bug'
+        bugs_link(type, arg)
       else
         "[[#{escape_html(link)}]]"
       end
@@ -514,6 +516,13 @@ module BitClust
       m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(spec)
       url = man_url(m[2], escape_html(m[1])) or return escape_html(spec)
       %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
+    end
+
+    BUGS_URL = "https://bugs.ruby-lang.org/issues/%s"
+
+    def bugs_link(type, id)
+      url = sprintf(BUGS_URL, id)
+      %Q(<a class="external" href="#{escape_html(url)}">[#{type}##{id}]</a>)
     end
 
     def rdoc_url(method_id, version)
