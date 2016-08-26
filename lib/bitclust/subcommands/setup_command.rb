@@ -19,7 +19,7 @@ module BitClust
         @prepare = nil
         @cleanup = nil
         @purge = nil
-        @versions = ["2.0.0", "2.1.0", "2.2.0"]
+        @versions = ["2.1.0", "2.2.0", "2.3.0"]
         @update = true
         @parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
         @parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
