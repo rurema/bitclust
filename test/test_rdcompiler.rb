@@ -599,7 +599,7 @@ HERE
        "ref class"       => ['[[ref:c:Hoge#frag]]',       '<a href="dummy/class/Hoge#frag">.*</a>'],
        "ref special var" => ['[[ref:m:$~#frag]]',         '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
        "ref library"     => ['[[ref:lib:jcode#frag]]',    '<a href="dummy/library/jcode#frag">.*</a>'],
-       "ref class"       => ['[[ref:c:Hoge]]',            'compileerror'],
+       "ref class error" => ['[[ref:c:Hoge]]',            'compileerror'],
        "ref ref"         => ['[[ref:ref:hoge/bar#frag]]', 'compileerror'],)
   def test_bracket_link_doc(data)
     target, expected = data
