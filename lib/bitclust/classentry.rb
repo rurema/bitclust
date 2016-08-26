@@ -214,13 +214,13 @@ module BitClust
     end
 
     def included_modules
-      list = ancestors().select {|c| c.module? }
+      list = ancestors().select(&:module?)
       list.delete self
       list
     end
 
     def extended_modules
-      ancestors().select {|c| c.class? }.map {|c| c.extended }.flatten
+      ancestors().select(&:class?).map(&:extended).flatten
     end
 
     def entries(level = 0)
@@ -254,7 +254,7 @@ module BitClust
       mf = []
       c = []; v = []
       added = []
-      entries(level).sort_by{|e| e.name}.each do |m|
+      entries(level).sort_by(&:name).each do |m|
         case m.kind
         when :defined, :redefined
           case m.type
@@ -280,42 +280,42 @@ module BitClust
 
     def singleton_methods(level = 0)
       # FIXME: inheritance
-      entries(level).select {|m| m.singleton_method? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:singleton_method?).sort_by(&:sort_key)
     end
 
     def public_singleton_methods(level = 0)
       # FIXME: inheritance
-      entries(level).select {|m| m.public_singleton_method? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:public_singleton_method?).sort_by(&:sort_key)
     end
 
     def instance_methods(level = 0)
       # FIXME: inheritance
-      entries(level).select {|m| m.instance_method? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:instance_method?).sort_by(&:sort_key)
     end
 
     def private_singleton_methods(level = 0)
       # FIXME: inheritance
-      entries(level).select {|m| m.private_singleton_method? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:private_singleton_method?).sort_by(&:sort_key)
     end
 
     def public_instance_methods(level = 0)
       # FIXME: inheritance
-      entries(level).select {|m| m.public_instance_method? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:public_instance_method?).sort_by(&:sort_key)
     end
 
     def private_instance_methods(level = 0)
       # FIXME: inheritance
-      entries(level).select {|m| m.private_instance_method? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:private_instance_method?).sort_by(&:sort_key)
     end
 
     alias private_methods   private_instance_methods
 
     def constants(level = 0)
-      entries(level).select {|m| m.constant? }.sort_by {|entry| entry.sort_key }
+      entries(level).select(&:constant?).sort_by(&:sort_key)
     end
 
     def special_variables
-      entries().select {|m| m.special_variable? }.sort_by {|entry| entry.sort_key }
+      entries().select(&:special_variable?).sort_by(&:sort_key)
     end
 
     def singleton_method?(name, inherit = true)
