@@ -20,6 +20,7 @@ module BitClust
         @cleanup = nil
         @purge = nil
         @versions = ["2.0.0", "2.1.0", "2.2.0"]
+        @update = true
         @parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
         @parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
           @prepare = true
@@ -32,6 +33,9 @@ module BitClust
         }
         @parser.on('--versions=V1,V2,...', "Specify versions. [#{@versions.join(',')}]") {|versions|
           @versions = versions.split(",")
+        }
+        @parser.on('--no-update', 'Do not update document repository') {
+          @update = false
         }
       end
 
@@ -112,6 +116,7 @@ module BitClust
 
         succeeded = false
         if (rubydoc_dir + ".git").exist?
+          return unless @update
           Dir.chdir(rubydoc_dir) do
             succeeded = system("git", "pull", "--rebase")
           end
