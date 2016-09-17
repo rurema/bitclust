@@ -37,7 +37,7 @@ EOS
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML>
 <HEAD>
-<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Type" content="text/html; charset=Windows-31J">
 </HEAD>
 <BODY>
 <UL><% [:library].each do |k| %>
@@ -50,7 +50,7 @@ EOS
       HHK_SKEL = <<EOS
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML>
-<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Type" content="text/html; charset=Windows-31J">
 <HEAD>
 </HEAD>
 <BODY>
@@ -240,7 +240,7 @@ EOS
       # change to MS unicode as much as possible
       def ms_unicode(str)
         str.tr("\u00a5\u00b7\u0308\u2014\u2212\u301c", 
-               "\\\uff65\u2025\u2015\uff0d\uff5e")
+               "\\\\\uff65\u2025\u2015\uff0d\uff5e")
       end
 
       def create_html_file(entry, manager, outputdir, db)
@@ -259,7 +259,7 @@ EOS
 
         html = ms_unicode(html)
         begin
-          new_html = html.gsub(/charset=utf-8/i, 'charset=Shift_JIS').encode('windows-31j')
+          new_html = html.gsub(/charset=utf-8/i, 'charset=Windows-31J').encode('windows-31j')
           mode = 'w:windows-31j'
         rescue
           new_html = html # write file as it is, utf-8
@@ -274,7 +274,7 @@ EOS
       def create_file(path, skel)
         $stderr.print("creating #{path} ...")
         str = ERB.new(skel).result(binding)
-        str = ms_unicode(str).gsub(/charset=utf-8/i, 'charset=Shift_JIS').encode('windows-31j')
+        str = ms_unicode(str).gsub(/charset=utf-8/i, 'charset=Windows-31J').encode('windows-31j')
         path.open('w:windows-31j') do |f|
           f.write(str)
         end
