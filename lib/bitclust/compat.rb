@@ -14,7 +14,7 @@ unless Object.method_defined?(:funcall)
   end
 end
 
-unless Fixnum.method_defined?(:ord)
+if 0.class != Integer && !Fixnum.method_defined?(:ord)
   class Fixnum
     def ord
       self
