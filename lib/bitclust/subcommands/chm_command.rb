@@ -37,6 +37,7 @@ EOS
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML>
 <HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=Windows-31J">
 </HEAD>
 <BODY>
 <UL><% [:library].each do |k| %>
@@ -49,6 +50,7 @@ EOS
       HHK_SKEL = <<EOS
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=Windows-31J">
 <HEAD>
 </HEAD>
 <BODY>
@@ -210,9 +212,9 @@ EOS
           pb.finish
         end
         @html_files.sort!
-        create_file(@outputdir + 'refm.hhp', HHP_SKEL, true)
-        create_file(@outputdir + 'refm.hhc', HHC_SKEL, true)
-        create_file(@outputdir + 'refm.hhk', HHK_SKEL, true)
+        create_file(@outputdir + 'refm.hhp', HHP_SKEL)
+        create_file(@outputdir + 'refm.hhc', HHC_SKEL)
+        create_file(@outputdir + 'refm.hhk', HHK_SKEL)
         create_file(@outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort, {:database => db}).body)
         create_file(@outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort, {:database => db}).body)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
@@ -225,6 +227,7 @@ EOS
         @manager_config = {
           :baseurl     => 'http://example.com/',
           :suffix      => '.html',
+          :catalogdir  => srcdir_root + 'data'+ 'bitclust' + 'catalog',
           :templatedir => srcdir_root + 'data'+ 'bitclust' + 'template',
           :themedir    => srcdir_root + 'theme' + 'default',
           :css_url     => 'style.css',
@@ -233,6 +236,13 @@ EOS
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
       end
+
+      FIX_UNDEF = { "\u00a5" => '\\', # encode MS unicode to Windows-31J as much as possible
+                    "\u00b7" => "\uff65",
+                    "\u0308" => "\u2025",
+                    "\u2014" => "\u2015",
+                    "\u2212" => "\uff0d",
+                    "\u301c" => "\uff5e" } 
 
       def create_html_file(entry, manager, outputdir, db)
         html = manager.entry_screen(entry, {:database => db}).body
@@ -247,18 +257,27 @@ EOS
                  raise
                end
         FileUtils.mkdir_p(path.dirname) unless path.dirname.directory?
-        path.open('w') do |f|
-          f.write(html)
+
+        begin
+          new_html = html.gsub(/charset=utf-8/i, 'charset=Windows-31J').
+                     encode('windows-31j', { :fallback => FIX_UNDEF })
+          mode = 'w:windows-31j'
+        rescue
+          new_html = html # write file as it is, utf-8
+          mode = 'w:utf-8'
+        end
+        path.open(mode) do |f|
+          f.write(new_html)
         end
         path.relative_path_from(outputdir).to_s
       end
 
-      def create_file(path, skel, sjis_flag = false)
+      def create_file(path, skel)
         $stderr.print("creating #{path} ...")
-        str = ERB.new(skel).result(binding)
-        # TODO Use String#encode when we drop 1.8 support
-        str = str.tosjis if sjis_flag
-        path.open('w') do |f|
+        str = ERB.new(skel).result(binding).
+              gsub(/charset=utf-8/i, 'charset=Windows-31J').
+              encode('windows-31j', { :fallback => FIX_UNDEF } )
+        path.open('w:windows-31j') do |f|
           f.write(str)
         end
         $stderr.puts(" done.")
