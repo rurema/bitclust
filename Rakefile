@@ -15,6 +15,6 @@ task :test do
   sh 'ruby test/run_test.rb'
 end
 
-Bundler::GemHelper.install_tasks(:name => "bitclust")
+Bundler::GemHelper.install_tasks(:name => "bitclust-core")
 Bundler::GemHelper.install_tasks(:name => "bitclust-dev")
 Bundler::GemHelper.install_tasks(:name => "refe2")
