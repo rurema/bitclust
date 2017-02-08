@@ -14,14 +14,6 @@ unless Object.method_defined?(:funcall)
   end
 end
 
-if 0.class != Integer && !Fixnum.method_defined?(:ord)
-  class Fixnum
-    def ord
-      self
-    end
-  end
-end
-
 unless String.method_defined?(:lines)
   class String
     alias lines to_a
