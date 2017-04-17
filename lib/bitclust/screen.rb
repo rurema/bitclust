@@ -163,7 +163,7 @@ module BitClust
     end
 
     def document_url(name)
-      raise unless %r!\A[-\w/]+\z! =~ name
+      raise unless %r!\A[-\w/.]+\z! =~ name
       "#{@cgi_url}/#{name}"
     end
 
