@@ -23,6 +23,7 @@ EOD
 
   s.add_development_dependency "test-unit", ">= 2.3.0"
   s.add_development_dependency "test-unit-notify"
+  s.add_development_dependency "terminal-notifier"
   s.add_development_dependency "test-unit-rr"
   s.add_runtime_dependency "rack"
   s.add_runtime_dependency "progressbar", "= 0.21.0"
