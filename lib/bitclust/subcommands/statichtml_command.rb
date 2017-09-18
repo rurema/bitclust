@@ -98,6 +98,7 @@ module BitClust
         @templatedir = srcdir_root + "data/bitclust/template.offline"
         @themedir = srcdir_root + "theme/default"
         @suffix = ".html"
+        @gtm_tracking_id = nil
         @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
         @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
@@ -124,6 +125,9 @@ module BitClust
         end
         @parser.on('--canonical-base-url=URL', 'Canonical base URL') do |url|
           @canonical_base_url = url
+        end
+        @parser.on('--tracking-id=ID', 'Google Tag Manager Tracking ID') do |id|
+          @gtm_tracking_id = id
         end
         @parser.on('--[no-]quiet', 'Be quiet') do |quiet|
           @verbose = !quiet
@@ -196,7 +200,8 @@ module BitClust
           :cgi_url     => '',
           :tochm_mode  => true,
           :fs_casesensitive => @fs_casesensitive,
-          :canonical_base_url => @canonical_base_url
+          :canonical_base_url => @canonical_base_url,
+          :gtm_tracking_id => @gtm_tracking_id
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]

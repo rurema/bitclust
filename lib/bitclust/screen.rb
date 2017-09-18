@@ -283,6 +283,22 @@ module BitClust
       @target_version || 'unknown'
     end
 
+    def google_tag_manager
+      tracking_id = @conf[:gtm_tracking_id]
+      return "" unless tracking_id
+      <<-HTML
+<!-- Global Site Tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=#{tracking_id}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+
+  gtag('config', '#{tracking_id}');
+</script>
+      HTML
+    end
+
     private
 
     def default_encoding
