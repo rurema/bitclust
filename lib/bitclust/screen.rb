@@ -286,7 +286,7 @@ module BitClust
     def google_tag_manager
       tracking_id = @conf[:gtm_tracking_id]
       return "" unless tracking_id
-      <<-HTML
+      <<-HTML.chomp
 <!-- Global Site Tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=#{tracking_id}"></script>
 <script>
