@@ -528,6 +528,7 @@ module BitClust
     def rdoc_url(method_id, version)
       cname, tmark, mname, libname = methodid2specparts(method_id)
       tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
+      cname = cname.split(".").first
       cname = cname.gsub('::', '/')
       id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
 
