@@ -736,6 +736,11 @@ HERE
           :method_id => "Net=HTTP/i.get.net.http",
           :version   => "2.0.0",
           :expected  => "http://docs.ruby-lang.org/en/2.0.0/Net/HTTP.html#method-i-get"
+       },
+       "ARGF.class#binmode" => {
+          :method_id => "ARGF.class/i.binmode.argf._builtin",
+          :version   => "2.0.0",
+          :expected  => "http://docs.ruby-lang.org/en/2.0.0/ARGF.html#method-i-binmode"
        })
   def test_rdoc_url(data)
     assert_equal(data[:expected], @c.rdoc_url(data[:method_id], data[:version]))
