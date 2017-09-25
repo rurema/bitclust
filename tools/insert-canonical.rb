@@ -4,7 +4,7 @@ require "fileutils"
 require "tempfile"
 require "strscan"
 
-canonical_base_url = "http://docs.ruby-lang.org/ja/latest/"
+canonical_base_url = "https://docs.ruby-lang.org/ja/latest/"
 base_dir = nil
 
 parser = OptionParser.new
