@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version     = BitClust::VERSION
   s.authors     = ["https://github.com/rurema"]
   s.email       = [""]
-  s.homepage    = "http://docs.ruby-lang.org/ja/"
+  s.homepage    = "https://docs.ruby-lang.org/ja/"
   s.summary     = %Q!BitClust is a rurema document processor.!
   s.description =<<EOD
 Rurema is a Japanese ruby documentation project, and
