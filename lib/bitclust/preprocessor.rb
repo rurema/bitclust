@@ -286,7 +286,7 @@ module BitClust
 
       def processing?
         toplevel? ||
-          @current == true ||
+          (@current == true && @previous != false) ||
           (@current == :samplecode && @previous == true) ||
           (@current == :samplecode && @previous == :toplevel)
       end

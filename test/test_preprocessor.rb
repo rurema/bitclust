@@ -81,6 +81,34 @@ HERE
     assert_equal(expected, ret.join)
   end
 
+  def test_complex_condition
+    params = { 'version' => '2.4.0' }
+    src = <<HERE
+\#@until 1.9.2
+before 1.9.2
+\#@until 1.8.6
+before 1.8.6
+\#@end
+\#@until 1.9.1
+before 1.9.1
+\#@end
+\#@until 1.9.1
+before 1.9.1
+\#@end
+\#@since 1.9.1
+after 1.9.1
+\#@end
+\#@else
+Display here!
+\#@end
+HERE
+    expected = <<HERE
+Display here!
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+
   def test_samplecode
     params = { 'version' => '1.9.2' }
     src = <<HERE
