@@ -232,7 +232,7 @@ module BitClust
           end
           line '</p>'
         when %r!\A//emlist\{!
-            emlist
+          emlist
         else
           raise 'must not happen'
         end
@@ -250,7 +250,7 @@ module BitClust
             line compile_text(line.strip)
           end
         when %r!\A//emlist\{!
-            emlist
+          emlist
         end
       end
       line '</dd>'
