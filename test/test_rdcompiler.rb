@@ -352,7 +352,7 @@ dsc3
 //}
 HERE
     expected = <<'HERE'
-<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="http://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
 <dl>
 <dt class='method-param'>[PARAM] arg:</dt>
