@@ -79,9 +79,9 @@ module BitClust
         when /\A\#@\#/   # preprocessor comment
           ;
         when /\A\#@todo/i
-          @buf.push line.gsub(/\A#/, '') if current_cond
+          @buf.push line.gsub(/\A\#/, '') if current_cond.processing?
         when /\A\#@include\s*\((.*?)\)/
-          next unless current_cond
+          next unless current_cond.processing?
           begin
             file = $1.strip
             basedir = File.dirname(line.location.file)
@@ -93,18 +93,24 @@ module BitClust
           cond_stmt_begin line, build_cond_by_value(line, 'version >=')
         when /\A\#@until\b/
           cond_stmt_begin line, build_cond_by_value(line, 'version <')
+        when /\A\#@samplecode\b/
+          samplecode_begin(line, samplecode_description_by_value(line))
         when /\A\#@if\b/
           cond_stmt_begin line, line.sub(/\A\#@if/, '').strip
         when /\A\#@else\s*\z/
-          parse_error "no matching #@if", line  if cond_toplevel?
+          parse_error "no matching \#@if", line  if cond_toplevel?
           cond_invert
         when /\A\#@end\s*\z/
-          parse_error "no matching #@if", line  if cond_toplevel?
-          cond_pop
+          if samplecode_processing?
+            samplecode_end
+          else
+            parse_error "no matching \#@if", line  if cond_toplevel?
+            cond_pop
+          end
         when /\A\#@/
           parse_error "unknown preprocessor directive", line
         else
-          if current_cond
+          if current_cond.processing?
             @buf.push line
             break
           end
@@ -139,28 +145,30 @@ module BitClust
     end
 
     def current_cond
-      @cond_stack.last
+      @state_stack.last
     end
 
     def cond_init
-      @cond_stack = [true]
+      @state_stack = [State.new(nil, :toplevel)]
     end
 
     def cond_toplevel?
-      @cond_stack.size == 1
+      @state_stack.size == 1
     end
 
     def cond_push(bool)
-      @cond_stack.push(@cond_stack.last && bool)
+      last = @state_stack.last
+      @state_stack.push(State.new(last.current, bool))
     end
 
     def cond_invert
-      b = @cond_stack.pop
-      @cond_stack.push(!b && @cond_stack.last)
+      b = @state_stack.pop.processing?
+      last = @state_stack.last
+      @state_stack.push(State.new(last.current, !b))
     end
 
     def cond_pop
-      @cond_stack.pop
+      @state_stack.pop
     end
 
     def eval_cond(str)
@@ -231,12 +239,64 @@ module BitClust
       end
     end
 
+    def samplecode_begin(line, description)
+      samplecode_push(description)
+      return unless current_cond.processing?
+      @buf.push("//emlist[#{description.strip}][ruby]{\n")
+    end
+
+    def samplecode_end
+      samplecode_pop
+      return unless current_cond.processing?
+      @buf.push("//}\n")
+    end
+
+    def samplecode_push(description)
+      last = @state_stack.last
+      @state_stack.push(State.new(last.current, :samplecode))
+    end
+
+    def samplecode_pop
+      @state_stack.pop
+    end
+
+    def samplecode_processing?
+      @state_stack.last.samplecode?
+    end
+
+    def samplecode_description_by_value(line)
+      line.sub(/\A\#@samplecode/, "")
+    end
+
     def scan_error(msg)
       raise ScanError, msg
     end
 
-  end
+    class State
+      attr_reader :current
 
+      def initialize(previous, current)
+        @previous = previous
+        @current = current
+      end
+
+      def toplevel?
+        @current == :toplevel
+      end
+
+      def processing?
+        toplevel? ||
+          @current == true ||
+          (@current == :samplecode && @previous == true) ||
+          (@current == :samplecode && @previous == :toplevel)
+      end
+
+      def samplecode?
+        @current == :samplecode ||
+          (@current == true && @previous == :samplecode)
+      end
+    end
+  end
 
   # Used by tools/stattodo.rb
   class LineCollector < LineFilter

@@ -80,5 +80,127 @@ HERE
     ret = Preprocessor.wrap(StringIO.new(src), params).to_a
     assert_equal(expected, ret.join)
   end
-end
 
+  def test_samplecode
+    params = { 'version' => '1.9.2' }
+    src = <<HERE
+--- puts(str) -> String
+
+xxx
+
+\#@samplecode description
+puts("xxx")
+puts("yyy")
+\#@end
+HERE
+
+    expected = <<HERE
+--- puts(str) -> String
+
+xxx
+
+//emlist[description][ruby]{
+puts("xxx")
+puts("yyy")
+//}
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+
+  def test_samplecode_with_condition1
+    params = { 'version' => '1.9.2' }
+    src = <<HERE
+--- puts(str) -> String
+
+xxx
+
+\#@since 1.9.2
+\#@samplecode description1
+puts("xxx1")
+puts("yyy1")
+\#@end
+\#@else
+\#@samplecode description2
+puts("xxx2")
+puts("yyy2")
+\#@end
+\#@end
+HERE
+
+    expected = <<HERE
+--- puts(str) -> String
+
+xxx
+
+//emlist[description1][ruby]{
+puts("xxx1")
+puts("yyy1")
+//}
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+
+  def test_samplecode_with_condition2
+    params = { 'version' => '1.9.2' }
+    src = <<HERE
+--- puts(str) -> String
+
+xxx
+
+\#@samplecode description
+\#@since 1.9.2
+puts("xxx")
+\#@else
+puts("yyy")
+\#@end
+\#@end
+HERE
+
+    expected = <<HERE
+--- puts(str) -> String
+
+xxx
+
+//emlist[description][ruby]{
+puts("xxx")
+//}
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+
+  def test_samplecode_with_condition3
+    params = { 'version' => '1.9.2' }
+    src = <<HERE
+--- puts(str) -> String
+
+xxx
+
+\#@since 1.9.1
+\#@samplecode description
+\#@since 1.9.2
+puts("xxx")
+\#@else
+puts("yyy")
+\#@end
+\#@end
+\#@else
+zzz
+\#@end
+HERE
+
+    expected = <<HERE
+--- puts(str) -> String
+
+xxx
+
+//emlist[description][ruby]{
+puts("xxx")
+//}
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+end
