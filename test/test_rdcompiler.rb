@@ -341,6 +341,35 @@ HERE
     assert_compiled_method_source(expected, src)
   end
 
+  def test_method_with_param_and_emlist_with_caption_and_lang
+    src = <<'HERE'
+--- method
+
+@param arg dsc1
+//emlist[This is caption][ruby]{
+dsc2
+dsc3
+//}
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<dl>
+<dt class='method-param'>[PARAM] arg:</dt>
+<dd>
+dsc1
+<p>This is caption</p>
+<pre>
+dsc2
+dsc3
+</pre>
+</dd>
+</dl>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src)
+  end
+
   def test_method2
     @c = BitClust::RDCompiler.new(@u, 1, {:database => @db, :force => true})
     src = <<'HERE'
