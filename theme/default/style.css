@@ -176,6 +176,7 @@ td {
 
 table.entries {
     width: 100%;
+    height: 100%;
 }
 
 table.entries tr {
@@ -196,6 +197,7 @@ td.signature {
 td.signature a {
     display: block;
     padding: 0.3em;
+    height: 100%;
 }
 
 td.description {
