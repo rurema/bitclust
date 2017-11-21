@@ -91,8 +91,15 @@ h4 {
     margin-bottom: 0.5em;
 }
 
+h5 {
+    font-size: 110%;
+    text-align: left;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
 /* never use */
-h5, h6 {
+h6 {
     background-color: red;
 }
 
