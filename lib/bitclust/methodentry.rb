@@ -202,6 +202,8 @@ module BitClust
       kind() == :redefined
     end
 
+    def description
+      source.split(/\n\n+/, 3)[1]
+    end
   end
-
 end

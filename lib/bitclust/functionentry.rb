@@ -76,6 +76,8 @@ module BitClust
       "#{private? ? 'static ' : ''}#{base}"
     end
 
+    def description
+      source.split(/\n\n+/, 2)[0].strip
+    end
   end
-
 end

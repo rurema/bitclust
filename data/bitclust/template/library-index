@@ -1,4 +1,7 @@
-<% @title = _('Library Index') %>
+<%
+  @title = _('Library Index')
+  @description = _('Library Index')
+%>
 <p>
 <%= manual_home_link() %>
 &gt; <%= _("All Libraries") %>

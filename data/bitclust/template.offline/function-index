@@ -1,4 +1,7 @@
-<% @title = _('Function Index') %>
+<%
+  @title = _('Function Index')
+  @description = _('Function Index')
+%>
 <p>
 <%= manual_home_link() %>
 &gt; <%= _('All Functions') %>

@@ -11,6 +11,7 @@
   <link rel="canonical" href="<%= canonical_url() %>">
   <% end %>
   <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
+  <meta name="description" content="<%=h @description %>">
 </head>
 <body>
 <%= yield %>
