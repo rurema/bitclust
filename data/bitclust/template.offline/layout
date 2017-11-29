@@ -2,6 +2,7 @@
 <html lang="ja-JP">
 <head>
   <%= google_tag_manager %>
+  <%= meta_robots %>
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
