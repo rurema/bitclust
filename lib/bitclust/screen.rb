@@ -285,7 +285,7 @@ module BitClust
 
     def google_tag_manager
       tracking_id = @conf[:gtm_tracking_id]
-      return "" unless tracking_id
+      return "\b" unless tracking_id
       <<-HTML.chomp
 <!-- Global Site Tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=#{tracking_id}"></script>
@@ -297,6 +297,12 @@ module BitClust
   gtag('config', '#{tracking_id}');
 </script>
       HTML
+    end
+
+    def meta_robots
+      content = @conf[:meta_robots_content]
+      return "\b" if content.empty?
+      %Q(<meta name="robots" content="#{content.join(',')}">)
     end
 
     private
