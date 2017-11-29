@@ -1,4 +1,7 @@
-<% @title = @entry.title %>
+<%
+   @title = @entry.title
+   @description = @entry.description
+%>
 <p>
 <% if @entry.name == 'index' %>
 <%= _('Ruby %s Reference Manual', ruby_version()) %>

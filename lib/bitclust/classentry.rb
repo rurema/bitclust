@@ -392,6 +392,10 @@ module BitClust
           .reject {|spec| spec.klass == cname }.uniq
     end
 
+    def description
+      source.split(/\n\n+/, 2)[0].strip
+    end
+
     def clear_cache
       @_smap = @_imap = @_cmap = nil
     end

@@ -79,6 +79,9 @@ module BitClust
     def libraries
       @db.libraries
     end
-  end
 
+    def description
+      source.split(/\n\n/, 2)[0].strip
+    end
+  end
 end

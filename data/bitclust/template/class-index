@@ -1,4 +1,7 @@
-<% @title = _('Class Index') %>
+<%
+    @title = _('Class Index')
+    @description = _('Class Index')
+%>
 <p>
 <%= manual_home_link() %>
 &gt; <%= _('All Classes') %>

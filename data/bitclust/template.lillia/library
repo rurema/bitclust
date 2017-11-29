@@ -1,4 +1,7 @@
-<% @title = "library #{@entry.name}" %>
+<%
+  @title = "library #{@entry.name}"
+  @description = @entry.description
+%>
 <div id="main">
 
 <p>

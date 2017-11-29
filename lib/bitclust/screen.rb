@@ -305,6 +305,10 @@ module BitClust
       %Q(<meta name="robots" content="#{content.join(',')}">)
     end
 
+    def meta_description
+      %Q(<meta name="description" content="">)
+    end
+
     private
 
     def default_encoding

@@ -1,6 +1,7 @@
 <%
     entry = @entry
     @title = "#{entry.type_label} #{entry.label}"
+    @description = @entry.description
 %>
 <p>
 <%= manual_home_link() %>

@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
   <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
   <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
+  <meta name="description" content="<%=h @description %>">
   <link rel="search" type="application/opensearchdescription+xml" title="<%= _('Ruby %s Reference Manual', ruby_version()) %>" href="<%=h opensearchdescription_url() %>">
 </head>
 <body>

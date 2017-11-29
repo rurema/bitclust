@@ -1,4 +1,7 @@
-<% @title = "#{@entry.type_label} #{@entry.label}" %>
+<%
+   @title = "#{@entry.type_label} #{@entry.label}"
+   @description = @entry.description
+%>
 <p>
 <%= manual_home_link() %>
 &gt; <a href="<%= function_index_url() %>"><%= _('All Functions') %></a>

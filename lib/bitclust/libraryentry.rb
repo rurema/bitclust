@@ -77,6 +77,10 @@ module BitClust
       "#<library #{@id}>"
     end
 
+    def description
+      source.split(/\n\n+/, 2)[0]
+    end
+
     def check_link(path = [])
       return if @link_checked
       if path.include?(name())
@@ -213,7 +217,5 @@ module BitClust
         @db.dirty_library self
       end
     end
-
-  end
-
+ end
 end
