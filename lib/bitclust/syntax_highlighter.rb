@@ -135,6 +135,9 @@ module BitClust
       when @stack.last == :heredoc
         style = COLORS[:heredoc_beg]
         @buffer << "<span class=\"#{style}\">#{token}"
+      when @stack.last == :method_call
+        @buffer << "<span class=\"nf\">#{token}</span>"
+        @stack.pop
       when BUILTINS_G.include?(token)
         @buffer << "<span class=\"nb\">#{token}</span>"
       else
@@ -157,6 +160,11 @@ module BitClust
       else
         on_default(:on_kw, token, *rest)
       end
+    end
+
+    def on_period(token, *rest)
+      @stack.push(:method_call)
+      on_default(:on_period, token, *rest)
     end
 
     def on_regexp_beg(token, *rest)
