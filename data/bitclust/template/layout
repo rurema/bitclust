@@ -6,6 +6,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
+  <link rel="stylesheet" type="text/css" href="<%=h custom_css_url("syntax-highlight.css") %>">
   <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
   <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
   <meta name="description" content="<%=h @description %>">
