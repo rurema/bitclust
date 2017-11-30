@@ -172,6 +172,8 @@ module BitClust
       when token == "def"
         @stack.push(:def)
         on_default(:on_kw, token, *rest)
+      when token == "self"
+        @buffer << "<span class=\"nc\">#{token}</span>"
       else
         on_default(:on_kw, token, *rest)
       end
