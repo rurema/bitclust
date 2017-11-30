@@ -47,7 +47,7 @@ module BitClust
       symbeg: "ss",                    # :
       tlambda: "o",                    # ->
       tlambeg: "p",                    # (->) {
-      tstring_beg: "s2",               # " (string")
+      tstring_beg: nil,                # " (string")
       tstring_content: nil,            # (") string (")
       tstring_end: nil,                # ("string) "
       words_beg: "sx",                 # %W(
@@ -175,21 +175,36 @@ module BitClust
     end
 
     def on_tstring_beg(token, *rest)
-      style = COLORS[:tstring_beg]
-      @buffer << "<span class=\"#{style}\">#{token}"
+      if token == "'"
+        @buffer << "<span class=\"s1\">#{token}"
+        @stack << :string1
+      else
+        @buffer << "<span class=\"s2\">#{token}</span>"
+        @stack << :string2
+      end
     end
 
     def on_tstring_content(token, *rest)
       p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
-      if @stack.last == :heredoc
+      case
+      when @stack.last == :heredoc
         @buffer << "<span class=\"sh\">#{escape_html(token)}</span>"
+      when @stack.last == :string1
+        @buffer << escape_html(token)
+      when @stack.last == :string2
+        @buffer << "<span class=\"s2\">#{escape_html(token)}</span>"
       else
         on_default(:on_tstring_content, token, *rest)
       end
     end
 
     def on_tstring_end(token, *rest)
-      @buffer << "#{token}</span>"
+      if token == "'"
+        @buffer << "</span>"
+      else
+        @buffer << "<span class=\"s2\">#{token}</span>"
+      end
+      @stack.pop
     end
 
     def on_heredoc_beg(token, *rest)
