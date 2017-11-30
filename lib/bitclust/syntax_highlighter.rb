@@ -23,7 +23,7 @@ module BitClust
       float: "mf",                     # 1.23 (float)
       gvar: "vg",                      # $var
       heredoc_beg: "no",               # <<EOS
-      heredoc_end: "no",                # EOS
+      heredoc_end: "no",               # EOS
       ident: nil,                      # identifier
       ignored_nl: nil,                 # ignored \n
       int: "mi",                       # 1 (integer)
