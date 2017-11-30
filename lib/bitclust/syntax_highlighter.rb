@@ -12,7 +12,7 @@ module BitClust
       backtick: "sb",                  # `
       comma: nil,                      # ,
       comment: "c1",                   # #...
-      const: "nc",                     # Const
+      const: "no",                     # Const
       cvar: "vc",                      # @@var
       embdoc: nil,                     # (=begin) document (=end)
       embdoc_beg: "cm",                # =begin
@@ -101,6 +101,7 @@ module BitClust
       super
       @buffer = ""
       @stack = []
+      @name_buffer = []
     end
 
     def on_default(event, token, *rest)
@@ -145,14 +146,32 @@ module BitClust
       end
     end
 
+    def on_const(token, *rest)
+      case
+      when @stack.last == :class
+        # @buffer << "<span class=\"nc\">#{token}</span>"
+        # @stack.pop
+        @name_buffer << token
+      when @stack.last == :module
+        # @buffer << "<span class=\"nn\">#{token}</span>"
+        # @stack.pop
+        @name_buffer << token
+      else
+        on_default(:on_const, token, *rest)
+      end
+    end
+
     def on_kw(token, *rest)
       p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
         @buffer << "#{token}</span>"
         @stack.pop
+      when token == "module"
+        @stack.push(:module)
+        on_default(:on_kw, token, *rest)
       when token == "class"
-        # @stack.push(:class)
+        @stack.push(:class)
         on_default(:on_kw, token, *rest)
       when token == "def"
         @stack.push(:def)
@@ -165,6 +184,61 @@ module BitClust
     def on_period(token, *rest)
       @stack.push(:method_call)
       on_default(:on_period, token, *rest)
+    end
+
+    def on_op(token, *rest)
+      case
+      when token == "::" && [:class, :module].include?(@stack.last)
+        @name_buffer << token
+      else
+        on_default(:on_op, token, *rest)
+      end
+    end
+
+    def on_sp(token, *rest)
+      case
+      when @name_buffer.empty?
+        on_default(:on_sp, token, *rest)
+        return
+      when @stack.last == :module
+        name = @name_buffer.join
+        @buffer << "<span class=\"nn\">#{name}</span>"
+        @stack.pop
+        @name_buffer.clear
+      when @stack.last == :class
+        namespace = @name_buffer.values_at(0..-3).join
+        operator = @name_buffer[-2]
+        name = @name_buffer.last
+        @buffer << "<span class=\"nn\">#{namespace}</span>"
+        @buffer << "<span class=\"o\">#{operator}</span>"
+        @buffer << "<span class=\"nc\">#{name}</span>"
+        @stack.pop
+        @name_buffer.clear
+      end
+      on_default(:on_sp, token, *rest)
+    end
+
+    def on_nl(token, *rest)
+      case
+      when @name_buffer.empty?
+        on_default(:on_nl, token, *rest)
+        return
+      when @stack.last == :module
+        name = @name_buffer.join
+        @buffer << "<span class=\"nn\">#{name}</span>"
+        @stack.pop
+        @name_buffer.clear
+      when @stack.last == :class
+        namespace = @name_buffer.values_at(0..-3).join
+        operator = @name_buffer[-2]
+        name = @name_buffer.last
+        @buffer << "<span class=\"nn\">#{namespace}</span>"
+        @buffer << "<span class=\"o\">#{operator}</span>"
+        @buffer << "<span class=\"nc\">#{name}</span>"
+        @stack.pop
+        @name_buffer.clear
+      end
+      on_default(:on_nl, token, *rest)
     end
 
     def on_regexp_beg(token, *rest)
