@@ -1,7 +1,10 @@
 require "ripper"
+require "bitclust/htmlutils"
 
 module BitClust
   class SyntaxHighlighter < Ripper::Filter
+    include BitClust::HTMLUtils
+
     COLORS = {
       CHAR: "sc",                      # ?a
       __end__: "k",                    # __END__
@@ -19,8 +22,8 @@ module BitClust
       embvar: "n",                     # ("...) # (var")
       float: "mf",                     # 1.23 (float)
       gvar: "vg",                      # $var
-      heredoc_beg: "sh",               # <<EOS
-      heredoc_end: nil,                # EOS
+      heredoc_beg: "no",               # <<EOS
+      heredoc_end: "no",                # EOS
       ident: nil,                      # identifier
       ignored_nl: nil,                 # ignored \n
       int: "mi",                       # 1 (integer)
@@ -102,7 +105,7 @@ module BitClust
 
     def on_default(event, token, *rest)
       event_name = event.to_s.sub(/\Aon_/, "")   # :on_event --> "event"
-      #p [__LINE__, event_name, token, rest]
+      p [__LINE__, event_name, token, rest] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[event_name.to_sym]
       @buffer << (style ? "<span class=\"#{style}\">#{token}</span>" : token)
       @previous_event = event_name.to_sym
@@ -110,27 +113,36 @@ module BitClust
     end
 
     def on_embdoc_beg(token, *rest)
+      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[:embdoc_beg]
       @buffer << "<span class=\"#{style}\">#{token}"
     end
 
     def on_embdoc_end(token, *rest)
+      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       @buffer << "#{token}</span>"
     end
 
     def on_ident(token, *rest)
-      #p [__LINE__, :ident, token, rest]
-      # p [@previous_event, @previous_token]
+      p [__LINE__, :ident, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      p [@previous_event, @previous_token, @stack] if ENV["RUBY_DEBUG"] == "1"
       case
       when @previous_event == :symbeg
         @buffer << "#{token}</span>"
         @previous_event = :ident
         @previous_token = token
-      when @stack.first == :def
+      when @stack.last == :def
         @stack.pop
         @buffer << "<span class=\"nf\">#{token}</span>"
         @previous_event = :ident
         @previous_token = token
+      when @stack.last == :embexpr
+        @buffer << "<span class=\"n\">#{token}</span>"
+        @previous_event = :ident
+        @previous_token = token
+      when @stack.last == :heredoc
+        style = COLORS[:heredoc_beg]
+        @buffer << "<span class=\"#{style}\">#{token}"
       when BUILTINS_G.include?(token)
         @buffer << "<span class=\"nb\">#{token}</span>"
       else
@@ -139,12 +151,13 @@ module BitClust
     end
 
     def on_kw(token, *rest)
+      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       case
       when @previous_event == :symbeg
         @buffer << "#{token}</span>"
         @previous_event = :kw
       when token == "class"
-        @stack.push(:class)
+        # @stack.push(:class)
         on_default(:on_kw, token, *rest)
       when token == "def"
         @stack.push(:def)
@@ -175,8 +188,38 @@ module BitClust
       @buffer << "<span class=\"#{style}\">#{token}"
     end
 
+    def on_tstring_content(token, *rest)
+      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      if @stack.last == :heredoc
+        @buffer << "<span class=\"sh\">#{escape_html(token)}</span>"
+      else
+        on_default(:on_tstring_content, token, *rest)
+      end
+    end
+
     def on_tstring_end(token, *rest)
       @buffer << "#{token}</span>"
+    end
+
+    def on_heredoc_beg(token, *rest)
+      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      @stack.push(:heredoc)
+      on_default(:on_heredoc_beg, token, *rest)
+    end
+
+    def on_heredoc_end(token, *rest)
+      @stack.pop
+      on_default(:on_heredoc_end, token, *rest)
+    end
+
+    def on_embexpr_beg(token, *rest)
+      @stack.push(:embexpr)
+      on_default(:on_embexpr_beg, token, *rest)
+    end
+
+    def on_embexpr_end(token, *rest)
+      @stack.pop
+      on_default(:on_embexpr_end, token, *rest)
     end
 
     def highlight
