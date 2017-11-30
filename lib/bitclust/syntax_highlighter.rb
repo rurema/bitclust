@@ -149,12 +149,8 @@ module BitClust
     def on_const(token, *rest)
       case
       when @stack.last == :class
-        # @buffer << "<span class=\"nc\">#{token}</span>"
-        # @stack.pop
         @name_buffer << token
       when @stack.last == :module
-        # @buffer << "<span class=\"nn\">#{token}</span>"
-        # @stack.pop
         @name_buffer << token
       else
         on_default(:on_const, token, *rest)
