@@ -12,6 +12,7 @@ require 'bitclust/lineinput'
 require 'bitclust/htmlutils'
 require 'bitclust/textutils'
 require 'bitclust/messagecatalog'
+require 'bitclust/syntax_highlighter'
 require 'stringio'
 
 module BitClust
@@ -267,9 +268,15 @@ module BitClust
       command = @f.gets
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)\]\[(?<lang>\w+?)\]! =~ command
         line "<p>#{escape_html(caption)}</p>"
-        line '<pre>'
+        line '<pre class="highlight">'
+        src = ""
         @f.until_terminator(%r<\A//\}>) do |line|
-          line escape_html(line.rstrip)
+          src << line
+        end
+        if lang == "ruby"
+          string BitClust::SyntaxHighlighter.new(src).highlight
+        else
+          string src
         end
         line '</pre>'
       else
