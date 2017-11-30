@@ -108,8 +108,6 @@ module BitClust
       p [__LINE__, event_name, token, rest] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[event_name.to_sym]
       @buffer << (style ? "<span class=\"#{style}\">#{token}</span>" : token)
-      @previous_event = event_name.to_sym
-      @previous_token = token
     end
 
     def on_embdoc_beg(token, *rest)
@@ -125,7 +123,6 @@ module BitClust
 
     def on_ident(token, *rest)
       p [__LINE__, :ident, token, rest] if ENV["RUBY_DEBUG"] == "1"
-      p [@previous_event, @previous_token, @stack] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
         @buffer << "#{token}</span>"
@@ -133,12 +130,8 @@ module BitClust
       when @stack.last == :def
         @stack.pop
         @buffer << "<span class=\"nf\">#{token}</span>"
-        @previous_event = :ident
-        @previous_token = token
       when @stack.last == :embexpr
         @buffer << "<span class=\"n\">#{token}</span>"
-        @previous_event = :ident
-        @previous_token = token
       when @stack.last == :heredoc
         style = COLORS[:heredoc_beg]
         @buffer << "<span class=\"#{style}\">#{token}"
