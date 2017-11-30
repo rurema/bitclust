@@ -105,24 +105,24 @@ module BitClust
 
     def on_default(event, token, *rest)
       event_name = event.to_s.sub(/\Aon_/, "")   # :on_event --> "event"
-      p [__LINE__, event_name, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      p [__LINE__, event_name, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[event_name.to_sym]
       @buffer << (style ? "<span class=\"#{style}\">#{token}</span>" : token)
     end
 
     def on_embdoc_beg(token, *rest)
-      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[:embdoc_beg]
       @buffer << "<span class=\"#{style}\">#{token}"
     end
 
     def on_embdoc_end(token, *rest)
-      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       @buffer << "#{token}</span>"
     end
 
     def on_ident(token, *rest)
-      p [__LINE__, :ident, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      p [__LINE__, :ident, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
         @buffer << "#{token}</span>"
@@ -146,7 +146,7 @@ module BitClust
     end
 
     def on_kw(token, *rest)
-      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
+      p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
         @buffer << "#{token}</span>"
