@@ -108,7 +108,7 @@ module BitClust
       event_name = event.to_s.sub(/\Aon_/, "")   # :on_event --> "event"
       p [__LINE__, event_name, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[event_name.to_sym]
-      @buffer << (style ? "<span class=\"#{style}\">#{token}</span>" : token)
+      @buffer << (style ? "<span class=\"#{style}\">#{escape_html(token)}</span>" : token)
     end
 
     def on_embdoc_beg(token, *rest)
