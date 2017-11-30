@@ -127,10 +127,9 @@ module BitClust
       p [__LINE__, :ident, token, rest] if ENV["RUBY_DEBUG"] == "1"
       p [@previous_event, @previous_token, @stack] if ENV["RUBY_DEBUG"] == "1"
       case
-      when @previous_event == :symbeg
+      when @stack.last == :symbol
         @buffer << "#{token}</span>"
-        @previous_event = :ident
-        @previous_token = token
+        @stack.pop
       when @stack.last == :def
         @stack.pop
         @buffer << "<span class=\"nf\">#{token}</span>"
@@ -153,9 +152,9 @@ module BitClust
     def on_kw(token, *rest)
       p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       case
-      when @previous_event == :symbeg
+      when @stack.last == :symbol
         @buffer << "#{token}</span>"
-        @previous_event = :kw
+        @stack.pop
       when token == "class"
         # @stack.push(:class)
         on_default(:on_kw, token, *rest)
@@ -177,10 +176,9 @@ module BitClust
     end
 
     def on_symbeg(token, *rest)
-      #p [:symbeg, token]
       style = COLORS[:symbeg]
       @buffer << "<span class=\"#{style}\">#{token}"
-      @previous_event = :symbeg
+      @stack << :symbol
     end
 
     def on_tstring_beg(token, *rest)
