@@ -292,8 +292,7 @@ module BitClust
       end
 
       def samplecode?
-        @current == :samplecode ||
-          (@current == true && @previous == :samplecode)
+        @current == :samplecode
       end
     end
   end
