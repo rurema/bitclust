@@ -136,6 +136,33 @@ HERE
     assert_equal(expected, ret.join)
   end
 
+  def test_samplecode_without_description
+    params = { 'version' => '1.9.2' }
+    src = <<HERE
+--- puts(str) -> String
+
+xxx
+
+\#@samplecode
+puts("xxx")
+puts("yyy")
+\#@end
+HERE
+
+    expected = <<HERE
+--- puts(str) -> String
+
+xxx
+
+//emlist[Example][ruby]{
+puts("xxx")
+puts("yyy")
+//}
+HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+
   def test_samplecode_with_condition1
     params = { 'version' => '1.9.2' }
     src = <<HERE

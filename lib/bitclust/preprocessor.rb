@@ -240,9 +240,10 @@ module BitClust
     end
 
     def samplecode_begin(line, description)
+      description = description.strip.sub(/\A\z/, "Example")
       samplecode_push(description)
       return unless current_cond.processing?
-      @buf.push("//emlist[#{description.strip}][ruby]{\n")
+      @buf.push("//emlist[#{description}][ruby]{\n")
     end
 
     def samplecode_end
