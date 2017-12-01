@@ -13,7 +13,7 @@ module BitClust
         @parser.banner = "Usage: #{File.basename($0, '.*')} <file>..."
         @parser.on('--param=KVPAIR', 'Set parameter by key/value pair.') {|pair|
           key, value = pair.split('=', 2)
-          params[key] = value
+          @params[key] = value
         }
       end
 
