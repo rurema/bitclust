@@ -289,7 +289,7 @@ module BitClust
 
     def on_tstring_end(token, data)
       if token == "'"
-        data << "</span>"
+        data << "#{token}</span>"
       else
         data << "<span class=\"s2\">#{token}</span>"
       end
