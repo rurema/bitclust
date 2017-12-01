@@ -358,11 +358,12 @@ HERE
 <dt class='method-param'>[PARAM] arg:</dt>
 <dd>
 dsc1
-<p>This is caption</p>
-<pre>
+<pre class="highlight ruby">
+<span class="caption">This is caption</span>
+<code>
 dsc2
 dsc3
-</pre>
+</code></pre>
 </dd>
 </dl>
 </dd>
@@ -385,10 +386,11 @@ HERE
 <p>
 abs
 </p>
-<p>description</p>
-<pre class="highlight">
+<pre class="highlight ruby">
+<span class="caption">description</span>
+<code>
 <span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
-</pre>
+</code></pre>
 </dd>
 HERE
     assert_compiled_method_source(expected, src)

@@ -267,8 +267,9 @@ module BitClust
     def emlist
       command = @f.gets
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)\]\[(?<lang>\w+?)\]! =~ command
-        line "<p>#{escape_html(caption)}</p>"
-        line '<pre class="highlight">'
+        line "<pre class=\"highlight #{lang}\">"
+        line "<span class=\"caption\">#{escape_html(caption)}</span>"
+        line "<code>"
         src = ""
         @f.until_terminator(%r<\A//\}>) do |line|
           src << line
@@ -278,7 +279,7 @@ module BitClust
         else
           string src
         end
-        line '</pre>'
+        line '</code></pre>'
       else
         line '<pre>'
         @f.until_terminator(%r<\A//\}>) do |line|
