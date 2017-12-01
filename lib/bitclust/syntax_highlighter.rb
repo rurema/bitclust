@@ -99,218 +99,227 @@ module BitClust
 
     def initialize(*args)
       super
-      @buffer = ""
       @stack = []
       @name_buffer = []
     end
 
-    def on_default(event, token, *rest)
+    def on_default(event, token, data)
       event_name = event.to_s.sub(/\Aon_/, "")   # :on_event --> "event"
       p [__LINE__, event_name, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[event_name.to_sym]
-      @buffer << (style ? "<span class=\"#{style}\">#{escape_html(token)}</span>" : token)
+      data << (style ? "<span class=\"#{style}\">#{escape_html(token)}</span>" : token)
+      data
     end
 
-    def on_embdoc_beg(token, *rest)
+    def on_embdoc_beg(token, data)
       p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[:embdoc_beg]
-      @buffer << "<span class=\"#{style}\">#{token}"
+      data << "<span class=\"#{style}\">#{token}"
+      data
     end
 
-    def on_embdoc_end(token, *rest)
+    def on_embdoc_end(token, data)
       p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
-      @buffer << "#{token}</span>"
+      data << "#{token}</span>"
+      data
     end
 
-    def on_ident(token, *rest)
+    def on_ident(token, data)
       p [__LINE__, :ident, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
-        @buffer << "#{token}</span>"
+        data << "#{token}</span>"
         @stack.pop
       when @stack.last == :def
         @stack.pop
-        @buffer << "<span class=\"nf\">#{token}</span>"
+        data << "<span class=\"nf\">#{token}</span>"
       when @stack.last == :embexpr
-        @buffer << "<span class=\"n\">#{token}</span>"
+        data << "<span class=\"n\">#{token}</span>"
       when @stack.last == :heredoc
         style = COLORS[:heredoc_beg]
-        @buffer << "<span class=\"#{style}\">#{token}"
+        data << "<span class=\"#{style}\">#{token}"
       when @stack.last == :method_call
-        @buffer << "<span class=\"nf\">#{token}</span>"
+        data << "<span class=\"nf\">#{token}</span>"
         @stack.pop
       when BUILTINS_G.include?(token)
-        @buffer << "<span class=\"nb\">#{token}</span>"
+        data << "<span class=\"nb\">#{token}</span>"
       else
-        @buffer << token
+        data << token
       end
+      data
     end
 
-    def on_const(token, *rest)
+    def on_const(token, data)
       case
       when @stack.last == :class
         @name_buffer << token
       when @stack.last == :module
         @name_buffer << token
       else
-        on_default(:on_const, token, *rest)
+        on_default(:on_const, token, data)
       end
+      data
     end
 
-    def on_kw(token, *rest)
+    def on_kw(token, data)
       p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
-        @buffer << "#{token}</span>"
+        data << "#{token}</span>"
         @stack.pop
       when token == "module"
         @stack.push(:module)
-        on_default(:on_kw, token, *rest)
+        on_default(:on_kw, token, data)
       when token == "class"
         @stack.push(:class)
-        on_default(:on_kw, token, *rest)
+        on_default(:on_kw, token, data)
       when token == "def"
         @stack.push(:def)
-        on_default(:on_kw, token, *rest)
+        on_default(:on_kw, token, data)
       when token == "self"
-        @buffer << "<span class=\"nc\">#{token}</span>"
+        data << "<span class=\"nc\">#{token}</span>"
       else
-        on_default(:on_kw, token, *rest)
+        on_default(:on_kw, token, data)
       end
+      data
     end
 
-    def on_period(token, *rest)
+    def on_period(token, data)
       @stack.push(:method_call)
-      on_default(:on_period, token, *rest)
+      on_default(:on_period, token, data)
     end
 
-    def on_op(token, *rest)
+    def on_op(token, data)
       case
       when token == "::" && [:class, :module].include?(@stack.last)
         @name_buffer << token
       else
-        on_default(:on_op, token, *rest)
+        on_default(:on_op, token, data)
       end
+      data
     end
 
-    def on_sp(token, *rest)
+    def on_sp(token, data)
       case
       when @name_buffer.empty?
-        on_default(:on_sp, token, *rest)
-        return
+        return on_default(:on_sp, token, data)
       when @stack.last == :module
         name = @name_buffer.join
-        @buffer << "<span class=\"nn\">#{name}</span>"
+        data << "<span class=\"nn\">#{name}</span>"
         @stack.pop
         @name_buffer.clear
       when @stack.last == :class
         namespace = @name_buffer.values_at(0..-3).join
         operator = @name_buffer[-2]
         name = @name_buffer.last
-        @buffer << "<span class=\"nn\">#{namespace}</span>"
-        @buffer << "<span class=\"o\">#{operator}</span>"
-        @buffer << "<span class=\"nc\">#{name}</span>"
+        data << "<span class=\"nn\">#{namespace}</span>"
+        data << "<span class=\"o\">#{operator}</span>"
+        data << "<span class=\"nc\">#{name}</span>"
         @stack.pop
         @name_buffer.clear
       end
-      on_default(:on_sp, token, *rest)
+      on_default(:on_sp, token, data)
     end
 
-    def on_nl(token, *rest)
+    def on_nl(token, data)
       case
       when @name_buffer.empty?
-        on_default(:on_nl, token, *rest)
-        return
+        return on_default(:on_nl, token, data)
       when @stack.last == :module
         name = @name_buffer.join
-        @buffer << "<span class=\"nn\">#{name}</span>"
+        data << "<span class=\"nn\">#{name}</span>"
         @stack.pop
         @name_buffer.clear
       when @stack.last == :class
         namespace = @name_buffer.values_at(0..-3).join
         operator = @name_buffer[-2]
         name = @name_buffer.last
-        @buffer << "<span class=\"nn\">#{namespace}</span>"
-        @buffer << "<span class=\"o\">#{operator}</span>"
-        @buffer << "<span class=\"nc\">#{name}</span>"
+        data << "<span class=\"nn\">#{namespace}</span>"
+        data << "<span class=\"o\">#{operator}</span>"
+        data << "<span class=\"nc\">#{name}</span>"
         @stack.pop
         @name_buffer.clear
       end
-      on_default(:on_nl, token, *rest)
+      on_default(:on_nl, token, data)
     end
 
-    def on_regexp_beg(token, *rest)
+    def on_regexp_beg(token, data)
       style = COLORS[:regexp_beg]
-      @buffer << "<span class=\"#{style}\">#{token}"
+      data << "<span class=\"#{style}\">#{token}"
+      data
     end
 
-    def on_regexp_end(token, *rest)
-      @buffer << "#{token}</span>"
+    def on_regexp_end(token, data)
+      data << "#{token}</span>"
+      data
     end
 
-    def on_symbeg(token, *rest)
+    def on_symbeg(token, data)
       style = COLORS[:symbeg]
-      @buffer << "<span class=\"#{style}\">#{token}"
+      data << "<span class=\"#{style}\">#{token}"
       @stack << :symbol
+      data
     end
 
-    def on_tstring_beg(token, *rest)
+    def on_tstring_beg(token, data)
       if token == "'"
-        @buffer << "<span class=\"s1\">#{token}"
+        data << "<span class=\"s1\">#{token}"
         @stack << :string1
       else
-        @buffer << "<span class=\"s2\">#{token}</span>"
+        data << "<span class=\"s2\">#{token}</span>"
         @stack << :string2
       end
+      data
     end
 
-    def on_tstring_content(token, *rest)
+    def on_tstring_content(token, data)
       p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :heredoc
-        @buffer << "<span class=\"sh\">#{escape_html(token)}</span>"
+        data << "<span class=\"sh\">#{escape_html(token)}</span>"
       when @stack.last == :string1
-        @buffer << escape_html(token)
+        data << escape_html(token)
       when @stack.last == :string2
-        @buffer << "<span class=\"s2\">#{escape_html(token)}</span>"
+        data << "<span class=\"s2\">#{escape_html(token)}</span>"
       else
-        on_default(:on_tstring_content, token, *rest)
+        on_default(:on_tstring_content, token, data)
       end
+      data
     end
 
-    def on_tstring_end(token, *rest)
+    def on_tstring_end(token, data)
       if token == "'"
-        @buffer << "</span>"
+        data << "</span>"
       else
-        @buffer << "<span class=\"s2\">#{token}</span>"
+        data << "<span class=\"s2\">#{token}</span>"
       end
       @stack.pop
+      data
     end
 
-    def on_heredoc_beg(token, *rest)
+    def on_heredoc_beg(token, data)
       p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       @stack.push(:heredoc)
-      on_default(:on_heredoc_beg, token, *rest)
+      on_default(:on_heredoc_beg, token, data)
     end
 
-    def on_heredoc_end(token, *rest)
+    def on_heredoc_end(token, data)
       @stack.pop
-      on_default(:on_heredoc_end, token, *rest)
+      on_default(:on_heredoc_end, token, data)
     end
 
-    def on_embexpr_beg(token, *rest)
+    def on_embexpr_beg(token, data)
       @stack.push(:embexpr)
-      on_default(:on_embexpr_beg, token, *rest)
+      on_default(:on_embexpr_beg, token, data)
     end
 
-    def on_embexpr_end(token, *rest)
+    def on_embexpr_end(token, data)
       @stack.pop
-      on_default(:on_embexpr_end, token, *rest)
+      on_default(:on_embexpr_end, token, data)
     end
 
     def highlight
-      parse
-      @buffer
+      parse("")
     end
   end
 end
