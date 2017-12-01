@@ -105,27 +105,23 @@ module BitClust
 
     def on_default(event, token, data)
       event_name = event.to_s.sub(/\Aon_/, "")   # :on_event --> "event"
-      p [__LINE__, event_name, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[event_name.to_sym]
       data << (style ? "<span class=\"#{style}\">#{escape_html(token)}</span>" : token)
       data
     end
 
     def on_embdoc_beg(token, data)
-      p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       style = COLORS[:embdoc_beg]
       data << "<span class=\"#{style}\">#{token}"
       data
     end
 
     def on_embdoc_end(token, data)
-      p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       data << "#{token}</span>"
       data
     end
 
     def on_ident(token, data)
-      p [__LINE__, :ident, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
         data << "#{token}</span>"
@@ -162,7 +158,6 @@ module BitClust
     end
 
     def on_kw(token, data)
-      p [__LINE__, token] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :symbol
         data << "#{token}</span>"
@@ -273,7 +268,6 @@ module BitClust
     end
 
     def on_tstring_content(token, data)
-      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       case
       when @stack.last == :heredoc
         data << "<span class=\"sh\">#{escape_html(token)}</span>"
@@ -298,7 +292,6 @@ module BitClust
     end
 
     def on_heredoc_beg(token, data)
-      p [__LINE__, token, rest] if ENV["RUBY_DEBUG"] == "1"
       @stack.push(:heredoc)
       on_default(:on_heredoc_beg, token, data)
     end
