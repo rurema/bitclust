@@ -118,6 +118,16 @@ pre {
     background-color: #eee;
     padding: 10px;
     font-weight: normal;
+    position: relative;
+}
+
+pre .caption {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.2em;
+    background: #ddd;
+    border-width: 0 1px 1px 0;
 }
 
 blockquote {

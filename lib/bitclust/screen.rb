@@ -301,6 +301,7 @@ module BitClust
 
     def meta_robots
       content = @conf[:meta_robots_content]
+      return "\b" unless content
       return "\b" if content.empty?
       %Q(<meta name="robots" content="#{content.join(',')}">)
     end

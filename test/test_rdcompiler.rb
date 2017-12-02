@@ -358,13 +358,63 @@ HERE
 <dt class='method-param'>[PARAM] arg:</dt>
 <dd>
 dsc1
-<p>This is caption</p>
-<pre>
+<pre class="highlight ruby">
+<span class="caption">This is caption</span>
+<code>
 dsc2
 dsc3
-</pre>
+</code></pre>
 </dd>
 </dl>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src)
+  end
+
+  def test_method_with_samplecode
+    src = <<'HERE'
+--- <=>
+
+abs
+//emlist[description][ruby]{
+puts "text"
+//}
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<p>
+abs
+</p>
+<pre class="highlight ruby">
+<span class="caption">description</span>
+<code>
+<span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
+</code></pre>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src)
+  end
+
+  def test_method_with_samplecode_no_caption
+    src = <<'HERE'
+--- <=>
+
+abs
+//emlist[][ruby]{
+puts "text"
+//}
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>self &lt;=&gt; </code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<p>
+abs
+</p>
+<pre class="highlight ruby">
+<code>
+<span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
+</code></pre>
 </dd>
 HERE
     assert_compiled_method_source(expected, src)

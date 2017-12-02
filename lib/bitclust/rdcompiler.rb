@@ -12,6 +12,7 @@ require 'bitclust/lineinput'
 require 'bitclust/htmlutils'
 require 'bitclust/textutils'
 require 'bitclust/messagecatalog'
+require 'bitclust/syntax_highlighter'
 require 'stringio'
 
 module BitClust
@@ -83,7 +84,7 @@ module BitClust
           @item_stack = []
           item_list($1.size)
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
-        when %r<\A//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{>
+        when %r<\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{>
           emlist
         when /\A:\s/
           dlist
@@ -136,7 +137,7 @@ module BitClust
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when /\A:\s/
           dlist
-        when %r<\A//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{>
+        when %r<\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{>
           emlist
         when /\A\s+\S/
           list
@@ -224,7 +225,7 @@ module BitClust
     # empty lines separate paragraphs.
     def dd_with_p
       line '<dd>'
-      while /\A(?:\s|\z)/ =~ @f.peek or %r!\A//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{! =~ @f.peek
+      while /\A(?:\s|\z)/ =~ @f.peek or %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{! =~ @f.peek
         case @f.peek
         when /\A$/
           @f.gets
@@ -234,7 +235,7 @@ module BitClust
             line compile_text(line.strip)
           end
           line '</p>'
-        when %r!\A//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{!
+        when %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{!
           emlist
         else
           raise 'must not happen'
@@ -246,13 +247,13 @@ module BitClust
     # empty lines do not separate paragraphs.
     def dd_without_p
       line '<dd>'
-      while /\A[ \t]/ =~ @f.peek or %r!\A//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{! =~ @f.peek
+      while /\A[ \t]/ =~ @f.peek or %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{! =~ @f.peek
         case @f.peek
         when  /\A[ \t\z]/
           @f.while_match(/\A[ \t\z]/) do |line|
             line compile_text(line.strip)
           end
-        when %r!\A//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{!
+        when %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{!
           emlist
         end
       end
@@ -265,13 +266,20 @@ module BitClust
 
     def emlist
       command = @f.gets
-      if %r!\A//emlist\[(?<caption>[^\[\]]+?)\]\[(?<lang>\w+?)\]! =~ command
-        line "<p>#{escape_html(caption)}</p>"
-        line '<pre>'
+      if %r!\A//emlist\[(?<caption>[^\[\]]+?)?\]\[(?<lang>\w+?)\]! =~ command
+        line "<pre class=\"highlight #{lang}\">"
+        line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
+        line "<code>"
+        src = ""
         @f.until_terminator(%r<\A//\}>) do |line|
-          line escape_html(line.rstrip)
+          src << line
         end
-        line '</pre>'
+        if lang == "ruby"
+          string BitClust::SyntaxHighlighter.new(src).highlight
+        else
+          string src
+        end
+        line '</code></pre>'
       else
         line '<pre>'
         @f.until_terminator(%r<\A//\}>) do |line|
@@ -306,7 +314,7 @@ module BitClust
     end
 
     def read_paragraph(f)
-      f.span(%r<\A(?!---|=|//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{)\S>)
+      f.span(%r<\A(?!---|=|//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{)\S>)
     end
 
     def see
@@ -361,7 +369,7 @@ module BitClust
     end
 
     def read_entry_paragraph(f)
-      f.span(%r<\A(?!---|=|//emlist(?:\[[^\[\]]+?\]\[\w+?\])?\{|@[a-z])\S>)
+      f.span(%r<\A(?!---|=|//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{|@[a-z])\S>)
     end
 
     def method_signature(sig_line, first)

@@ -154,7 +154,7 @@ HERE
 
 xxx
 
-//emlist[Example][ruby]{
+//emlist[][ruby]{
 puts("xxx")
 puts("yyy")
 //}

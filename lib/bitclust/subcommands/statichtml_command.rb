@@ -63,6 +63,10 @@ module BitClust
           @bitclust_html_base + "/" + @css_url
         end
 
+        def custom_css_url(filename)
+          @bitclust_html_base + "/" + filename
+        end
+
         def favicon_url
           @bitclust_html_base + "/" + @favicon_url
         end
@@ -177,6 +181,8 @@ module BitClust
                     :verbose => @verbose)
         create_index_html(@outputdir)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
+                     @outputdir.to_s, {:verbose => @verbose, :preserve => true})
+        FileUtils.cp(@manager_config[:themedir] + "syntax-highlight.css",
                      @outputdir.to_s, {:verbose => @verbose, :preserve => true})
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:favicon_url],
                      @outputdir.to_s, {:verbose => @verbose, :preserve => true})
