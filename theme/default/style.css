@@ -115,8 +115,15 @@ span.compileerror {
 
 pre {
     line-height: 1.1;
-    background-color: #eee;
+    background-color: #f2f2f2;
     padding: 10px;
+    font-weight: normal;
+}
+
+pre.highlight {
+    line-height: 1.1;
+    background-color: #f2f2f2;
+    padding: 0px 10px 10px 10px;
     font-weight: normal;
     position: relative;
 }
