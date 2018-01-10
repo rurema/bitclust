@@ -501,7 +501,7 @@ module BitClust
       %Q(<a class="external" href="#{escape_html(url)}">[#{escape_html("#{ml}:#{num}")}]</a>)
     end
 
-    RFC_URL = 'http://www.ietf.org/rfc/rfc%s.txt'
+    RFC_URL = 'https://tools.ietf.org/html/rfc%s'
 
     def rfc_link(num)
       url = sprintf(RFC_URL, num)
