@@ -447,7 +447,7 @@ module BitClust
         rfc_link(arg)
       when 'ruby-list', 'ruby-dev', 'ruby-ext', 'ruby-talk', 'ruby-core'
         blade_link(type, arg)
-      when 'feature', 'bug'
+      when 'feature', 'bug', 'misc'
         bugs_link(type, arg)
       else
         "[[#{escape_html(link)}]]"

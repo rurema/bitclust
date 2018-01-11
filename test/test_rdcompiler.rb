@@ -667,7 +667,8 @@ HERE
        "url"                 => ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
        "ruby-list"           => ['[[ruby-list:12345]]', '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
        "bugs.r-l.o feature"  => ['[[feature:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[feature#12345]</a>'],
-       "bugs.r-l.o bug"      => ['[[bug:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[bug#12345]</a>'],)
+       "bugs.r-l.o bug"      => ['[[bug:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[bug#12345]</a>'],
+       "bugs.r-l.o misc"     => ['[[misc:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[misc#12345]</a>'])
   def test_bracket_link(data)
     target, expected = data
     assert_equal(expected, @c.send(:compile_text, target), target)
