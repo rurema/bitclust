@@ -655,20 +655,20 @@ HERE
        "C API root"          => ['[[f:/]]',           '<a href="dummy/function/">All C API</a>'],
        "C API index"         => ['[[f:_index]]',      '<a href="dummy/function/">All C API</a>'],
        "standard library"    => ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
-       "man command"         => ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
-       "man header"          => ['[[man:sys/socket.h(header)]]', '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
-       "man system call"     => ['[[man:fopen(3linux)]]', '<a class="external" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
-       "RFC"                 => ['[[RFC:2822]]',      '<a class="external" href="https://tools.ietf.org/html/rfc2822">[RFC2822]</a>'],
+       "man command"         => ['[[man:tr(1)]]',     '<a class="external" target="_blank" rel="noopener" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
+       "man header"          => ['[[man:sys/socket.h(header)]]', '<a class="external" target="_blank" rel="noopener" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
+       "man system call"     => ['[[man:fopen(3linux)]]', '<a class="external" target="_blank" rel="noopener" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
+       "RFC"                 => ['[[RFC:2822]]',      '<a class="external" target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc2822">[RFC2822]</a>'],
        "special var $~"      => ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
        "special var $,"      => ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
        "extra close bracket" => ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],
        "continuity"          => ['[[c:String]][[c:String]]', '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
        "constant"            => ['[[m:File::SEPARATOR]]', '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],
-       "url"                 => ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
-       "ruby-list"           => ['[[ruby-list:12345]]', '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
-       "bugs.r-l.o feature"  => ['[[feature:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[feature#12345]</a>'],
-       "bugs.r-l.o bug"      => ['[[bug:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[bug#12345]</a>'],
-       "bugs.r-l.o misc"     => ['[[misc:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[misc#12345]</a>'])
+       "url"                 => ['[[url:http://i.loveruby.net]]', '<a class="external" target="_blank" rel="noopener" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
+       "ruby-list"           => ['[[ruby-list:12345]]', '<a class="external" target="_blank" rel="noopener" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
+       "bugs.r-l.o feature"  => ['[[feature:12345]]', '<a class="external" target="_blank" rel="noopener" href="https://bugs.ruby-lang.org/issues/12345">[feature#12345]</a>'],
+       "bugs.r-l.o bug"      => ['[[bug:12345]]', '<a class="external" target="_blank" rel="noopener" href="https://bugs.ruby-lang.org/issues/12345">[bug#12345]</a>'],
+       "bugs.r-l.o misc"     => ['[[misc:12345]]', '<a class="external" target="_blank" rel="noopener" href="https://bugs.ruby-lang.org/issues/12345">[misc#12345]</a>'])
   def test_bracket_link(data)
     target, expected = data
     assert_equal(expected, @c.send(:compile_text, target), target)
