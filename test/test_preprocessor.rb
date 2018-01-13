@@ -109,6 +109,8 @@ HERE
     assert_equal(expected, ret.join)
   end
 
+  sub_test_case("samplecode") do
+
   def test_samplecode
     params = { 'version' => '1.9.2' }
     src = <<HERE
@@ -288,5 +290,6 @@ puts("zzz")
 HERE
     ret = Preprocessor.wrap(StringIO.new(src), params).to_a
     assert_equal(expected, ret.join)
+  end
   end
 end
