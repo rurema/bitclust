@@ -109,9 +109,11 @@ HERE
     assert_equal(expected, ret.join)
   end
 
-  def test_samplecode
-    params = { 'version' => '1.9.2' }
-    src = <<HERE
+  sub_test_case("samplecode") do
+
+    def test_samplecode
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -122,7 +124,7 @@ puts("yyy")
 \#@end
 HERE
 
-    expected = <<HERE
+      expected = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -132,13 +134,13 @@ puts("xxx")
 puts("yyy")
 //}
 HERE
-    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
-    assert_equal(expected, ret.join)
-  end
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
 
-  def test_samplecode_without_description
-    params = { 'version' => '1.9.2' }
-    src = <<HERE
+    def test_samplecode_without_description
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -149,7 +151,7 @@ puts("yyy")
 \#@end
 HERE
 
-    expected = <<HERE
+      expected = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -159,13 +161,13 @@ puts("xxx")
 puts("yyy")
 //}
 HERE
-    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
-    assert_equal(expected, ret.join)
-  end
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
 
-  def test_samplecode_with_condition1
-    params = { 'version' => '1.9.2' }
-    src = <<HERE
+    def test_samplecode_with_condition1
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -183,7 +185,7 @@ puts("yyy2")
 \#@end
 HERE
 
-    expected = <<HERE
+      expected = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -193,13 +195,13 @@ puts("xxx1")
 puts("yyy1")
 //}
 HERE
-    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
-    assert_equal(expected, ret.join)
-  end
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
 
-  def test_samplecode_with_condition2
-    params = { 'version' => '1.9.2' }
-    src = <<HERE
+    def test_samplecode_with_condition2
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -213,7 +215,7 @@ puts("yyy")
 \#@end
 HERE
 
-    expected = <<HERE
+      expected = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -222,13 +224,13 @@ xxx
 puts("xxx")
 //}
 HERE
-    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
-    assert_equal(expected, ret.join)
-  end
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
 
-  def test_samplecode_with_condition3
-    params = { 'version' => '1.9.2' }
-    src = <<HERE
+    def test_samplecode_with_condition3
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -246,7 +248,7 @@ zzz
 \#@end
 HERE
 
-    expected = <<HERE
+      expected = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -255,13 +257,13 @@ xxx
 puts("xxx")
 //}
 HERE
-    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
-    assert_equal(expected, ret.join)
-  end
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
 
-  def test_samplecode_with_condition4
-    params = { 'version' => '1.9.2' }
-    src = <<HERE
+    def test_samplecode_with_condition4
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -275,7 +277,7 @@ puts("zzz")
 \#@end
 HERE
 
-    expected = <<HERE
+      expected = <<HERE
 --- puts(str) -> String
 
 xxx
@@ -286,7 +288,8 @@ puts("yyy")
 puts("zzz")
 //}
 HERE
-    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
-    assert_equal(expected, ret.join)
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
   end
 end

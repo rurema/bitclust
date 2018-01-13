@@ -282,12 +282,30 @@ module BitClust
     end
 
     def on_tstring_end(token, data)
-      if token == "'"
+      case
+      when token == "'"
+        data << "#{token}</span>"
+      when [:qwords, :words].include?(@stack.last)
+        @stack.pop
         data << "#{token}</span>"
       else
         data << "<span class=\"s2\">#{token}</span>"
       end
       @stack.pop
+      data
+    end
+
+    def on_qwords_beg(token, data)
+      @stack.push(:qwords)
+      style = COLORS[:qwords_beg]
+      data << "<span class=\"#{style}\">#{token}"
+      data
+    end
+
+    def on_words_beg(token, data)
+      @stack.push(:words)
+      style = COLORS[:words_beg]
+      data << "<span class=\"#{style}\">#{token}"
       data
     end
 
