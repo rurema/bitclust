@@ -14,8 +14,14 @@
 <% headline_init %>
 <%= headline("#{entry.type_label} #{entry.label}") %>
 <dl class="methodlist">
-<% @entries.sort.each do |ent| %>
+<%
+    headline_push
+    @entries.sort.each do |ent|
+%>
 <%= compile_method(ent) %>
-<% end %>
+<%
+    end
+    headline_pop
+%>
 </dl>
 
