@@ -17,8 +17,9 @@ class LineInput
     new(StringIO.new(s))
   end
 
-  def initialize(f)
+  def initialize(f, entry = nil)
     @input = f
+    @entry = entry
     @buf = []
     @lineno = 0
     @eof_p = false
@@ -34,6 +35,14 @@ class LineInput
 
   def path
     @input.path
+  end
+
+  def name
+    if @entry
+      @entry.inspect
+    else
+      "-"
+    end
   end
 
   def lineno

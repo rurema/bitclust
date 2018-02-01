@@ -5,6 +5,25 @@ module BitClust
   class SyntaxHighlighter < Ripper::Filter
     include BitClust::HTMLUtils
 
+    class Error < StandardError
+      def initialize(name, lineno, column, error_message)
+        @name = name
+        @lineno = lineno
+        @column = column
+        @error_message = error_message
+      end
+
+      def message
+        "#{@name}:#{@lineno}:#{@column} #{@error_message} (#{self.class})"
+      end
+    end
+
+    class ParseError < Error
+    end
+
+    class CompileError < Error
+    end
+
     COLORS = {
       CHAR: "sc",                      # ?a
       __end__: "k",                    # __END__
@@ -97,10 +116,16 @@ module BitClust
 
     BUILTINS_B = %w[chomp chop exit gsub sub]
 
-    def initialize(*args)
+    def initialize(src, filename = "-", lineno = 1)
       super
       @stack = []
       @name_buffer = []
+      @__lexer.define_singleton_method(:on_parse_error) do |message|
+        raise ParseError.new(filename, self.lineno, self.column, message)
+      end
+      @__lexer.define_singleton_method(:compile_error) do |message|
+        raise CompileError.new(filename, self.lineno, self.column, message)
+      end
     end
 
     def on_default(event, token, data)

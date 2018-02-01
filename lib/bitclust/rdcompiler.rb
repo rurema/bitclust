@@ -45,7 +45,7 @@ module BitClust
     def compile_function(f, opt = nil)
       @opt = opt
       @type = :function
-      setup(f.source) {
+      setup(f.source, f) {
         entry
       }
     ensure
@@ -57,7 +57,7 @@ module BitClust
       @opt = opt
       @type = :method
       @method = m
-      setup(m.source) {
+      setup(m.source, m) {
         entry
       }
     ensure
@@ -66,8 +66,8 @@ module BitClust
 
     private
 
-    def setup(src)
-      @f = LineInput.new(StringIO.new(src))
+    def setup(src, entry = nil)
+      @f = LineInput.new(StringIO.new(src), entry)
       @out = StringIO.new
       yield
       @out.string
@@ -275,7 +275,13 @@ module BitClust
           src << line
         end
         if lang == "ruby"
-          string BitClust::SyntaxHighlighter.new(src).highlight
+          begin
+            filename = caption&.size > 2 ? caption : @f.name
+            string BitClust::SyntaxHighlighter.new(src, filename).highlight
+          rescue BitClust::SyntaxHighlighter::Error => ex
+            $stderr.puts ex.message
+            exit(false)
+          end
         else
           string src
         end
