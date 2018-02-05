@@ -276,7 +276,7 @@ module BitClust
         end
         if lang == "ruby"
           begin
-            filename = caption&.size > 2 ? caption : @f.name
+            filename = (caption&.size || 0) > 2 ? caption : @f.name
             string BitClust::SyntaxHighlighter.new(src, filename).highlight
           rescue BitClust::SyntaxHighlighter::Error => ex
             $stderr.puts ex.message
