@@ -20,4 +20,15 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
       end
     end
   end
+
+  test "__END__ support" do
+    src = <<EOS
+p 1
+__END__
+data
+EOS
+
+    html = highlight(src)
+    assert_match(/<span class="k">\s*__END__\s*<\/span>data/m, html)
+  end
 end
