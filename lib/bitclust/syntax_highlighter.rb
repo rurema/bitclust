@@ -358,7 +358,7 @@ module BitClust
     def on___end__(token, data)
       on_default(:on___end__, token, data)
       style = COLORS[:comment]
-      data << "<span class=\"#{style}\">#{@src.lines[lineno..-1].join}</span>"
+      data << "<span class=\"#{style}\">#{escape_html(@src.lines[lineno..-1].join)}</span>"
       data
     end
 
