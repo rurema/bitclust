@@ -118,6 +118,7 @@ module BitClust
 
     def initialize(src, filename = "-", lineno = 1)
       super
+      @src = src
       @stack = []
       @name_buffer = []
       @__lexer.define_singleton_method(:on_parse_error) do |message|
@@ -352,6 +353,13 @@ module BitClust
     def on_embexpr_end(token, data)
       @stack.pop
       on_default(:on_embexpr_end, token, data)
+    end
+
+    def on___end__(token, data)
+      on_default(:on___end__, token, data)
+      style = COLORS[:comment]
+      data << "<span class=\"#{style}\">#{escape_html(@src.lines[lineno..-1].join)}</span>"
+      data
     end
 
     def highlight
