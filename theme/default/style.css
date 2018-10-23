@@ -215,6 +215,7 @@ td.signature a {
     display: block;
     padding: 0.3em;
     height: 100%;
+    box-sizing: border-box;
 }
 
 td.description {
