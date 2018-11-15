@@ -165,7 +165,6 @@ module BitClust
         end
 
         fdb.transaction do
-          functions = {}
           create_html_entries("capi", fdb.functions, manager, fdb)
         end
 
