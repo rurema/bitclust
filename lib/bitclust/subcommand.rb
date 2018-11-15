@@ -52,6 +52,15 @@ module BitClust
     def srcdir_root
       Pathname.new(__FILE__).realpath.dirname.parent.parent
     end
+
+    def align_progress_bar_title(title)
+      size = title.size
+      if size > 14
+        title[0..13]
+      else
+        title + ' ' * (14 - size)
+      end
+    end
   end
 end
 

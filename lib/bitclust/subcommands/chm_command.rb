@@ -176,7 +176,7 @@ EOS
           end
 
           entries = db.docs + db.libraries.sort + db.classes.sort + methods.values.sort
-          pb = ProgressBar.new('entry', entries.size)
+          pb = ProgressBar.create(title: 'entry', total: entries.size)
           entries.each do |c|
             filename = create_html_file(c, manager, @outputdir, db)
             @html_files << filename
@@ -206,8 +206,8 @@ EOS
                   Sitemap::Content.new("#{e.klass.name}#{e.typemark}#{name} (#{e.library.name})", filename)
               end
             end
-            pb.title.replace(e.name)
-            pb.inc
+            pb.title = align_progress_bar_title(e.name)
+            pb.increment
           end
           pb.finish
         end
