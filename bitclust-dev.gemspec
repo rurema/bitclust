@@ -16,7 +16,7 @@ EOD
 
   s.rubyforge_project = ""
 
-  s.files         = Dir["tools/*", "lib/bitclust.rb"]
+  s.files         = Dir["tools/*"]
   s.executables   = Dir["tools/*"].
     map {|v| File.basename(v) }.
     reject {|f| %w(ToDoHistory check-signature.rb).include?(f) }
