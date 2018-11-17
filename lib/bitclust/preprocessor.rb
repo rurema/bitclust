@@ -67,6 +67,7 @@ module BitClust
     def initialize(f, params = {})
       super f
       @params = params
+      @pre_read_line = nil
       @last_if = nil
       cond_init
     end
@@ -74,7 +75,8 @@ module BitClust
     private
 
     def next_line(f)
-      while line = f.gets
+      while line = @pre_read_line || f.gets
+        @pre_read_line = nil
         case line
         when /\A\#@\#/   # preprocessor comment
           ;
@@ -111,6 +113,12 @@ module BitClust
           parse_error "unknown preprocessor directive", line
         else
           if current_cond.processing?
+            if line =~ /\P{ascii}$/
+              @pre_read_line = f.gets
+              if @pre_read_line && @pre_read_line[0] && !@pre_read_line[0].ascii_only?
+                line = line.chomp
+              end
+            end
             @buf.push line
             break
           end
