@@ -231,9 +231,7 @@ module BitClust
           @f.gets
         when  /\A[ \t\z]/
           line '<p>'
-          @f.while_match(/\A[ \t\z]/) do |line|
-            line compile_text(line.strip)
-          end
+          line compile_text(text_node_from_lines(@f.span(/\A[ \t\z]/)))
           line '</p>'
         when %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{!
           emlist
@@ -250,9 +248,7 @@ module BitClust
       while /\A[ \t]/ =~ @f.peek or %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{! =~ @f.peek
         case @f.peek
         when  /\A[ \t\z]/
-          @f.while_match(/\A[ \t\z]/) do |line|
-            line compile_text(line.strip)
-          end
+          line compile_text(text_node_from_lines(@f.span(/\A[ \t\z]/)))
         when %r!\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{!
           emlist
         end
@@ -313,9 +309,7 @@ module BitClust
 
     def paragraph
       line '<p>'
-      read_paragraph(@f).each do |line|
-        line compile_text(line.strip)
-      end
+      line compile_text(text_node_from_lines(read_paragraph(@f)))
       line '</p>'
     end
 
@@ -328,7 +322,7 @@ module BitClust
       cmd = header.slice!(/\A\@\w+/)
       body = [header] + @f.span(/\A\s+\S/)
       line '<p>'
-      line '[SEE_ALSO] ' + compile_text(body.join('').strip)
+      line '[SEE_ALSO] ' + compile_text(text_node_from_lines(body))
       line '</p>'
     end
 
@@ -368,9 +362,7 @@ module BitClust
     # FIXME: parse @param, @return, ...
     def entry_paragraph
       line '<p>'
-      read_entry_paragraph(@f).each do |line|
-        line compile_text(line.strip)
-      end
+      line compile_text(text_node_from_lines(read_entry_paragraph(@f)))
       line '</p>'
     end
 
@@ -591,6 +583,11 @@ module BitClust
       @out.puts
     end
 
+    def text_node_from_lines(lines)
+      lines.map(&:strip).join("\n").gsub(/(\P{ascii})\n(\P{ascii})/) do
+        "#{::Regexp.last_match(1)}#{::Regexp.last_match(2)}"
+      end
+    end
   end
 
 end
