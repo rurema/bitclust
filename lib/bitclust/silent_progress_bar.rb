@@ -3,13 +3,17 @@ module BitClust
   # Null-object version of ProgressBar.
   class SilentProgressBar
 
-    attr_reader :title
+    attr_accessor :title
 
-    def initialize(title, total, out = $stderr)
-      @title, @total, @out = title, total, out
+    def self.create(output: $stderr, title:, total:)
+      self.new(output: output, title: title, total: total)
     end
 
-    def inc(step = 1)
+    def initialize(output:, title:, total:)
+      @title, @total, @output = title, total, output
+    end
+
+    def increment
     end
 
     def finish

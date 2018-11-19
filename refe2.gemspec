@@ -15,7 +15,7 @@ This is tools for Rubyists.
 EOD
 
   s.rubyforge_project = ""
-  s.files         = Dir["bin/refe", "lib/bitclust.rb"]
+  s.files         = Dir["bin/refe"]
   s.executables   = ["refe"]
   s.require_paths = ["lib"]
 

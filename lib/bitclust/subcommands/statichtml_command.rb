@@ -165,7 +165,6 @@ module BitClust
         end
 
         fdb.transaction do
-          functions = {}
           create_html_entries("capi", fdb.functions, manager, fdb)
         end
 
@@ -219,34 +218,36 @@ module BitClust
       end
 
       def create_html_entries(title, entries, manager, db)
+        title = align_progress_bar_title(title)
         original_title = title.dup
         if @verbose
-          progressbar = ProgressBar.new(title, entries.size)
+          progressbar = ProgressBar.create(title: title, total: entries.size)
         else
-          progressbar = SilentProgressBar.new(title, entries.size)
+          progressbar = SilentProgressBar.create(title: title, total: entries.size)
         end
         entries.each do |entry|
           create_html_file(entry, manager, @outputdir, db)
-          progressbar.title.replace([entry].flatten.first.name)
-          progressbar.inc
+          progressbar.title = align_progress_bar_title([entry].flatten.first.name)
+          progressbar.increment
         end
-        progressbar.title.replace(original_title)
+        progressbar.title = original_title
         progressbar.finish
       end
 
       def create_html_methods(title, methods, manager, db)
+        title = align_progress_bar_title(title)
         original_title = title.dup
         if @verbose
-          progressbar = ProgressBar.new(title, methods.size)
+          progressbar = ProgressBar.create(title: title, total: methods.size)
         else
-          progressbar = SilentProgressBar.new(title, methods.size)
+          progressbar = SilentProgressBar.create(title: title, total: methods.size)
         end
         methods.each do |method_name, method_entries|
           create_html_method_file(method_name, method_entries, manager, @outputdir, db)
-          progressbar.title.replace(method_name)
-          progressbar.inc
+          progressbar.title = align_progress_bar_title(method_name)
+          progressbar.increment
         end
-        progressbar.title.replace(original_title)
+        progressbar.title = original_title
         progressbar.finish
       end
 
