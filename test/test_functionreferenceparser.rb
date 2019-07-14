@@ -33,12 +33,12 @@ HERE
          :version   => "1.9.3",
          :expected  => ["some text 2\n"],
        },
-       "2.0.0" => {
-         :version   => "2.0.0",
+       "2.5.0" => {
+         :version   => "2.5.0",
          :expected  => ["some text 1\n"],
        },
-       "2.1.0" => {
-         :version   => "2.1.0",
+       "2.6.0" => {
+         :version   => "2.6.0",
          :expected  => ["some text 1\n"],
        })
   def test_parse_file(data)
