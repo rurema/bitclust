@@ -149,7 +149,7 @@ module BitClust
     end
 
     def cond_init
-      @state_stack = [State.new(nil, :toplevel)]
+      @state_stack = [State.new(true, :toplevel)]
     end
 
     def cond_toplevel?
@@ -158,13 +158,13 @@ module BitClust
 
     def cond_push(bool)
       last = @state_stack.last
-      @state_stack.push(State.new(last.current, bool))
+      @state_stack.push(last.next(bool, :condition))
     end
 
     def cond_invert
       b = @state_stack.pop.processing?
       last = @state_stack.last
-      @state_stack.push(State.new(last.current, !b))
+      @state_stack.push(last.next(!b, :condition))
     end
 
     def cond_pop
@@ -254,7 +254,7 @@ module BitClust
 
     def samplecode_push(description)
       last = @state_stack.last
-      @state_stack.push(State.new(last.current, :samplecode))
+      @state_stack.push(last.next(true, :samplecode))
     end
 
     def samplecode_pop
@@ -276,24 +276,25 @@ module BitClust
     class State
       attr_reader :current
 
-      def initialize(previous, current)
-        @previous = previous
-        @current = current
+      def initialize(is_processing, label)
+        @is_processing = is_processing
+        @label = label
+      end
+
+      def next(is_processing, label)
+        State.new(@is_processing && is_processing, label)
       end
 
       def toplevel?
-        @current == :toplevel
+        @label == :toplevel
       end
 
       def processing?
-        toplevel? ||
-          (@current == true && @previous != false) ||
-          (@current == :samplecode && @previous == true) ||
-          (@current == :samplecode && @previous == :toplevel)
+        @is_processing
       end
 
       def samplecode?
-        @current == :samplecode
+        @label == :samplecode
       end
     end
   end
