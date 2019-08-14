@@ -13,8 +13,6 @@ Rurema is a Japanese ruby documentation project, and
 bitclust is a rurema document processor.
 EOD
 
-  s.rubyforge_project = ""
-
   s.files         = Dir["ChangeLog", "Gemfile", "README", "Rakefile", "bitclust.gemspec",
                         "data/**/*", "lib/**/*.rb", "theme/**/*"].reject {|f| f =~ /.*~/ }
   s.test_files    = Dir["test/**/*.rb"].reject {|f| f =~ /.*~/ }

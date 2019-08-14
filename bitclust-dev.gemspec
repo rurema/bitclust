@@ -14,8 +14,6 @@ bitclust is a rurema document processor.
 This is tools for Rurema developpers.
 EOD
 
-  s.rubyforge_project = ""
-
   s.files         = Dir["tools/*"]
   s.executables   = Dir["tools/*"].
     map {|v| File.basename(v) }.
