@@ -109,6 +109,27 @@ HERE
     assert_equal(expected, ret.join)
   end
 
+  def test_nested_condition
+    params = { 'version' => '2.4.0' }
+    src = <<~'HERE'
+      #@until 2.4.0
+      #@since 1.8.7
+      #@since 1.9.3
+      #@since 2.0.0
+      Not display here!
+      #@end
+      #@end
+      #@end
+      #@end
+      Display here!
+    HERE
+    expected = <<~HERE
+      Display here!
+    HERE
+    ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+    assert_equal(expected, ret.join)
+  end
+
   sub_test_case("samplecode") do
 
     def test_samplecode
