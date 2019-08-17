@@ -7,15 +7,15 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
 
   sub_test_case "syntax error" do
     test "single line" do
-      src = "...\n"
-      assert_raise(BitClust::SyntaxHighlighter::ParseError.new("-", 1, 3, "syntax error, unexpected ...")) do
+      src = "foo(\n"
+      assert_raise(BitClust::SyntaxHighlighter::ParseError.new("-", 1, 5, "syntax error, unexpected end-of-input, expecting ')'")) do
         highlight(src)
       end
     end
 
     test "multiple line" do
-      src = "a = 1\n...\n"
-      assert_raise(BitClust::SyntaxHighlighter::ParseError.new("-", 2, 3, "syntax error, unexpected ..., expecting end-of-input")) do
+      src = "a = 1\nfoo(\n"
+      assert_raise(BitClust::SyntaxHighlighter::ParseError.new("-", 2, 5, "syntax error, unexpected end-of-input, expecting ')'")) do
         highlight(src)
       end
     end
