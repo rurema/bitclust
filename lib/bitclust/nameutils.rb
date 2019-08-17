@@ -120,10 +120,14 @@ module BitClust
       "#{cid}/#{typename2char(t)}.#{encodename_url(name)}.#{libid}"
     end
 
+    @@split_method_id = {}
+
     # private module function
     def split_method_id(id)
-      c, rest = id.split("/")
-      return *[c, *rest.split(%r<[/\.]>, 3)]
+      @@split_method_id[id] ||= begin
+        c, rest = id.split("/")
+        [c, *rest.split(%r<[/\.]>, 3)]
+      end
     end
 
     NAME_TO_MARK = {
