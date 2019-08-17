@@ -269,7 +269,6 @@ HERE
           @urlmapper.bitclust_html_base = '..'
           path = outputdir + e.type_id.to_s + html_filename(encodename_package(e.name), @suffix)
           create_html_file_p(entry, manager, path, db)
-          path.relative_path_from(outputdir).to_s
         when :function
           create_html_function_file(entry, manager, outputdir, db)
         else
@@ -286,7 +285,6 @@ HERE
         path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
           e.typechar + html_filename(encodename_package(name), @suffix)
         create_html_file_p(entries, manager, path, db)
-        path.relative_path_from(outputdir).to_s
       end
 
       def create_html_function_file(entry, manager, outputdir, db)
@@ -294,7 +292,6 @@ HERE
         @urlmapper.bitclust_html_base = '..'
         path = outputdir + entry.type_id.to_s + html_filename(entry.name, @suffix)
         create_html_file_p(entry, manager, path, db)
-        path.relative_path_from(outputdir).to_s
       end
 
       def create_html_file_p(entry, manager, path, db)
