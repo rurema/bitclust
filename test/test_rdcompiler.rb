@@ -3,6 +3,7 @@ require 'bitclust/database'
 require 'bitclust/methoddatabase'
 require 'bitclust/screen'
 require 'test/unit'
+require 'test/unit/rr'
 require 'timeout'
 
 class TestRDCompiler < Test::Unit::TestCase
@@ -834,5 +835,244 @@ HERE
        })
   def test_rdoc_link(data)
     assert_equal(data[:expected], @c.rdoc_link(data[:method_id], data[:version]))
+  end
+
+  def test_paragraph_with_single_line
+    source = <<~SOURCE
+      a
+    SOURCE
+    expected = <<~HTML
+      <p>
+      a
+      </p>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_paragraph_with_newline_between_ascii_and_ascii
+    source = <<~SOURCE
+      a
+      a
+    SOURCE
+    expected = <<~HTML
+      <p>
+      a
+      a
+      </p>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_paragraph_with_newline_between_ascii_and_non_ascii
+    source = <<~SOURCE
+      a
+      あ
+    SOURCE
+    expected = <<~HTML
+      <p>
+      a
+      あ
+      </p>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_paragraph_with_newline_between_non_ascii_and_ascii
+    source = <<~SOURCE
+      あ
+      a
+    SOURCE
+    expected = <<~HTML
+      <p>
+      あ
+      a
+      </p>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_paragraph_with_newline_between_non_ascii_and_non_ascii
+    source = <<~SOURCE
+      あ
+      あ
+    SOURCE
+    expected = <<~HTML
+      <p>
+      ああ
+      </p>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_definition_list_with_ascii
+    source = <<~SOURCE
+      : b
+        あ
+        あ
+    SOURCE
+    expected = <<~HTML
+      <dl>
+      <dt>b</dt>
+      <dd>
+      <p>
+      ああ
+      </p>
+      </dd>
+      </dl>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_definition_list_with_non_ascii
+    source = <<~SOURCE
+      : b
+        a
+        a
+    SOURCE
+    expected = <<~HTML
+      <dl>
+      <dt>b</dt>
+      <dd>
+      <p>
+      a
+      a
+      </p>
+      </dd>
+      </dl>
+    HTML
+    assert_equal(
+      expected,
+      @c.compile(source)
+    )
+  end
+
+  def test_entry_info_with_ascii
+    source = <<~SOURCE
+      --- b
+
+      @param arg あ
+        あ
+    SOURCE
+    expected = <<~HTML
+      <dt class="method-heading" id="dummy"><code>b</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+      <dd class="method-description">
+      <dl>
+      <dt class='method-param'>[PARAM] arg:</dt>
+      <dd>
+      ああ
+      </dd>
+      </dl>
+      </dd>
+    HTML
+    assert_compiled_method_source(expected, source)
+  end
+
+  def test_entry_info_with_non_ascii
+    source = <<~SOURCE
+      --- b
+      @param arg a
+        a
+    SOURCE
+    expected = <<~HTML
+      <dt class="method-heading" id="dummy"><code>b</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+      <dd class="method-description">
+      <dl>
+      <dt class='method-param'>[PARAM] arg:</dt>
+      <dd>
+      a
+      a
+      </dd>
+      </dl>
+      </dd>
+    HTML
+    assert_compiled_method_source(expected, source)
+  end
+
+  def test_entry_paragraph_with_ascii
+    source = <<~SOURCE
+      --- b
+      あ
+      あ
+    SOURCE
+    expected = <<~HTML
+      <dt class="method-heading" id="dummy"><code>b</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+      <dd class="method-description">
+      <p>
+      ああ
+      </p>
+      </dd>
+    HTML
+    assert_compiled_method_source(expected, source)
+  end
+
+  def test_entry_paragraph_with_non_ascii
+    source = <<~SOURCE
+      --- b
+      a
+      a
+    SOURCE
+    expected = <<~HTML
+      <dt class="method-heading" id="dummy"><code>b</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+      <dd class="method-description">
+      <p>
+      a
+      a
+      </p>
+      </dd>
+    HTML
+    assert_compiled_method_source(expected, source)
+  end
+
+  def test_entry_see_with_ascii
+    source = <<~SOURCE
+      --- b
+      @see あ
+        あ
+    SOURCE
+    expected = <<~HTML
+      <dt class="method-heading" id="dummy"><code>b</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+      <dd class="method-description">
+      <p>
+      [SEE_ALSO] ああ
+      </p>
+      </dd>
+    HTML
+    assert_compiled_method_source(expected, source)
+  end
+
+  def test_entry_see_with_non_ascii
+    source = <<~SOURCE
+      --- b
+      @see a
+        a
+    SOURCE
+    expected = <<~HTML
+      <dt class="method-heading" id="dummy"><code>b</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+      <dd class="method-description">
+      <p>
+      [SEE_ALSO] a
+      a
+      </p>
+      </dd>
+    HTML
+    assert_compiled_method_source(expected, source)
   end
 end
