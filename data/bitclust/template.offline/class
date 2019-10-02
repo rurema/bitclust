@@ -82,6 +82,30 @@
 </dl>
 
 <%
+_myself, *ancestors = @entry.ancestors.reject { |c| %w[Object Kernel BasicObject].include?(c.name) }
+displayed_methods = Set.new(ents.instance_methods.map(&:name))
+%>
+
+<% unless ancestors.empty? %>
+  <%= headline(_("Ancestor Methods")) %>
+<dl>
+  <% ancestors.each do |c|
+       methods = c.partitioned_entries(@alevel).instance_methods
+         .reject { |m| displayed_methods.include?(m.name) }
+       next if methods.empty? %>
+<dt><%= _('Ancestor Methods %s', c.name) %></dt>
+<dd>
+    <% methods.each do |m| %>
+      <%= method_link(m.spec_string, m.name) %>
+      <% displayed_methods << m.name %>
+    <% end %>
+</dd>
+<%
+  end
+end %>
+</dl>
+
+<%
     items.each do |label, entries|
       unless entries.empty? %>
 <%=     headline(label) %>
