@@ -11,9 +11,9 @@ All Functions
 All Libraries
 ライブラリ一覧
 Ancestor Methods
-親クラスで定義されているメソッド
+継承しているメソッド
 Ancestor Methods %s
-%sで定義されているメソッド
+%sから継承しているメソッド
 Builtin
 組み込み
 Builtin Library
