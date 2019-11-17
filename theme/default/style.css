@@ -237,6 +237,20 @@ td.library {
     border: 3px solid white;
 }
 
+@media only screen and (max-width:425px) {
+    table.entries tr {
+        display: block;
+    }
+    td.signature {
+        display: block;
+        width: inherit;
+        text-indent: 0em !important;
+    }
+    td.description {
+        display: block;
+    }
+}
+
 a {
     font-weight: bold;
     text-decoration: none;
