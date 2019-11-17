@@ -252,6 +252,9 @@ td.library {
     dd {
         margin: 0.3em 0em 1em 1em;
     }
+    p {
+        overflow-wrap: break-word;
+    }
 }
 
 a {
