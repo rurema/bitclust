@@ -237,26 +237,6 @@ td.library {
     border: 3px solid white;
 }
 
-@media only screen and (max-width:425px) {
-    table.entries tr {
-        display: block;
-    }
-    td.signature {
-        display: block;
-        width: inherit;
-        text-indent: 0em !important;
-    }
-    td.description {
-        display: block;
-    }
-    dd {
-        margin: 0.3em 0em 1em 1em;
-    }
-    p {
-        overflow-wrap: break-word;
-    }
-}
-
 a {
     font-weight: bold;
     text-decoration: none;
@@ -332,4 +312,24 @@ hr {
  position: absolute;
  top: 15px;
  right: 10px;
+}
+
+@media only screen and (max-width:425px) {
+    table.entries tr {
+        display: block;
+    }
+    td.signature {
+        display: block;
+        width: inherit;
+        text-indent: 0em !important;
+    }
+    td.description {
+        display: block;
+    }
+    dd {
+        margin: 0.3em 0em 1em 1em;
+    }
+    p {
+        overflow-wrap: break-word;
+    }
 }
