@@ -34,7 +34,7 @@ jobs:
           gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} $gem
         done
       env:
-        GEM_HOST_API_KEY: ${{secrets.GPR_AUTH_TOKEN}}
+        GEM_HOST_API_KEY: ${{secrets.GITHUB_TOKEN}}
         OWNER: rurema
 
     - name: Publish to RubyGems
