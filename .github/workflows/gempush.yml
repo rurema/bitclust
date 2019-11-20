@@ -36,7 +36,6 @@ jobs:
       env:
         GEM_HOST_API_KEY: ${{secrets.GPR_AUTH_TOKEN}}
         OWNER: rurema
-      if: false # wait for GPR
 
     - name: Publish to RubyGems
       run: |
