@@ -12,7 +12,7 @@
   <% if @conf[:canonical_base_url] %>
   <link rel="canonical" href="<%= canonical_url() %>">
   <% end %>
-  <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
+  <title><%=h @title %> (Ruby <%=h ruby_version %> リファレンスマニュアル)</title>
   <meta name="description" content="<%=h @description %>">
 </head>
 <body>
