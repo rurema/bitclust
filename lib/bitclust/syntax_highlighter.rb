@@ -122,10 +122,10 @@ module BitClust
       @stack = []
       @name_buffer = []
       @__lexer.define_singleton_method(:on_parse_error) do |message|
-        raise ParseError.new(filename, self.lineno, self.column, message)
+        raise ParseError.new(filename, self.lineno, self.column, "#{message}\n#{src}")
       end
       @__lexer.define_singleton_method(:compile_error) do |message|
-        raise CompileError.new(filename, self.lineno, self.column, message)
+        raise CompileError.new(filename, self.lineno, self.column, "#{message}\n#{src}")
       end
     end
 
