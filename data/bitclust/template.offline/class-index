@@ -2,10 +2,19 @@
   @title = _('Class Index')
   @description = _('Class Index')
 %>
-<p>
-<%= manual_home_link() %>
-&gt; <%= _('All Classes') %>
-</p>
+<header>
+  <nav>
+    <ol>
+      <li>
+        <%= manual_home_link() %>
+      </li>
+      <li>
+        <%= _('All Classes') %>
+      </li>
+    </ol>
+  </nav>
+</header>
+
 <%
     headline_init
 %>

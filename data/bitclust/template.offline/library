@@ -2,11 +2,22 @@
  @title = "library #{@entry.name}"
  @description = @entry.description
 %>
-<p>
-<%= manual_home_link() %>
-&gt; <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
-&gt; <%= friendly_library_name(@entry.name) %>
-</p>
+<header>
+  <nav>
+    <ol>
+      <li>
+        <%= manual_home_link() %>
+      </li>
+      <li>
+        <a href="<%= library_index_url() %>"><%= _('All Libraries') %></a>
+      </li>
+      <li>
+        <%= friendly_library_name(@entry.name) %>
+      </li>
+    </ol>
+  </nav>
+</header>
+
 <%
     headline_init
 %>
@@ -75,4 +86,3 @@
 <%    end %>
 </code></p>
 <%  end %>
-

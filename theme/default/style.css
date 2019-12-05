@@ -285,6 +285,24 @@ hr {
     height: 1px;
 }
 
+header nav ol {
+    list-style-type: none;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    padding-left: 0;
+}
+
+header nav ol li {
+    display: inline-block;
+    margin-bottom: 0;
+}
+
+header nav ol li + li::before {
+    content: ">";
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+}
+
 @media print {
     body {
         font-family: osaka,'MS Mincho',serif;

@@ -2,10 +2,19 @@
  @title = _('Library Index')
  @description = _('Library Index')
 %>
-<p>
-<%= manual_home_link() %>
-&gt; <%= _("All Libraries") %>
-</p>
+<header>
+  <nav>
+    <ol>
+      <li>
+        <%= manual_home_link() %>
+      </li>
+      <li>
+        <%= _("All Libraries") %>
+      </li>
+    </ol>
+  </nav>
+</header>
+
 <%
     headline_init
 %>
