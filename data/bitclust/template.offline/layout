@@ -4,7 +4,6 @@
   <%= google_tag_manager %>
   <%= meta_robots %>
   <meta http-equiv="Content-Type" content="text/html; charset=<%=h charset() %>">
-  <meta http-equiv="Content-Language" content="ja-JP">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="<%=h css_url() %>">
   <link rel="stylesheet" type="text/css" href="<%=h custom_css_url("syntax-highlight.css") %>">
