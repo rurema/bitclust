@@ -2,10 +2,19 @@
   @title = _('Function Index')
   @description = _('Function Index')
 %>
-<p>
-<%= manual_home_link() %>
-&gt; <%= _('All Functions') %>
-</p>
+<header>
+  <nav>
+    <ol>
+      <li>
+        <%= manual_home_link() %>
+      </li>
+      <li>
+        <%= _('All Functions') %>
+      </li>
+    </ol>
+  </nav>
+</header>
+
 <%
     headline_init
 %>
@@ -24,4 +33,3 @@
     headline_pop
 %>
 </table>
-

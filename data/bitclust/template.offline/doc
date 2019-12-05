@@ -2,14 +2,25 @@
   @title = @entry.title
   @description = @entry.description
 %>
-<p>
-<% if @entry.name == 'index' %>
-<%= _('Ruby %s Reference Manual', ruby_version()) %>
-<% else %>
-<%= manual_home_link() %>
-&gt; <%=h breadcrumb_title %>
-<% end %>
-</p>
+<header>
+  <nav>
+    <ol>
+      <% if @entry.name == 'index' %>
+        <li>
+          <%= _('Ruby %s Reference Manual', ruby_version()) %>
+        </li>
+      <% else %>
+        <li>
+          <%= manual_home_link() %>
+        </li>
+        <li>
+          <%=h breadcrumb_title %>
+        </li>
+      <% end %>
+    </ol>
+  </nav>
+</header>
+
 <% headline_init %>
 <%= headline(@entry.title) %>
 <% headline_push %>
