@@ -22,7 +22,7 @@
 <% end %>
 <header>
   <nav>
-    <ol>
+    <ol class="inline-breadcrumb-list">
       <li>
         <%= manual_home_link() %>
       </li>
