@@ -2,12 +2,31 @@
   @title = @entry.title
   @description = @entry.description
 %>
+<% if @conf[:canonical_base_url] %>
+<script type="application/ld+json">
+<%=
+  items = [
+    {
+      name: manual_home_name,
+      url: absolute_url_to(@urlmapper.document_url('index'))
+    }
+  ]
+  if @entry.name != 'index'
+    items << {
+      name: breadcrumb_title,
+      url: canonical_url
+    }
+  end
+  breadcrumb_json_ld(items)
+%>
+</script>
+<% end %>
 <header>
   <nav>
     <ol>
       <% if @entry.name == 'index' %>
         <li>
-          <%= _('Ruby %s Reference Manual', ruby_version()) %>
+          <%= manual_home_name %>
         </li>
       <% else %>
         <li>

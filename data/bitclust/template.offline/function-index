@@ -2,6 +2,24 @@
   @title = _('Function Index')
   @description = _('Function Index')
 %>
+<% if @conf[:canonical_base_url] %>
+<script type="application/ld+json">
+<%=
+  breadcrumb_json_ld(
+    [
+      {
+        name: manual_home_name,
+        url: absolute_url_to(@urlmapper.document_url('index'))
+      },
+      {
+        name: _('All Functions'),
+        url: canonical_url
+      }
+    ]
+  )
+%>
+</script>
+<% end %>
 <header>
   <nav>
     <ol>
