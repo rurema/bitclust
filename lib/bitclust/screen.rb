@@ -463,12 +463,12 @@ module BitClust
       {
         '@context': 'http://schema.org',
         '@type': 'BreadcrumbList',
-        'itemListElement' => items.map.with_index do |item, index|
+        'itemListElement' => items.map.with_index(1) do |item, index|
           {
             '@type' => 'ListItem',
             'item' => item[:url],
             'name' => item[:name],
-            'position' => index + 1
+            'position' => index
           }
         end
       }.to_json
