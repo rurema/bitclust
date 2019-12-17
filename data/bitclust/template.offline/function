@@ -3,6 +3,28 @@
     @title = "#{entry.type_label} #{entry.label}"
     @description = @entry.description
 %>
+<% if @conf[:canonical_base_url] %>
+<script type="application/ld+json">
+<%=
+  breadcrumb_json_ld(
+    [
+      {
+        name: manual_home_name,
+        url: absolute_url_to(@urlmapper.document_url('index'))
+      },
+      {
+        name: _('All Functions'),
+        url: absolute_url_to(function_index_url)
+      },
+      {
+        name: "#{entry.name}#{' (static)' unless entry.public?}",
+        url: canonical_url
+      }
+    ]
+  )
+%>
+</script>
+<% end %>
 <header>
   <nav>
     <ol>

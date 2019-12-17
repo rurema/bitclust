@@ -13,7 +13,9 @@ require 'bitclust/htmlutils'
 require 'bitclust/nameutils'
 require 'bitclust/messagecatalog'
 require 'erb'
+require 'json'
 require 'stringio'
+require 'uri'
 
 module BitClust
 
@@ -415,8 +417,12 @@ module BitClust
       end
     end
 
+    def manual_home_name
+      _('Ruby %s Reference Manual', ruby_version())
+    end
+
     def manual_home_link
-      document_link('index', _('Ruby %s Reference Manual', ruby_version()))
+      document_link('index', manual_home_name)
     end
 
     def friendly_library_link(id)
@@ -451,6 +457,28 @@ module BitClust
         body = f.break(/\A---/).join.split(/\n\n/, 2).first || ''
         yield sigs, body
       end
+    end
+
+    def breadcrumb_json_ld(items)
+      {
+        '@context': 'http://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement' => items.map.with_index(1) do |item, index|
+          {
+            '@type' => 'ListItem',
+            'item' => item[:url],
+            'name' => item[:name],
+            'position' => index
+          }
+        end
+      }.to_json
+    end
+
+    def absolute_url_to(path)
+      ::URI.join(
+        canonical_url,
+        path
+      )
     end
   end
 

@@ -3,6 +3,36 @@
     @title = "#{entry.type_label} #{entry.label}"
     @description = entry.description
 %>
+<% if @conf[:canonical_base_url] %>
+<script type="application/ld+json">
+<%=
+  breadcrumb_json_ld(
+    [
+      {
+        name: manual_home_name,
+        url: absolute_url_to(@urlmapper.document_url('index'))
+      },
+      {
+        name: _('All Libraries'),
+        url: absolute_url_to(library_index_url),
+      },
+      {
+        name: friendly_library_name(entry.library.name),
+        url: absolute_url_to(@urlmapper.library_url(entry.library.name))
+      },
+      {
+        name: _("#{entry.klass.type} %s", entry.klass.name),
+        url: absolute_url_to(@urlmapper.class_url(entry.klass.name))
+      },
+      {
+        name: %Q<#{'$' if entry.typename == :special_variable}#{entry.name}#{" (#{entry.visibility})" unless entry.really_public?}>,
+        url: canonical_url
+      }
+    ]
+  )
+%>
+</script>
+<% end %>
 <header>
   <nav>
     <ol>
