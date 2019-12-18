@@ -304,6 +304,24 @@ hr {
     padding-right: 0.1rem;
 }
 
+.inline-ancestors-list {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    list-style-type: none;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-left: 0;
+}
+
+.inline-ancestors-list li {
+    margin-bottom: 0;
+}
+
+.inline-ancestors-list li + li::after {
+    content: "<";
+    padding-right: 0.3rem;
+}
+
 @media print {
     body {
         font-family: osaka,'MS Mincho',serif;
