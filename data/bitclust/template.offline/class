@@ -30,7 +30,7 @@
 <% end %>
 <header>
   <nav>
-    <ol>
+    <ol class="inline-breadcrumb-list">
       <li>
         <%= manual_home_link() %>
       </li>
@@ -51,40 +51,62 @@
     headline_init
 %>
 <%= headline("#{@entry.type} #{@entry.name}" + @entry.ancestors[1..@alevel].map{|c| " + #{c.name}" }.join) %>
-<p>
 <%
     myself, *supers = @entry.ancestors
     n = 0
 %>
+
 <% unless @entry.alias? %>
-<%= _('ancestors') %>: <%= escape_html(myself.name) %>
-<%  supers.each do |c| %>
-      <%= @conf[:tochm_mode] ? "&lt;" : a_href("?a=#{n}", "<")  %> <%= class_link(c.name) %>
-      <% n += 1 %>
-<%  end %>
+  <nav>
+    <%= _('ancestors') %>:
+    <ol class="inline-ancestors-list">
+      <% supers.reverse_each do |c| %>
+        <li>
+          <%= class_link(c.name) %>
+        </li>
+        <% n += 1 %>
+      <% end %>
+      <li>
+        <%= escape_html(myself.name) %>
+      </li>
+    </ol>
+  </nav>
 <% end %>
 
 <% unless @entry.extended.empty? %>
-<br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
-<% end %>
-<% unless @entry.aliases.empty? %>
-<br>aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
-<% end %>
-<% unless @entry.dynamically_included.empty? %>
-<br> dynamic include:
- <%= @entry.dynamically_included.map{|m|
-       class_link(m.name) + " (by " + library_link(m.library.name) + ")"
-     }.join(", ")
- %>
-<% end %>
-<% unless @entry.dynamically_extended.empty? %>
-<br> dynamic extend:
- <%= @entry.dynamically_extended.map{|m|
-       class_link(m.name) + " (by " + library_link(m.library.name) + ")"
-     }.join(", ")
- %>
-<% end %>
+<p>
+  extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
 </p>
+<% end %>
+
+<% unless @entry.aliases.empty? %>
+<p>
+  aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
+</p>
+<% end %>
+
+<% unless @entry.dynamically_included.empty? %>
+<p>
+  dynamic include:
+  <%=
+    @entry.dynamically_included.map {|m|
+      class_link(m.name) + " (by " + library_link(m.library.name) + ")"
+    }.join(", ")
+  %>
+</p>
+<% end %>
+
+<% unless @entry.dynamically_extended.empty? %>
+<p>
+  dynamic extend:
+  <%=
+    @entry.dynamically_extended.map {|m|
+      class_link(m.name) + " (by " + library_link(m.library.name) + ")"
+    }.join(", ")
+  %>
+</p>
+<% end %>
+
 <%
     headline_push
 %>

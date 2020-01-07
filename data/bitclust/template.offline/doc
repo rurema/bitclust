@@ -23,7 +23,7 @@
 <% end %>
 <header>
   <nav>
-    <ol>
+    <ol class="inline-breadcrumb-list">
       <% if @entry.name == 'index' %>
         <li>
           <%= manual_home_name %>
