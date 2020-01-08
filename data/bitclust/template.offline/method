@@ -1,6 +1,6 @@
 <%
     entry = @entries.sort.first
-    @title = "#{entry.type_label} #{entry.label}"
+    @title = entry.label
     @description = entry.description
 %>
 <% if @conf[:canonical_base_url] %>
