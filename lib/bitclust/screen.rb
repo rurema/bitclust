@@ -187,7 +187,7 @@ module BitClust
     private
 
     def preproc(template)
-      template.gsub(/^\.include ([\w\-]+)/) { load($1.untaint) }.untaint
+      template.gsub(/^\.include ([\w\-]+)/) { load($1) }
     end
   end
 
