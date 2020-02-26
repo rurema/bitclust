@@ -25,7 +25,7 @@ module BitClust
         @parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
           @prepare = true
         }
-        @parser.on('--cleanup', 'Cleanup datebase before create database.') {
+        @parser.on('--cleanup', 'Cleanup database before create database.') {
           @cleanup = true
         }
         @parser.on('--purge', 'Purge all downloaded and generated files and exit.') {
