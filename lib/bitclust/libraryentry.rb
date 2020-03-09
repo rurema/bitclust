@@ -42,6 +42,7 @@ module BitClust
     alias label name
 
     def ==(other)
+      return false if self.class != other.class
       @id == other.id
     end
 

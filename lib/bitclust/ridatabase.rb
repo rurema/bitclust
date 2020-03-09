@@ -71,6 +71,7 @@ class Ent
   attr_reader :entry
 
   def ==(other)
+    return false if self.class != other.class
     @name == other.name
   end
 
