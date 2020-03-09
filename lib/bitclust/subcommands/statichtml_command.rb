@@ -180,19 +180,19 @@ module BitClust
                     :verbose => @verbose)
         create_index_html(@outputdir)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
-                     @outputdir.to_s, {:verbose => @verbose, :preserve => true})
+                     @outputdir.to_s, verbose: @verbose, preserve: true)
         FileUtils.cp(@manager_config[:themedir] + "syntax-highlight.css",
-                     @outputdir.to_s, {:verbose => @verbose, :preserve => true})
+                     @outputdir.to_s, verbose: @verbose, preserve: true)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:favicon_url],
-                     @outputdir.to_s, {:verbose => @verbose, :preserve => true})
+                     @outputdir.to_s, verbose: @verbose, preserve: true)
         Dir.mktmpdir do |tmpdir|
           FileUtils.cp_r(@manager_config[:themedir] + 'images', tmpdir,
-                         {:verbose => @verbose, :preserve => true})
+                         verbose: @verbose, preserve: true)
           Dir.glob(File.join(tmpdir, 'images', '/**/.svn')).each do |d|
-            FileUtils.rm_r(d, {:verbose => @verbose})
+            FileUtils.rm_r(d, verbose: @verbose)
           end
           FileUtils.cp_r(File.join(tmpdir, 'images'), @outputdir.to_s,
-                         {:verbose => @verbose, :preserve => true})
+                         verbose: @verbose, preserve: true)
         end
       end
 
