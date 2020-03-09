@@ -499,6 +499,7 @@ $cm_comb_m += 1
       end
 
       def ==(other)
+        return false if self.class != other.class
         @idstring == other.idstring
       end
 

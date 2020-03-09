@@ -93,6 +93,7 @@ module BitClust
     end
 
     def ==(other)
+      return false if self.class != other.class
       @klass == other.klass and
       @type == other.type and
       @method == other.method

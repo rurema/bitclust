@@ -28,6 +28,7 @@ module BitClust
     attr_reader :id
 
     def ==(other)
+      return false if self.class != other.class
       @id == other.id
     end
 
