@@ -64,4 +64,10 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
       assert_equal(expected, highlight(source))
     end
   end
+
+  test 'htmlescape' do
+    source = 'puts /<a>/'
+    expected = '<span class="nb">puts</span> <span class="sr">/&lt;a&gt;/</span>'
+    assert_equal(expected, highlight(source))
+  end
 end
