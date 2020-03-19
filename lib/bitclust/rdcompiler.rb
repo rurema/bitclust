@@ -260,6 +260,11 @@ module BitClust
       "<dt>#{s}</dt>"
     end
 
+    def stop_on_syntax_error?
+      return true unless @option.key?(:stop_on_syntax_error)
+      @option[:stop_on_syntax_error]
+    end
+
     def emlist
       command = @f.gets
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)?\]\[(?<lang>\w+?)\]! =~ command
@@ -276,7 +281,11 @@ module BitClust
             string BitClust::SyntaxHighlighter.new(src, filename).highlight
           rescue BitClust::SyntaxHighlighter::Error => ex
             $stderr.puts ex.message
-            exit(false)
+            if stop_on_syntax_error?
+              exit(false)
+            else
+              string src
+            end
           end
         else
           string src
