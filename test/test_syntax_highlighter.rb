@@ -5,6 +5,12 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
     BitClust::SyntaxHighlighter.new(src, filename).highlight
   end
 
+  def final_stack(src, filename = "-")
+    highlighter = BitClust::SyntaxHighlighter.new(src, filename)
+    highlighter.highlight
+    highlighter.instance_variable_get("@stack")
+  end
+
   sub_test_case "syntax error" do
     test "single line" do
       src = "foo(\n"
@@ -62,6 +68,12 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
       </span>
       END
       assert_equal(expected, highlight(source))
+    end
+  end
+
+  sub_test_case "final stack is empty" do
+    test "x.!" do
+      assert_equal [], final_stack("x.!")
     end
   end
 end
