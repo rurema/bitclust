@@ -145,8 +145,8 @@ module BitClust
         case @f.peek
         when /\A$/
           @f.gets
-        when  /\A[ \t\z]/
-          @f.while_match(/\A[ \t\z]/) do |line|
+        when  /\A[ \t]/
+          @f.while_match(/\A[ \t]/) do |line|
             # nop
           end
         when %r!\A//emlist\{!
@@ -161,8 +161,8 @@ module BitClust
     def dd_without_p
       while /\A[ \t]/ =~ @f.peek or %r!\A//emlist\{! =~ @f.peek
         case @f.peek
-        when  /\A[ \t\z]/
-          @f.while_match(/\A[ \t\z]/) do |line|
+        when  /\A[ \t]/
+          @f.while_match(/\A[ \t]/) do |line|
             # nop
           end
         when %r!\A//emlist\{!
