@@ -218,5 +218,5 @@ module BitClust
         @db.dirty_library self
       end
     end
- end
+  end
 end
