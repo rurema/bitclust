@@ -134,7 +134,7 @@
     .sort_by{ |_, mname| mname.gsub(/(?=[^\da-zA-Z])/, "\t") }
     .each do |index_id, mname|
 %>
-<a href="#<%= index_id %>"><%= "#{prefix}#{mname}" %></a>
+<a href="#<%= index_id %>"><%= escape_html "#{prefix}#{mname}" %></a>
 <%
   end
 %>
