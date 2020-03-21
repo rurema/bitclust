@@ -102,7 +102,7 @@ module BitClust
     }
 
     def inspect
-      c, t, m, lib = methodid2specparts(@id)
+      c, t, _m, _lib = methodid2specparts(@id)
       "\#<method #{c}#{t}#{names().join(',')}>"
     end
 
@@ -115,12 +115,12 @@ module BitClust
     end
 
     def label
-      c, t, m, lib = methodid2specparts(@id)
+      c, t, m, _lib = methodid2specparts(@id)
       "#{t == '$' ? '' : c}#{t}#{m}"
     end
 
     def short_label
-      c, t, m, lib = methodid2specparts(@id)
+      _c, t, m, _lib = methodid2specparts(@id)
       "#{t == '#' ? '' : t}#{m}"
     end
 
@@ -129,7 +129,7 @@ module BitClust
     end
 
     def labels
-      c, t, m, lib = methodid2specparts(@id)
+      c, t, _m, _lib = methodid2specparts(@id)
       names().map {|name| "#{c}#{t}#{name}" }
     end
 

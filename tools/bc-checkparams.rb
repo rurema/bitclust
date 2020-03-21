@@ -25,7 +25,7 @@ def main
   }
   begin
     option.parse!(ARGV)
-  rescue OptionParser::ParseError => ex
+  rescue OptionParser::ParseError => _ex
     $stderr.puts err.message
     exit 1
   end

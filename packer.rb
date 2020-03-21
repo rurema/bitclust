@@ -28,8 +28,6 @@ database_versions = [
   "2.0.0",
 ]
 database_version_to_dir = proc {|version| "db-" + version.tr(".", "_") }
-title = "bitclust"
-
 fu = FileUtils::Verbose
 
 parser = OptionParser.new

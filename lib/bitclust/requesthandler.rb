@@ -207,7 +207,7 @@ module BitClust
     end
 
     def defined_type?
-      type, param = parse_path_info()
+      type, _param = parse_path_info()
       case type
       when 'library', 'class', 'method', 'function', 'search', 'opensearchdescription'
         true
@@ -217,7 +217,7 @@ module BitClust
     end
 
     def type_id
-      type, param = parse_path_info()
+      type, _param = parse_path_info()
       type.intern if type
     end
 
@@ -256,7 +256,7 @@ module BitClust
     private
 
     def type_param
-      type, param = parse_path_info()
+      _type, param = parse_path_info()
       return nil unless param
       return nil if param.empty?
       param

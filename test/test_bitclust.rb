@@ -31,7 +31,7 @@ HERE
   end
 
   def search_capi(command, *argv)
-    db = BitClust::FunctionDatabase.new(@tmpdir)
+    _db = BitClust::FunctionDatabase.new(@tmpdir)
     cmd = case command
           when "lookup"
             BitClust::Subcommands::LookupCommand.new

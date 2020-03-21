@@ -13,7 +13,7 @@ module BitClust
       pat = to_pattern(pat)
       return [] if pat.empty? or /\A\s+\z/ =~ pat
       cname, type, mname = parse_method_spec_pattern(pat)
-      ret = cs = ms = []
+      cs = ms = []
       if cname and not cname.empty?
         if mname
           ms = find_class_method(db, cname, type, mname)

@@ -319,7 +319,7 @@ module BitClust
 
     def see
       header = @f.gets
-      cmd = header.slice!(/\A\@\w+/)
+      header.slice!(/\A\@\w+/)
       body = [header] + @f.span(/\A\s+\S/)
       line '<p>'
       line '[SEE_ALSO] ' + compile_text(text_node_from_lines(body))
@@ -328,7 +328,7 @@ module BitClust
 
     def todo
       header = @f.gets
-      cmd = header.slice!(/\A\@\w+/)
+      header.slice!(/\A\@\w+/)
       body = header
       line '<p class="todo">'
       line '[TODO]' + body
@@ -544,7 +544,7 @@ module BitClust
     end
 
     def rdoc_url(method_id, version)
-      cname, tmark, mname, libname = methodid2specparts(method_id)
+      cname, tmark, mname, _libname = methodid2specparts(method_id)
       tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
       cname = cname.split(".").first
       cname = cname.gsub('::', '/')
