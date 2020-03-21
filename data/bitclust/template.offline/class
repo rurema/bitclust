@@ -129,12 +129,12 @@
 <dt><%= label %></dt>
 <dd>
 <%
-  entries.each do |m|
-    m.names.each do |mname|
+  entries.inject([]){ |ary, m| ary.concat(m.names.map{ |mname| [m, mname] }) }
+    .sort_by{ |_, mname| mname.gsub(/(?=[^\da-zA-Z])/, "\t") }
+    .each do |m, mname|
 %>
 <a href="#<%= m.index_id %>"><%= "#{prefix}#{mname}" %></a>
 <%
-    end
   end
 %>
 </dd>
