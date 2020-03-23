@@ -147,6 +147,16 @@ pre.highlight {
   background: #EE8;
   opacity: 1;
 }
+.highlight__copy-button::after {
+  content: "COPY"
+}
+.highlight__copy-button.copied {
+  background: #070;
+  color: white;
+}
+.highlight__copy-button.copied::after {
+  content: "COPIED"
+}
 .highlight__copy-text {
   position: fixed;
   left: -1000px;
