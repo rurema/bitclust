@@ -86,7 +86,7 @@ module BitClust
             file = $1.strip
             basedir = File.dirname(line.location.file)
             @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
-          rescue Errno::ENOENT => err
+          rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
           end
         when /\A\#@since\b/
@@ -321,7 +321,7 @@ module BitClust
             file = $1.strip
             basedir = File.dirname(line.location.file)
             @buf.concat LineCollector.process("#{basedir}/#{file}")
-          rescue Errno::ENOENT => err
+          rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
           end
         else

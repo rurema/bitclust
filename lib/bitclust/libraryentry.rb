@@ -35,6 +35,7 @@ module BitClust
         @link_checked = false
       end
       init_properties
+      @all_classes = nil
     end
 
     attr_reader :id, :name
@@ -218,5 +219,5 @@ module BitClust
         @db.dirty_library self
       end
     end
- end
+  end
 end

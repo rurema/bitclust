@@ -10,7 +10,7 @@ ARGF.each do |line|
   if /\A---/ =~ line
     begin
       BitClust::MethodSignature.parse(line)
-    rescue => err
+    rescue => _err
       $stderr.puts "#{ARGF.filename}:#{ARGF.file.lineno}: #{line.strip.inspect}"
       st = 1
     end

@@ -27,7 +27,12 @@ module BitClust
         @srcdir = @datadir = @themedir = @theme = @templatedir = nil
         @encoding = 'utf-8'   # encoding of view
         if Object.const_defined?(:Encoding)
-          Encoding.default_external = @encoding
+          begin
+            verbose, $VERBOSE = $VERBOSE, false
+            Encoding.default_external = @encoding
+          ensure
+            $VERBOSE = verbose
+          end
         end
 
         @debugp = false

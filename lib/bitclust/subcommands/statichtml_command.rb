@@ -94,7 +94,12 @@ module BitClust
 
       def initialize
         if Object.const_defined?(:Encoding)
-          Encoding.default_external = 'utf-8'
+          begin
+            verbose, $VERBOSE = $VERBOSE, false
+            Encoding.default_external = 'utf-8'
+          ensure
+            $VERBOSE = verbose
+          end
         end
         super
         @verbose = true

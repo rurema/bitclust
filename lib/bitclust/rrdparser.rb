@@ -14,7 +14,6 @@ require 'bitclust/lineinput'
 require 'bitclust/parseutils'
 require 'bitclust/nameutils'
 require 'bitclust/exception'
-require 'bitclust/methoddatabase'
 
 module BitClust
 

@@ -122,7 +122,7 @@ class RiMethodEntry < Ent
   end
 
   def fullname
-    c, t, m = @entry.fullname.split(/([\.\#])/, 2)
+    c, t = @entry.fullname.split(/([\.\#])/, 2)
     "#{c}#{t}#{@name}"
   end
 end

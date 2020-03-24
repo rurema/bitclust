@@ -67,7 +67,7 @@ module BitClust
     end
 
     def methodid2specstring(id)
-      c, t, m, lib = *split_method_id(id)
+      c, t, m, _lib = *split_method_id(id)
       classid2name(c) + typechar2mark(t) + decodename_url(m)
     end
 
@@ -77,32 +77,32 @@ module BitClust
     end
 
     def methodid2libid(id)
-      c, t, m, lib = *split_method_id(id)
+      _c, _t, _m, lib = *split_method_id(id)
       lib
     end
 
     def methodid2classid(id)
-      c, t, m, lib = *split_method_id(id)
+      c, _t, _m, _lib = *split_method_id(id)
       c
     end
 
     def methodid2typechar(id)
-      c, t, m, lib = *split_method_id(id)
+      _c, t, _m, _lib = *split_method_id(id)
       t
     end
 
     def methodid2typename(id)
-      c, t, m, lib = *split_method_id(id)
+      _c, t, _m, _lib = *split_method_id(id)
       typechar2name(t)
     end
 
     def methodid2typemark(id)
-      c, t, m, lib = *split_method_id(id)
+      _c, t, _m, _lib = *split_method_id(id)
       typechar2mark(t)
     end
 
     def methodid2mname(id)
-      c, t, m, lib = *split_method_id(id)
+      _c, _t, m, _lib = *split_method_id(id)
       decodename_url(m)
     end
 

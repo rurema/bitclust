@@ -102,7 +102,7 @@ module BitClust
       ORDER = { '.' => 1, '#' => 2, '::' => 3 }
 
       def m_order(m)
-        m, t, c = *m.reverse.split(/(\#|\.|::)/, 2)
+        m, t = *m.reverse.split(/(\#|\.|::)/, 2)
         [ORDER[t] || 0, m.reverse]
       end
 
