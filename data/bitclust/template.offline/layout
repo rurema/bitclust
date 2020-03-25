@@ -22,7 +22,6 @@
   </a>
 
   フィードバックは<a href="https://github.com/rurema/doctree/issues/new" id="feedback-link">こちら</a>
-  <script>document.getElementById("feedback-link").search = new URLSearchParams({'body': document.location});</script>
-</div>
+  <script>if (window.URLSearchParams) { document.getElementById("feedback-link").search = new URLSearchParams({'body': document.location}); }</script></div>
 </body>
 </html>
