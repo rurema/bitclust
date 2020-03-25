@@ -134,6 +134,34 @@ pre.highlight {
     position: relative;
 }
 
+/* for COPY */
+.highlight__copy-button {
+  float: right;
+  margin: 0 -1.1em 0.25em 0.5em;
+  padding: 0.25em 0.5em;
+  background: #DDD;
+  opacity: 0.75;
+  cursor: pointer;
+}
+.highlight__copy-button:hover {
+  background: #EE8;
+  opacity: 1;
+}
+.highlight__copy-button::after {
+  content: "COPY"
+}
+.highlight__copy-button.copied {
+  background: #070;
+  color: white;
+}
+.highlight__copy-button.copied::after {
+  content: "COPIED"
+}
+.highlight__copy-text {
+  position: fixed;
+  left: -1000px;
+}
+
 pre .caption {
     position: absolute;
     top: 0;
