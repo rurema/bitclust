@@ -80,7 +80,6 @@ module BitClust
     persistent_properties {
       property :type,       'Symbol'         # :class | :module | :object
       property :superclass, 'ClassEntry'
-      property :singleton_object_class, 'ClassEntry'
       property :included,   '[ClassEntry]'
       property :extended,   '[ClassEntry]'
       property :dynamically_included, '[ClassEntry]'
@@ -211,10 +210,9 @@ module BitClust
 
     def ancestors
       @ancestors ||=
-        if singleton_object_class()
-          singleton_class, *ancestors = singleton_object_class().ancestors
-          [ singleton_class,
-            included().map {|m| m.ancestors },
+        if self.object? && superclass()
+          myself, *ancestors = superclass().ancestors
+          [ myself, included().map {|m| m.ancestors },
             ancestors ].flatten
         else
           [ self, included().map {|m| m.ancestors },

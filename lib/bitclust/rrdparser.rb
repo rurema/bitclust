@@ -363,14 +363,14 @@ module BitClust
       end
 
       def define_object(name, singleton_object_class)
-        register_class :object, name, nil, singleton_object_class: singleton_object_class
+        singleton_object_class = @db.get_class(singleton_object_class) if singleton_object_class
+        register_class :object, name, singleton_object_class
       end
 
-      def register_class(type, name, superclass, singleton_object_class: nil)
+      def register_class(type, name, superclass)
         @klass = @db.open_class(name) {|c|
           c.type = type
           c.superclass = superclass
-          c.singleton_object_class = @db.get_class(singleton_object_class) if singleton_object_class
           c.library = @library
           @library.add_class c
         }

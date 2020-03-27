@@ -67,7 +67,7 @@
         <% n += 1 %>
       <% end %>
       <li>
-        <%= @entry.type == :object ? class_link(myself.name) : escape_html(myself.name) %>
+        <%= @entry.object? ? class_link(myself.name) : escape_html(myself.name) %>
       </li>
     </ol>
   </nav>
