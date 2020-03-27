@@ -216,6 +216,7 @@ module BitClust
       when token == "::" && [:class, :module].include?(@stack.last)
         @name_buffer << token
       else
+        @stack.pop if @stack.last == :method_call
         on_default(:on_op, token, data)
       end
       data

@@ -70,4 +70,16 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
     expected = '<span class="nb">puts</span> <span class="sr">/&lt;a&gt;/</span>'
     assert_equal(expected, highlight(source))
   end
+
+  test 'symbol method' do
+    source = <<~END
+      p 1.!
+      p 2
+    END
+    expected = <<~END
+      <span class="nb">p</span> <span class="mi">1</span><span class="p">.</span><span class="o">!</span>
+      <span class="nb">p</span> <span class="mi">2</span>
+    END
+    assert_equal(expected, highlight(source))
+  end
 end
