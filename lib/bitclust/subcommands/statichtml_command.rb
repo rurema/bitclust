@@ -113,6 +113,7 @@ module BitClust
         @suffix = ".html"
         @gtm_tracking_id = nil
         @meta_robots_content = ["noindex"]
+        @stop_on_syntax_error = true
         @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
         @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
@@ -145,6 +146,9 @@ module BitClust
         end
         @parser.on('--meta-robots-content=VALUE1,VALUE2,...', Array, 'HTML <meta> element: <meta name="robots" content="VALUE1,VALUE2..."') do |values|
           @meta_robots_content = values
+        end
+        @parser.on('--no-stop-on-syntax-error', 'Do not stop on syntax error') do |boolean|
+          @stop_on_syntax_error = boolean
         end
         @parser.on('--[no-]quiet', 'Be quiet') do |quiet|
           @verbose = !quiet
@@ -223,6 +227,7 @@ module BitClust
           :canonical_base_url => @canonical_base_url,
           :gtm_tracking_id => @gtm_tracking_id,
           :meta_robots_content => @meta_robots_content,
+          :stop_on_syntax_error => @stop_on_syntax_error,
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]
