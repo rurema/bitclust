@@ -120,11 +120,7 @@ module BitClust
           @context.define_module name
           read_class_body f
         when 'object'
-          if superclass
-            # FIXME
-            tty_warn "#{line.location}: singleton object class not implemented yet"
-          end
-          @context.define_object name
+          @context.define_object name, superclass
           read_object_body f
         when 'reopen'
           @context.reopen_class name
@@ -366,8 +362,9 @@ module BitClust
         register_class :module, name, nil
       end
 
-      def define_object(name)
-        register_class :object, name, nil
+      def define_object(name, singleton_object_class)
+        singleton_object_class = @db.get_class(singleton_object_class) if singleton_object_class
+        register_class :object, name, singleton_object_class
       end
 
       def register_class(type, name, superclass)
