@@ -76,6 +76,11 @@ module BitClust
     def next_line(f)
       while line = f.gets
         case line
+        when /\A(?!\#@)/
+          if current_cond.processing?
+            @buf.push line
+            break
+          end
         when /\A\#@\#/   # preprocessor comment
           ;
         when /\A\#@todo/i
@@ -107,13 +112,8 @@ module BitClust
             parse_error "no matching \#@if", line  if cond_toplevel?
             cond_pop
           end
-        when /\A\#@/
-          parse_error "unknown preprocessor directive", line
         else
-          if current_cond.processing?
-            @buf.push line
-            break
-          end
+          parse_error "unknown preprocessor directive", line
         end
       end
       if @buf.empty?
