@@ -114,8 +114,8 @@ span.compileerror {
 }
 
 code, pre, tt {
-  font-size: 90%;
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    font-size: 90%;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
 pre {
@@ -348,6 +348,22 @@ hr {
 .inline-ancestors-list li + li::after {
     content: "<";
     padding-right: 0.3rem;
+}
+
+.class-toc {
+    list-style: none;
+    margin: 0.5em 0;
+    padding: 0;
+    column-gap: 1em;
+    column-width: 10em;
+    column-rule: 1px dotted #BBB;
+}
+
+.class-toc > li {
+    padding-left: 1em;
+    text-indent: -1em;
+    word-break: break-all;
+    break-inside: avoid;
 }
 
 @media print {

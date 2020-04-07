@@ -128,15 +128,18 @@
 <% items.each do |label, entries, prefix| next if entries.empty? %>
 <dt><%= label %></dt>
 <dd>
+<ul class="class-toc">
 <%
-  entries.each do |m|
-    m.names.each do |mname|
+  entries.inject([]){ |ary, m| ary.concat(m.names.map{ |mname| [m.index_id, mname] }) }
+    .uniq
+    .sort_by{ |_, mname| mname.gsub(/(?=[^\da-zA-Z])/, "\t") }
+    .each do |index_id, mname|
 %>
-<a href="#<%= m.index_id %>"><%= "#{prefix}#{mname}" %></a>
+<li><a href="#<%= index_id %>"><%= escape_html "#{prefix}#{mname}" %></a></li>
 <%
-    end
   end
 %>
+</ul>
 </dd>
 <% end %>
 </dl>
@@ -155,10 +158,12 @@ displayed_methods = Set.new(ents.instance_methods.map(&:name))
        next if methods.empty? %>
 <dt><%= _('Ancestor Methods %s', c.name) %></dt>
 <dd>
+  <ul class="class-toc">
     <% methods.each do |m| %>
-      <%= method_link(m.spec_string, m.name) %>
+      <li><%= method_link(m.spec_string, m.name) %></li>
       <% displayed_methods << m.name %>
     <% end %>
+  </ul>
 </dd>
 <%
   end
