@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja-JP">
+<head>
 <%= google_tag_manager %>
 <%= meta_robots %>
 <meta charset="<%=h charset() %>">
@@ -13,6 +14,7 @@
 <title><%=h @title %> (Ruby <%=h ruby_version %> リファレンスマニュアル)</title>
 <meta name="description" content="<%=h @description %>">
 <script src="<%=h custom_js_url('script.js') %>"></script>
+</head>
 <body>
 <%= yield %>
 <div id="footer">
