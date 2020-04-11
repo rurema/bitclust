@@ -31,12 +31,11 @@
       </li>
     </ol>
   </nav>
+<% headline_init %>
+<%= headline(_("Class Index")) %>
 </header>
 
-<%
-    headline_init
-%>
-<%= headline(_("Class Index")) %>
+<main>
 <p>
 <%= @entries.size %> classes/modules in database
 </p>
@@ -56,3 +55,4 @@
     headline_pop
 %>
 </ul>
+</main>

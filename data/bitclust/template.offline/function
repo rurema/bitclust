@@ -39,10 +39,11 @@
       </li>
     </ol>
   </nav>
-</header>
-
 <% headline_init %>
 <%= headline("#{entry.type_label} #{entry.label}") %>
+</header>
+
+<main>
 <dl class="functionlist">
 <dt>
   <code><%= entry.header %></code>
@@ -51,3 +52,4 @@
 <%= compile_function(entry) %>
 </dd>
 </dl>
+</main>

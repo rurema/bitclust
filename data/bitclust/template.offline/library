@@ -38,13 +38,11 @@
       </li>
     </ol>
   </nav>
+<% headline_init %>
+<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}") %>
 </header>
 
-<%
-    headline_init
-%>
-<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}") %>
-
+<main>
 <%
     headline_push
     all_classes = @entry.all_classes
@@ -108,3 +106,4 @@
 <%    end %>
 </code></p>
 <%  end %>
+</main>
