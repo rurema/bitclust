@@ -18,9 +18,8 @@
         elem.appendChild(copyText)
 
         // COPY button
-        const btn = document.createElement('div')
+        const btn = document.createElement('span')
         btn.setAttribute('class', 'highlight__copy-button')
-        // btn.textContent = "COPY"
         elem.insertBefore(btn, elem.firstChild)
 
         btn.onclick = function(){
