@@ -31,12 +31,11 @@
       </li>
     </ol>
   </nav>
+<% headline_init %>
+<%= headline(_("Function Index")) %>
 </header>
 
-<%
-    headline_init
-%>
-<%= headline(_("Function Index")) %>
+<main>
 <table class="entries functions">
 <%
     headline_push
@@ -51,3 +50,4 @@
     headline_pop
 %>
 </table>
+</main>

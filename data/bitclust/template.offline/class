@@ -45,12 +45,11 @@
       </li>
     </ol>
   </nav>
+<% headline_init %>
+<%= headline("#{@entry.type} #{@entry.name}" + @entry.ancestors[1..@alevel].map{|c| " + #{c.name}" }.join) %>
 </header>
 
-<%
-    headline_init
-%>
-<%= headline("#{@entry.type} #{@entry.name}" + @entry.ancestors[1..@alevel].map{|c| " + #{c.name}" }.join) %>
+<main>
 <%
     myself, *supers = @entry.ancestors
     n = 0
@@ -190,3 +189,4 @@ end %>
     end
     headline_pop
 %>
+</main>

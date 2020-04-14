@@ -38,9 +38,11 @@
       <% end %>
     </ol>
   </nav>
-</header>
-
 <% headline_init %>
 <%= headline(@entry.title) %>
+</header>
+
+<main>
 <% headline_push %>
 <%= compile_rd(@entry.source) %>
+</main>

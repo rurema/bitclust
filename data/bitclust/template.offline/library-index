@@ -31,12 +31,11 @@
       </li>
     </ol>
   </nav>
+<% headline_init %>
+<%= headline(_("Library Index")) %>
 </header>
 
-<%
-    headline_init
-%>
-<%= headline(_("Library Index")) %>
+<main>
 <%
     headline_push
     weight = {"Builtin" => "", "" => "\x7f\x7f"}
@@ -75,3 +74,4 @@
     end
     headline_pop
 %>
+</main>
