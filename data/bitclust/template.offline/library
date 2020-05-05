@@ -97,12 +97,16 @@
   end
 %>
 <%
-    ents = @entry.methods.sort
+    ents = @entry.methods.flat_map do |m|
+      c, t, n, = methodid2specparts(m.id)
+      prefix = (t == '$' ? '' : c) + t
+      m.names.map { |name| [prefix + name, c + t + n] }
+    end.sort
     unless ents.empty? %>
 <%= headline(_("Added/Redefined Methods")) %>
 <p><code>
-<%    ents.each do |m| %>
-<%= link_to_method(m, true) %>
+<%    ents.each do |label, spec| %>
+<%= method_link(spec, label) %>
 <%    end %>
 </code></p>
 <%  end %>
