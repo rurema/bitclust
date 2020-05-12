@@ -14,6 +14,14 @@ bitclust is a rurema document processor.
 This is tools for Rurema developpers.
 EOD
 
+  s.metadata = {
+    "bug_tracker_uri"   => "https://github.com/rurema/bitclust/issues",
+    "documentation_uri" => "https://github.com/rurema/doctree/wiki",
+    "homepage_uri"      => s.homepage,
+    "source_code_uri"   => "https://github.com/rurema/bitclust",
+    "wiki_uri"          => "https://github.com/rurema/doctree/wiki",
+  }
+
   s.files         = Dir["tools/*"]
   s.executables   = Dir["tools/*"].
     map {|v| File.basename(v) }.
