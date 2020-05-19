@@ -153,14 +153,16 @@ displayed_methods = Set.new(ents.instance_methods.map(&:name))
 <dl>
   <% ancestors.each do |c|
        methods = c.partitioned_entries(@alevel).instance_methods
-         .reject { |m| displayed_methods.include?(m.name) }
+         .flat_map { |m| m.names.map { |n| [n, m] } }
+         .reject { |name,| displayed_methods.include?(name) }
+         .sort
        next if methods.empty? %>
 <dt><%= _('Ancestor Methods %s', c.name) %></dt>
 <dd>
   <ul class="class-toc">
-    <% methods.each do |m| %>
-      <li><%= method_link(m.spec_string, m.name) %></li>
-      <% displayed_methods << m.name %>
+    <% methods.each do |name, m| %>
+      <li><%= method_link(m.spec_string, name) %></li>
+      <% displayed_methods << name %>
     <% end %>
   </ul>
 </dd>
