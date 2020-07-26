@@ -2,6 +2,7 @@
     entry = @entries.sort.first
     @title = entry.label
     @description = entry.description
+    @edit_url = edit_url(entry.source_location) if @conf[:edit_base_url]
 %>
 <% if @conf[:canonical_base_url] %>
 <script type="application/ld+json">
