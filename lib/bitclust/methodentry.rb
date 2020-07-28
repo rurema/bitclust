@@ -99,7 +99,7 @@ module BitClust
       property :visibility,      'Symbol'   # :public | :private | :protected
       property :kind,            'Symbol'   # :defined | :added | :redefined
       property :source,          'String'
-      property :source_location, 'String'
+      property :source_location, 'Location'
     }
 
     def inspect
@@ -207,11 +207,5 @@ module BitClust
     def description
       source.split(/\n\n+/, 3)[1]
     end
-
-    prepend Module.new {
-      def source_location
-        Location.new(*super.split(':'))
-      end
-    }
   end
 end
