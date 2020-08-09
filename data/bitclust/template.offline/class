@@ -152,9 +152,11 @@ displayed_methods = Set.new(ents.instance_methods.map(&:name))
   <%= headline(_("Ancestor Methods")) %>
 <dl>
   <% ancestors.each do |c|
+       undefined_methods = @entry.partitioned_entries.undefined
        methods = c.partitioned_entries(@alevel).instance_methods
          .flat_map { |m| m.names.map { |n| [n, m] } }
          .reject { |name,| displayed_methods.include?(name) }
+         .reject { |name,| undefined_methods.any? { |m| m.names.include?(name) } }
          .sort
        next if methods.empty? %>
 <dt><%= _('Ancestor Methods %s', c.name) %></dt>

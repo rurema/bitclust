@@ -253,7 +253,7 @@ module BitClust
                        :instance_methods,  :private_instance_methods,
                        :module_functions,
                        :constants, :special_variables,
-                       :added)
+                       :added, :undefined)
 
     def partitioned_entries(level = 0)
       s = []; spv = []
@@ -261,6 +261,7 @@ module BitClust
       mf = []
       c = []; v = []
       added = []
+      undefined = []
       entries(level).sort_by(&:name).each do |m|
         case m.kind
         when :defined, :redefined
@@ -280,9 +281,11 @@ module BitClust
           end
         when :added
           added.push m
+        when :undefined
+          undefined.push m
         end
       end
-      Parts.new(s,spv, i,ipv, mf, c, v, added)
+      Parts.new(s,spv, i,ipv, mf, c, v, added, undefined)
     end
 
     def singleton_methods(level = 0)
