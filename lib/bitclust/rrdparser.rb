@@ -10,6 +10,7 @@
 require 'bitclust/compat'
 require 'bitclust/preprocessor'
 require 'bitclust/methodid'
+require 'bitclust/methoddatabase'
 require 'bitclust/lineinput'
 require 'bitclust/parseutils'
 require 'bitclust/nameutils'
