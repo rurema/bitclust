@@ -26,6 +26,14 @@ unless String.method_defined?(:bytesize)
   end
 end
 
+unless String.method_defined?(:match?)
+  class String
+    def match?(pattern, pos = 0)
+      !match(pattern, pos).nil?
+    end
+  end
+end
+
 def fopen(*args, &block)
   option = args[1]
   if option and !Object.const_defined?(:Encoding)
