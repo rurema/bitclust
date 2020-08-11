@@ -95,10 +95,11 @@ module BitClust
     attr_writer :klass
 
     persistent_properties {
-      property :names,      '[String]'
-      property :visibility, 'Symbol'   # :public | :private | :protected
-      property :kind,       'Symbol'   # :defined | :added | :redefined
-      property :source,     'String'
+      property :names,           '[String]'
+      property :visibility,      'Symbol'   # :public | :private | :protected
+      property :kind,            'Symbol'   # :defined | :added | :redefined
+      property :source,          'String'
+      property :source_location, 'Location'
     }
 
     def inspect

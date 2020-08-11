@@ -368,6 +368,10 @@ module BitClust
       @urlmapper.canonical_url(current_url)
     end
 
+    def edit_url(location)
+      @urlmapper.edit_url(location)
+    end
+
     def opensearchdescription_url
       @urlmapper.opensearchdescription_url
     end

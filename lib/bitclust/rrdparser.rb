@@ -448,10 +448,11 @@ module BitClust
       def define_method(chunk)
         id = method_id(chunk)
         @db.open_method(id) {|m|
-          m.names      = chunk.names.sort
-          m.kind       = @kind
-          m.visibility = @visibility || :public
-          m.source     = chunk.source
+          m.names           = chunk.names.sort
+          m.kind            = @kind
+          m.visibility      = @visibility || :public
+          m.source          = chunk.source
+          m.source_location = chunk.source.location
           case @kind
           when :added, :redefined
             @library.add_method m

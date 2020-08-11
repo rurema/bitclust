@@ -28,6 +28,7 @@ module BitClust
           @suffix = h[:suffix]
           @fs_casesensitive = h[:fs_casesensitive]
           @canonical_base_url = h[:canonical_base_url]
+          @edit_base_url = h[:edit_base_url]
         end
 
         def library_url(name)
@@ -87,6 +88,10 @@ module BitClust
           (@canonical_base_url + "/#{current_url}").sub(@bitclust_html_base, "").sub(/([^:])\/\/+/, "\\1/")
         end
 
+        def edit_url(location)
+          "#{@edit_base_url}/#{location.file}#L#{location.line}"
+        end
+
         def encodename_package(str)
           if @fs_casesensitive
             encodename_url(str)
@@ -140,6 +145,9 @@ module BitClust
         end
         @parser.on('--canonical-base-url=URL', 'Canonical base URL') do |url|
           @canonical_base_url = url
+        end
+        @parser.on('--edit-base-url=URL', 'Edit base URL') do |url|
+          @edit_base_url = url
         end
         @parser.on('--tracking-id=ID', 'Google Tag Manager Tracking ID') do |id|
           @gtm_tracking_id = id
@@ -225,6 +233,7 @@ module BitClust
           :tochm_mode  => true,
           :fs_casesensitive => @fs_casesensitive,
           :canonical_base_url => @canonical_base_url,
+          :edit_base_url => @edit_base_url,
           :gtm_tracking_id => @gtm_tracking_id,
           :meta_robots_content => @meta_robots_content,
           :stop_on_syntax_error => @stop_on_syntax_error,
