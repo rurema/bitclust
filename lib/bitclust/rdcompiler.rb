@@ -393,7 +393,7 @@ module BitClust
         string a_href(@urlmapper.method_url(methodid2specstring(@method.id)), "permalink")
         string ']['
         string rdoc_link(@method.id, @option[:database].properties["version"])
-        if @option[:edit_base_url]
+        if @option[:edit_base_url] && @method.source_location
           string ']['
           string a_href(@urlmapper.edit_url(@method.source_location), 'edit')
         end
