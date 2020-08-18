@@ -116,7 +116,7 @@ module BitClust
         when '[LibraryEntry]' then "restore_libraries(h['#{@name}'])"
         when '[ClassEntry]'   then "restore_classes(h['#{@name}'])"
         when '[MethodEntry]'  then "restore_methods(h['#{@name}'])"
-        when 'Location'       then "h['#{@name}']&.then { |loc| Location.new(*loc.split(?:)) }"
+        when 'Location'       then "h['#{@name}']&.tap { |loc| break Location.new(*loc.split(?:)) }"
         else
           raise "must not happen: @type=#{@type.inspect}"
         end
