@@ -1,6 +1,7 @@
 <%
  @title = "library #{@entry.name}"
  @description = @entry.description
+ @edit_url = edit_url(@entry.source_location) if @conf[:edit_base_url] && @entry.source_location
 %>
 <% if @conf[:canonical_base_url] %>
 <script type="application/ld+json">
@@ -39,7 +40,7 @@
     </ol>
   </nav>
 <% headline_init %>
-<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}") %>
+<%= headline(@entry.id == '_builtin' ? _('Builtin Library') : "library #{@entry.name}", edit_url: @edit_url) %>
 </header>
 
 <main>

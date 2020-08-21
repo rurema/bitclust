@@ -69,7 +69,7 @@ module BitClust
 
     def parse_file(path, libname, params = {})
       fopen(path, 'r:UTF-8') {|f|
-        return parse(f, libname, params)
+        return parse(f, libname, params).tap { |lib| lib.source_location = Location.new(path, 1) }
       }
     end
 
