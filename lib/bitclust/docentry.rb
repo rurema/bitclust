@@ -57,8 +57,9 @@ module BitClust
     end
 
     persistent_properties {
-      property :title,    'String'
-      property :source,   'String'
+      property :title,           'String'
+      property :source,          'String'
+      property :source_location, 'Location'
     }
 
     def inspect
