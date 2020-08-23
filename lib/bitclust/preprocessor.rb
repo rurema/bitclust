@@ -71,6 +71,10 @@ module BitClust
       cond_init
     end
 
+    def path
+      @f.path if @f.respond_to?(:path)
+    end
+
     private
 
     def next_line(f)
