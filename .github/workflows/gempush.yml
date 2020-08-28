@@ -36,7 +36,6 @@ jobs:
       env:
         GEM_HOST_API_KEY: ${{secrets.GITHUB_TOKEN}}
         OWNER: rurema
-      if: false # GPR must use same name between repo and gem
 
     - name: Publish to RubyGems
       run: |
