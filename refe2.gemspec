@@ -19,6 +19,7 @@ EOD
     "documentation_uri" => "https://github.com/rurema/doctree/wiki",
     "homepage_uri"      => s.homepage,
     "source_code_uri"   => "https://github.com/rurema/bitclust",
+    "github_repo"       => "https://github.com/rurema/bitclust",
     "wiki_uri"          => "https://github.com/rurema/doctree/wiki",
   }
 
