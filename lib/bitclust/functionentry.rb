@@ -37,13 +37,14 @@ module BitClust
     end
 
     persistent_properties {
-      property :filename,   'String'
-      property :macro,      'bool'
-      property :private,    'bool'
-      property :type,       'String'
-      property :name,       'String'
-      property :params,     'String'
-      property :source,     'String'
+      property :filename,        'String'
+      property :macro,           'bool'
+      property :private,         'bool'
+      property :type,            'String'
+      property :name,            'String'
+      property :params,          'String'
+      property :source,          'String'
+      property :source_location, 'Location'
     }
 
     attr_reader :id

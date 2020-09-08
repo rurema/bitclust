@@ -400,8 +400,11 @@ module BitClust
       @hlevel -= 1
     end
 
-    def headline(str)
-      "<h#{@hlevel}>#{escape_html(str)}</h#{@hlevel}>"
+    def headline(str, edit_url: nil)
+      edit_link = edit_url ? <<~HTML : ''
+        <span class="permalink">[<a href="#{edit_url}">edit</a>]</span>
+      HTML
+      "<h#{@hlevel}>#{escape_html(str)}</h#{@hlevel}>" + edit_link
     end
 
     def headline_noescape(str)

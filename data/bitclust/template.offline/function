@@ -2,6 +2,7 @@
     entry = @entry
     @title = "#{entry.type_label} #{entry.label}"
     @description = @entry.description
+    @edit_url = edit_url(@entry.source_location) if @conf[:edit_base_url] && @entry.source_location
 %>
 <% if @conf[:canonical_base_url] %>
 <script type="application/ld+json">
@@ -40,7 +41,7 @@
     </ol>
   </nav>
 <% headline_init %>
-<%= headline("#{entry.type_label} #{entry.label}") %>
+<%= headline("#{entry.type_label} #{entry.label}", edit_url: @edit_url) %>
 </header>
 
 <main>

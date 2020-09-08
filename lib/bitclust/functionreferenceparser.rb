@@ -34,6 +34,7 @@ module BitClust
 
     def parse(f, filename, params = {})
       @filename = filename
+      @path = f.path
       s = Preprocessor.read(f, params)
       file_entries LineInput.for_string(s)
       @db.functions
@@ -59,6 +60,7 @@ module BitClust
         f.name = h.name
         f.params = h.params
         f.source = body.join('')
+        f.source_location = body[0]&.location&.tap {|loc| break Location.new(@path, loc.line - 1) }
       }
     end
 

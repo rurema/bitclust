@@ -175,14 +175,17 @@ module BitClust
     end
 
     def copy_doc
+      root_path = Pathname.new(@root).expand_path
       Dir.glob("#{@root}/../../doc/**/*.rd").each do |f|
         if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f
           id = libname2id($1)
           se = DocEntry.new(self, id)
           s = Preprocessor.read(f, properties)
           title, source = RRDParser.split_doc(s)
+          relative_path = Pathname.new(f).expand_path(@root).relative_path_from(root_path)
           se.title = title
           se.source = source
+          se.source_location = Location.new(relative_path, 1)
           se.save
         end
       end

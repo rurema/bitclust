@@ -70,7 +70,7 @@ module BitClust
 
     def parse_file(path, libname, params = {})
       fopen(path, 'r:UTF-8') {|f|
-        return parse(f, libname, params)
+        return parse(f, libname, params).tap { |lib| lib.source_location = Location.new(path, 1) }
       }
     end
 
@@ -114,14 +114,14 @@ module BitClust
         type, name, superclass = *parse_level1_header(line)
         case type
         when 'class'
-          @context.define_class name, (superclass || 'Object')
+          @context.define_class name, (superclass || 'Object'), location: line.location
           read_class_body f
         when 'module'
           parse_error "superclass given for module", line  if superclass
-          @context.define_module name
+          @context.define_module name, location: line.location
           read_class_body f
         when 'object'
-          @context.define_object name, superclass
+          @context.define_object name, superclass, location: line.location
           read_object_body f
         when 'reopen'
           @context.reopen_class name
@@ -349,30 +349,31 @@ module BitClust
         @library.sublibrary @db.get_library(libname)
       end
 
-      def define_class(name, supername)
+      def define_class(name, supername, location: nil)
         if @db.properties['version'] >= "1.9.0"
           top = 'BasicObject'
         else
           top = 'Object'
         end
         superclass = (name == top ? nil : @db.get_class(supername))
-        register_class :class, name, superclass
+        register_class :class, name, superclass, location: location
       end
 
-      def define_module(name)
-        register_class :module, name, nil
+      def define_module(name, location: nil)
+        register_class :module, name, nil, location: location
       end
 
-      def define_object(name, singleton_object_class)
+      def define_object(name, singleton_object_class, location: nil)
         singleton_object_class = @db.get_class(singleton_object_class) if singleton_object_class
-        register_class :object, name, singleton_object_class
+        register_class :object, name, singleton_object_class, location: location
       end
 
-      def register_class(type, name, superclass)
+      def register_class(type, name, superclass, location: nil)
         @klass = @db.open_class(name) {|c|
           c.type = type
           c.superclass = superclass
           c.library = @library
+          c.source_location = location
           @library.add_class c
         }
         @kind = :defined

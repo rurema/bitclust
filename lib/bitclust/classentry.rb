@@ -88,6 +88,7 @@ module BitClust
       property :aliases,    '[ClassEntry]'
       property :aliasof,    'ClassEntry'
       property :source,     'String'
+      property :source_location, 'Location'
     }
 
     # FIXME: do not use superclass property aliasing (#6826)

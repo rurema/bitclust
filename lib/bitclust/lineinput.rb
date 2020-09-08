@@ -9,6 +9,7 @@
 #
 
 require 'stringio'
+require 'bitclust/parseutils'
 
 # Utility class for line-wise file parsing
 class LineInput
@@ -34,7 +35,7 @@ class LineInput
   end
 
   def path
-    @input.path
+    @input.path if @input.respond_to?(:path)
   end
 
   def name
@@ -52,12 +53,15 @@ class LineInput
   def gets
     unless @buf.empty?
       @lineno += 1
-      return @buf.pop
+      line = @buf.pop
+      line&.location = BitClust::Location.new(path, @lineno)
+      return line
     end
     return nil if @eof_p   # to avoid ARGF blocking.
     line = @input.gets
     @eof_p = true unless line
     @lineno += 1
+    line&.location = BitClust::Location.new(path, @lineno)
     line
   end
 

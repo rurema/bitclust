@@ -73,6 +73,7 @@ module BitClust
       property :sublibraries, '[LibraryEntry]'
       property :is_sublibrary,   'bool'
       property :category, 'String'
+      property :source_location, 'Location'
     }
 
     def inspect
