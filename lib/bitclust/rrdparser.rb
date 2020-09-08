@@ -10,6 +10,7 @@
 require 'bitclust/compat'
 require 'bitclust/preprocessor'
 require 'bitclust/methodid'
+require 'bitclust/methoddatabase'
 require 'bitclust/lineinput'
 require 'bitclust/parseutils'
 require 'bitclust/nameutils'
@@ -449,7 +450,7 @@ module BitClust
         id = method_id(chunk)
         @db.open_method(id) {|m|
           m.names           = chunk.names.sort
-          m.kind            = @kind
+          m.kind            = chunk.source.match?(/^@undef$/) ? :undefined : @kind
           m.visibility      = @visibility || :public
           m.source          = chunk.source
           m.source_location = chunk.source.location

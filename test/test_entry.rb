@@ -9,6 +9,14 @@ alias HogeHoge
 alias HogeHogeHoge
 == Class Methods
 --- hoge
+hoge
+--- fuga
+@undef
+fuga
+== Instance Methods
+--- fugafuga
+@undef
+fugafuga
 = class Bar < Hoge
 == Class Methods
 --- bar
@@ -19,7 +27,7 @@ HERE
   end
 
   def test_entries
-    assert_equal(['bar', 'hoge'],
+    assert_equal(['bar', 'fuga', 'fugafuga', 'hoge'],
                  @lib.fetch_class("Bar").entries(1).map{|e| e.name}.sort)
   end
 
@@ -43,6 +51,11 @@ HERE
     assert(@lib.fetch_class("Err").error_class?)
     assert(!@lib.fetch_class("HogeHoge").error_class?)
     assert(@lib.fetch_class("ErrErr").error_class?)
+  end
+
+  def test_partitioned_entries
+    parts = @lib.fetch_class('Hoge').partitioned_entries
+    assert_equal(['fuga', 'fugafuga'], parts.undefined.map(&:name))
   end
 
   def test_superclass
