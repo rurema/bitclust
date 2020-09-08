@@ -23,7 +23,7 @@
   </a>
 
   <a href="https://github.com/rurema/doctree/issues/new" id="feedback-link">フィードバックを送る</a>
-  <% if @edit_url %>
+  <% if defined?(@edit_url) && @edit_url %>
     / <a href="<%= @edit_url %>">このマニュアルを編集する</a>
   <% end %>
   <script>if (window.URLSearchParams) { document.getElementById("feedback-link").search = new URLSearchParams({'body': document.location}); }</script>
