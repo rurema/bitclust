@@ -54,14 +54,14 @@ class LineInput
     unless @buf.empty?
       @lineno += 1
       line = @buf.pop
-      line&.location = BitClust::Location.new(path, @lineno)
+      line&.location ||= BitClust::Location.new(path, @lineno)
       return line
     end
     return nil if @eof_p   # to avoid ARGF blocking.
     line = @input.gets
     @eof_p = true unless line
     @lineno += 1
-    line&.location = BitClust::Location.new(path, @lineno)
+    line&.location ||= BitClust::Location.new(path, @lineno)
     line
   end
 
