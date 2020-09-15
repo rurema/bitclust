@@ -365,7 +365,7 @@ module BitClust
     end
 
     def highlight
-      parse("")
+      parse(+"")
     end
   end
 end

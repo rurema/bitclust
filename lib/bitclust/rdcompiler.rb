@@ -271,7 +271,7 @@ module BitClust
         line "<pre class=\"highlight #{lang}\">"
         line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
         line "<code>"
-        src = ""
+        src = +""
         @f.until_terminator(%r<\A//\}>) do |line|
           src << line
         end
