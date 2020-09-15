@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # Compatibility for older rubies
 #

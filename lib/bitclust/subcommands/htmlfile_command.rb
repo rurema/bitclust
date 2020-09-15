@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Copyright (c) 2006-2007 Minero Aoki
 #
 # This program is free software.

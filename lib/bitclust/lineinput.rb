@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # $Id: lineinput.rb 3723 2007-03-28 21:34:13Z aamine $
 #
