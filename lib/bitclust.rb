@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'bitclust/requesthandler'
 require 'bitclust/screen'
 require 'bitclust/server'

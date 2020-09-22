@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # bitclust/preprocessor.rb
 #
@@ -47,7 +48,7 @@ module BitClust
       else
         io = wrap(fopen(path, 'r:UTF-8'), params)
       end
-      ret = ""
+      ret = +""
       while s = io.gets
         ret << s
       end
@@ -247,13 +248,13 @@ module BitClust
       description = description.strip
       samplecode_push(description)
       return unless current_cond.processing?
-      @buf.push("//emlist[#{description}][ruby]{\n")
+      @buf.push(+"//emlist[#{description}][ruby]{\n")
     end
 
     def samplecode_end
       samplecode_pop
       return unless current_cond.processing?
-      @buf.push("//}\n")
+      @buf.push(+"//}\n")
     end
 
     def samplecode_push(description)

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "ripper"
 require "bitclust/htmlutils"
 
@@ -365,7 +366,7 @@ module BitClust
     end
 
     def highlight
-      parse("")
+      parse(+"")
     end
   end
 end
