@@ -19,3 +19,78 @@ jobs:
       run: bundle install
     - name: Run test
       run: bundle exec rake
+
+  rurema:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # NOTE: rurema/doctreeは2.5+しかサポートしていない
+        ruby: [ 2.7, 2.6, 2.5, ruby-head ]
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: 'bitclust'
+    - uses: actions/checkout@v2
+      with:
+        repository: 'rurema/doctree'
+        path: 'doctree'
+        ref: 'master'
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Set up Bundler
+      run: gem install bundler --no-document
+    - name: Install dependencies
+      run: bundle install
+      working-directory: ./doctree
+    - name: Run rake
+      run: bundle exec rake
+      working-directory: ./doctree
+
+    - name: Create tarballs
+      if: ${{ runner.os != 'Windows' }}
+      run: |
+        set -ex
+        mkdir /tmp/artifact
+        cd /tmp/html
+        for d in *.*; do
+          tar acf ../artifact/$d.tar.xz $d
+        done
+    - name: Create tarballs
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        mkdir /tmp/artifact
+        cd /tmp/html
+        ls -Name "*.*" | foreach {
+          tar acf "../artifact/${_}.tar.xz" $_
+        }
+    - uses: actions/upload-artifact@v2
+      with:
+        name: statichtml-ubuntu-latest-${{ matrix.ruby }}
+        path: /tmp/artifact/2.?.0.tar.xz
+
+    - name: Rename generated html
+      run: |
+        cd /tmp
+        mv -v html html.pr
+    - uses: actions/checkout@v2
+      with:
+        path: 'bitclust'
+        ref: ${{ github.event.pull_request.base.sha }}
+    - name: Install dependencies
+      run: bundle install
+      working-directory: ./doctree
+    - name: Run rake
+      run: bundle exec rake
+      working-directory: ./doctree
+    - name: Rename generated html and generate diff
+      run: |
+        cd /tmp
+        mv -v html html.base
+        git diff --no-index html.base html.pr --stat || true
+        git diff --no-index html.base html.pr --output artifact/html.diff || true
+    - uses: actions/upload-artifact@v2
+      with:
+        name: diff-ubuntu-latest-${{ matrix.ruby }}
+        path: /tmp/artifact/html.diff
