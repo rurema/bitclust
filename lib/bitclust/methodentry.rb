@@ -205,6 +205,10 @@ module BitClust
       kind() == :redefined
     end
 
+    def undefined?
+      kind() == :undefined
+    end
+
     def description
       source.split(/\n\n+/, 3)[1]
     end

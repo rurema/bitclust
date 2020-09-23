@@ -175,6 +175,8 @@ module BitClust
         db.transaction do
           methods = {}
           db.methods.each_with_index do |entry, i|
+            next if entry.undefined?
+
             entry.names.each do |name|
               method_name = entry.klass.name + entry.typemark + name
               (methods[method_name] ||= []) << entry
