@@ -146,7 +146,7 @@
 
 <%
 _myself, *ancestors = @entry.ancestors.reject { |c| %w[Object Kernel BasicObject].include?(c.name) }
-displayed_methods = Set.new(ents.instance_methods.map(&:name))
+displayed_methods = Set.new(ents.instance_methods.flat_map(&:names))
 %>
 
 <% unless ancestors.empty? %>
