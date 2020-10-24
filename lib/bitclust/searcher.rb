@@ -403,7 +403,7 @@ module BitClust
 
     def print_packed_names(names)
       max = terminal_column()
-      buf = ''
+      buf = +''
       names.each do |name|
         if buf.size + name.size + 1 > max
           if buf.empty?
@@ -411,7 +411,7 @@ module BitClust
             next
           end
           puts buf
-          buf = ''
+          buf = +''
         end
         buf << name << ' '
       end
