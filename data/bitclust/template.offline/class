@@ -146,7 +146,8 @@
 
 <%
 _myself, *ancestors = @entry.ancestors.reject { |c| %w[Object Kernel BasicObject].include?(c.name) }
-displayed_methods = Set.new(ents.instance_methods.flat_map(&:names))
+displayed_instance_methods = Set.new(ents.instance_methods.flat_map(&:names))
+displayed_singleton_methods = Set.new(ents.singleton_methods.flat_map(&:names))
 %>
 
 <% unless ancestors.empty? %>
@@ -154,9 +155,28 @@ displayed_methods = Set.new(ents.instance_methods.flat_map(&:names))
 <dl>
   <% ancestors.each do |c|
        undefined_methods = @entry.partitioned_entries.undefined
+       methods = c.partitioned_entries(@alevel).singleton_methods
+         .flat_map { |m| m.names.map { |n| [n, m] } }
+         .reject { |name,| displayed_singleton_methods.include?(name) }
+         .reject { |name,| undefined_methods.any? { |m| m.names.include?(name) } }
+         .sort
+       next if methods.empty? %>
+<dt><%= _('Ancestor Singleton Methods %s', c.name) %></dt>
+<dd>
+  <ul class="class-toc">
+    <% methods.each do |name, m| %>
+      <li><%= method_link(m.spec_string, name) %></li>
+      <% displayed_singleton_methods << name %>
+    <% end %>
+  </ul>
+</dd>
+  <% end %>
+
+  <% ancestors.each do |c|
+       undefined_methods = @entry.partitioned_entries.undefined
        methods = c.partitioned_entries(@alevel).instance_methods
          .flat_map { |m| m.names.map { |n| [n, m] } }
-         .reject { |name,| displayed_methods.include?(name) }
+         .reject { |name,| displayed_instance_methods.include?(name) }
          .reject { |name,| undefined_methods.any? { |m| m.names.include?(name) } }
          .sort
        next if methods.empty? %>
@@ -165,14 +185,13 @@ displayed_methods = Set.new(ents.instance_methods.flat_map(&:names))
   <ul class="class-toc">
     <% methods.each do |name, m| %>
       <li><%= method_link(m.spec_string, name) %></li>
-      <% displayed_methods << name %>
+      <% displayed_instance_methods << name %>
     <% end %>
   </ul>
 </dd>
-<%
-  end
-end %>
+  <% end %>
 </dl>
+<% end %>
 
 <%
     items.each do |label, entries|
