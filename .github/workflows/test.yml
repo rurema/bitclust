@@ -41,6 +41,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
     - name: Set up Bundler
       run: gem install bundler --no-document
+      if: ${{ matrix.ruby == '2.5' }}
     - name: Install dependencies
       run: bundle install
       working-directory: ./doctree
