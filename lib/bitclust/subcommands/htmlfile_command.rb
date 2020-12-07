@@ -21,8 +21,8 @@ module BitClust
         @parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
           @target = name
         }
-        @parser.on('--force', '-f', 'Force to use rd_file template.') {|name|
-          @rd_file = true
+        @parser.on('--[no-]force', '-f', 'Force to use rd_file template.') {|bool|
+          @rd_file = bool
         }
         @parser.on('--ruby_version=VER', '--ruby=VER', 'Set Ruby version') {|version|
           @version = version
@@ -42,6 +42,9 @@ module BitClust
         end
         @capi = options[:capi]
         target_file = argv[0]
+        if /refm\/doc\// =~ target_file
+          @rd_file = true if @rd_file.nil?
+        end
         options = { 'version' => @version }
         manager = ScreenManager.new(:templatedir => @templatedir,
                                     :base_url => @baseurl,
