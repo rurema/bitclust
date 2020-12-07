@@ -421,6 +421,37 @@ HERE
     assert_compiled_method_source(expected, src)
   end
 
+  def test_method_with_samplecode_singleton_class
+    src = <<'HERE'
+--- singleton_method(name) -> Method
+//emlist[][ruby]{
+class <<obj
+  def foo
+  end
+end
+p Foo.singleton_method(:foo)
+//}
+end
+HERE
+  expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>singleton_method(name) -&gt; Method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<pre class="highlight ruby">
+<code>
+<span class="k">class</span> <span class="o">&lt;&lt;</span><span class="nn"></span><span class="o"></span><span class="nc">obj</span>
+  <span class="k">def</span> <span class="nf">foo</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="nb">p</span> <span class="no">Foo</span><span class="p">.</span><span class="nf">singleton_method</span><span class="p">(</span><span class="ss">:foo</span><span class="p">)</span>
+</code></pre>
+<p>
+end
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src)
+  end
+
   def test_method2
     @c = BitClust::RDCompiler.new(@u, 1, {:database => @db, :force => true})
     src = <<'HERE'

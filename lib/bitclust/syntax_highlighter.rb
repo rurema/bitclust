@@ -165,6 +165,8 @@ module BitClust
       when @stack.last == :method_call
         data << "<span class=\"nf\">#{token}</span>"
         @stack.pop
+      when @stack.last == :class
+        @name_buffer << token
       when BUILTINS_G.include?(token)
         data << "<span class=\"nb\">#{token}</span>"
       else
