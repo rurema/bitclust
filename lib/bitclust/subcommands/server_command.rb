@@ -5,7 +5,6 @@ require 'find'
 require 'pp'
 require 'optparse'
 require 'yaml'
-require 'webrick'
 require 'uri'
 
 require 'bitclust'
@@ -16,7 +15,6 @@ module BitClust
     class ServerCommand < Subcommand
       def initialize
         super
-        require 'webrick'
         require 'uri'
 
         @params = {
@@ -118,6 +116,11 @@ module BitClust
       end
 
       def exec(argv, options)
+        begin
+          require 'webrick'
+        rescue LoadError
+          abort "webrick is not found. You may need to `gem install webrick` to install webrick."
+        end
         require 'bitclust/app'
         if @debugp
           @params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::DEBUG)

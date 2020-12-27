@@ -15,7 +15,6 @@ require 'bitclust/classentry'
 require 'bitclust/methodentry'
 require 'bitclust/docentry'
 require 'drb'
-require 'webrick/server'
 
 module BitClust
 
@@ -27,6 +26,11 @@ module BitClust
     end
 
     def listen(url, foreground = false)
+      begin
+        require 'webrick/server'
+      rescue LoadError
+        abort "webrick is not found. You may need to `gem install webrick` to install webrick."
+      end
       WEBrick::Daemon.start unless foreground
       DRb.start_service url, @db
       DRb.thread.join
