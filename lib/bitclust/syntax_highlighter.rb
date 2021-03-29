@@ -181,6 +181,9 @@ module BitClust
         @name_buffer << token
       when @stack.last == :module
         @name_buffer << token
+      when @stack.last == :symbol
+        data << "#{token}</span>"
+        @stack.pop
       else
         on_default(:on_const, token, data)
       end
