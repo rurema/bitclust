@@ -360,10 +360,13 @@ hr {
 }
 
 .class-toc > li {
+    display: inline-block;
     padding-left: 1em;
     text-indent: -1em;
     word-break: break-all;
     break-inside: avoid;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @media print {
