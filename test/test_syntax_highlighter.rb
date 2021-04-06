@@ -82,4 +82,26 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
     END
     assert_equal(expected, highlight(source))
   end
+
+  test 'symbol const' do
+    source = <<~END
+      class Foo
+        def to_hash
+          {:Bar => 'a',
+           :Baz => 'b'
+          }
+        end
+      end
+    END
+    expected = <<~END
+      <span class="k">class</span> <span class="nn"></span><span class="o"></span><span class="nc">Foo</span>
+        <span class="k">def</span> <span class="nf">to_hash</span>
+          <span class="p">{</span><span class="ss">:Bar</span> <span class="o">=&gt;</span> <span class="s1">'a'</span>,
+           <span class="ss">:Baz</span> <span class="o">=&gt;</span> <span class="s1">'b'</span>
+          <span class="p">}</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    END
+    assert_equal(expected, highlight(source))
+  end
 end
