@@ -219,7 +219,7 @@ module BitClust
       f.while_match(/\A==[^=]/) do |line|
         case line.sub(/\A==/, '').strip
         when /\A((?:public|private|protected)\s+)?(?:(class|singleton|instance)\s+)?methods?\z/i
-          @context.visibility = ($1 || 'public').downcase.intern
+          @context.visibility = ($1 || 'public').downcase.strip.intern
           t = ($2 || 'instance').downcase.sub(/class/, 'singleton')
           @context.type = "#{t}_method".intern
         when /\AModule\s+Functions?\z/i

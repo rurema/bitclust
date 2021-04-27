@@ -252,14 +252,14 @@ module BitClust
     end
 
     Parts = Struct.new(:singleton_methods, :private_singleton_methods,
-                       :instance_methods,  :private_instance_methods,
+                       :instance_methods,  :private_instance_methods, :protected_instance_methods,
                        :module_functions,
                        :constants, :special_variables,
                        :added, :undefined)
 
     def partitioned_entries(level = 0)
       s = []; spv = []
-      i = []; ipv = []
+      i = []; ipv = []; ipt = []
       mf = []
       c = []; v = []
       added = []
@@ -271,7 +271,9 @@ module BitClust
           when :singleton_method
             (m.public? ? s : spv).push m
           when :instance_method
-            (m.public? ? i : ipv).push m
+            tmp = m.public? ? i : ipv
+            tmp = ipt if m.protected?
+            tmp.push m
           when :module_function
             mf.push m
           when :constant
@@ -287,7 +289,7 @@ module BitClust
           undefined.push m
         end
       end
-      Parts.new(s,spv, i,ipv, mf, c, v, added, undefined)
+      Parts.new(s,spv, i,ipv,ipt, mf, c, v, added, undefined)
     end
 
     def singleton_methods(level = 0)
@@ -321,6 +323,10 @@ module BitClust
     end
 
     alias private_methods   private_instance_methods
+
+    def protected_instance_methods(level = 0)
+      entries(level).select(&:protected_instance_method?).sort_by(&:sort_key)
+    end
 
     def constants(level = 0)
       entries(level).select(&:constant?).sort_by(&:sort_key)
