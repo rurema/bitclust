@@ -16,7 +16,7 @@ module BitClust
         @target = nil
         @templatedir = srcdir_root + "data/bitclust/template.offline"
         @baseurl = "file://" + srcdir_root.to_s
-        @version = "2.0.0"
+        @version = RUBY_VERSION
         @parser.banner = "Usage: #{File.basename($0, '.*')} htmlfile [options] rdfile"
         @parser.on('--target=NAME', 'Compile NAME to HTML.') {|name|
           @target = name
