@@ -37,6 +37,7 @@ module BitClust
     private :default_message_catalog
 
     def entry_screen(entry, opt)
+      @conf[:target_version] = opt[:target_version]
       new_screen(Screen.for_entry(entry), entry, opt)
     end
 
