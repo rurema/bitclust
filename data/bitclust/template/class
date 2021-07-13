@@ -60,6 +60,7 @@
      [_('Instance Methods'),          ents.instance_methods           ],
      [_('Private Singleton Methods'), ents.private_singleton_methods  ],
      [_('Private Instance Methods'),  ents.private_instance_methods   ],
+     [_('Protected Instance Methods'),ents.protected_instance_methods ],
      [_('Module Functions'),          ents.module_functions           ],
      [_('Constants'),                 ents.constants                  ],
      [_('Special Variables'),         ents.special_variables          ]]\
@@ -147,4 +148,3 @@
     end
     headline_pop
 %>
-

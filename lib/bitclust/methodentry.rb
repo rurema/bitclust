@@ -148,7 +148,7 @@ module BitClust
     end
 
     def public?
-      visibility() != :private
+      visibility() != :private && visibility() != :protected
     end
 
     def protected?
@@ -172,7 +172,11 @@ module BitClust
     end
 
     def private_instance_method?
-      instance_method? and public?
+      instance_method? and private?
+    end
+
+    def protected_instance_method?
+      instance_method? and protected?
     end
 
     def singleton_method?

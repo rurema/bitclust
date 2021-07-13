@@ -39,4 +39,32 @@ HERE
     test_undef_spec = BitClust::MethodSpec.parse('Dummy#test_undef')
     assert_equal(:undefined, methoddatabase.get_method(test_undef_spec).kind)
   end
+
+  def test_protected_instance_method
+    result = BitClust::RRDParser.parse(<<HERE, 'dummy')
+= module Dummy
+
+== Instance Methods
+--- im
+
+== Private Methods
+
+--- pvi
+
+== Protected Instance Methods
+
+--- pti
+
+HERE
+    _library, methoddatabase = result
+
+    test_undef_spec = BitClust::MethodSpec.parse('Dummy#im')
+    assert_equal(true, methoddatabase.get_method(test_undef_spec).public?)
+
+    test_undef_spec = BitClust::MethodSpec.parse('Dummy#pvi')
+    assert_equal(true, methoddatabase.get_method(test_undef_spec).private?)
+
+    test_undef_spec = BitClust::MethodSpec.parse('Dummy#pti')
+    assert_equal(true, methoddatabase.get_method(test_undef_spec).protected?)
+  end
 end

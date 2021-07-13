@@ -59,6 +59,7 @@
      [_('Instance Methods'),          ents.instance_methods           ],
      [_('Private Singleton Methods'), ents.private_singleton_methods  ],
      [_('Private Instance Methods'),  ents.private_instance_methods   ],
+     [_('Protected Instance Methods'),ents.protected_instance_methods ],
      [_('Module Functions'),          ents.module_functions           ],
      [_('Constants'),                 ents.constants                  ],
      [_('Special Variables'),         ents.special_variables          ],
@@ -70,7 +71,7 @@
 <%
         headline_push
         entries.each do |m|
-%> 
+%>
 <span id="<%= BitClust::NameUtils.encodename_url(m.name) %>"></span>
 <%=     compile_method(m) %>
 <%
@@ -107,11 +108,11 @@
 </form>
 <ul id="index-classes-list">
 <%
-    lib = @entry.library 
-    ((lib.all_classes - lib.all_error_classes).sort + lib.all_error_classes).each do |c| 
-%> 
+    lib = @entry.library
+    ((lib.all_classes - lib.all_error_classes).sort + lib.all_error_classes).each do |c|
+%>
 <li><%= class_link(c.name, "#{c.name}") %></li>
-<%  end  %>    
+<%  end  %>
 </ul>
 </div>
 
