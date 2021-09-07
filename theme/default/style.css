@@ -5,7 +5,11 @@
 body {
     background-color: white;
     color: black;
-    font-family: Meiryo, "Hiragino Kaku Gothic Pro", "MS Gothic", Osaka, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont,
+      "Helvetica Neue", Arial,
+      "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+      "BIZ UDGothic", Meiryo,
+      sans-serif;
     text-align: left;
     margin-top: 20px;
     margin-left: 2%;
