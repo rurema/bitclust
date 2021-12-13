@@ -196,8 +196,8 @@ module BitClust
             nl
             string compile_text(cont.strip)
           end
-          line @item_stack.pop # current level li
-        elsif /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level < $1.size
+        end
+        if /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level < $1.size
           item_list($1.size)
           line @item_stack.pop # current level ul or ol
         elsif /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level > $1.size

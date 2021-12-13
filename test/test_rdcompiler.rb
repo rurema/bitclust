@@ -525,13 +525,15 @@ HERE
     src = <<HERE
   * hoge1
     * fuga1
+      bar
   * hoge2
     * fuga2
 HERE
     expected = <<HERE
 <ul>
 <li>hoge1<ul>
-<li>fuga1</li>
+<li>fuga1
+bar</li>
 </ul>
 </li>
 <li>hoge2<ul>
