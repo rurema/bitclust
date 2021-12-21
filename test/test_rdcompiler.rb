@@ -541,7 +541,6 @@ bar</li>
 </ul>
 </li>
 </ul>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -580,7 +579,6 @@ HERE
 </ol>
 </li>
 </ol>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -607,7 +605,6 @@ HERE
 </ol>
 </li>
 </ul>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -628,6 +625,8 @@ HERE
 <li>boo1</li>
 </ol>
 </li>
+</ol>
+</li>
 <li>hoge2<ol>
 <li>fuga2<ol>
 <li>boo2</li>
@@ -636,9 +635,6 @@ HERE
 </ol>
 </li>
 </ol>
-</li>
-</ol>
-
 HERE
     assert_compiled_source(expected, src)
   end
