@@ -50,7 +50,6 @@ jobs:
       working-directory: ./doctree
 
     - name: Create tarballs
-      if: ${{ runner.os != 'Windows' }}
       run: |
         set -ex
         mkdir /tmp/artifact
@@ -58,14 +57,6 @@ jobs:
         for d in *.*; do
           tar acf ../artifact/$d.tar.xz $d
         done
-    - name: Create tarballs
-      if: ${{ runner.os == 'Windows' }}
-      run: |
-        mkdir /tmp/artifact
-        cd /tmp/html
-        ls -Name "*.*" | foreach {
-          tar acf "../artifact/${_}.tar.xz" $_
-        }
     - uses: actions/upload-artifact@v2
       with:
         name: statichtml-ubuntu-latest-${{ matrix.ruby }}
