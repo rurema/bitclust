@@ -539,13 +539,15 @@ HERE
     src = <<HERE
   * hoge1
     * fuga1
+      bar
   * hoge2
     * fuga2
 HERE
     expected = <<HERE
 <ul>
 <li>hoge1<ul>
-<li>fuga1</li>
+<li>fuga1
+bar</li>
 </ul>
 </li>
 <li>hoge2<ul>
@@ -553,7 +555,6 @@ HERE
 </ul>
 </li>
 </ul>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -592,7 +593,6 @@ HERE
 </ol>
 </li>
 </ol>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -619,7 +619,6 @@ HERE
 </ol>
 </li>
 </ul>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -640,6 +639,8 @@ HERE
 <li>boo1</li>
 </ol>
 </li>
+</ol>
+</li>
 <li>hoge2<ol>
 <li>fuga2<ol>
 <li>boo2</li>
@@ -648,9 +649,6 @@ HERE
 </ol>
 </li>
 </ol>
-</li>
-</ol>
-
 HERE
     assert_compiled_source(expected, src)
   end
