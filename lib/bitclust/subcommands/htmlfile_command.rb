@@ -62,7 +62,7 @@ module BitClust
               lib = RRDParser.parse_stdlib_file(target_file, options)
             end
             entry = @target ? lookup(lib, @target) : lib
-            puts manager.entry_screen(entry, { :database => db }).body
+            puts manager.entry_screen(entry, { :database => db, :target_version => @version }).body
             return
           rescue ParseError => ex
             $stderr.puts ex.message
