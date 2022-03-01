@@ -221,6 +221,9 @@ module BitClust
       case
       when token == "::" && [:class, :module].include?(@stack.last)
         @name_buffer << token
+      when token == "<<" && @stack.last == :class
+        @stack.pop
+        on_default(:on_op, token, data)
       else
         @stack.pop if @stack.last == :method_call
         on_default(:on_op, token, data)

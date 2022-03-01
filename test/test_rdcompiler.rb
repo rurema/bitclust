@@ -427,7 +427,14 @@ HERE
 //emlist[][ruby]{
 class <<obj
   def foo
+    Object.new
   end
+end
+class << Object.new
+end
+class << self
+end
+class << FOO::BAR::BAZ
 end
 p Foo.singleton_method(:foo)
 //}
@@ -438,9 +445,16 @@ HERE
 <dd class="method-description">
 <pre class="highlight ruby">
 <code>
-<span class="k">class</span> <span class="o">&lt;&lt;</span><span class="nn"></span><span class="o"></span><span class="nc">obj</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span>obj
   <span class="k">def</span> <span class="nf">foo</span>
+    <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
   <span class="k">end</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="nc">self</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="no">FOO</span><span class="o">::</span><span class="no">BAR</span><span class="o">::</span><span class="no">BAZ</span>
 <span class="k">end</span>
 <span class="nb">p</span> <span class="no">Foo</span><span class="p">.</span><span class="nf">singleton_method</span><span class="p">(</span><span class="ss">:foo</span><span class="p">)</span>
 </code></pre>
