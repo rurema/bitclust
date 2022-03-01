@@ -7,14 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [ 2.7, 2.6, 2.5, 2.4, 2.3, ruby-head ]
+        ruby: [ 3.1, '3.0', 2.7, 2.6, 2.5, 2.4, 2.3, ruby-head ]
     steps:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Set up Bundler
-      run: gem install bundler --no-document
     - name: Install dependencies
       run: bundle install
     - name: Run test
@@ -25,7 +23,7 @@ jobs:
     strategy:
       matrix:
         # NOTE: rurema/doctreeは2.5+しかサポートしていない
-        ruby: [ 2.7, 2.6, 2.5, ruby-head ]
+        ruby: [ 3.1, '3.0', 2.7, 2.6, 2.5, ruby-head ]
     steps:
     - uses: actions/checkout@v2
       with:
@@ -39,9 +37,6 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Set up Bundler
-      run: gem install bundler --no-document
-      if: ${{ matrix.ruby == '2.5' }}
     - name: Install dependencies
       run: bundle install
       working-directory: ./doctree
@@ -50,7 +45,6 @@ jobs:
       working-directory: ./doctree
 
     - name: Create tarballs
-      if: ${{ runner.os != 'Windows' }}
       run: |
         set -ex
         mkdir /tmp/artifact
@@ -58,18 +52,10 @@ jobs:
         for d in *.*; do
           tar acf ../artifact/$d.tar.xz $d
         done
-    - name: Create tarballs
-      if: ${{ runner.os == 'Windows' }}
-      run: |
-        mkdir /tmp/artifact
-        cd /tmp/html
-        ls -Name "*.*" | foreach {
-          tar acf "../artifact/${_}.tar.xz" $_
-        }
     - uses: actions/upload-artifact@v2
       with:
         name: statichtml-ubuntu-latest-${{ matrix.ruby }}
-        path: /tmp/artifact/2.?.0.tar.xz
+        path: /tmp/artifact/*.tar.xz
 
     - name: Rename generated html
       run: |
