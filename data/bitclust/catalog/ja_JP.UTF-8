@@ -105,7 +105,7 @@ Text
 Thread
 スレッド
 ancestors
-クラスの継承リスト
+クラス・モジュールの継承リスト
 class %s
 %sクラス
 library %s
