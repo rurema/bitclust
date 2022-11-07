@@ -275,6 +275,28 @@ module BitClust
       on_default(:on_nl, token, data)
     end
 
+    def on_semicolon(token, data)
+      case
+      when @name_buffer.empty?
+        return on_default(:on_semicolon, token, data)
+      when @stack.last == :module
+        name = @name_buffer.join
+        data << "<span class=\"nn\">#{name}</span>"
+        @stack.pop
+        @name_buffer.clear
+      when @stack.last == :class
+        namespace = @name_buffer.values_at(0..-3).join
+        operator = @name_buffer[-2]
+        name = @name_buffer.last
+        data << "<span class=\"nn\">#{namespace}</span>"
+        data << "<span class=\"o\">#{operator}</span>"
+        data << "<span class=\"nc\">#{name}</span>"
+        @stack.pop
+        @name_buffer.clear
+      end
+      on_default(:on_semicolon, token, data)
+    end
+
     def on_regexp_beg(token, data)
       style = COLORS[:regexp_beg]
       data << "<span class=\"#{style}\">#{token}"
