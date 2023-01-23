@@ -505,7 +505,7 @@ module BitClust
       end
     end
 
-    BLADE_URL = 'http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/%s/%s'
+    BLADE_URL = 'https://blade.ruby-lang.org/%s/%s'
 
     def blade_link(ml, num)
       url = sprintf(BLADE_URL, ml, num)
