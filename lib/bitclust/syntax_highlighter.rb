@@ -56,6 +56,7 @@ module BitClust
       nl: nil,                         # \n
       op: "o",                         # operator
       period: "p",                     # .
+      qsymbols_beg: "ss",              # %i(
       qwords_beg: "sx",                # %w(
       rbrace: "p",                     # }
       rbracket: "p",                   # ]
@@ -65,6 +66,7 @@ module BitClust
       semicolon: nil,                  # ;
       sp: nil,                         # space
       symbeg: "ss",                    # :
+      symbols_beg: "ss",               # %I(
       tlambda: "o",                    # ->
       tlambeg: "p",                    # (->) {
       tstring_beg: nil,                # " (string")
@@ -344,7 +346,7 @@ module BitClust
       case
       when token == "'"
         data << "#{token}</span>"
-      when [:qwords, :words].include?(@stack.last)
+      when %i[qwords words qsymbols symbols].include?(@stack.last)
         @stack.pop
         data << "#{token}</span>"
       else
@@ -364,6 +366,20 @@ module BitClust
     def on_words_beg(token, data)
       @stack.push(:words)
       style = COLORS[:words_beg]
+      data << "<span class=\"#{style}\">#{token}"
+      data
+    end
+
+    def on_qsymbols_beg(token, data)
+      @stack.push(:qsymbols)
+      style = COLORS[:qsymbols_beg]
+      data << "<span class=\"#{style}\">#{token}"
+      data
+    end
+
+    def on_symbols_beg(token, data)
+      @stack.push(:symbols)
+      style = COLORS[:symbols_beg]
       data << "<span class=\"#{style}\">#{token}"
       data
     end

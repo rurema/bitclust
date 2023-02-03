@@ -105,6 +105,24 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
     assert_equal(expected, highlight(source))
   end
 
+  test 'symbol list' do
+    source = <<~END
+      %i[hellow world].each {|s| p s }
+    END
+    expected = <<~END
+      <span class="ss">%i[hellow world]</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span><span class="o">|</span>s<span class="o">|</span> <span class="nb">p</span> s <span class="p">}</span>
+    END
+    assert_equal(expected, highlight(source))
+
+    source = <<~END
+      %I[hellow world].each {|s| p s }
+    END
+    expected = <<~END
+      <span class="ss">%I[hellow world]</span><span class="p">.</span><span class="nf">each</span> <span class="p">{</span><span class="o">|</span>s<span class="o">|</span> <span class="nb">p</span> s <span class="p">}</span>
+    END
+    assert_equal(expected, highlight(source))
+  end
+
   test 'one liner module' do
     source = <<~END
       module Foo; end
