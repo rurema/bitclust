@@ -78,6 +78,8 @@ Objects
 オブジェクト
 Private Instance Methods
 privateメソッド
+Protected Instance Methods
+protectedメソッド
 Private Singleton Methods
 private特異メソッド
 Required Libraries
@@ -103,7 +105,7 @@ Text
 Thread
 スレッド
 ancestors
-クラスの継承リスト
+クラス・モジュールの継承リスト
 class %s
 %sクラス
 library %s

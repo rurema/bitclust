@@ -427,7 +427,14 @@ HERE
 //emlist[][ruby]{
 class <<obj
   def foo
+    Object.new
   end
+end
+class << Object.new
+end
+class << self
+end
+class << FOO::BAR::BAZ
 end
 p Foo.singleton_method(:foo)
 //}
@@ -438,9 +445,16 @@ HERE
 <dd class="method-description">
 <pre class="highlight ruby">
 <code>
-<span class="k">class</span> <span class="o">&lt;&lt;</span><span class="nn"></span><span class="o"></span><span class="nc">obj</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span>obj
   <span class="k">def</span> <span class="nf">foo</span>
+    <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
   <span class="k">end</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="nc">self</span>
+<span class="k">end</span>
+<span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="no">FOO</span><span class="o">::</span><span class="no">BAR</span><span class="o">::</span><span class="no">BAZ</span>
 <span class="k">end</span>
 <span class="nb">p</span> <span class="no">Foo</span><span class="p">.</span><span class="nf">singleton_method</span><span class="p">(</span><span class="ss">:foo</span><span class="p">)</span>
 </code></pre>
@@ -525,13 +539,15 @@ HERE
     src = <<HERE
   * hoge1
     * fuga1
+      bar
   * hoge2
     * fuga2
 HERE
     expected = <<HERE
 <ul>
 <li>hoge1<ul>
-<li>fuga1</li>
+<li>fuga1
+bar</li>
 </ul>
 </li>
 <li>hoge2<ul>
@@ -539,7 +555,6 @@ HERE
 </ul>
 </li>
 </ul>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -578,7 +593,6 @@ HERE
 </ol>
 </li>
 </ol>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -605,7 +619,6 @@ HERE
 </ol>
 </li>
 </ul>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -626,6 +639,8 @@ HERE
 <li>boo1</li>
 </ol>
 </li>
+</ol>
+</li>
 <li>hoge2<ol>
 <li>fuga2<ol>
 <li>boo2</li>
@@ -634,9 +649,6 @@ HERE
 </ol>
 </li>
 </ol>
-</li>
-</ol>
-
 HERE
     assert_compiled_source(expected, src)
   end
@@ -697,7 +709,7 @@ HERE
        "continuity"          => ['[[c:String]][[c:String]]', '<a href="dummy/class/String">String</a><a href="dummy/class/String">String</a>'],
        "constant"            => ['[[m:File::SEPARATOR]]', '<a href="dummy/method/File/c/SEPARATOR">File::SEPARATOR</a>'],
        "url"                 => ['[[url:http://i.loveruby.net]]', '<a class="external" href="http://i.loveruby.net">http://i.loveruby.net</a>'],
-       "ruby-list"           => ['[[ruby-list:12345]]', '<a class="external" href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12345">[ruby-list:12345]</a>'],
+       "ruby-list"           => ['[[ruby-list:12345]]', '<a class="external" href="https://blade.ruby-lang.org/ruby-list/12345">[ruby-list:12345]</a>'],
        "bugs.r-l.o feature"  => ['[[feature:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[feature#12345]</a>'],
        "bugs.r-l.o bug"      => ['[[bug:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[bug#12345]</a>'],
        "bugs.r-l.o misc"     => ['[[misc:12345]]', '<a class="external" href="https://bugs.ruby-lang.org/issues/12345">[misc#12345]</a>'])

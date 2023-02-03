@@ -172,7 +172,9 @@ module BitClust
       "<h#{level} #{name}>#{label}</h#{level}>"
     end
 
-    def item_list(level = 0, indent = true)
+    ITEM_RE = /\A(\s+)(?:\*\s|\(\d+\))/
+
+    def item_list(level = 0)
       open_tag = nil
       close_tag = nil
       case @f.peek
@@ -183,11 +185,9 @@ module BitClust
         open_tag  = "<ol>"
         close_tag = "</ol>"
       end
-      if indent
-        line open_tag
-        @item_stack.push(close_tag)
-      end
-      @f.while_match(/\A(\s+)(?:\*\s|\(\d+\))/) do |line|
+      line open_tag
+      @item_stack.push(close_tag)
+      @f.while_match(ITEM_RE) do |line|
         string "<li>"
         @item_stack.push("</li>")
         string compile_text(line.sub(/\A(\s+)(?:\*|\(\d+\))/, '').strip)
@@ -196,15 +196,14 @@ module BitClust
             nl
             string compile_text(cont.strip)
           end
-          line @item_stack.pop # current level li
-        elsif /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level < $1.size
+        end
+        if (m = ITEM_RE.match(@f.peek)) && level < m[1].size
           item_list($1.size)
-          line @item_stack.pop # current level ul or ol
-        elsif /\A(\s+)(?:\*\s|\(\d+\))/ =~ @f.peek and level > $1.size
           line @item_stack.pop # current level li
-          line @item_stack.pop # current level ul or ol
-          line @item_stack.pop # previous level li
-          item_list($1.size, false)
+          break if ITEM_RE =~ @f.peek and level > $1.size
+        elsif m && level > m[1].size
+          line @item_stack.pop # current level li
+          break
         else
           line @item_stack.pop # current level li
         end
@@ -506,7 +505,7 @@ module BitClust
       end
     end
 
-    BLADE_URL = 'http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/%s/%s'
+    BLADE_URL = 'https://blade.ruby-lang.org/%s/%s'
 
     def blade_link(ml, num)
       url = sprintf(BLADE_URL, ml, num)
