@@ -142,6 +142,45 @@ pre.highlight {
     position: relative;
 }
 
+main {
+    position: relative;
+}
+
+/* for RUN */
+.highlight__run-button {
+    padding: 0.25em 0.5em;
+    background-color: #DDD;
+    opacity: 0.75;
+    cursor: pointer;
+    float: right;
+}
+.highlight__run-button:hover {
+  background-color: #EE8;
+  opacity: 1;
+}
+.highlight__run-button[data-running="true"] {
+  background-color: #070;
+  color: white;
+  opacity: 1;
+}
+
+.highlight__run-output {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f2f2f2;
+    border: 0;
+}
+pre.highlight.ruby[data-editing="true"]:focus-within {
+  outline: auto;
+}
+pre.highlight.ruby[data-editing="true"] > code {
+  display: inline-block;
+  width: 100%;
+}
+pre.highlight.ruby[data-editing="true"] > code:focus {
+  outline: none;
+}
+
 /* for COPY */
 .highlight__copy-button {
   float: right;
