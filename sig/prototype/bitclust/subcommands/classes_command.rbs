@@ -1,0 +1,15 @@
+module BitClust
+  module Subcommands
+    class ClassesCommand < Subcommand
+      include CrossRubyUtils
+
+      def initialize: () -> void
+
+      def parse: (untyped argv) -> untyped
+
+      def exec: (untyped argv, untyped options) -> untyped
+
+      def defined_classes: (untyped ruby, untyped lib, untyped rejects) -> untyped
+    end
+  end
+end

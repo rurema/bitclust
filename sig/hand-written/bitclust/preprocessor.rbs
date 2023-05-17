@@ -1,0 +1,7 @@
+module BitClust
+  class LineFilter
+    include Enumerable[String]
+
+    def each: () { (String) -> untyped } -> untyped
+  end
+end

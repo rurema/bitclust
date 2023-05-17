@@ -1,0 +1,118 @@
+module BitClust
+  # Utilities for conversion among names, ids and URL fragments.
+  module NameUtils
+    LIBNAME_RE: ::Regexp
+
+    CONST_RE: ::Regexp
+
+    CONST_PATH_RE: ::Regexp
+
+    CLASS_NAME_RE: ::Regexp
+
+    CLASS_PATH_RE: ::Regexp
+
+    METHOD_NAME_RE: ::Regexp
+
+    TYPEMARK_RE: ::Regexp
+
+    METHOD_SPEC_RE: ::Regexp
+
+    GVAR_RE: ::Regexp
+
+    def self?.libname?: (untyped str) -> (true | false)
+
+    def self?.libname2id: (untyped name) -> untyped
+
+    def self?.libid2name: (untyped id) -> untyped
+
+    def self?.classname?: (untyped str) -> (true | false)
+
+    def self?.classname2id: (untyped name) -> untyped
+
+    def self?.classid2name: (untyped id) -> untyped
+
+    def self?.method_spec?: (untyped str) -> (false | untyped)
+
+    def self?.split_method_spec: (untyped spec) -> untyped
+
+    def self?.methodid2specstring: (untyped id) -> untyped
+
+    def self?.methodid2specparts: (untyped id) -> untyped
+
+    def self?.methodid2libid: (untyped id) -> untyped
+
+    def self?.methodid2classid: (untyped id) -> untyped
+
+    def self?.methodid2typechar: (untyped id) -> untyped
+
+    def self?.methodid2typename: (untyped id) -> untyped
+
+    def self?.methodid2typemark: (untyped id) -> untyped
+
+    def self?.methodid2mname: (untyped id) -> untyped
+
+    def self?.gvarname?: (untyped str) -> (true | false)
+
+    MID: ::Regexp
+
+    def self?.methodname?: (untyped str) -> (true | false)
+
+    def self?.build_method_id: (untyped libid, untyped cid, untyped t, untyped name) -> ::String
+
+    # private module function
+    def self?.split_method_id: (untyped id) -> untyped
+
+    NAME_TO_MARK: { singleton_method: ".", instance_method: "#", module_function: ".#", constant: "::", special_variable: "$" }
+
+    MARK_TO_NAME: untyped
+
+    def self?.typename?: (untyped n) -> untyped
+
+    def self?.typename2mark: (untyped name) -> untyped
+
+    def self?.typemark2name: (untyped mark) -> untyped
+
+    NAME_TO_CHAR: { singleton_method: "s", instance_method: "i", module_function: "m", constant: "c", special_variable: "v" }
+
+    CHAR_TO_NAME: untyped
+
+    def self?.typechar?: (untyped c) -> untyped
+
+    def self?.typename2char: (untyped name) -> untyped
+
+    def self?.typechar2name: (untyped char) -> untyped
+
+    MARK_TO_CHAR: ::Hash[::String, "s" | "i" | "m" | "c" | "v"]
+
+    CHAR_TO_MARK: untyped
+
+    def self?.typemark?: (untyped m) -> untyped
+
+    def self?.typechar2mark: (untyped char) -> untyped
+
+    def self?.typemark2char: (untyped mark) -> untyped
+
+    def self?.functionname?: (untyped n) -> (true | false)
+
+    # string -> case-sensitive ID
+    def self?.encodename_url: (untyped str) -> untyped
+
+    # case-sensitive ID -> string
+    def self?.decodename_url: (untyped str) -> untyped
+
+    # string -> encoded string in a rdoc way
+    def self?.encodename_rdocurl: (untyped str) -> untyped
+
+    # case-sensitive ID -> encoded string (encode only [A-Z])
+    def self?.encodeid: (untyped str) -> untyped
+
+    # encoded string -> case-sensitive ID (decode only [A-Z])
+    def self?.decodeid: (untyped str) -> untyped
+
+    def self?.encodename_fs: (untyped str) -> untyped
+
+    def self?.decodename_fs: (untyped str) -> untyped
+
+    def self?.html_filename: (untyped basename, untyped suffix) -> ::String
+  end
+end

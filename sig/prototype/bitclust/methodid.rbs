@@ -1,0 +1,114 @@
+module BitClust
+  # Represents infomation to identify a method (library, class/module,
+  # type and name.)
+  #
+  # A MethodID has #library, #klass, #typename, and method name.
+  # #library, #klass, #typename must be an object.
+  class MethodID
+    include NameUtils
+
+    def initialize: (?untyped? library, ?untyped? klass, ?untyped? type, ?untyped? name) -> void
+
+    attr_accessor library: untyped
+
+    attr_accessor klass: untyped
+
+    attr_accessor type: untyped
+
+    attr_accessor name: untyped
+
+    def inspect: () -> ::String
+
+    def match?: (untyped m) -> untyped
+
+    alias typename type
+
+    def typechar: () -> untyped
+
+    def typemark: () -> untyped
+
+    def idstring: () -> untyped
+  end
+
+  # A MethodSpec has #klass, #type, #method and #library.
+  # All attributes are string.
+  # #library is optional.
+  class MethodSpec
+    def self.parse: (untyped str) -> untyped
+
+    def initialize: (untyped c, untyped t, untyped m, ?untyped? library) -> void
+
+    attr_reader klass: untyped
+
+    attr_reader type: untyped
+
+    attr_reader method: untyped
+
+    attr_reader library: untyped
+
+    def inspect: () -> ::String
+
+    def to_s: () -> ::String
+
+    def display_name: () -> (::String | untyped)
+
+    def ==: (untyped other) -> (false | untyped)
+
+    alias eql? ==
+
+    def hash: () -> untyped
+
+    def <=>: (untyped other) -> untyped
+
+    def match?: (untyped m) -> untyped
+
+    def singleton_method?: () -> untyped
+
+    def instance_method?: () -> untyped
+
+    def module_function?: () -> untyped
+
+    def method?: () -> untyped
+
+    def constant?: () -> untyped
+
+    def special_variable?: () -> untyped
+  end
+
+  # A MethodNamePattern has #klass, #type, #method and #library.
+  # All attributes are string.
+  # All attributes are optional.
+  class MethodNamePattern
+    def initialize: (?untyped? c, ?untyped? t, ?untyped? m, ?untyped? lib) -> void
+
+    attr_reader klass: untyped
+
+    attr_reader type: untyped
+
+    attr_reader method: untyped
+
+    attr_reader library: untyped
+
+    def inspect: () -> ::String
+
+    private
+
+    def esc: (untyped s) -> untyped
+
+    def tesc: (untyped s) -> untyped
+
+    public
+
+    def match?: (untyped m) -> untyped
+
+    def select_classes: (untyped cs) -> untyped
+
+    def empty?: () -> untyped
+
+    def class?: () -> untyped
+
+    def method?: () -> untyped
+
+    def special_variable?: () -> untyped
+  end
+end

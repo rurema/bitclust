@@ -1,0 +1,59 @@
+module BitClust
+  module Subcommands
+    class ChmCommand < Subcommand
+      HHP_SKEL: ::String
+
+      HHC_SKEL: "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n<HTML>\n<HEAD>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Windows-31J\">\n</HEAD>\n<BODY>\n<UL><% [:library].each do |k| %>\n<%= @sitemap[k].to_html %>\n<% end %></UL>\n</BODY>\n</HTML>\n"
+
+      HHK_SKEL: "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n<HTML>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Windows-31J\">\n<HEAD>\n</HEAD>\n<BODY>\n<UL><% @index_contents.sort.each do |content| %>\n<%= content.to_html %>\n<% end %></UL>\n</BODY>\n</HTML>\n"
+
+      class Sitemap
+        class Content
+          include ERB::Util
+
+          def initialize: (untyped name, ?untyped? local) -> void
+
+          attr_reader name: untyped
+
+          attr_reader local: untyped
+
+          attr_reader contents: untyped
+
+          def []: (untyped index) -> untyped
+
+          def <<: (untyped content) -> untyped
+
+          def <=>: (untyped other) -> untyped
+
+          def to_html: () -> untyped
+        end
+        def initialize: (untyped name, ?untyped? local) -> void
+
+        def method_missing: (untyped name, *untyped args) { () -> untyped } -> untyped
+      end
+
+      class URLMapperEx < URLMapper
+        def library_url: (untyped name) -> ("/library/index.html" | ::String)
+
+        def class_url: (untyped name) -> ::String
+
+        def method_url: (untyped spec) -> ::String
+
+        def document_url: (untyped name) -> ::String
+      end
+
+      FIX_UNDEF: ::Hash[::String, "\\" | ::String]
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> untyped
+
+      private
+
+      def create_manager_config: () -> untyped
+
+      def create_html_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+
+      def create_file: (untyped path, untyped skel) -> untyped
+    end
+  end
+end

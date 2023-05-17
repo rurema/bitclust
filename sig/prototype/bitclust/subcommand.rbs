@@ -1,0 +1,21 @@
+module BitClust
+  # Base class for bitclust subcommands.
+  class Subcommand
+    def initialize: () -> void
+
+    def parse: (untyped argv) -> untyped
+
+    def help: () -> untyped
+
+    def exec: (untyped argv, untyped options) -> untyped
+
+    # TODO refactor
+    def error: (untyped message) -> untyped
+
+    def option_error: (untyped message) -> untyped
+
+    def srcdir_root: () -> untyped
+
+    def align_progress_bar_title: (untyped title) -> untyped
+  end
+end

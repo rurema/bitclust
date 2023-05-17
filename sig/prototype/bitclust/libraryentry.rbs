@@ -1,0 +1,74 @@
+module BitClust
+  # Entry for libraries ("_builtin", "yaml", etc.)
+  class LibraryEntry < Entry
+    def self.type_id: () -> :library
+
+    def initialize: (untyped db, untyped id) -> void
+
+    attr_reader id: untyped
+
+    attr_reader name: untyped
+
+    alias label name
+
+    def ==: (untyped other) -> (false | untyped)
+
+    alias eql? ==
+
+    def hash: () -> untyped
+
+    def <=>: (untyped other) -> untyped
+
+    def labels: () -> ::Array[untyped]
+
+    def name?: (untyped n) -> untyped
+
+    def inspect: () -> ::String
+
+    def description: () -> untyped
+
+    def check_link: (?untyped path) -> (nil | untyped)
+
+    def all_requires: (?::Hash[untyped, untyped] libs) -> untyped
+
+    def all_classes: () -> untyped
+
+    def error_classes: () -> untyped
+
+    def all_error_classes: () -> untyped
+
+    def all_modules: () -> untyped
+
+    def all_objects: () -> untyped
+
+    def require: (untyped lib) -> untyped
+
+    def sublibrary: (untyped lib) -> (untyped | nil)
+
+    def fetch_class: (untyped name) -> untyped
+
+    def get_class: (untyped name) -> untyped
+
+    def classnames: () -> untyped
+
+    private
+
+    def classmap: () -> untyped
+
+    public
+
+    def fetch_methods: (untyped spec) -> untyped
+
+    def fetch_method: (untyped spec) -> untyped
+
+    private
+
+    def methodmap: () -> untyped
+
+    public
+
+    def add_class: (untyped c) -> (untyped | nil)
+
+    def add_method: (untyped m) -> (untyped | nil)
+  end
+end

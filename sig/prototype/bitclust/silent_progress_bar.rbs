@@ -1,0 +1,14 @@
+module BitClust
+  # Null-object version of ProgressBar.
+  class SilentProgressBar
+    attr_accessor title: untyped
+
+    def self.create: (title: untyped, total: untyped, ?output: untyped) -> untyped
+
+    def initialize: (output: untyped, title: untyped, total: untyped) -> void
+
+    def increment: () -> nil
+
+    def finish: () -> nil
+  end
+end

@@ -1,0 +1,6 @@
+module BitClust
+  class LibraryEntry < Entry
+    def each_class: () { (ClassEntry) -> untyped } -> untyped
+    def each_method: () { (MethodEntry) -> untyped } -> untyped
+  end
+end

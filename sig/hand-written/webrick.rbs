@@ -1,0 +1,9 @@
+module WEBrick
+  class CGI
+  end
+
+  module HTTPServlet
+    class AbstractServlet
+    end
+  end
+end

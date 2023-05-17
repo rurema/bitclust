@@ -1,0 +1,57 @@
+module BitClust
+  # Abstract class for BitClust DB.
+  # Each entry is written in a file.
+  #
+  # Has subclass MethodDatabase (Ruby stuff) and FunctionDatabase (C stuff).
+  class Database
+    include NameUtils
+
+    def self.datadir?: (untyped dir) -> untyped
+
+    def self.connect: (untyped uri) -> untyped
+
+    def self.dummy: (?::Hash[untyped, untyped] params) -> untyped
+
+    def initialize: (untyped prefix) -> void
+
+    def dummy?: () -> untyped
+
+    def transaction: () { () -> untyped } -> untyped
+
+    private
+
+    def check_transaction: () -> (nil | untyped)
+
+    public
+
+    def properties: () -> untyped
+
+    def propkeys: () -> untyped
+
+    def propget: (untyped key) -> untyped
+
+    def propset: (untyped key, untyped value) -> untyped
+
+    def encoding: () -> untyped
+
+    def exist?: (untyped rel) -> (false | untyped)
+
+    def entries: (untyped rel) -> untyped
+
+    def makepath: (untyped rel) -> untyped
+
+    def load_properties: (untyped rel) -> untyped
+
+    def save_properties: (untyped rel, untyped h) -> untyped
+
+    def read: (untyped rel) -> untyped
+
+    def foreach_line: (untyped rel) { () -> untyped } -> untyped
+
+    def atomic_write_open: (untyped rel) { () -> untyped } -> untyped
+
+    private
+
+    def realpath: (untyped rel) -> ::String
+  end
+end

@@ -1,0 +1,21 @@
+module BitClust
+  # Main class of BitClust server application.
+  # Actual actions are implemneted by RequestHandler.
+  #
+  # Supports Rack and WEBrick.
+  class App
+    def initialize: (untyped options) -> void
+
+    attr_reader interfaces: untyped
+
+    attr_reader versions: untyped
+
+    def index: (untyped req) -> untyped
+
+    def get_instance: (untyped server) -> self
+
+    def service: (untyped req, untyped res) -> untyped
+
+    def call: (untyped env) -> ::Array[200 | ::Hash[::String, "text/html; charset=utf-8"] | ::Array[untyped]]
+  end
+end

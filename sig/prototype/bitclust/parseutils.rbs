@@ -1,0 +1,32 @@
+class String
+  attr_accessor location: untyped
+end
+
+module BitClust
+  # Provides line-wise access to a file with :file and :line.
+  # Used by Preprocessor
+  class LineStream
+    def initialize: (untyped f) -> void
+
+    def gets: () -> (nil | untyped)
+  end
+
+  # Encapsulates :file and :line.
+  # Used by LineStream(above)
+  class Location
+    def initialize: (untyped file, untyped line) -> void
+
+    attr_reader file: untyped
+
+    attr_reader line: untyped
+
+    def to_s: () -> ::String
+
+    def inspect: () -> ::String
+  end
+
+  # Utilities for parsing 
+  module ParseUtils
+    def parse_error: (untyped msg, untyped line) -> untyped
+  end
+end

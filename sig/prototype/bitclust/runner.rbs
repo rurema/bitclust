@@ -1,0 +1,20 @@
+module BitClust
+  # Body of bin/bitclust.
+  class Runner
+    def initialize: () -> void
+
+    def run: (untyped argv) -> untyped
+
+    def prepare: () -> untyped
+
+    def _run: (untyped argv) -> untyped
+
+    def load_config: () -> untyped
+
+    def error: (untyped message) -> untyped
+  end
+end
+
+class Object
+  def libdir: () -> untyped
+end

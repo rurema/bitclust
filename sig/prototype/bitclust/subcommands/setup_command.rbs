@@ -1,0 +1,25 @@
+module BitClust
+  module Subcommands
+    class SetupCommand < Subcommand
+      REPOSITORY_PATH: "https://github.com/rurema/doctree.git"
+
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> (nil | untyped)
+
+      private
+
+      def purge: () -> untyped
+
+      def prepare: () -> untyped
+
+      def generate_config: (untyped path, untyped config) -> untyped
+
+      def checkout: (untyped rubydoc_dir) -> (nil | untyped)
+
+      def update_method_database: (untyped prefix, untyped argv) -> untyped
+
+      def update_function_database: (untyped prefix, untyped argv) -> untyped
+    end
+  end
+end

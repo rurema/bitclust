@@ -1,0 +1,48 @@
+# Utility class for line-wise file parsing
+class LineInput
+  def self.for_string: (untyped s) -> untyped
+
+  def initialize: (untyped f, ?untyped? entry) -> void
+
+  def inspect: () -> ::String
+
+  def eof?: () -> untyped
+
+  def path: () -> (untyped | nil)
+
+  def name: () -> (untyped | "-")
+
+  def lineno: () -> untyped
+
+  def gets: () -> (untyped | nil)
+
+  def ungets: (untyped line) -> (nil | untyped)
+
+  def peek: () -> untyped
+
+  def next?: () -> (true | false)
+
+  def skip_blank_lines: () -> untyped
+
+  def gets_if: (untyped re, ?untyped? index) -> (nil | untyped)
+
+  def gets_unless: (untyped re) -> (nil | untyped)
+
+  def each: () { (untyped) -> untyped } -> untyped
+
+  def while_match: (untyped re) { (untyped) -> untyped } -> nil
+
+  def getlines_while: (untyped re) -> untyped
+
+  alias span getlines_while
+
+  def until_match: (untyped re) { (untyped) -> untyped } -> nil
+
+  def getlines_until: (untyped re) -> untyped
+
+  alias break getlines_until
+
+  def until_terminator: (untyped re) { (untyped) -> untyped } -> nil
+
+  def getblock: (untyped term_re) -> untyped
+end

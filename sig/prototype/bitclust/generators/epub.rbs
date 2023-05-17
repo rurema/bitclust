@@ -1,0 +1,29 @@
+module BitClust
+  module Generators
+    class EPUB
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      CONTENTS_DIR_NAME: "OEBPS"
+
+      def generate: () -> untyped
+
+      private
+
+      def make_epub_directory: () { (untyped) -> untyped } -> untyped
+
+      def copy_static_files: (untyped epub_directory) -> untyped
+
+      def generate_xhtml_files: (untyped contents_directory) -> untyped
+
+      def generate_contents_opf: (untyped epub_directory) -> untyped
+
+      def pack_epub: (untyped epub_directory) -> untyped
+
+      def glob_relative_path: (untyped path, untyped pattern) -> untyped
+
+      def decodename_package: (untyped str) -> untyped
+
+      def last_modified: () -> untyped
+    end
+  end
+end

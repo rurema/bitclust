@@ -1,0 +1,38 @@
+module BitClust
+  # Web server interface for BitClust server
+  class Interface
+    def initialize: (?::Hash[untyped, untyped] webrick_conf) { () -> untyped } -> void
+
+    # for WEBrick servlet
+    def get_instance: (untyped server) -> untyped
+
+    def main: () -> untyped
+
+    # for rack
+    def call: (untyped env) -> untyped
+
+    private
+
+    def fastcgi?: () -> untyped
+
+    def mod_ruby?: () -> false
+
+    class CGI < ::WEBrick::CGI
+      def main: (untyped handler) -> untyped
+
+      def do_GET: (untyped wreq, untyped wres) -> untyped
+
+      alias do_POST do_GET
+    end
+
+    class FCGI < CGI
+      def main: (untyped handler) -> untyped
+    end
+
+    class WEBrickServlet < ::WEBrick::HTTPServlet::AbstractServlet
+      def do_GET: (untyped wreq, untyped wres) -> untyped
+
+      alias do_POST do_GET
+    end
+  end
+end

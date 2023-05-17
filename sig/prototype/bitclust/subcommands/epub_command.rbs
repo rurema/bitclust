@@ -1,0 +1,9 @@
+module BitClust
+  module Subcommands
+    class EPUBCommand < Subcommand
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> untyped
+    end
+  end
+end

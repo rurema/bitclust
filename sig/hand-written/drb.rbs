@@ -1,0 +1,4 @@
+module DRb
+  module DRbUndumped
+  end
+end

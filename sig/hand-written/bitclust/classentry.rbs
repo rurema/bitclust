@@ -1,0 +1,6 @@
+module BitClust
+  class ClassEntry < Entry
+    include Enumerable[MethodEntry]
+    def each: () { (MethodEntry) -> untyped } -> untyped
+  end
+end

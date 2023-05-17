@@ -1,0 +1,100 @@
+module BitClust
+  # Body of bin/refe.
+  class Searcher
+    include NameUtils
+
+    def initialize: () -> void
+
+    attr_reader parser: untyped
+
+    def parse: (untyped argv) -> untyped
+
+    def exec: (untyped argv, ?::Hash[untyped, untyped] options) -> untyped
+
+    def help: () -> untyped
+
+    private
+
+    def server_mode_check: (untyped argv) -> untyped
+
+    def refe_mode_check: (untyped argv) -> untyped
+
+    def spawn_server: (untyped db) -> untyped
+
+    def new_local_database: (untyped db) -> untyped
+
+    def new_database: () -> untyped
+
+    def dblocation_name: () -> untyped
+
+    def dblocation: () -> untyped
+
+    def find_dblocation: () -> untyped
+
+    def dbpath: () -> untyped
+
+    def env_dbpath: () -> (untyped | nil)
+
+    def default_dbpath: () -> (untyped | ::String | nil)
+
+    def search_pattern: (untyped db, untyped argv) -> untyped
+
+    def show_all_classes: (untyped db) -> untyped
+
+    def show_all_functions: (untyped db) -> untyped
+
+    def find_class: (untyped db, untyped c) -> untyped
+
+    def find_method: (untyped db, untyped c, untyped t, untyped m) -> untyped
+
+    def find_function: (untyped db, untyped f) -> untyped
+
+    def check_method_type: (untyped t) -> untyped
+
+    def find_class_or_method: (untyped db, untyped pattern) -> untyped
+
+    def find_constant: (untyped db, untyped pattern) -> untyped
+
+    def parse_method_spec_pattern: (untyped pat) -> untyped
+  end
+
+  class Plain
+    def compile: (untyped src) -> untyped
+  end
+
+  class TerminalView
+    def initialize: (untyped compiler, untyped opts) -> void
+
+    attr_accessor database: untyped
+
+    def show_class: (untyped cs) -> untyped
+
+    def show_method: (untyped result) -> untyped
+
+    def show_function: (untyped fs) -> untyped
+
+    private
+
+    def print_names: (untyped names) -> untyped
+
+    def print_packed_names: (untyped names) -> untyped
+
+    def terminal_column: () -> untyped
+
+    def describe_class: (untyped c) -> (nil | untyped)
+
+    def print_methods: (untyped c, untyped typename, untyped title) -> (nil | untyped)
+
+    def describe_method: (untyped rec) -> untyped
+
+    def describe_function: (untyped f) -> untyped
+
+    def puts: (*untyped args) -> untyped
+
+    def convert: (untyped string) -> untyped
+
+    def output_encoding: () -> untyped
+
+    def encoding_to_nkf_option: (untyped encoding) -> (nil | untyped)
+  end
+end

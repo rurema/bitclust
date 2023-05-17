@@ -1,0 +1,21 @@
+module BitClust
+  module Subcommands
+    class AncestorsCommand < Subcommand
+      include CrossRubyUtils
+
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> untyped
+
+      private
+
+      def ancestors: (untyped ruby, untyped requires, untyped classname) -> untyped
+
+      def check_ancestors: (untyped db, untyped ruby, untyped requires, untyped classname) -> untyped
+
+      def check_all_ancestors: (untyped db, untyped ruby, untyped requires) -> untyped
+
+      def defined_classes: (untyped ruby, untyped lib, untyped rejects) -> untyped
+    end
+  end
+end

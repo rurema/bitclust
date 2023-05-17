@@ -1,0 +1,28 @@
+module BitClust
+  # Body of Refe server (spanwed by `refe --server`).
+  class Server
+    def initialize: (untyped db) -> void
+
+    def listen: (untyped url, ?bool foreground) -> untyped
+  end
+
+  class Database
+    include DRb::DRbUndumped
+  end
+
+  class Entry
+    include DRb::DRbUndumped
+  end
+
+  class SearchResult
+    include DRb::DRbUndumped
+  end
+end
+
+class Object
+  def _remote_object?: () -> false
+end
+
+class DRb::DRbObject
+  def _remote_object?: () -> true
+end

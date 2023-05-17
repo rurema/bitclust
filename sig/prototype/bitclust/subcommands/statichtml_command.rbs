@@ -1,0 +1,69 @@
+module BitClust
+  module Subcommands
+    class StatichtmlCommand < Subcommand
+      include NameUtils
+
+      class URLMapperEx < URLMapper
+        include NameUtils
+
+        attr_accessor bitclust_html_base: untyped
+
+        def initialize: (untyped h) -> void
+
+        def library_url: (untyped name) -> untyped
+
+        def class_url: (untyped name) -> untyped
+
+        def method_url: (untyped spec) -> untyped
+
+        def function_url: (untyped name) -> untyped
+
+        def document_url: (untyped name) -> untyped
+
+        def css_url: () -> untyped
+
+        def custom_css_url: (untyped filename) -> untyped
+
+        def custom_js_url: (untyped filename) -> untyped
+
+        def favicon_url: () -> untyped
+
+        def library_index_url: () -> untyped
+
+        def function_index_url: () -> untyped
+
+        def canonical_url: (untyped current_url) -> untyped
+
+        def edit_url: (untyped location) -> untyped
+
+        def encodename_package: (untyped str) -> untyped
+      end
+
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> untyped
+
+      private
+
+      def create_manager_config: () -> untyped
+
+      def create_html_entries: (untyped title, untyped entries, untyped manager, untyped db) -> untyped
+
+      def create_html_methods: (untyped title, untyped methods, untyped manager, untyped db) -> untyped
+
+      def create_index_html: (untyped outputdir) -> untyped
+
+      def create_html_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+
+      def create_html_method_file: (untyped method_name, untyped entries, untyped manager, untyped outputdir, untyped db) -> untyped
+
+      def create_html_function_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+
+      def create_html_file_p: (untyped entry, untyped manager, untyped path, untyped db) -> untyped
+
+      def create_file: (untyped path, untyped str, ?::Hash[untyped, untyped] options) -> untyped
+
+      def encodename_package: (untyped str) -> untyped
+    end
+  end
+end

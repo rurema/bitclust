@@ -1,0 +1,11 @@
+module BitClust
+  module Subcommands
+    class ListCommand < Subcommand
+      def initialize: () -> void
+
+      def parse: (untyped argv) -> untyped
+
+      def exec: (untyped argv, untyped options) -> untyped
+    end
+  end
+end

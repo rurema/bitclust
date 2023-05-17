@@ -1,0 +1,12 @@
+module BitClust
+  module Subcommands
+    class ChmCommand < Subcommand
+      class Sitemap
+        class Content
+          include Enumerable[untyped]
+          def each: () { (untyped) -> untyped } -> untyped
+        end
+      end
+    end
+  end
+end

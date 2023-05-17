@@ -1,0 +1,27 @@
+module BitClust
+  # Provides utility methods like print_crossruby_table.
+  # Used by subcommands "ancestors" "classes" etc.
+  module CrossRubyUtils
+    private
+
+    def print_crossruby_table: () { () -> untyped } -> untyped
+
+    def print_table: (untyped vers, untyped table) -> untyped
+
+    def crossrubyutils_sort_entries: (untyped ents) -> untyped
+
+    def print_record: (untyped thcols, untyped th, untyped tds, ?untyped? width_list) -> untyped
+
+    def version_id: (untyped ver) -> untyped
+
+    def get_ruby: (untyped version) -> (untyped | nil)
+
+    def build_crossruby_table: () { (untyped) -> untyped } -> untyped
+
+    def forall_ruby: (untyped path) { () -> untyped } -> untyped
+
+    def rubys: (untyped path) -> untyped
+
+    def parse_PATH: (untyped str) -> untyped
+  end
+end

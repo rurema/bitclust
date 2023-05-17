@@ -1,0 +1,87 @@
+module BitClust
+  class SyntaxHighlighter < Ripper::Filter
+    include BitClust::HTMLUtils
+
+    class Error < StandardError
+      def initialize: (untyped name, untyped lineno, untyped column, untyped error_message) -> void
+
+      def message: () -> ::String
+    end
+
+    class ParseError < Error
+    end
+
+    class CompileError < Error
+    end
+
+    COLORS: { CHAR: "sc", __end__: "k", backref: "vg", backtick: "sb", comma: nil, comment: "c1", const: "no", cvar: "vc", embdoc: nil, embdoc_beg: "cm", embdoc_end: nil, embexpr_beg: "si", embexpr_end: "si", embvar: "n", float: "mf", gvar: "vg", heredoc_beg: "no", heredoc_end: "no", ident: nil, ignored_nl: nil, int: "mi", ivar: "vi", kw: "k", label: "ss", lbrace: "p", lbracket: "p", lparen: "p", nl: nil, op: "o", period: "p", qsymbols_beg: "ss", qwords_beg: "sx", rbrace: "p", rbracket: "p", regexp_beg: "sr", regexp_end: nil, rparen: "p", semicolon: nil, sp: nil, symbeg: "ss", symbols_beg: "ss", tlambda: "o", tlambeg: "p", tstring_beg: nil, tstring_content: nil, tstring_end: nil, words_beg: "sx", words_sep: nil }
+
+    LABELS: ::Hash[untyped, untyped]
+
+    KEYWORDS: ::Array["BEGIN" | "END" | "alias" | "begin" | "break" | "case" | "defined\\?" | "do" | "else" | "elsif" | "end" | "ensure" | "for" | "if" | "in" | "next" | "redo" | "rescue" | "raise" | "retry" | "return" | "super" | "then" | "undef" | "unless" | "until" | "when" | "while" | "yield"]
+
+    KEYWORDS_PSEUDO: ::Array["loop" | "include" | "extend" | "raise" | "alias_method" | "attr" | "catch" | "throw" | "private" | "module_function" | "public" | "protected" | "true" | "false" | "nil" | "__FILE__" | "__LINE__"]
+
+    BUILTINS_G: ::Array["attr_reader" | "attr_writer" | "attr_accessor" | "__id__" | "__send__" | "abort" | "ancestors" | "at_exit" | "autoload" | "binding" | "callcc" | "caller" | "catch" | "chomp" | "chop" | "class_eval" | "class_variables" | "clone" | "const_defined\\?" | "const_get" | "const_missing" | "const_set" | "constants" | "display" | "dup" | "eval" | "exec" | "exit" | "extend" | "fail" | "fork" | "format" | "freeze" | "getc" | "gets" | "global_variables" | "gsub" | "hash" | "id" | "included_modules" | "inspect" | "instance_eval" | "instance_method" | "instance_methods" | "instance_variable_get" | "instance_variable_set" | "instance_variables" | "lambda" | "load" | "local_variables" | "loop" | "method" | "method_missing" | "methods" | "module_eval" | "name" | "object_id" | "open" | "p" | "print" | "printf" | "private_class_method" | "private_instance_methods" | "private_methods" | "proc" | "protected_instance_methods" | "protected_methods" | "public_class_method" | "public_instance_methods" | "public_methods" | "putc" | "puts" | "raise" | "rand" | "readline" | "readlines" | "require" | "require_relative" | "scan" | "select" | "self" | "send" | "set_trace_func" | "singleton_methods" | "sleep" | "split" | "sprintf" | "srand" | "sub" | "syscall" | "system" | "taint" | "test" | "throw" | "to_a" | "to_s" | "trace_var" | "trap" | "untaint" | "untrace_var" | "warn"]
+
+    BUILTINS_Q: ::Array["autoload" | "block_given" | "const_defined" | "eql" | "equal" | "frozen" | "include" | "instance_of" | "is_a" | "iterator" | "kind_of" | "method_defined" | "nil" | "private_method_defined" | "protected_method_defined" | "public_method_defined" | "respond_to" | "tainted"]
+
+    BUILTINS_B: ::Array["chomp" | "chop" | "exit" | "gsub" | "sub"]
+
+    def initialize: (untyped src, ?::String filename, ?::Integer lineno) -> void
+
+    def on_default: (untyped event, untyped token, untyped data) -> untyped
+
+    def on_embdoc_beg: (untyped token, untyped data) -> untyped
+
+    def on_embdoc_end: (untyped token, untyped data) -> untyped
+
+    def on_ident: (untyped token, untyped data) -> untyped
+
+    def on_const: (untyped token, untyped data) -> untyped
+
+    def on_kw: (untyped token, untyped data) -> untyped
+
+    def on_period: (untyped token, untyped data) -> untyped
+
+    def on_op: (untyped token, untyped data) -> untyped
+
+    def on_sp: (untyped token, untyped data) -> untyped
+
+    def on_nl: (untyped token, untyped data) -> untyped
+
+    def on_semicolon: (untyped token, untyped data) -> untyped
+
+    def on_regexp_beg: (untyped token, untyped data) -> untyped
+
+    def on_regexp_end: (untyped token, untyped data) -> untyped
+
+    def on_symbeg: (untyped token, untyped data) -> untyped
+
+    def on_tstring_beg: (untyped token, untyped data) -> untyped
+
+    def on_tstring_content: (untyped token, untyped data) -> untyped
+
+    def on_tstring_end: (untyped token, untyped data) -> untyped
+
+    def on_qwords_beg: (untyped token, untyped data) -> untyped
+
+    def on_words_beg: (untyped token, untyped data) -> untyped
+
+    def on_qsymbols_beg: (untyped token, untyped data) -> untyped
+
+    def on_symbols_beg: (untyped token, untyped data) -> untyped
+
+    def on_heredoc_beg: (untyped token, untyped data) -> untyped
+
+    def on_heredoc_end: (untyped token, untyped data) -> untyped
+
+    def on_embexpr_beg: (untyped token, untyped data) -> untyped
+
+    def on_embexpr_end: (untyped token, untyped data) -> untyped
+
+    def on___end__: (untyped token, untyped data) -> untyped
+
+    def highlight: () -> untyped
+  end
+end

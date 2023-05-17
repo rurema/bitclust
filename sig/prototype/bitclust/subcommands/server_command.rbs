@@ -1,0 +1,19 @@
+module BitClust
+  module Subcommands
+    class ServerCommand < Subcommand
+      def initialize: () -> void
+
+      def parse: (untyped argv) -> untyped
+
+      def exec: (untyped argv, untyped options) -> untyped
+
+      private
+
+      def srcdir_root: () -> untyped
+
+      def set_srcdir: (untyped dir) -> untyped
+
+      def load_config_file: () -> untyped
+    end
+  end
+end

@@ -1,0 +1,139 @@
+class ApplicationError < StandardError
+end
+
+class RiClassNotFound < ApplicationError
+end
+
+# Handle RDoc(ri) database for tools/bc-rdoc.rb and
+# `bitclust methods --diff`.
+class RiDatabase
+  def self.open_system_db: () -> untyped
+
+  def self.open: (untyped dir, untyped version) -> untyped
+
+  def initialize: (untyped ripath, untyped version) -> void
+
+  attr_reader version: untyped
+
+  def get_method: (untyped m) -> untyped
+
+  def current_class=: (untyped name) -> untyped
+
+  attr_reader class: untyped
+
+  attr_reader singleton_methods: untyped
+
+  attr_reader instance_methods: untyped
+
+  def lookup_class: (untyped name) -> untyped
+
+  private
+
+  def wrap_entries: (untyped ents) -> untyped
+end
+
+class Ent
+  def initialize: (untyped name, untyped ent) -> void
+
+  attr_reader name: untyped
+
+  attr_reader entry: untyped
+
+  def ==: (untyped other) -> (false | untyped)
+
+  alias eql? ==
+
+  def hash: () -> untyped
+
+  def <=>: (untyped other) -> untyped
+end
+
+class BCMethodEntry < Ent
+  def bitclust?: () -> true
+
+  def inspect: () -> ::String
+
+  def fullname: () -> ::String
+
+  def id: () -> (untyped | ::String)
+end
+
+class RiMethodEntry < Ent
+  def bitclust?: () -> false
+
+  def inspect: () -> ::String
+
+  def singleton_method?: () -> untyped
+
+  def fullname: () -> ::String
+end
+
+module RI
+  class RiReader
+    def singleton_methods: (untyped c) -> untyped
+
+    def instance_methods: (untyped c) -> untyped
+  end
+
+  class ClassEntry
+    def singleton_methods: () -> untyped
+
+    attr_reader instance_methods: untyped
+
+    def method_entries: () -> untyped
+  end
+
+  class MethodEntry
+    def fullname: () -> ::String
+
+    def singleton_method?: () -> untyped
+  end
+
+  class MethodDescription
+    def fullname: () -> untyped
+
+    def singleton_method?: () -> untyped
+  end
+end
+
+module HTMLUtils
+  ESC: ::Hash[::String, "&amp;" | "&lt;" | "&gt;" | "&quot;"]
+
+  def self?.escape: (untyped str) -> untyped
+
+  UNESC: untyped
+
+  def self?.unescape: (untyped str) -> untyped
+end
+
+class Formatter
+  include HTMLUtils
+
+  def method_info: (untyped m) -> untyped
+
+  private
+
+  def line: (?untyped? s) -> untyped
+
+  def describe_method: (untyped m) -> untyped
+
+  def trim_space: (untyped s) -> untyped
+
+  def trim_sig: (untyped s) -> untyped
+
+  def format_elements: (untyped elems) -> ("" | untyped)
+
+  def format_element: (untyped e) -> untyped
+
+  def headline: (untyped e) -> ::String
+
+  def paragraph: (untyped e) -> untyped
+
+  def verbatim: (untyped e) -> untyped
+
+  def list: (untyped e) -> untyped
+
+  def remove_inline: (untyped str) -> untyped
+
+  def wrap: (untyped str) -> untyped
+end

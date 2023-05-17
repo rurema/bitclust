@@ -1,0 +1,13 @@
+module BitClust
+  module Subcommands
+    class HtmlfileCommand < Subcommand
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> (nil | untyped)
+
+      private
+
+      def lookup: (untyped lib, untyped key) -> untyped
+    end
+  end
+end

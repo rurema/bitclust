@@ -1,0 +1,38 @@
+module BitClust
+  # Entry for general documents (doc/**/*.rd, etc.)
+  class DocEntry < Entry
+    def self.type_id: () -> :doc
+
+    def initialize: (untyped db, untyped id) -> void
+
+    attr_reader id: untyped
+
+    def ==: (untyped other) -> (false | untyped)
+
+    alias eql? ==
+
+    def hash: () -> untyped
+
+    def <=>: (untyped other) -> untyped
+
+    def name: () -> untyped
+
+    alias label name
+
+    def labels: () -> ::Array[untyped]
+
+    def name?: (untyped n) -> untyped
+
+    def inspect: () -> ::String
+
+    def classes: () -> untyped
+
+    def error_classes: () -> untyped
+
+    def methods: () -> untyped
+
+    def libraries: () -> untyped
+
+    def description: () -> untyped
+  end
+end

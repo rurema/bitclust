@@ -1,0 +1,11 @@
+module BitClust
+  class FunctionEntry < Entry
+    def filename: () ->        String
+    def macro: () ->           bool
+    def private: () ->         bool
+    def type: () ->            String
+    def params: () ->          String
+    def source: () ->          String
+    def source_location: () -> Location
+  end
+end
