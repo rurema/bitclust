@@ -16,8 +16,6 @@ module BitClust
   # Entry for libraries ("_builtin", "yaml", etc.)
   class LibraryEntry < Entry
 
-    include Enumerable
-
     def LibraryEntry.type_id
       :library
     end
