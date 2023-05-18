@@ -1,0 +1,24 @@
+class String
+  attr_accessor location: ::BitClust::Location
+end
+
+module BitClust
+  class LineStream
+    def initialize: (_Gets f) -> void
+    @f: _Gets
+
+    def gets: () -> String?
+  end
+
+  class Location
+    def initialize: (String? file, Integer line) -> void
+
+    attr_reader file: String?
+
+    attr_reader line: Integer
+  end
+
+  module ParseUtils
+    def parse_error: (String msg, String line) -> bot
+  end
+end
