@@ -3,4 +3,5 @@ interface _Gets
   def respond_to?: (Symbol | String) -> bool
   def path: () -> String?
   def lineno: () -> Integer
+  def inspect: () -> String
 end

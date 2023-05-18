@@ -1,0 +1,47 @@
+# Utility class for line-wise file parsing
+class LineInput
+  def self.for_string: (String s) -> LineInput
+
+  def initialize: (_Gets | StringIO f, ?untyped? entry) -> void
+  @input: _Gets | StringIO
+  @entry: untyped?
+  @buf: Array[String]
+  @lineno: Integer
+  @eof_p: bool
+
+  def eof?: () -> bool
+
+  def path: () -> String?
+
+  def name: () -> String
+
+  def lineno: () -> Integer
+
+  def gets: () -> String?
+
+  def ungets: (String? line) -> String?
+
+  def peek: () -> String?
+
+  def next?: () -> bool
+
+  def skip_blank_lines: () -> Integer
+
+  def gets_if: (Regexp re, ?Integer? index) -> String?
+
+  def gets_unless: (Regexp re) -> String?
+
+  def each: () { (String) -> untyped } -> untyped
+
+  def while_match: (Regexp re) { (String) -> untyped } -> nil
+
+  def getlines_while: (Regexp re) -> Array[String]
+
+  def until_match: (Regexp re) { (String) -> untyped } -> nil
+
+  def getlines_until: (Regexp re) -> Array[String]
+
+  def until_terminator: (Regexp re) { (String) -> untyped } -> nil
+
+  def getblock: (Regexp term_re) -> Array[String]
+end
