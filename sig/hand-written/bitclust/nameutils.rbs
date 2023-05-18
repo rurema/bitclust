@@ -1,0 +1,94 @@
+module BitClust
+  module NameUtils
+    def self?.libname?: (String str) -> bool
+
+    def self?.libname2id: (String name) -> String
+
+    def self?.libid2name: (String id) -> String
+
+    def self?.classname?: (String str) -> bool
+
+    def self?.classname2id: (String name) -> String
+
+    def self?.classid2name: (String id) -> String
+
+    def self?.method_spec?: (String str) -> bool
+
+    def self?.split_method_spec: (String spec) -> [String, String, String]
+
+    def self?.methodid2specstring: (String id) -> String
+
+    def self?.methodid2specparts: (String id) -> [String, String, String, String]
+
+    def self?.methodid2libid: (String id) -> String
+
+    def self?.methodid2classid: (String id) -> String
+
+    def self?.methodid2typechar: (String id) -> String
+
+    def self?.methodid2typename: (String id) -> String
+
+    def self?.methodid2typemark: (String id) -> String
+
+    def self?.methodid2mname: (String id) -> String
+
+    def self?.gvarname?: (String str) -> bool
+
+    def self?.methodname?: (String str) -> bool
+
+    def self?.build_method_id: (String libid, String cid, String t, String name) -> ::String
+
+    def self?.split_method_id: (String id) -> [String, String, String, String]
+
+    NAME_TO_MARK: Hash[Symbol, String]
+    MARK_TO_NAME: Hash[String, Symbol]
+
+    def self?.typename?: (Symbol n) -> bool
+
+    def self?.typename2mark: (Symbol name) -> String
+
+    def self?.typemark2name: (String mark) -> Symbol
+
+    NAME_TO_CHAR: Hash[Symbol, String]
+    CHAR_TO_NAME: Hash[String, Symbol]
+
+    def self?.typechar?: (String c) -> bool
+
+    def self?.typename2char: (Symbol name) -> String
+
+    def self?.typechar2name: (String char) -> Symbol
+
+    MARK_TO_CHAR: ::Hash[::String, String]
+
+    CHAR_TO_MARK: Hash[String, String]
+
+    def self?.typemark?: (String m) -> bool
+
+    def self?.typechar2mark: (String char) -> String
+
+    def self?.typemark2char: (String mark) -> String
+
+    def self?.functionname?: (String n) -> bool
+
+    # string -> case-sensitive ID
+    def self?.encodename_url: (String str) -> String
+
+    # case-sensitive ID -> string
+    def self?.decodename_url: (String str) -> String
+
+    # string -> encoded string in a rdoc way
+    def self?.encodename_rdocurl: (String str) -> String
+
+    # case-sensitive ID -> encoded string (encode only [A-Z])
+    def self?.encodeid: (String str) -> String
+
+    # encoded string -> case-sensitive ID (decode only [A-Z])
+    def self?.decodeid: (String str) -> String
+
+    def self?.encodename_fs: (String str) -> String
+
+    def self?.decodename_fs: (String str) -> String
+
+    def self?.html_filename: (String basename, String suffix) -> ::String
+  end
+end

@@ -59,51 +59,51 @@ module BitClust
     def split_method_spec(spec)
       case spec
       when /\AKernel\$/
-        return 'Kernel', '$', $'
+        return ['Kernel', '$', $']
       else
         m = /\A(#{CLASS_PATH_RE})(#{TYPEMARK_RE})(#{METHOD_NAME_RE})\z/o.match(spec) or
             raise ArgumentError, "wrong method spec: #{spec.inspect}"
-        return *m.captures
+        return m.captures
       end
     end
 
     def methodid2specstring(id)
-      c, t, m, _lib = *split_method_id(id)
+      c, t, m, _lib = split_method_id(id)
       classid2name(c) + typechar2mark(t) + decodename_url(m)
     end
 
     def methodid2specparts(id)
-      c, t, m, lib = *split_method_id(id)
-      return classid2name(c), typechar2mark(t), decodename_url(m), libid2name(lib)
+      c, t, m, lib = split_method_id(id)
+      [classid2name(c), typechar2mark(t), decodename_url(m), libid2name(lib)]
     end
 
     def methodid2libid(id)
-      _c, _t, _m, lib = *split_method_id(id)
+      _c, _t, _m, lib = split_method_id(id)
       lib
     end
 
     def methodid2classid(id)
-      c, _t, _m, _lib = *split_method_id(id)
+      c, _t, _m, _lib = split_method_id(id)
       c
     end
 
     def methodid2typechar(id)
-      _c, t, _m, _lib = *split_method_id(id)
+      _c, t, _m, _lib = split_method_id(id)
       t
     end
 
     def methodid2typename(id)
-      _c, t, _m, _lib = *split_method_id(id)
+      _c, t, _m, _lib = split_method_id(id)
       typechar2name(t)
     end
 
     def methodid2typemark(id)
-      _c, t, _m, _lib = *split_method_id(id)
+      _c, t, _m, _lib = split_method_id(id)
       typechar2mark(t)
     end
 
     def methodid2mname(id)
-      _c, _t, m, _lib = *split_method_id(id)
+      _c, _t, m, _lib = split_method_id(id)
       decodename_url(m)
     end
 
@@ -127,7 +127,7 @@ module BitClust
     def split_method_id(id)
       @@split_method_id[id] ||= begin
         c, rest = id.split("/")
-        [c, *rest.split(%r<[/\.]>, 3)]
+        [c, *rest&.split(%r<[/\.]>, 3)]
       end
     end
 
