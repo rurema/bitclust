@@ -1,0 +1,18 @@
+module BitClust
+  class Entry
+    interface _PersistentProperties
+      def init_properties: () -> void
+      def clear: () -> void
+      def _set_properties: (Hash[String, String] h) -> void
+      def _get_properties: () -> Hash[String, String]
+      def unload: () -> void
+    end
+
+    class Property
+      type property_type  ='String' | 'Symbol' | 'bool' | 'LibraryEntry' | 'ClassEntry' | 'MethodEntry' | '[String]' | '[LibraryEntry]' | '[ClassEntry]'  | '[MethodEntry]' | 'Location' | ''
+      def initialize: (Symbol name, property_type type) -> void
+      attr_reader name: Symbol
+      @type: property_type
+    end
+  end
+end

@@ -1,5 +1,13 @@
 module BitClust
   class FunctionEntry < Entry
+    def initialize: (untyped db, untyped id) -> void
+    attr_reader id: untyped
+
+    def inspect: () -> String
+    def name_match?: (Regexp re) -> Integer?
+    def <=>: (FunctionEntry other) -> Integer?
+
+    include BitClust::Entry::_PersistentProperties
     def filename: () ->        String
     def macro: () ->           bool
     def private: () ->         bool
@@ -7,5 +15,10 @@ module BitClust
     def params: () ->          String
     def source: () ->          String
     def source_location: () -> Location
+
+    def public?: () -> bool
+    def callable?: () -> bool
+
+    def description: () -> String
   end
 end

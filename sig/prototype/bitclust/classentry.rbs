@@ -30,11 +30,6 @@ module BitClust
     # FIXME: implement class alias
     def labels: () -> ::Array[untyped]
 
-    # FIXME: do not use superclass property aliasing (#6826)
-    alias orig_superclass superclass
-
-    def superclass: () -> untyped
-
     def save: () -> untyped
 
     def inspect: () -> ::String

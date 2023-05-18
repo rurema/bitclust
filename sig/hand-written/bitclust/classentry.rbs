@@ -2,5 +2,23 @@ module BitClust
   class ClassEntry < Entry
     include Enumerable[MethodEntry]
     def each: () { (MethodEntry) -> untyped } -> untyped
+
+    @entries: Array[MethodEntry]?
+    @ancestors_checked: bool
+    @s_ancestors_checked: bool
+
+    include BitClust::Entry::_PersistentProperties
+    def type: () ->       Symbol
+    def superclass: () -> ClassEntry
+    def included: () ->   [ClassEntry]
+    def extended: () ->   [ClassEntry]
+    def dynamically_included: () -> [ClassEntry]
+    def dynamically_extended: () -> [ClassEntry]
+    def library: () ->    LibraryEntry
+    def aliases: () ->    [ClassEntry]
+    def aliasof: () ->    ClassEntry
+    def source: () ->     String
+    def source_location: () -> Location
+    def orig_superclass: () -> ClassEntry
   end
 end
