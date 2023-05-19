@@ -1,0 +1,15 @@
+module BitClust
+  class Subcommand
+    @parser: OptionParser
+
+    @db: FunctionDatabase | MethodDatabase
+
+    def error: (untyped message) -> bot
+
+    def option_error: (untyped message) -> bot
+
+    def srcdir_root: () -> Pathname
+
+    def align_progress_bar_title: (untyped title) -> String
+  end
+end
