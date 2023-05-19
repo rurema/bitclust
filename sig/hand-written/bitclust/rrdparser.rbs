@@ -1,0 +1,153 @@
+module BitClust
+  class RRDParser
+
+    def self.parse_stdlib_file: (String path, ?::Hash[String, String] params) -> untyped
+
+    def self.parse: (untyped s, untyped lib, ?::Hash[String, String] params) -> untyped
+
+    def self.split_doc: (String source) -> [String, String]
+
+    def self.libname: (String path) -> String
+
+    def initialize: (untyped db) -> void
+
+    attr_reader db: untyped
+
+    @context: Context
+
+    def parse_file: (untyped path, untyped libname, ?::Hash[untyped, untyped] params) -> untyped
+
+    def parse: (untyped f, untyped libname, ?::Hash[untyped, untyped] params) -> untyped
+
+    private
+
+    def do_parse: (LineInput f) -> void
+
+    def read_classes: (LineInput f) -> void
+
+    def parse_level1_header: (String line) -> [String, String?, String?]
+
+    def isconst: (String? name, String line) -> String?
+
+    def read_class_body: (LineInput f) -> void
+
+    def read_reopen_body: (LineInput f) -> void
+
+    def read_object_body: (LineInput f) -> void
+
+    def read_aliases: (LineInput f) -> void
+
+    def read_includes: (LineInput f, ?bool reopen) -> void
+
+    def read_extends: (LineInput f, ?bool reopen) -> void
+
+    def tty_warn: (untyped msg) -> void
+
+    def read_level2_blocks: (LineInput f) -> void
+
+    def read_entries: (LineInput f) -> void
+
+    def concat_aliases: (Array[Chunk] chunks) -> Array[Chunk]
+
+    def read_chunks: (LineInput f) -> Array[Chunk]
+
+    def read_chunk: (LineInput f) -> Chunk
+
+    def check_chunk_signatures: (Array[Signature] sigs, String line) -> Signature
+
+    def method_signature: (String line) -> Signature
+
+    class Context
+      def initialize: (untyped db, untyped libname) -> void
+
+      @db: untyped
+      @kind: Symbol?
+
+      attr_reader library: untyped
+
+      attr_reader klass: untyped
+
+      attr_accessor type: untyped
+
+      attr_accessor visibility: untyped
+
+      def categorize: (untyped category) -> untyped
+
+      def require: (untyped libname) -> untyped
+
+      def sublibrary: (untyped libname) -> untyped
+
+      def define_class: (untyped name, untyped supername, ?location: untyped?) -> untyped
+
+      def define_module: (untyped name, ?location: untyped?) -> untyped
+
+      def define_object: (untyped name, untyped singleton_object_class, ?location: untyped?) -> untyped
+
+      private
+
+      def register_class: (untyped type, untyped name, untyped superclass, ?location: untyped?) -> untyped
+
+      def clear_scope: () -> untyped
+
+      public
+
+      def reopen_class: (untyped name) -> untyped
+
+      def redefine_class: (untyped name) -> untyped
+
+      def include: (untyped name) -> untyped
+
+      def extend: (untyped name) -> untyped
+
+      def dynamic_include: (untyped name) -> untyped
+
+      def dynamic_extend: (untyped name) -> untyped
+
+      def alias: (untyped name) -> untyped
+
+      def module_function: () -> untyped
+
+      def constant: () -> untyped
+
+      def special_variable: () -> untyped
+
+      def signature: () -> (nil | untyped)
+
+      def define_method: (untyped chunk) -> untyped
+
+      def method_id: (untyped chunk) -> untyped
+    end
+
+    class Chunk
+      def initialize: (Signature signature, Array[String] names, String source) -> void
+
+      attr_reader signature: Signature
+
+      attr_reader names: Array[String]
+
+      attr_reader source: String
+
+      def alias?: (Chunk other) -> bool
+
+      def unify: (Chunk other) -> void
+    end
+
+    class Signature
+      def initialize: (String? c, String? t, String? m) -> void
+
+      attr_reader klass: String?
+
+      attr_reader type: String?
+
+      attr_reader name: String?
+
+      def typename: () -> Symbol
+
+      def same_type?: (Signature other) -> bool
+
+      def compatible?: (Signature other) -> bool
+
+      def fully_qualified?: () -> bool
+    end
+  end
+end

@@ -47,7 +47,7 @@ module BitClust
 
     def self?.typename2mark: (Symbol name) -> String
 
-    def self?.typemark2name: (String mark) -> Symbol
+    def self?.typemark2name: (String? mark) -> Symbol
 
     NAME_TO_CHAR: Hash[Symbol, String]
     CHAR_TO_NAME: Hash[String, Symbol]

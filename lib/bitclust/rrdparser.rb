@@ -245,8 +245,8 @@ module BitClust
       return [] if chunks.empty?
       result = [chunks.shift]
       chunks.each do |chunk|
-        if result.last.alias?(chunk)
-          result.last.unify chunk
+        if result.last&.alias?(chunk)
+          result.last&.unify chunk
         else
           result.push chunk
         end
@@ -271,7 +271,7 @@ module BitClust
       src.location = header[0].location
       sigs = header.map {|line| method_signature(line) }
       mainsig = check_chunk_signatures(sigs, header[0])
-      names = sigs.map {|s| s.name }.uniq.sort
+      names = sigs.map {|s| s.name }.compact.uniq.sort
       Chunk.new(mainsig, names, src)
     end
 

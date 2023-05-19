@@ -1,167 +1,25 @@
 module BitClust
   # Parser for Ruby API reference file (refm/api/src/*)
   class RRDParser
-    include NameUtils
-
-    include ParseUtils
-
-    def self.parse_stdlib_file: (untyped path, ?::Hash[untyped, untyped] params) -> untyped
-
-    def self.parse: (untyped s, untyped lib, ?::Hash[untyped, untyped] params) -> untyped
-
-    def self.split_doc: (untyped source) -> (untyped | ::Array["" | untyped])
-
-    def self.libname: (untyped path) -> untyped
-
-    def initialize: (untyped db) -> void
-
-    attr_reader db: untyped
-
-    def parse_file: (untyped path, untyped libname, ?::Hash[untyped, untyped] params) -> untyped
-
-    def parse: (untyped f, untyped libname, ?::Hash[untyped, untyped] params) -> untyped
-
-    private
-
-    def do_parse: (untyped f) -> untyped
-
-    def read_classes: (untyped f) -> untyped
-
-    def parse_level1_header: (untyped line) -> untyped
-
-    def isconst: (untyped name, untyped line) -> (nil | untyped)
-
-    def read_class_body: (untyped f) -> untyped
-
-    def read_reopen_body: (untyped f) -> untyped
-
-    def read_object_body: (untyped f) -> untyped
-
-    def read_aliases: (untyped f) -> untyped
-
-    def read_includes: (untyped f, ?bool reopen) -> untyped
-
-    def read_extends: (untyped f, ?bool reopen) -> untyped
-
-    def tty_warn: (untyped msg) -> (untyped | nil)
-
-    def read_level2_blocks: (untyped f) -> untyped
-
-    def read_entries: (untyped f) -> untyped
-
-    def concat_aliases: (untyped chunks) -> (::Array[untyped] | untyped)
-
-    def read_chunks: (untyped f) -> untyped
-
-    def read_chunk: (untyped f) -> untyped
-
-    def check_chunk_signatures: (untyped sigs, untyped line) -> untyped
-
     SIGNATURE: ::Regexp
 
     GVAR: ::Regexp
 
-    def method_signature: (untyped line) -> untyped
-
     class Context
       include NameUtils
 
-      def initialize: (untyped db, untyped libname) -> void
-
-      attr_reader library: untyped
-
-      attr_reader klass: untyped
-
-      attr_accessor type: untyped
-
-      attr_accessor visibility: untyped
-
-      def categorize: (untyped category) -> untyped
-
-      def require: (untyped libname) -> untyped
-
-      def sublibrary: (untyped libname) -> untyped
-
-      def define_class: (untyped name, untyped supername, ?location: untyped?) -> untyped
-
-      def define_module: (untyped name, ?location: untyped?) -> untyped
-
-      def define_object: (untyped name, untyped singleton_object_class, ?location: untyped?) -> untyped
-
       private
 
-      def register_class: (untyped type, untyped name, untyped superclass, ?location: untyped?) -> untyped
-
-      def clear_scope: () -> untyped
-
       public
-
-      def reopen_class: (untyped name) -> untyped
-
-      def redefine_class: (untyped name) -> untyped
-
-      def include: (untyped name) -> untyped
-
-      def extend: (untyped name) -> untyped
-
-      def dynamic_include: (untyped name) -> untyped
-
-      def dynamic_extend: (untyped name) -> untyped
-
-      # Add a alias +name+ to the alias list.
-      def alias: (untyped name) -> untyped
-
-      def module_function: () -> untyped
-
-      def constant: () -> untyped
-
-      def special_variable: () -> untyped
-
-      def signature: () -> (nil | untyped)
-
-      def define_method: (untyped chunk) -> untyped
-
-      def method_id: (untyped chunk) -> untyped
-    end
-
-    class Chunk
-      def initialize: (untyped signature, untyped names, untyped source) -> void
-
-      attr_reader signature: untyped
-
-      attr_reader names: untyped
-
-      attr_reader source: untyped
-
-      def inspect: () -> ::String
-
-      def alias?: (untyped other) -> untyped
-
-      def unify: (untyped other) -> untyped
     end
 
     class Signature
       include NameUtils
-
-      def initialize: (untyped c, untyped t, untyped m) -> void
-
-      attr_reader klass: untyped
-
-      attr_reader type: untyped
-
-      attr_reader name: untyped
-
-      def inspect: () -> ::String
-
-      def to_s: () -> ::String
-
-      def typename: () -> untyped
-
-      def same_type?: (untyped other) -> untyped
-
-      def compatible?: (untyped other) -> untyped
-
-      def fully_qualified?: () -> (true | false)
     end
+    include NameUtils
+
+    include ParseUtils
+
+    private
   end
 end

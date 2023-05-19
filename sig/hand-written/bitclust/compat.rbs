@@ -1,0 +1,5 @@
+class Object
+  # same as File.open
+  def fopen: ((::string | ::_ToPath | ::int), ?(::string | ::int), ?::int) -> ::File
+           | [T] ((::string | ::_ToPath | ::int), ?(::string | ::int), ?::int) { (::File) -> T } -> T
+end
