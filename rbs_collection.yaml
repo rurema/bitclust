@@ -23,6 +23,8 @@ gems:
 
   #- name: drb
   - name: erb
+  - name: optparse
+  - name: pathname
   - name: ripper
 
   - name: progressbar
