@@ -13,8 +13,16 @@ module BitClust
       public
     end
 
+    class Chunk
+      def inspect: () -> ::String
+    end
+
     class Signature
       include NameUtils
+
+      def inspect: () -> ::String
+
+      def to_s: () -> ::String
     end
     include NameUtils
 
