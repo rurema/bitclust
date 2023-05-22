@@ -2,6 +2,103 @@ module BitClust
   class LineFilter
     include Enumerable[String]
 
+    def initialize: (_Gets f) -> void
+
+    @f: _Gets
+    @buf: Array[String]
+
+    def gets: () -> String
+
     def each: () { (String) -> untyped } -> untyped
+
+    # abstract
+    def next_line: (_Gets) -> String
+  end
+
+  class Preprocessor < LineFilter
+    @params: Hash[untyped, untyped]
+    @last_if: String?
+    @state_stack: Array[State]
+
+    def self.read: (untyped path, ?::Hash[untyped, untyped] params) -> String
+
+    def self.process: (untyped path, ?::Hash[untyped, untyped] params) -> Array[String]
+
+    def self.wrap: (untyped f, ?::Hash[untyped, untyped] params) -> instance
+
+    def path: () -> String?
+
+    def next_line: (_Gets) -> String
+
+    def cond_stmt_begin: (String line, String cond) -> void
+
+    def build_cond_by_value: (String line, String left) -> String
+
+    def current_cond: () -> State?
+
+    def cond_init: () -> void
+
+    def cond_toplevel?: () -> bool
+
+    def cond_push: (bool bool) -> void
+
+    def cond_invert: () -> void
+
+    def cond_pop: () -> void
+
+    type evaluated_result = String | Integer | nil
+
+    def eval_cond: (String str) -> evaluated_result
+
+    def eval_expr: (StringScanner s) -> evaluated_result
+
+    def eval_expr_p: (StringScanner s) -> evaluated_result
+
+    def read_conj: (StringScanner s) -> String?
+
+    def read_op: (StringScanner s) -> String?
+
+    def eval_primary: (StringScanner s) -> evaluated_result
+
+    def samplecode_begin: (untyped line, untyped description) -> (nil | untyped)
+
+    def samplecode_end: () -> (nil | untyped)
+
+    def samplecode_push: (untyped description) -> void
+
+    def samplecode_pop: () -> void
+
+    def samplecode_processing?: () -> bool
+
+    def samplecode_description_by_value: (String line) -> String
+
+    def scan_error: (String msg) -> bot
+
+    class State
+      type state_label = :toplevel | :samplecode | :condition
+      attr_reader current: Symbol
+      @is_processing: bool
+      @label: state_label
+
+      def initialize: (bool is_processing, state_label label) -> void
+
+      def next: (bool is_processing, state_label label) -> State
+
+      def toplevel?: () -> bool
+
+      def processing?: () -> bool
+
+      def samplecode?: () -> bool
+    end
+
+    class LineCollector < LineFilter
+      def self.process: (untyped path) -> instance
+
+      def self.wrap: (untyped f) -> instance
+
+      private
+
+      def next_line: (untyped f) -> String
+    end
   end
 end

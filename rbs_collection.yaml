@@ -26,6 +26,7 @@ gems:
   - name: optparse
   - name: pathname
   - name: ripper
+  - name: strscan
 
   - name: progressbar
   - name: webrick

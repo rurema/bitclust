@@ -2,83 +2,13 @@ module BitClust
   # Superclass of Preprocessor
   class LineFilter
     include ParseUtils
-
-    def initialize: (untyped f) -> void
-
-    def gets: () -> untyped
   end
 
   # Handle pragmas like #@todo, #@include, #@since, etc.
   class Preprocessor < LineFilter
-    def self.read: (untyped path, ?::Hash[untyped, untyped] params) -> untyped
-
-    def self.process: (untyped path, ?::Hash[untyped, untyped] params) -> untyped
-
-    def self.wrap: (untyped f, ?::Hash[untyped, untyped] params) -> untyped
-
     def initialize: (untyped f, ?::Hash[untyped, untyped] params) -> void
 
-    def path: () -> (untyped | nil)
-
     private
-
-    def next_line: (untyped f) -> untyped
-
-    def cond_stmt_begin: (untyped line, untyped cond) -> untyped
-
-    def build_cond_by_value: (untyped line, untyped left) -> untyped
-
-    def current_cond: () -> untyped
-
-    def cond_init: () -> untyped
-
-    def cond_toplevel?: () -> untyped
-
-    def cond_push: (untyped bool) -> untyped
-
-    def cond_invert: () -> untyped
-
-    def cond_pop: () -> untyped
-
-    def eval_cond: (untyped str) -> untyped
-
-    def eval_expr: (untyped s) -> untyped
-
-    def eval_expr_p: (untyped s) -> untyped
-
-    def read_conj: (untyped s) -> untyped
-
-    def read_op: (untyped s) -> untyped
-
-    def eval_primary: (untyped s) -> untyped
-
-    def samplecode_begin: (untyped line, untyped description) -> (nil | untyped)
-
-    def samplecode_end: () -> (nil | untyped)
-
-    def samplecode_push: (untyped description) -> untyped
-
-    def samplecode_pop: () -> untyped
-
-    def samplecode_processing?: () -> untyped
-
-    def samplecode_description_by_value: (untyped line) -> untyped
-
-    def scan_error: (untyped msg) -> untyped
-
-    class State
-      attr_reader current: untyped
-
-      def initialize: (untyped is_processing, untyped label) -> void
-
-      def next: (untyped is_processing, untyped label) -> untyped
-
-      def toplevel?: () -> untyped
-
-      def processing?: () -> untyped
-
-      def samplecode?: () -> untyped
-    end
   end
 
   # Used by tools/stattodo.rb
