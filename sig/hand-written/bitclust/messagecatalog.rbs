@@ -1,0 +1,37 @@
+module BitClust
+  module Translatable
+    private
+
+    @__message_catalog: MessageCatalog
+
+    def init_message_catalog: (MessageCatalog catalog) -> void
+
+    def message_catalog: () -> MessageCatalog
+
+    def _: (untyped key, *untyped args) -> untyped
+  end
+
+  class MessageCatalog
+    ENCODING_MAP: ::Hash[::String, "UTF-8" | "EUC-JP" | "Shift_JIS"]
+
+    def self.encoding2locale: (String enc) -> String
+
+    def self.load: (String prefix) -> instance
+
+    def self.load_with_locales: (String prefix, Array[String] locales) -> instance
+
+    def self.env_locales: () -> Array[String]
+
+    def self.find_catalog: (String prefix, Array[String] locales) -> ([String, String] | nil)
+
+    def self.load_file: (String path, String locale) -> instance
+
+    def initialize: (Hash[String, String] msgs, String locale) -> void
+    @msgs: Hash[String, String]
+    @locale: String
+
+    def inspect: () -> ::String
+
+    def translate: (String key, *untyped args) -> String
+  end
+end

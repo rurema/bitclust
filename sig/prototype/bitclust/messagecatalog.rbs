@@ -2,38 +2,5 @@ module BitClust
   # Provides methods to use MessageCatalog
   module Translatable
     private
-
-    def init_message_catalog: (untyped catalog) -> untyped
-
-    def message_catalog: () -> untyped
-
-    def _: (untyped key, *untyped args) -> untyped
-  end
-
-  # Tiny implementation of message catalog (I18N)
-  # see data/bitclust/catalog/ja_JP.UTF-8
-  #
-  # FIXME: support automatic encoding-conversion
-  class MessageCatalog
-    ENCODING_MAP: ::Hash[::String, "UTF-8" | "EUC-JP" | "Shift_JIS"]
-
-    # FIXME: support non ja_JP locales
-    def self.encoding2locale: (untyped enc) -> untyped
-
-    def self.load: (untyped prefix) -> untyped
-
-    def self.load_with_locales: (untyped prefix, untyped locales) -> untyped
-
-    def self.env_locales: () -> untyped
-
-    def self.find_catalog: (untyped prefix, untyped locales) -> (untyped | nil)
-
-    def self.load_file: (untyped path, untyped locale) -> untyped
-
-    def initialize: (untyped msgs, untyped locale) -> void
-
-    def inspect: () -> ::String
-
-    def translate: (untyped key, *untyped args) -> untyped
   end
 end
