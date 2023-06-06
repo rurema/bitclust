@@ -2,7 +2,7 @@
 sources:
 - type: git
   name: ruby/gem_rbs_collection
-  revision: 4d9c6bf87599f2b4c68854e1c95a88e585d05395
+  revision: 28208148c7e64a25e9b86b9723b4c3a2cef14e81
   remote: https://github.com/ruby/gem_rbs_collection.git
   repo_dir: gems
 path: ".gem_rbs_collection"
@@ -12,6 +12,10 @@ gems:
   source:
     type: stdlib
 - name: erb
+  version: '0'
+  source:
+    type: stdlib
+- name: fileutils
   version: '0'
   source:
     type: stdlib
@@ -28,7 +32,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 4d9c6bf87599f2b4c68854e1c95a88e585d05395
+    revision: 28208148c7e64a25e9b86b9723b4c3a2cef14e81
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper

@@ -23,6 +23,7 @@ gems:
 
   #- name: drb
   - name: erb
+  - name: fileutils
   - name: optparse
   - name: pathname
   - name: ripper
