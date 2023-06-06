@@ -1,0 +1,64 @@
+module BitClust
+  class Database
+    include NameUtils
+
+    def self.datadir?: (::String dir) -> bool
+
+    def self.connect: (::URI::Generic uri) -> (instance | ::DRb::DRbObject)
+
+    type propkey_type = ::String
+    type properties_type = ::Hash[propkey_type, untyped]
+
+    def self.dummy: (?properties_type params) -> untyped
+
+    def initialize: (String? prefix) -> void
+    @prefix: String?
+    @properties: properties_type?
+    @in_transaction: bool
+    @properties_dirty: bool
+
+    def dummy?: () -> bool
+
+    def transaction: () { () -> untyped } -> void
+
+    def dirty?: () -> void
+    def clear_dirty: () -> void
+    def commit: () -> void
+
+    private
+
+    def check_transaction: () -> void
+
+    public
+
+    def properties: () -> properties_type
+
+    def propkeys: () -> ::Array[propkey_type]
+
+    def propget: (propkey_type key) -> untyped
+
+    def propset: (propkey_type key, untyped value) -> void
+
+    def encoding: () -> untyped
+
+    def exist?: (::String rel) -> bool
+
+    def entries: (::String rel) -> ::Array[::String]
+
+    def makepath: (::String rel) -> void
+
+    def load_properties: (::String rel) -> properties_type
+
+    def save_properties: (::String rel, properties_type h) -> void
+
+    def read: (::String rel) -> ::String
+
+    def foreach_line: (::String rel) { (::String line) -> void } -> nil
+
+    def atomic_write_open: [T] (::String rel) { (::File) -> T } -> void
+
+    private
+
+    def realpath: (::String rel) -> ::String
+  end
+end
