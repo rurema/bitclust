@@ -2,6 +2,10 @@ module WEBrick
   class CGI
   end
 
+  class Daemon
+    def self.start: () ?{ () -> untyped } -> untyped
+  end
+
   module HTTPServlet
     class AbstractServlet
     end

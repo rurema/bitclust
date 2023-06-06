@@ -1,0 +1,8 @@
+module BitClust
+  class Server
+    def initialize: (MethodDatabase db) -> void
+    @db: MethodDatabase
+
+    def listen: (String url, ?bool foreground) -> Thread
+  end
+end
