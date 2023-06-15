@@ -12,8 +12,9 @@ module BitClust
 
   class Location
     def initialize: (String? file, Integer line) -> void
+                  | (Pathname file, Integer line) -> void
 
-    attr_reader file: String?
+    attr_reader file: (String? | Pathname)
 
     attr_reader line: Integer
   end

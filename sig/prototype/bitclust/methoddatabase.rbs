@@ -1,134 +1,28 @@
 module BitClust
   # Database for Ruby entries (library, class, method).
   class MethodDatabase < Database
-    include Completion
-
-    def self.dummy: (?::Hash[untyped, untyped] params) -> untyped
-
-    def initialize: (untyped prefix) -> void
-
-    attr_writer refs: untyped
-
-    def init: () -> untyped
-
     private
-
-    def commit: () -> untyped
 
     public
 
-    def dirty?: () -> untyped
-
-    def each_dirty_entry: () { () -> untyped } -> untyped
-
-    def dirty_library: (untyped lib) -> untyped
-
-    def each_dirty_library: () { () -> untyped } -> untyped
-
-    def dirty_class: (untyped c) -> untyped
-
-    def each_dirty_class: () { () -> untyped } -> untyped
-
-    def dirty_method: (untyped m) -> untyped
-
-    def each_dirty_method: () { () -> untyped } -> untyped
-
-    def clear_dirty: () -> untyped
-
-    def update_requires: () -> untyped
-
-    def update_sublibraries: () -> untyped
-
-    def update_by_stdlibtree: (untyped root) -> untyped
-
     private
-
-    def parse_LIBRARIES: (untyped path, untyped properties) -> untyped
 
     public
 
-    def update_by_file: (untyped path, untyped libname) -> untyped
-
-    def refs: () -> untyped
-
-    def make_refs: () -> untyped
-
-    def copy_doc: () -> untyped
-
-    def docs: () -> untyped
-
     private
-
-    def docmap: () -> untyped
 
     public
 
-    def get_doc: (untyped name) -> untyped
-
-    def fetch_doc: (untyped name) -> untyped
-
-    def libraries: () -> untyped
-
     private
-
-    def librarymap: () -> untyped
 
     public
 
-    def get_library: (untyped name) -> untyped
-
-    def fetch_library: (untyped name) -> untyped
-
-    def fetch_library_id: (untyped id) -> untyped
-
-    def open_library: (untyped name, ?bool reopen) -> untyped
-
-    def classes: () -> untyped
-
     private
-
-    def classmap: () -> untyped
 
     public
 
-    # get a class entry if it exists, or create a new class entry object
-    # if it doesn't exist.
-    def get_class: (untyped name) -> untyped
-
-    # This method does not work in transaction.
-    def fetch_class: (untyped name) -> untyped
-
-    def fetch_class_id: (untyped id) -> untyped
-
-    def search_classes: (untyped pattern) -> untyped
-
-    def open_class: (untyped name) { (untyped) -> untyped } -> untyped
-
     private
 
-    def load_class: (untyped id) -> untyped
-
-    def load_extent: (untyped entry_class) -> untyped
-
-    def id_extent: (untyped entry_class) -> untyped
-
     public
-
-    # Return existing/newly created MethodEntry from the given MethodID
-    #
-    # FIXME: see kind
-    def open_method: (untyped id) { (untyped) -> untyped } -> untyped
-
-    def methods: () -> untyped
-
-    def get_method: (untyped spec) -> untyped
-
-    def fetch_methods: (untyped spec) -> untyped
-
-    def fetch_method: (untyped spec) -> untyped
-
-    def search_method: (untyped pattern) -> untyped
-
-    def search_methods: (untyped pattern) -> untyped
   end
 end

@@ -1,0 +1,138 @@
+module BitClust
+  class MethodDatabase < Database
+    include Completion
+
+    def self.dummy: (?::Hash[untyped, untyped] params) -> untyped
+
+    def initialize: (::String prefix) -> void
+
+    @librarymap: Hash[String, LibraryEntry]?
+    @classmap: Hash[String, ClassEntry]
+    @class_extent_loaded: bool
+    @dirty_libraries: Hash[LibraryEntry, TrueClass]
+    @dirty_classes: Hash[ClassEntry, TrueClass]
+    @dirty_methods: Hash[MethodEntry, TrueClass]
+    @refs: RefsDatabase?
+    @docmap: Hash[String, DocEntry]
+
+    attr_writer refs: untyped
+
+    def init: () -> void
+
+    private
+
+    def commit: () -> void
+
+    public
+
+    def dirty?: () -> bool
+
+    def each_dirty_entry: () { (Entry) -> void } -> void
+
+    def dirty_library: (LibraryEntry lib) -> void
+
+    def each_dirty_library: () { (LibraryEntry) -> void } -> void
+
+    def dirty_class: (ClassEntry c) -> void
+
+    def each_dirty_class: () { (ClassEntry) -> void } -> void
+
+    def dirty_method: (MethodEntry m) -> void
+
+    def each_dirty_method: () { (MethodEntry) -> void } -> void
+
+    def clear_dirty: () -> void
+
+    def update_requires: () -> void
+
+    def update_sublibraries: () -> void
+
+    def update_by_stdlibtree: (String root) -> void
+    @root: String
+
+    private
+
+    def parse_LIBRARIES: (String path, ::Hash[untyped, untyped] properties) -> Array[String]
+
+    public
+
+    def update_by_file: (String path, String libname) -> LibraryEntry
+
+    def refs: () -> RefsDatabase
+
+    def make_refs: () -> RefsDatabase
+
+    def copy_doc: () -> void
+
+    def docs: () -> Array[DocEntry]
+
+    private
+
+    def docmap: () -> Hash[String, DocEntry]
+
+    public
+
+    def get_doc: (String name) -> DocEntry
+
+    def fetch_doc: (String name) -> (DocEntry | bot)
+
+    def libraries: () -> Array[LibraryEntry]
+
+    private
+
+    def librarymap: () -> Hash[String, LibraryEntry]
+
+    public
+
+    def get_library: (String name) -> LibraryEntry
+
+    def fetch_library: (String name) -> (LibraryEntry | bot)
+
+    def fetch_library_id: (String id) -> (LibraryEntry | bot)
+
+    def open_library: (String name, ?bool reopen) -> LibraryEntry
+
+    def classes: () -> Array[ClassEntry]
+
+    private
+
+    def classmap: () -> Hash[String, ClassEntry]
+
+    public
+
+    def get_class: (String name) -> ClassEntry
+
+    def fetch_class: (String name) -> (ClassEntry | bot)
+
+    def fetch_class_id: (String id) -> (ClassEntry | bot)
+
+    def search_classes: (String pattern) -> (Array[ClassEntry] | bot)
+
+    def open_class: (String name) { (ClassEntry) -> void } -> ClassEntry
+
+    private
+
+    def load_class: (String id) -> (ClassEntry | nil)
+
+    # entry_class < Entry, Hash[String, entry_class]
+    def load_extent: (untyped entry_class) -> Hash[String, untyped]
+
+    def id_extent: (untyped entry_class) -> untyped
+
+    public
+
+    def open_method: (MethodID id) { (MethodEntry) -> void } -> MethodEntry
+
+    def methods: () -> Array[MethodEntry]
+
+    def get_method: (MethodSpec spec) -> MethodEntry
+
+    def fetch_methods: (MethodSpec spec) -> (Array[MethodEntry] | bot)
+
+    def fetch_method: (MethodSpec spec) -> (MethodEntry | bot)
+
+    def search_method: (MethodNamePattern pattern) -> (MethodEntry | bot)
+
+    def search_methods: (MethodNamePattern pattern) -> (Array[MethodEntry] | bot)
+  end
+end
