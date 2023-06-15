@@ -133,6 +133,6 @@ module BitClust
 
     def search_method: (MethodNamePattern pattern) -> (MethodEntry | bot)
 
-    def search_methods: (MethodNamePattern pattern) -> (Array[MethodEntry] | bot)
+    def search_methods: (MethodNamePattern pattern) -> (SearchResult | bot)
   end
 end
