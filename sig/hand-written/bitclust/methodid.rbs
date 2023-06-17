@@ -1,0 +1,105 @@
+module BitClust
+  # Represents infomation to identify a method (library, class/module,
+  # type and name.)
+  #
+  # A MethodID has #library, #klass, #typename, and method name.
+  # #library, #klass, #typename must be an object.
+  class MethodID
+    include NameUtils
+
+    def initialize: (?LibraryEntry? library, ?ClassEntry? klass, ?Symbol? type, ?String? name) -> void
+    @library: LibraryEntry
+    @klass: ClassEntry
+    @type: Symbol
+    @name: String
+
+    attr_accessor library: LibraryEntry
+
+    attr_accessor klass: ClassEntry
+
+    attr_accessor type: Symbol
+
+    attr_accessor name: String
+
+    def match?: (MethodID m) -> bool
+
+    def typechar: () -> String
+
+    def typemark: () -> String
+
+    def idstring: () -> String
+  end
+
+  class MethodSpec
+    def self.parse: (String str) -> instance
+
+    def initialize: (String c, String t, String m, ?String? library) -> void
+
+    attr_reader klass: String
+
+    attr_reader type: String
+
+    attr_reader method: String
+
+    attr_reader library: String
+
+    def display_name: () -> ::String
+
+    def ==: (untyped other) -> bool
+
+    def hash: () -> ::Integer
+
+    def <=>: (untyped other) -> ::Integer?
+
+    def match?: (MethodEntry m) -> bool
+
+    def singleton_method?: () -> bool
+
+    def instance_method?: () -> bool
+
+    def module_function?: () -> bool
+
+    def method?: () -> bool
+
+    def constant?: () -> bool
+
+    def special_variable?: () -> bool
+  end
+
+  class MethodNamePattern
+    def initialize: (?String? c, ?String? t, ?String? m, ?String? lib) -> void
+
+    attr_reader klass: String?
+
+    attr_reader type: String?
+
+    attr_reader method: String?
+
+    attr_reader library: String?
+
+    # unused?
+    @crecache: Array[untyped]
+    @mrecache: Array[untyped]
+
+    private
+
+    def esc: (String? s) -> String
+
+    def tesc: (String? s) -> String
+
+    public
+
+    def match?: (MethodEntry m) -> bool
+
+    # unused?
+    def select_classes: (untyped cs) -> untyped
+
+    def empty?: () -> bool
+
+    def class?: () -> boolish
+
+    def method?: () -> boolish
+
+    def special_variable?: () -> bool
+  end
+end

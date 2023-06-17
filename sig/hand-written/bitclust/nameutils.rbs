@@ -36,7 +36,7 @@ module BitClust
 
     def self?.methodname?: (String str) -> bool
 
-    def self?.build_method_id: (String libid, String cid, String t, String name) -> ::String
+    def self?.build_method_id: (String libid, String cid, Symbol t, String name) -> ::String
 
     def self?.split_method_id: (String id) -> [String, String, String, String]
 
