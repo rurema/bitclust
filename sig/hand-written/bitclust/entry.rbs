@@ -14,5 +14,10 @@ module BitClust
       attr_reader name: Symbol
       @type: property_type
     end
+
+    # サブクラスで定義されている
+    def self.type_id: () -> Symbol
+
+    def type_id: () -> Symbol
   end
 end

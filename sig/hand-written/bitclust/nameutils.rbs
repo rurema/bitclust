@@ -26,7 +26,7 @@ module BitClust
 
     def self?.methodid2typechar: (String id) -> String
 
-    def self?.methodid2typename: (String id) -> String
+    def self?.methodid2typename: (String id) -> typename
 
     def self?.methodid2typemark: (String id) -> String
 
@@ -49,14 +49,15 @@ module BitClust
 
     def self?.typemark2name: (String? mark) -> Symbol
 
-    NAME_TO_CHAR: Hash[Symbol, String]
-    CHAR_TO_NAME: Hash[String, Symbol]
+    type typename = (:singleton_method | :instance_method | :module_function | :constant | :special_variable)
+    NAME_TO_CHAR: Hash[typename, String]
+    CHAR_TO_NAME: Hash[String, typename]
 
     def self?.typechar?: (String c) -> bool
 
-    def self?.typename2char: (Symbol name) -> String
+    def self?.typename2char: (typename | Symbol name) -> String
 
-    def self?.typechar2name: (String char) -> Symbol
+    def self?.typechar2name: (String char) -> typename
 
     MARK_TO_CHAR: ::Hash[::String, String]
 

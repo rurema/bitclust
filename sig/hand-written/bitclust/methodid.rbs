@@ -7,18 +7,11 @@ module BitClust
   class MethodID
     include NameUtils
 
-    def initialize: (?LibraryEntry? library, ?ClassEntry? klass, ?Symbol? type, ?String? name) -> void
-    @library: LibraryEntry
-    @klass: ClassEntry
-    @type: Symbol
-    @name: String
+    def initialize: (?LibraryEntry? library, ?ClassEntry? klass, ?BitClust::NameUtils::typename? type, ?String? name) -> void
 
     attr_accessor library: LibraryEntry
-
     attr_accessor klass: ClassEntry
-
-    attr_accessor type: Symbol
-
+    attr_accessor type: BitClust::NameUtils::typename
     attr_accessor name: String
 
     def match?: (MethodID m) -> bool

@@ -1,0 +1,101 @@
+module BitClust
+  class MethodEntry < Entry
+    def self.type_id: () -> :method
+
+    def initialize: (MethodDatabase db, String id) -> void
+
+    @db: MethodDatabase
+    attr_reader id: String
+
+    def ==: (untyped other) -> bool
+
+    def hash: () -> ::Integer
+
+    def <=>: (untyped other) -> ::Integer?
+
+    KIND_NUM: { defined: 0, redefined: 1, added: 2 }
+
+    def sort_key: () -> ::Array[untyped]
+
+    def name: () -> untyped
+
+    def typename: () -> BitClust::NameUtils::typename
+
+    alias type typename
+
+    def typemark: () -> untyped
+
+    def typechar: () -> untyped
+
+    def type_label: () -> untyped
+
+    def library: () -> untyped
+
+    attr_writer library: untyped
+
+    def klass: () -> untyped
+
+    attr_writer klass: untyped
+
+    include BitClust::Entry::_PersistentProperties
+    def names: () ->           Array[String]
+    def visibility: () ->      (:public | :private | :protected)
+    def kind: () ->            (:defined | :added | :redefined)
+    def source: () ->          String
+    def source_location: () -> Location
+
+    def inspect: () -> ::String
+
+    def spec: () -> untyped
+
+    def spec_string: () -> untyped
+
+    def label: () -> ::String
+
+    def short_label: () -> ::String
+
+    def index_id: () -> untyped
+
+    def labels: () -> untyped
+
+    def name?: (untyped name) -> untyped
+
+    def name_match?: (untyped re) -> untyped
+
+    def really_public?: () -> untyped
+
+    def public?: () -> untyped
+
+    def protected?: () -> untyped
+
+    def private?: () -> untyped
+
+    def public_singleton_method?: () -> untyped
+
+    def private_singleton_method?: () -> untyped
+
+    def public_instance_method?: () -> untyped
+
+    def private_instance_method?: () -> untyped
+
+    def protected_instance_method?: () -> untyped
+
+    def singleton_method?: () -> untyped
+
+    def instance_method?: () -> untyped
+
+    def constant?: () -> untyped
+
+    def special_variable?: () -> untyped
+
+    def defined?: () -> untyped
+
+    def added?: () -> untyped
+
+    def redefined?: () -> untyped
+
+    def undefined?: () -> untyped
+
+    def description: () -> untyped
+  end
+end
