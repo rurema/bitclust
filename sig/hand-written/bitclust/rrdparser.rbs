@@ -67,7 +67,7 @@ module BitClust
 
       attr_reader klass: untyped
 
-      attr_accessor type: untyped
+      attr_accessor type: NameUtils::typename?
 
       attr_accessor visibility: untyped
 
@@ -133,15 +133,15 @@ module BitClust
     end
 
     class Signature
-      def initialize: (String? c, String? t, String? m) -> void
+      def initialize: (String c, NameUtils::typemark? t, String? m) -> void
 
-      attr_reader klass: String?
+      attr_reader klass: String
 
-      attr_reader type: String?
+      attr_reader type: NameUtils::typemark?
 
       attr_reader name: String?
 
-      def typename: () -> Symbol
+      def typename: () -> NameUtils::typename
 
       def same_type?: (Signature other) -> bool
 

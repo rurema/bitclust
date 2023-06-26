@@ -14,7 +14,7 @@ module BitClust
 
     def self?.method_spec?: (String str) -> bool
 
-    def self?.split_method_spec: (String spec) -> [String, String, String]
+    def self?.split_method_spec: (String spec) -> [String, typemark, String]
 
     def self?.methodid2specstring: (String id) -> String
 
@@ -36,38 +36,42 @@ module BitClust
 
     def self?.methodname?: (String str) -> bool
 
-    def self?.build_method_id: (String libid, String cid, Symbol t, String name) -> ::String
+    def self?.build_method_id: (String libid, String cid, typename t, String name) -> ::String
 
-    def self?.split_method_id: (String id) -> [String, String, String, String]
+    def self?.split_method_id: (String id) -> [String, typechar, String, String]
 
-    NAME_TO_MARK: Hash[Symbol, String]
-    MARK_TO_NAME: Hash[String, Symbol]
+    type typename = (:singleton_method | :instance_method | :module_function | :constant | :special_variable)
+    type typemark = ('.' | '#' | '.#' | '::' | '$')
+
+    NAME_TO_MARK: Hash[typename, typemark]
+    MARK_TO_NAME: Hash[typemark, typename]
 
     def self?.typename?: (Symbol n) -> bool
 
-    def self?.typename2mark: (Symbol name) -> String
+    def self?.typename2mark: (typename? name) -> typemark
 
-    def self?.typemark2name: (String? mark) -> Symbol
+    def self?.typemark2name: (typemark? mark) -> typename
 
-    type typename = (:singleton_method | :instance_method | :module_function | :constant | :special_variable)
-    NAME_TO_CHAR: Hash[typename, String]
-    CHAR_TO_NAME: Hash[String, typename]
+    type typechar = ('s' | 'i' | 'm' | 'c' | 'v')
 
-    def self?.typechar?: (String c) -> bool
+    NAME_TO_CHAR: Hash[typename, typechar]
+    CHAR_TO_NAME: Hash[typechar, typename]
 
-    def self?.typename2char: (typename | Symbol name) -> String
+    def self?.typechar?: (typechar | String c) -> bool
 
-    def self?.typechar2name: (String char) -> typename
+    def self?.typename2char: (typename | Symbol name) -> typechar
 
-    MARK_TO_CHAR: ::Hash[::String, String]
+    def self?.typechar2name: (typechar char) -> typename
 
-    CHAR_TO_MARK: Hash[String, String]
+    MARK_TO_CHAR: Hash[typemark, typechar]
 
-    def self?.typemark?: (String m) -> bool
+    CHAR_TO_MARK: Hash[typechar, typemark]
 
-    def self?.typechar2mark: (String char) -> String
+    def self?.typemark?: (typemark | String m) -> bool
 
-    def self?.typemark2char: (String mark) -> String
+    def self?.typechar2mark: (typechar | String? char) -> typemark
+
+    def self?.typemark2char: (typemark | String? mark) -> typechar
 
     def self?.functionname?: (String n) -> bool
 
