@@ -3,5 +3,11 @@ module BitClust
   # constants and special variables(like $!).
   class MethodEntry < Entry
     alias eql? ==
+
+    def inspect: () -> ::String
+
+    def label: () -> ::String
+
+    def short_label: () -> ::String
   end
 end

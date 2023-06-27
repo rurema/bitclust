@@ -18,17 +18,17 @@ module BitClust
 
     def self?.methodid2specstring: (String id) -> String
 
-    def self?.methodid2specparts: (String id) -> [String, String, String, String]
+    def self?.methodid2specparts: (String id) -> [String, typemark, String, String]
 
     def self?.methodid2libid: (String id) -> String
 
     def self?.methodid2classid: (String id) -> String
 
-    def self?.methodid2typechar: (String id) -> String
+    def self?.methodid2typechar: (String id) -> typechar
 
     def self?.methodid2typename: (String id) -> typename
 
-    def self?.methodid2typemark: (String id) -> String
+    def self?.methodid2typemark: (String id) -> typemark
 
     def self?.methodid2mname: (String id) -> String
 

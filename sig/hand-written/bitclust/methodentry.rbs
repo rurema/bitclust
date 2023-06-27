@@ -19,23 +19,23 @@ module BitClust
 
     def name: () -> untyped
 
-    def typename: () -> BitClust::NameUtils::typename
+    def typename: () -> NameUtils::typename
 
     alias type typename
 
-    def typemark: () -> untyped
+    def typemark: () -> NameUtils::typemark
 
-    def typechar: () -> untyped
+    def typechar: () -> NameUtils::typechar
 
-    def type_label: () -> untyped
+    def type_label: () -> String
 
-    def library: () -> untyped
+    def library: () -> LibraryEntry
 
-    attr_writer library: untyped
+    attr_writer library: LibraryEntry
 
-    def klass: () -> untyped
+    def klass: () -> ClassEntry
 
-    attr_writer klass: untyped
+    attr_writer klass: ClassEntry
 
     include BitClust::Entry::_PersistentProperties
     def names: () ->           Array[String]
@@ -44,58 +44,52 @@ module BitClust
     def source: () ->          String
     def source_location: () -> Location
 
-    def inspect: () -> ::String
+    def spec: () -> MethodSpec
 
-    def spec: () -> untyped
+    def spec_string: () -> String
 
-    def spec_string: () -> untyped
+    def index_id: () -> String
 
-    def label: () -> ::String
+    def labels: () -> Array[String]
 
-    def short_label: () -> ::String
+    def name?: (String name) -> bool
 
-    def index_id: () -> untyped
+    def name_match?: (Regexp re) -> bool
 
-    def labels: () -> untyped
+    def really_public?: () -> bool
 
-    def name?: (untyped name) -> untyped
+    def public?: () -> bool
 
-    def name_match?: (untyped re) -> untyped
+    def protected?: () -> bool
 
-    def really_public?: () -> untyped
+    def private?: () -> bool
 
-    def public?: () -> untyped
+    def public_singleton_method?: () -> bool
 
-    def protected?: () -> untyped
+    def private_singleton_method?: () -> bool
 
-    def private?: () -> untyped
+    def public_instance_method?: () -> bool
 
-    def public_singleton_method?: () -> untyped
+    def private_instance_method?: () -> bool
 
-    def private_singleton_method?: () -> untyped
+    def protected_instance_method?: () -> bool
 
-    def public_instance_method?: () -> untyped
+    def singleton_method?: () -> bool
 
-    def private_instance_method?: () -> untyped
+    def instance_method?: () -> bool
 
-    def protected_instance_method?: () -> untyped
+    def constant?: () -> bool
 
-    def singleton_method?: () -> untyped
+    def special_variable?: () -> bool
 
-    def instance_method?: () -> untyped
+    def defined?: () -> bool
 
-    def constant?: () -> untyped
+    def added?: () -> bool
 
-    def special_variable?: () -> untyped
+    def redefined?: () -> bool
 
-    def defined?: () -> untyped
+    def undefined?: () -> bool
 
-    def added?: () -> untyped
-
-    def redefined?: () -> untyped
-
-    def undefined?: () -> untyped
-
-    def description: () -> untyped
+    def description: () -> String?
   end
 end

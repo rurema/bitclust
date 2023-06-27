@@ -26,7 +26,7 @@ module BitClust
   class MethodSpec
     def self.parse: (String str) -> instance
 
-    def initialize: (String c, String t, String m, ?String? library) -> void
+    def initialize: (String c, NameUtils::typemark t, String m, ?String? library) -> void
 
     attr_reader klass: String
 
