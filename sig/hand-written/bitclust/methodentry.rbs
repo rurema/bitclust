@@ -4,7 +4,6 @@ module BitClust
 
     def initialize: (MethodDatabase db, String id) -> void
 
-    @db: MethodDatabase
     attr_reader id: String
 
     def ==: (untyped other) -> bool
@@ -37,7 +36,6 @@ module BitClust
 
     attr_writer klass: ClassEntry
 
-    include BitClust::Entry::_PersistentProperties
     def names: () ->           Array[String]
     def visibility: () ->      (:public | :private | :protected)
     def kind: () ->            (:defined | :added | :redefined)

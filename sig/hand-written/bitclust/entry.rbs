@@ -7,17 +7,75 @@ module BitClust
       def _get_properties: () -> Hash[String, String]
       def unload: () -> void
     end
+    include BitClust::Entry::_PersistentProperties
+    def self.persistent_properties: () { () -> void } -> void
+    def self.property: (Symbol name, Property::property_type type) -> void
+    self.@slots: Array[Property]
 
     class Property
-      type property_type  ='String' | 'Symbol' | 'bool' | 'LibraryEntry' | 'ClassEntry' | 'MethodEntry' | '[String]' | '[LibraryEntry]' | '[ClassEntry]'  | '[MethodEntry]' | 'Location' | ''
+      type property_type = 'String' | 'Symbol' | 'bool' | 'LibraryEntry' | 'ClassEntry' | 'MethodEntry' | '[String]' | '[LibraryEntry]' | '[ClassEntry]'  | '[MethodEntry]' | 'Location' | ''
       def initialize: (Symbol name, property_type type) -> void
       attr_reader name: Symbol
       @type: property_type
+
+      def initial_value: () -> (String | bot)
+      def deserializer: () -> (String | bot)
+      def serializer: () -> (String | bot)
     end
+
+    def initialize: (MethodDatabase db) -> void
+    @db: MethodDatabase
+
+    # サブクラスで定義されている
+    attr_reader id: String
+
+    # サブクラスで定義されている
+    def name: () -> String
 
     # サブクラスで定義されている
     def self.type_id: () -> Symbol
 
     def type_id: () -> Symbol
+
+    @loaded: bool
+    def loaded?: () -> bool
+
+    def encoding: () -> untyped
+
+    # サブクラスで定義されている
+    def source: () -> String
+
+    def synopsis_source: () -> String
+
+    def detail_source: () -> String
+
+    def save: () -> void
+
+    private
+
+    def load: () -> void
+
+    def saved?: () -> bool
+
+    def restore_library: (String id) -> LibraryEntry
+
+    def restore_class: (String id) -> (nil | ClassEntry)
+
+    def restore_libraries: (String str) -> Array[LibraryEntry]
+
+    def restore_classes: (String str) -> Array[ClassEntry]
+
+    def restore_methods: (String str) -> Array[MethodEntry]
+
+    # klass < Entry, Array[klass]
+    def restore_entries: (String str, untyped klass) -> ::Array[untyped]
+
+    def serialize_entry: (Entry x) -> String
+
+    def serialize_entries: (Array[Entry] xs) -> String
+
+    def objpath: () -> ::String
+
+    def path_string: (Array[String] path) -> String
   end
 end

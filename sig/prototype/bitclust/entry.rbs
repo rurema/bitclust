@@ -1,64 +1,10 @@
 module BitClust
   # Ancestor of entry classes.
   class Entry
-    # Used to define specific property of each entry class.
-    #
-    # Example
-    #   persistent_properties {
-    #     property :requires, '[LibraryEntry]'
-    #     property :classes,  '[ClassEntry]'
-    #     ...
-    class Property
-      def initial_value: () -> untyped
-
-      def deserializer: () -> untyped
-
-      def serializer: () -> untyped
-    end
     include NameUtils
-
-    def self.persistent_properties: () { () -> untyped } -> untyped
-
-    def self.property: (untyped name, untyped type) -> untyped
 
     alias self.load self.new
 
-    def initialize: (untyped db) -> void
-
-    def loaded?: () -> untyped
-
-    def encoding: () -> untyped
-
-    def synopsis_source: () -> untyped
-
-    def detail_source: () -> untyped
-
-    def save: () -> untyped
-
     private
-
-    def load: () -> untyped
-
-    def saved?: () -> untyped
-
-    def restore_library: (untyped id) -> untyped
-
-    def restore_class: (untyped id) -> (nil | untyped)
-
-    def restore_libraries: (untyped str) -> untyped
-
-    def restore_classes: (untyped str) -> untyped
-
-    def restore_methods: (untyped str) -> untyped
-
-    def restore_entries: (untyped str, untyped klass) -> (::Array[untyped] | untyped)
-
-    def serialize_entry: (untyped x) -> (untyped | "")
-
-    def serialize_entries: (untyped xs) -> untyped
-
-    def objpath: () -> ::String
-
-    def path_string: (untyped path) -> untyped
   end
 end

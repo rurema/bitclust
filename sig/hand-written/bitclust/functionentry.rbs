@@ -7,7 +7,6 @@ module BitClust
     def name_match?: (Regexp re) -> Integer?
     def <=>: (FunctionEntry other) -> Integer?
 
-    include BitClust::Entry::_PersistentProperties
     def filename: () ->        String
     def macro: () ->           bool
     def private: () ->         bool

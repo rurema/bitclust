@@ -3,11 +3,12 @@ module BitClust
     include Enumerable[MethodEntry]
     def each: () { (MethodEntry) -> untyped } -> untyped
 
+    def initialize: (MethodDatabase db, String id) -> void
+
     @entries: Array[MethodEntry]?
     @ancestors_checked: bool
     @s_ancestors_checked: bool
 
-    include BitClust::Entry::_PersistentProperties
     def type: () ->       Symbol
     def superclass: () -> ClassEntry
     def included: () ->   [ClassEntry]

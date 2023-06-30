@@ -4,8 +4,6 @@ module BitClust
     Parts: untyped
     def self.type_id: () -> :class
 
-    def initialize: (untyped db, untyped id) -> void
-
     attr_reader id: untyped
 
     def ==: (untyped other) -> (false | untyped)
