@@ -16,7 +16,7 @@ module BitClust
 
     def sort_key: () -> ::Array[untyped]
 
-    def name: () -> untyped
+    def name: () -> String
 
     def typename: () -> NameUtils::typename
 

@@ -1,152 +1,16 @@
 module BitClust
   # Represents a class, a module or a singleton object (like ARGF, main, etc.).
   class ClassEntry < Entry
-    Parts: untyped
-    def self.type_id: () -> :class
-
-    attr_reader id: untyped
-
-    def ==: (untyped other) -> (false | untyped)
-
     alias eql? ==
-
-    def hash: () -> untyped
-
-    def <=>: (untyped other) -> untyped
-
-    def name: () -> untyped
-
-    def name?: (untyped n) -> untyped
-
-    # Return the real class name
-    def realname: () -> untyped
-
-    def name_match?: (untyped re) -> untyped
 
     alias label name
 
-    # FIXME: implement class alias
-    def labels: () -> ::Array[untyped]
-
-    def save: () -> untyped
-
     def inspect: () -> ::String
-
-    def dummy?: () -> untyped
-
-    def class?: () -> untyped
-
-    def module?: () -> untyped
-
-    def object?: () -> untyped
-
-    def alias?: () -> untyped
-
-    def error_class?: () -> untyped
-
-    def include: (untyped m) -> untyped
-
-    def extend: (untyped m) -> untyped
-
-    # Add a module +m+ to the dynamically included module list.
-    def dynamic_include: (untyped m, untyped lib) -> untyped
-
-    # Add a module +m+ to the dynamically extended module list.
-    def dynamic_extend: (untyped m, untyped lib) -> untyped
-
-    # Add a alias +c+ to the alias list.
-    def alias: (untyped c) -> untyped
-
-    def check_ancestor_type: () -> untyped
-
-    def check_ancestors_link: (?untyped path) -> (nil | untyped)
-
-    def check_singleton_ancestors_link: (?untyped path) -> (nil | untyped)
-
-    def ancestors: () -> untyped
-
-    def included_modules: () -> untyped
-
-    def extended_modules: () -> untyped
-
-    def entries: (?::Integer level) -> untyped
 
     alias methods entries
 
-    def add_method: (untyped m) -> untyped
-
-    def partitioned_entries: (?::Integer level) -> untyped
-
-    def singleton_methods: (?::Integer level) -> untyped
-
-    def public_singleton_methods: (?::Integer level) -> untyped
-
-    def instance_methods: (?::Integer level) -> untyped
-
-    def private_singleton_methods: (?::Integer level) -> untyped
-
-    def public_instance_methods: (?::Integer level) -> untyped
-
-    def private_instance_methods: (?::Integer level) -> untyped
-
     alias private_methods private_instance_methods
 
-    def protected_instance_methods: (?::Integer level) -> untyped
-
-    def constants: (?::Integer level) -> untyped
-
-    def special_variables: () -> untyped
-
-    def singleton_method?: (untyped name, ?bool inherit) -> untyped
-
-    def instance_method?: (untyped name, ?bool inherit) -> untyped
-
-    def constant?: (untyped name, ?bool inherit) -> untyped
-
-    def special_variable?: (untyped name) -> untyped
-
-    def get_methods: (untyped spec) -> untyped
-
-    def get_method: (untyped spec) -> untyped
-
-    def fetch_methods: (untyped spec) -> untyped
-
-    def fetch_method: (untyped spec) -> untyped
-
-    # internal use only
-    def match_entry: (untyped t, untyped mname) -> untyped
-
-    def singleton_method_names: () -> untyped
-
-    def instance_method_names: () -> untyped
-
-    def constant_names: () -> untyped
-
-    def special_variable_names: () -> untyped
-
-    def inherited_method_specs: () -> untyped
-
-    def description: () -> untyped
-
-    def clear_cache: () -> untyped
-
-    # internal use only
-    def _smap: () -> untyped
-
-    # internal use only
-    def _imap: () -> untyped
-
-    # internal use only
-    def _cmap: () -> untyped
-
     private
-
-    def makemap: (untyped typechar, untyped inherited_modules, untyped ents) -> untyped
-
-    def save_index: () -> untyped
-
-    def writemap: (untyped map, untyped mark, untyped f) -> untyped
-
-    def _index: () -> untyped
   end
 end

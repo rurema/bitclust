@@ -1,25 +1,160 @@
 module BitClust
   class ClassEntry < Entry
     include Enumerable[MethodEntry]
-    def each: () { (MethodEntry) -> untyped } -> untyped
+
+    def self.type_id: () -> :class
 
     def initialize: (MethodDatabase db, String id) -> void
+    attr_reader id: String
 
     @entries: Array[MethodEntry]?
     @ancestors_checked: bool
     @s_ancestors_checked: bool
 
+    def ==: (untyped other) -> bool
+
+    def hash: () -> ::Integer
+
+    def <=>: (untyped other) -> ::Integer?
+
+    def name: () -> String
+
+    def name?: (untyped n) -> bool
+
+    def realname: () -> String
+
+    def name_match?: (Regexp re) -> Integer?
+
+    def labels: () -> Array[String]
+
     def type: () ->       Symbol
     def superclass: () -> ClassEntry
-    def included: () ->   [ClassEntry]
-    def extended: () ->   [ClassEntry]
-    def dynamically_included: () -> [ClassEntry]
-    def dynamically_extended: () -> [ClassEntry]
+    def included: () ->   Array[ClassEntry]
+    def extended: () ->   Array[ClassEntry]
+    def dynamically_included: () -> Array[ClassEntry]
+    def dynamically_extended: () -> Array[ClassEntry]
     def library: () ->    LibraryEntry
-    def aliases: () ->    [ClassEntry]
+    def aliases: () ->    Array[ClassEntry]
     def aliasof: () ->    ClassEntry
     def source: () ->     String
     def source_location: () -> Location
     def orig_superclass: () -> ClassEntry
+
+    def save: () -> void
+
+    def dummy?: () -> bool
+
+    def class?: () -> bool
+
+    def module?: () -> bool
+
+    def object?: () -> bool
+
+    def alias?: () -> bool
+
+    def error_class?: () -> bool
+
+    def include: (ClassEntry m) -> void
+
+    def extend: (ClassEntry m) -> void
+
+    def dynamic_include: (ClassEntry m, LibraryEntry lib) -> void
+
+    def dynamic_extend: (ClassEntry m, LibraryEntry lib) -> void
+
+    def alias: (ClassEntry c) -> void
+
+    def check_ancestor_type: () -> void
+
+    def check_ancestors_link: (?Array[String] path) -> void
+
+    def check_singleton_ancestors_link: (?Array[String] path) -> void
+
+    def ancestors: () -> Array[ClassEntry]
+    @ancestors: Array[ClassEntry]
+
+    def included_modules: () -> Array[ClassEntry]
+
+    def extended_modules: () -> Array[ClassEntry]
+
+    def entries: (?::Integer level) -> Array[MethodEntry]
+
+    def each: () { (MethodEntry) -> untyped } -> untyped
+
+    def add_method: (MethodEntry m) -> void
+
+    class Parts < Struct[untyped]
+    end
+
+    def partitioned_entries: (?::Integer level) -> Parts
+
+    def singleton_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def public_singleton_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def instance_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def private_singleton_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def public_instance_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def private_instance_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def protected_instance_methods: (?::Integer level) -> Array[MethodEntry]
+
+    def constants: (?::Integer level) -> Array[MethodEntry]
+
+    def special_variables: () -> Array[MethodEntry]
+
+    def singleton_method?: (String name, ?bool inherit) -> boolish
+
+    def instance_method?: (String name, ?bool inherit) -> boolish
+
+    def constant?: (String name, ?bool inherit) -> boolish
+
+    def special_variable?: (String name) -> boolish
+
+    def get_methods: (MethodSpec spec) -> Array[MethodEntry]
+
+    def get_method: (MethodSpec spec) -> MethodEntry?
+
+    def fetch_methods: (MethodSpec spec) -> (Array[MethodEntry] | bot)
+
+    def fetch_method: (MethodSpec spec) -> (MethodEntry | bot)
+
+    def match_entry: (String t, String mname) -> String?
+
+    def singleton_method_names: () -> Array[String?]
+
+    def instance_method_names: () -> Array[String?]
+
+    def constant_names: () -> Array[String?]
+
+    def special_variable_names: () -> Array[String?]
+
+    def inherited_method_specs: () -> Array[MethodSpec]
+
+    def description: () -> String
+
+    def clear_cache: () -> void
+
+    @_smap: Hash[String, String]?
+    @_imap: Hash[String, String]?
+    @_cmap: Hash[String, String]?
+
+    def _smap: () -> Hash[String, String]
+    def _imap: () -> Hash[String, String]
+    def _cmap: () -> Hash[String, String]
+
+    private
+
+    def makemap: (NameUtils::typechar typechar, Array[ClassEntry] inherited_modules, Array[MethodEntry] ents) -> Hash[String, String]
+
+    def save_index: () -> void
+
+    def writemap: (Hash[String, String] map, ('.' | '#' | ':') mark, File f) -> void
+
+    def _index: () -> Hash[String, String]
+    @_index: Hash[String, String]
   end
 end
