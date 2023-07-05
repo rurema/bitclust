@@ -1,0 +1,16 @@
+module BitClust
+  # Utility for tweaking text.
+  module TextUtils
+    def self?.detab: (String str, ?::Integer ts) -> String
+
+    def self?.unindent_block: (Array[String] lines) -> Array[String]
+
+    def self?.n_minimum_indent: (Array[String] lines) -> Integer
+
+    def self?.n_indent: (String line) -> Integer
+
+    INDENT_RE: Hash[Integer, Regexp]
+
+    def self?.unindent: (String line, Integer n) -> String
+  end
+end
