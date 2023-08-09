@@ -66,7 +66,8 @@ module BitClust
   class MethodSpec
 
     def MethodSpec.parse(str)
-      new(*NameUtils.split_method_spec(str))
+      c, t, m = NameUtils.split_method_spec(str)
+      new(c, t, m)
     end
 
     def initialize(c, t, m, library = nil)

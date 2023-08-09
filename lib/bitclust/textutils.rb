@@ -18,7 +18,7 @@ module BitClust
     def detab(str, ts = 8)
       add = 0
       str.gsub(/\t/) {
-        len = ts - ($~.begin(0) + add) % ts
+        len = ts - ((($~ || raise).begin(0) || raise) + add) % ts
         add += len - 1
         ' ' * len
       }
@@ -30,11 +30,11 @@ module BitClust
     end
 
     def n_minimum_indent(lines)
-      lines.reject {|line| line.strip.empty? }.map {|line| n_indent(line) }.min
+      lines.reject {|line| line.strip.empty? }.map {|line| n_indent(line) }.min || raise
     end
 
     def n_indent(line)
-      line.slice(/\A\s*/).size
+      (line.slice(/\A\s*/) || raise).size
     end
 
     INDENT_RE = {

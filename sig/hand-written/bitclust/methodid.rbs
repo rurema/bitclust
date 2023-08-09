@@ -34,7 +34,7 @@ module BitClust
 
     attr_reader method: String
 
-    attr_reader library: String
+    attr_reader library: String?
 
     def display_name: () -> ::String
 

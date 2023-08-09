@@ -66,8 +66,8 @@ module BitClust
 
     persistent_properties {
       property :requires, '[LibraryEntry]'
-      property :classes,  '[ClassEntry]'   # :defined classes
-      property :methods,  '[MethodEntry]'  # :added/:redefined entries
+      property :classes,  '[ClassEntry]'   ## :defined classes
+      property :methods,  '[MethodEntry]'  ## :added/:redefined entries
       property :source,   'String'
       property :sublibraries, '[LibraryEntry]'
       property :is_sublibrary,   'bool'

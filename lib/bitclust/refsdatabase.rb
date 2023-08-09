@@ -22,7 +22,7 @@ module BitClust
       refs = self.new
       buf.each_line{|l|
         if /((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+)\n/ =~ l
-          type, id, linkid, desc = [$1, $2, $3, $4].map{|e| e.gsub(/\\(.)/){|s| $1 == ',' ? ',' : s } }
+          type, id, linkid, desc = [$1, $2, $3, $4].map{|e| e&.gsub(/\\(.)/){|s| $1 == ',' ? ',' : s } }
           refs[type, id, linkid] = desc
         end
       }

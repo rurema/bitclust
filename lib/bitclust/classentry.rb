@@ -79,7 +79,7 @@ module BitClust
     end
 
     persistent_properties {
-      property :type,       'Symbol'         # :class | :module | :object
+      property :type,       'Symbol'         ## :class | :module | :object
       property :superclass, 'ClassEntry'
       property :included,   '[ClassEntry]'
       property :extended,   '[ClassEntry]'
@@ -235,8 +235,8 @@ module BitClust
     def entries(level = 0)
       @entries ||= @db.entries("method/#{@id}")\
           .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
-      ret = @entries
-      ancestors[1..level].each{|c| ret += c.entries }
+      ret = @entries || raise
+      (ancestors[1..level] || raise).each{|c| ret += c.entries }
       ret
     end
 

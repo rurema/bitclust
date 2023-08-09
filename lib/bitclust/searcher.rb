@@ -172,7 +172,7 @@ module BitClust
 
     def find_dblocation
       %w( REFE2_SERVER BITCLUST_SERVER ).each do |key|
-        return URI.parse(ENV[key]) if ENV[key]
+        return URI.parse(ENV.fetch(key)) if ENV[key]
       end
       if path = dbpath()
         URI.parse("file://#{path}")
@@ -188,7 +188,7 @@ module BitClust
     def env_dbpath
       [ 'REFE2_DATADIR', 'BITCLUST_DATADIR' ].each do |key|
         if ENV.key?(key)
-          unless MethodDatabase.datadir?(ENV[key])
+          unless MethodDatabase.datadir?(ENV.fetch(key))
             raise InvalidDatabase, "environment variable #{key} given but #{ENV[key]} is not a valid BitClust database"
           end
           return ENV[key]
@@ -202,7 +202,7 @@ module BitClust
       [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
         return path if MethodDatabase.datadir?(path)
       end
-      config_path = Pathname(ENV['HOME']) + ".bitclust" + "config"
+      config_path = Pathname(ENV.fetch('HOME')) + ".bitclust" + "config"
       if config_path.exist?
         config = YAML.load_file(config_path)
         return "#{config[:database_prefix]}-#{config[:default_version]}"
@@ -278,7 +278,8 @@ module BitClust
       when /\A\$/   # Special variable.
         find_method db, 'Kernel', '$', pattern.sub(/\A\$/, '')
       when /[\#,]\.|\.[\#,]|[\#\.\,]/   # method spec
-        find_method db, *parse_method_spec_pattern(pattern)
+        c, t, m = parse_method_spec_pattern(pattern)
+        find_method db, c, t, m
       when /::/   # Class name or constant name.
         find_constant db, pattern
       when /\A[A-Z]/   # Method name or class name, but class name is better.

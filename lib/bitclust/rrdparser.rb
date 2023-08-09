@@ -47,7 +47,7 @@ module BitClust
 
     def RRDParser.split_doc(source)
       if m = /^=(\[a:.*?\])?( +(.*)|([^=].*))\r?\n/.match(source)
-        title = $3 || $4
+        title = $3 || $4 || raise
         s = m.post_match
         return title, s
       end
@@ -141,7 +141,7 @@ module BitClust
       unless m
         parse_error "level-1 header syntax error", line
       end
-      return m[1], isconst(m[2], line), isconst(m[3], line)
+      return (m[1] || raise), isconst((m[2] || raise), line), isconst((m[3] || raise), line)
     end
 
     def isconst(name, line)
@@ -221,7 +221,7 @@ module BitClust
         when /\A((?:public|private|protected)\s+)?(?:(class|singleton|instance)\s+)?methods?\z/i
           @context.visibility = ($1 || 'public').downcase.strip.intern
           t = ($2 || 'instance').downcase.sub(/class/, 'singleton')
-          @context.type = "#{t}_method".intern
+          @context.type = _ = "#{t}_method".intern
         when /\AModule\s+Functions?\z/i
           @context.module_function
         when /\AConstants?\z/i
@@ -243,7 +243,7 @@ module BitClust
 
     def concat_aliases(chunks)
       return [] if chunks.empty?
-      result = [chunks.shift]
+      result = [chunks.shift || raise]
       chunks.each do |chunk|
         if result.last&.alias?(chunk)
           result.last&.unify chunk
@@ -313,9 +313,12 @@ module BitClust
     def method_signature(line)
       case
       when m = SIGNATURE.match(line)
-        Signature.new(*m.captures)
+        klass, typemark_, name = m.captures
+        # @type var typemark: NameUtils::typemark
+        typemark = _ = typemark_
+        Signature.new(klass, typemark, name)
       when m = GVAR.match(line)
-        Signature.new(nil, '$', m[1][1..-1])
+        Signature.new(nil, '$', (m[1] || raise)[1..-1])
       else
         parse_error "wrong method signature", line
       end

@@ -48,9 +48,9 @@ module BitClust
 
     def self?.typename?: (Symbol n) -> bool
 
-    def self?.typename2mark: (typename? name) -> typemark
+    def self?.typename2mark: (typename name) -> typemark
 
-    def self?.typemark2name: (typemark? mark) -> typename
+    def self?.typemark2name: (typemark mark) -> typename
 
     type typechar = ('s' | 'i' | 'm' | 'c' | 'v')
 
@@ -59,7 +59,7 @@ module BitClust
 
     def self?.typechar?: (typechar | String c) -> bool
 
-    def self?.typename2char: (typename | Symbol name) -> typechar
+    def self?.typename2char: (typename name) -> typechar
 
     def self?.typechar2name: (typechar char) -> typename
 
@@ -69,9 +69,9 @@ module BitClust
 
     def self?.typemark?: (typemark | String m) -> bool
 
-    def self?.typechar2mark: (typechar | String? char) -> typemark
+    def self?.typechar2mark: (typechar char) -> typemark
 
-    def self?.typemark2char: (typemark | String? mark) -> typechar
+    def self?.typemark2char: (typemark mark) -> typechar
 
     def self?.functionname?: (String n) -> bool
 

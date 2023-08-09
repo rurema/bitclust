@@ -97,8 +97,8 @@ module BitClust
 
     persistent_properties {
       property :names,           '[String]'
-      property :visibility,      'Symbol'   # :public | :private | :protected
-      property :kind,            'Symbol'   # :defined | :added | :redefined
+      property :visibility,      'Symbol'   ## :public | :private | :protected
+      property :kind,            'Symbol'   ## :defined | :added | :redefined
       property :source,          'String'
       property :source_location, 'Location'
     }
@@ -109,7 +109,8 @@ module BitClust
     end
 
     def spec
-      MethodSpec.new(*methodid2specparts(@id))
+      c, t, m, lib = methodid2specparts(@id)
+      MethodSpec.new(c, t, m, lib)
     end
 
     def spec_string

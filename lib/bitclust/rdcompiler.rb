@@ -134,7 +134,7 @@ module BitClust
           break
         when /\A(\s+)\*\s/, /\A(\s+)\(\d+\)\s/
           @item_stack = []
-          item_list($1.size)
+          item_list(($1 || raise).size)
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when /\A:\s/
           dlist
@@ -197,11 +197,11 @@ module BitClust
             string compile_text(cont.strip)
           end
         end
-        if (m = ITEM_RE.match(@f.peek)) && level < m[1].size
-          item_list($1.size)
+        if (m = ITEM_RE.match(@f.peek)) && level < (m[1] || raise).size
+          item_list(($1 || raise).size)
           line @item_stack.pop # current level li
-          break if ITEM_RE =~ @f.peek and level > $1.size
-        elsif m && level > m[1].size
+          break if ITEM_RE =~ @f.peek and level > ($1 || raise).size
+        elsif m && level > (m[1] || raise).size
           line @item_stack.pop # current level li
           break
         else
@@ -302,7 +302,7 @@ module BitClust
 
     def list
       lines = unindent_block(canonicalize(@f.break(/\A\S/)))
-      while lines.last.empty?
+      while lines.last&.empty?
         lines.pop
       end
       line '<pre>'
@@ -496,7 +496,7 @@ module BitClust
         bracket_link("#{type}:#{name}", label, frag)
       when /\A(\w+)\z/
         e = @option[:entry]
-        frag = $1
+        frag = $1 || raise
         type = e.type_id.to_s
         label = @option[:database].refs[type, e.name, frag] || frag
         a_href('#' + frag, label)
@@ -559,7 +559,7 @@ module BitClust
     def rdoc_url(method_id, version)
       cname, tmark, mname, _libname = methodid2specparts(method_id)
       tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
-      cname = cname.split(".").first
+      cname = cname.split(".").first || raise
       cname = cname.gsub('::', '/')
       id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
 

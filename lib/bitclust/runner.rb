@@ -145,7 +145,7 @@ Global Options:
     end
 
     def load_config
-      home_directory = Pathname(ENV['HOME'])
+      home_directory = Pathname(ENV.fetch('HOME'))
       config_path = home_directory + ".bitclust/config"
       if config_path.exist?
         YAML.load_file(config_path)
