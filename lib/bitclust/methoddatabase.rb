@@ -179,7 +179,7 @@ module BitClust
       root_path = Pathname.new(@root).expand_path
       Dir.glob("#{@root}/../../doc/**/*.rd").each do |f|
         if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f
-          id = libname2id($1)
+          id = libname2id($1 || raise)
           se = DocEntry.new(self, id)
           s = Preprocessor.read(f, properties)
           title, source = RRDParser.split_doc(s)
