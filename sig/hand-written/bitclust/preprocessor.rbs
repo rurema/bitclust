@@ -13,6 +13,8 @@ module BitClust
 
     # abstract
     def next_line: (_Gets) -> String
+
+    def lineno: () -> Integer
   end
 
   class Preprocessor < LineFilter
