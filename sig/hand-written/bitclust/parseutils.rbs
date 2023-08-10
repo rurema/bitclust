@@ -8,6 +8,10 @@ module BitClust
     @f: _Gets
 
     def gets: () -> String?
+
+    # _Gets 用
+    def path: () -> String?
+    def lineno: () -> Integer
   end
 
   class Location

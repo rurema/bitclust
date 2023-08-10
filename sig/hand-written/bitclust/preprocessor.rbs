@@ -14,6 +14,7 @@ module BitClust
     # abstract
     def next_line: (_Gets) -> String
 
+    # _Gets 用
     def lineno: () -> Integer
   end
 
@@ -36,7 +37,7 @@ module BitClust
 
     def build_cond_by_value: (String line, String left) -> String
 
-    def current_cond: () -> State?
+    def current_cond: () -> State
 
     def cond_init: () -> void
 
@@ -50,7 +51,7 @@ module BitClust
 
     type evaluated_result = String | Integer | nil
 
-    def eval_cond: (String str) -> evaluated_result
+    def eval_cond: (String str) -> bool
 
     def eval_expr: (StringScanner s) -> evaluated_result
 
