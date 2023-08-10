@@ -2,12 +2,16 @@
 sources:
 - type: git
   name: ruby/gem_rbs_collection
-  revision: 28208148c7e64a25e9b86b9723b4c3a2cef14e81
+  revision: c1c60a977dba802154336875afbe382013502ed2
   remote: https://github.com/ruby/gem_rbs_collection.git
   repo_dir: gems
 path: ".gem_rbs_collection"
 gems:
 - name: cgi
+  version: '0'
+  source:
+    type: stdlib
+- name: dbm
   version: '0'
   source:
     type: stdlib
@@ -19,6 +23,10 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: nkf
+  version: '0'
+  source:
+    type: stdlib
 - name: optparse
   version: '0'
   source:
@@ -27,12 +35,16 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: pstore
+  version: '0'
+  source:
+    type: stdlib
 - name: rack
   version: '2.2'
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 28208148c7e64a25e9b86b9723b4c3a2cef14e81
+    revision: c1c60a977dba802154336875afbe382013502ed2
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
@@ -48,6 +60,10 @@ gems:
   source:
     type: stdlib
 - name: uri
+  version: '0'
+  source:
+    type: stdlib
+- name: yaml
   version: '0'
   source:
     type: stdlib
