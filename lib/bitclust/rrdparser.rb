@@ -448,7 +448,7 @@ module BitClust
 
       def signature
         return nil unless @klass
-        Signature.new(@klass.name, @type ? typename2mark(@type) : nil, nil)
+        Signature.new(@klass.name, @type ? typename2mark(@type || raise) : nil, nil)
       end
 
       def define_method(chunk)
@@ -524,7 +524,7 @@ module BitClust
       end
 
       def typename
-        typemark2name(@type)
+        typemark2name(_ = @type)
       end
 
       def same_type?(other)
