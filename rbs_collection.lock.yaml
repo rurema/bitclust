@@ -23,6 +23,10 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: json
+  version: '0'
+  source:
+    type: stdlib
 - name: nkf
   version: '0'
   source:

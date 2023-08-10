@@ -24,6 +24,7 @@ gems:
   #- name: drb
   - name: erb
   - name: fileutils
+  - name: json
   - name: nkf
   - name: optparse
   - name: pathname
