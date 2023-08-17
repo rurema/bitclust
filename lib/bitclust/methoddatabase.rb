@@ -47,14 +47,15 @@ module BitClust
     attr_writer :refs
 
     def init
-      FileUtils.rm_rf @prefix
-      FileUtils.mkdir_p @prefix
-      Dir.mkdir "#{@prefix}/library"
-      Dir.mkdir "#{@prefix}/class"
-      Dir.mkdir "#{@prefix}/method"
-      Dir.mkdir "#{@prefix}/doc"
-      FileUtils.touch "#{@prefix}/properties"
-      FileUtils.touch "#{@prefix}/refs"
+      prefix = @prefix || raise
+      FileUtils.rm_rf prefix
+      FileUtils.mkdir_p prefix
+      Dir.mkdir "#{prefix}/library"
+      Dir.mkdir "#{prefix}/class"
+      Dir.mkdir "#{prefix}/method"
+      Dir.mkdir "#{prefix}/doc"
+      FileUtils.touch "#{prefix}/properties"
+      FileUtils.touch "#{prefix}/refs"
     end
 
     #
@@ -311,7 +312,7 @@ module BitClust
       check_transaction
       id = classname2id(name)
       if exist?("class/#{id}")
-        c = load_class(id)
+        c = load_class(id) || raise
         c.clear
       else
         c = (@classmap[id] ||= ClassEntry.new(self, id))
@@ -331,6 +332,7 @@ module BitClust
     private :load_class
 
     def load_extent(entry_class)
+      # @type var h: Hash[String, untyped]
       h = {}
       id_extent(entry_class).each do |id|
         h[id] = entry_class.new(self, id)
@@ -383,7 +385,8 @@ module BitClust
     end
 
     def search_method(pattern)
-      search_methods(pattern).first
+      raise "[MAYBE BUG] BitClust::SearchResult#first is not defined"
+      # search_methods(pattern).first
     end
 
     def search_methods(pattern)

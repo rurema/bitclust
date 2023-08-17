@@ -1,9 +1,4 @@
 module BitClust
-  # Represents infomation to identify a method (library, class/module,
-  # type and name.)
-  #
-  # A MethodID has #library, #klass, #typename, and method name.
-  # #library, #klass, #typename must be an object.
   class MethodID
     include NameUtils
 
@@ -14,13 +9,23 @@ module BitClust
     attr_accessor type: BitClust::NameUtils::typename
     attr_accessor name: String
 
-    def match?: (MethodID m) -> bool
+    interface _MethodMatchable
+      def library: () -> LibraryEntry
+      def type: () -> BitClust::NameUtils::typename
+      def name:() -> String
+    end
+
+    def match?: (_MethodMatchable m) -> bool
 
     def typechar: () -> String
 
     def typemark: () -> String
 
     def idstring: () -> String
+  end
+
+  interface _MethodMatcher
+    def match?: (MethodID::_MethodMatchable & MethodSpec::_MethodMatchable m) -> bool
   end
 
   class MethodSpec
@@ -44,7 +49,12 @@ module BitClust
 
     def <=>: (untyped other) -> ::Integer?
 
-    def match?: (MethodEntry m) -> bool
+    interface _MethodMatchable
+      def typemark: () -> NameUtils::typemark
+      def name?: (String name) -> bool
+    end
+
+    def match?: (_MethodMatchable m) -> bool
 
     def singleton_method?: () -> bool
 

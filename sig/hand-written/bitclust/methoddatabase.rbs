@@ -125,13 +125,13 @@ module BitClust
 
     def methods: () -> Array[MethodEntry]
 
-    def get_method: (MethodSpec spec) -> MethodEntry
+    def get_method: (MethodSpec spec) -> MethodEntry?
 
     def fetch_methods: (MethodSpec spec) -> (Array[MethodEntry] | bot)
 
     def fetch_method: (MethodSpec spec) -> (MethodEntry | bot)
 
-    def search_method: (MethodNamePattern pattern) -> (MethodEntry | bot)
+    def search_method: (MethodNamePattern pattern) -> MethodEntry?
 
     def search_methods: (MethodNamePattern pattern) -> (SearchResult | bot)
   end

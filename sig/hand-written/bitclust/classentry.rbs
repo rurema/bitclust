@@ -125,13 +125,13 @@ module BitClust
 
     def special_variable?: (String name) -> boolish
 
-    def get_methods: (MethodSpec spec) -> Array[MethodEntry]
+    def get_methods: (_MethodMatcher spec) -> Array[MethodEntry]
 
-    def get_method: (MethodSpec spec) -> MethodEntry?
+    def get_method: (_MethodMatcher spec) -> MethodEntry?
 
-    def fetch_methods: (MethodSpec spec) -> (Array[MethodEntry] | bot)
+    def fetch_methods: (_MethodMatcher spec) -> (Array[MethodEntry] | bot)
 
-    def fetch_method: (MethodSpec spec) -> (MethodEntry | bot)
+    def fetch_method: (_MethodMatcher spec) -> (MethodEntry | bot)
 
     def match_entry: (String t, String mname) -> String?
 
