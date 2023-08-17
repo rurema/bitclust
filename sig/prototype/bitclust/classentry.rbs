@@ -1,16 +1,6 @@
 module BitClust
   # Represents a class, a module or a singleton object (like ARGF, main, etc.).
   class ClassEntry < Entry
-    alias eql? ==
-
-    alias label name
-
-    def inspect: () -> ::String
-
-    alias methods entries
-
-    alias private_methods private_instance_methods
-
     private
   end
 end

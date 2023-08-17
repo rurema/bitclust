@@ -258,6 +258,16 @@ module BitClust
                        :added, :undefined)
 
     def partitioned_entries(level = 0)
+      # @type var s: Array[MethodEntry]
+      # @type var spv: Array[MethodEntry]
+      # @type var i: Array[MethodEntry]
+      # @type var ipv: Array[MethodEntry]
+      # @type var ipt: Array[MethodEntry]
+      # @type var mf: Array[MethodEntry]
+      # @type var c: Array[MethodEntry]
+      # @type var v: Array[MethodEntry]
+      # @type var added: Array[MethodEntry]
+      # @type var undefined: Array[MethodEntry]
       s = []; spv = []
       i = []; ipv = []; ipt = []
       mf = []
@@ -444,7 +454,7 @@ module BitClust
       inherited_modules.each do |mod|
         map.update mod.__send__("_#{typechar == 'c' ? 'c' : 'i'}map")
       end
-      defined, undefined = *ents.partition {|m| m.defined? }
+      defined, undefined = ents.partition {|m| m.defined? }
       (undefined + defined).each do |m|
         m.names.each do |name|
           map[name] = m.spec_string
