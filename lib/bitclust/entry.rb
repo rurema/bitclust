@@ -227,7 +227,7 @@ module BitClust
 
     def path_string(path)
       i = path.index(name())
-      (path[i..-1] + [name()]).join(' -> ')
+      ((path[i..-1] || raise) + [name()]).join(' -> ')
     end
     private :path_string
 

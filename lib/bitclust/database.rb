@@ -28,7 +28,7 @@ module BitClust
     def Database.connect(uri)
       case uri.scheme
       when 'file'
-        new(uri.path)
+        new(uri.path || raise)
       when 'druby'
         DRbObject.new_with_uri(uri.to_s)
       else
@@ -62,7 +62,7 @@ module BitClust
       yield
       return if dummy?
       if @properties_dirty
-        save_properties 'properties', @properties
+        save_properties 'properties', (@properties || raise)
         @properties_dirty = false
       end
       commit if dirty?

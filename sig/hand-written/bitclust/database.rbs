@@ -11,8 +11,8 @@ module BitClust
 
     def self.dummy: (?properties_type params) -> untyped
 
-    def initialize: (String prefix) -> void
-    @prefix: String
+    def initialize: (String? prefix) -> void
+    @prefix: String?
     @properties: properties_type?
     @in_transaction: bool
     @properties_dirty: bool
