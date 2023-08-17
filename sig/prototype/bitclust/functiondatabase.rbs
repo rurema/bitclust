@@ -1,44 +1,14 @@
 module BitClust
   # Database for C API functions.
   class FunctionDatabase < Database
-    include Completion
-
-    def initialize: (untyped prefix) -> void
-
     private
-
-    def commit: () -> untyped
 
     public
 
-    def dirty_function: (untyped f) -> untyped
-
-    def dirty?: () -> untyped
-
-    def each_dirty_function: () { () -> untyped } -> untyped
-
-    def clear_dirty: () -> untyped
-
-    def update_by_file: (untyped path, untyped filename) -> untyped
-
-    def search_functions: (untyped pattern) -> untyped
-
-    def open_function: (untyped id) { (untyped) -> untyped } -> untyped
-
-    def fetch_function: (untyped id) -> untyped
-
     private
-
-    def load_function: (untyped id) -> untyped
 
     public
 
-    def functions: () -> untyped
-
     private
-
-    def functionmap: () -> untyped
-
-    def id_extent: (untyped entry_class) -> untyped
   end
 end

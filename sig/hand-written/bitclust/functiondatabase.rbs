@@ -1,0 +1,47 @@
+module BitClust
+  class FunctionDatabase < Database
+    include Completion
+
+    def initialize: (String prefix) -> void
+
+    @dirty_functions: Hash[FunctionEntry, true]
+    @function_extent_loaded: bool
+
+    private
+
+    def commit: () -> void
+
+    public
+
+    def dirty_function: (FunctionEntry f) -> void
+
+    def dirty?: () -> bool
+
+    def each_dirty_function: () { (FunctionEntry) -> untyped } -> void
+
+    def clear_dirty: () -> void
+
+    def update_by_file: (String path, String filename) -> void
+
+    def search_functions: (string pattern) -> Array[FunctionEntry]
+
+    def open_function: (String id) { (FunctionEntry) -> untyped } -> FunctionEntry
+
+    def fetch_function: (String id) -> (FunctionEntry | bot)
+
+    private
+
+    def load_function: (String id) -> FunctionEntry?
+
+    public
+
+    def functions: () -> Array[FunctionEntry]
+
+    private
+
+    attr_reader functionmap: Hash[String, FunctionEntry]
+
+    # entry_class は BitClust::Entry のサブクラスのクラスオブジェクト
+    def id_extent: (untyped entry_class) -> Array[String]
+  end
+end
