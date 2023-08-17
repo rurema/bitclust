@@ -126,7 +126,7 @@ module BitClust
           parse_error "unterminated \#@if", @last_if || raise
         end
       end
-      @buf.shift || raise
+      @buf.shift
     end
 
     def cond_stmt_begin(line, cond)

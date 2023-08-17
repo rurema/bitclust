@@ -221,7 +221,7 @@ module BitClust
 
     def on_op(token, data)
       case
-      when token == "::" && [:class, :module].include?(@stack.last || raise)
+      when token == "::" && [:class, :module].include?(_ = @stack.last)
         @name_buffer << token
       when token == "<<" && @stack.last == :class
         @stack.pop
@@ -346,7 +346,7 @@ module BitClust
       case
       when token == "'"
         data << "#{token}</span>"
-      when %i[qwords words qsymbols symbols].include?(@stack.last || raise)
+      when %i[qwords words qsymbols symbols].include?(_ = @stack.last)
         @stack.pop
         data << "#{token}</span>"
       else

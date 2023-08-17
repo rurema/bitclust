@@ -141,7 +141,7 @@ module BitClust
       unless m
         parse_error "level-1 header syntax error", line
       end
-      return (m[1] || raise), isconst((m[2] || raise), line), isconst((m[3] || raise), line)
+      return (m[1] || raise), isconst((m[2]), line), isconst((m[3]), line)
     end
 
     def isconst(name, line)

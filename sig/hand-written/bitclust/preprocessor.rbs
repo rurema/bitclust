@@ -7,12 +7,12 @@ module BitClust
     @f: _Gets
     @buf: Array[String]
 
-    def gets: () -> String
+    def gets: () -> String?
 
     def each: () { (String) -> untyped } -> untyped
 
     # abstract
-    def next_line: (_Gets) -> String
+    def next_line: (_Gets) -> String?
 
     # _Gets 用
     def lineno: () -> Integer
@@ -31,7 +31,7 @@ module BitClust
 
     def path: () -> String?
 
-    def next_line: (_Gets) -> String
+    def next_line: (_Gets) -> String?
 
     def cond_stmt_begin: (String line, String cond) -> void
 
@@ -101,7 +101,7 @@ module BitClust
 
       private
 
-      def next_line: (untyped f) -> String
+      def next_line: (untyped f) -> String?
     end
   end
 end
