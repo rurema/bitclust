@@ -1,6 +1,80 @@
 module BitClust
   class LibraryEntry < Entry
+    def self.type_id: () -> :library
+
+    def initialize: (MethodDatabase db, String id) -> void
+    attr_reader id: String
+
+    attr_reader name: String
+    alias label name
+
+    def ==: (untyped other) -> bool
+    alias eql? ==
+
+    def hash: () -> Integer
+
+    def <=>: (untyped other) -> ::Integer?
+
+    def labels: () -> [String]
+
+    def name?: (String n) -> bool
+
+    attr_accessor requires: Array[LibraryEntry]
+    attr_accessor classes:  Array[ClassEntry]   ## :defined classes
+    attr_accessor methods:  Array[MethodEntry]  ## :added/:redefined entries
+    attr_accessor source:   String
+    attr_accessor sublibraries: Array[LibraryEntry]
+    attr_accessor is_sublibrary: bool
+    attr_accessor category: String
+    attr_accessor source_location: Location
+
+    def inspect: () -> ::String
+    def description: () -> String
+
+    @link_checked: bool
+    def check_link: (?Array[String] path) -> (bool? | bot)
+
+    def all_requires: (?::Hash[String, LibraryEntry] libs) -> Array[LibraryEntry]
+
+    @all_classes: Array[ClassEntry]?
+    def all_classes: () -> Array[ClassEntry]
+    attr_reader error_classes: Array[ClassEntry]
+    attr_reader all_error_classes: Array[ClassEntry]
+    attr_reader all_modules: Array[ClassEntry]
+    attr_reader all_objects: Array[ClassEntry]
+
+    def require: (LibraryEntry lib) -> void
+    def sublibrary: (LibraryEntry lib) -> void
+
+    def fetch_class: (string name) -> (ClassEntry | bot)
+    def get_class: (string name) -> ClassEntry?
+
+    def classnames: () -> Array[String]
+
     def each_class: () { (ClassEntry) -> untyped } -> untyped
+
+    private
+
+    @classmap: Hash[String, ClassEntry]?
+    def classmap: () -> Hash[String, ClassEntry]
+
+    public
+
+    def fetch_methods: (MethodSpec spec) -> Array[MethodEntry]
+
+    def fetch_method: (MethodSpec spec) -> MethodEntry
+
     def each_method: () { (MethodEntry) -> untyped } -> untyped
+
+    private
+
+    @methodmap: Hash[MethodEntry, MethodEntry]?
+    def methodmap: () -> Hash[MethodEntry, MethodEntry]
+
+    public
+
+    def add_class: (ClassEntry c) -> (untyped | nil)
+
+    def add_method: (MethodEntry m) -> (untyped | nil)
   end
 end
