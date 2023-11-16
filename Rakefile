@@ -24,6 +24,18 @@ task :sig do
   sh 'steep validate'
 end
 
+namespace :rbs do
+  desc 'rbs collection install'
+  task :install do
+    sh 'rbs collection install'
+  end
+
+  desc 'rbs collection update'
+  task :update do
+    sh 'rbs collection update'
+  end
+end
+
 Bundler::GemHelper.install_tasks(:name => "bitclust-core")
 Bundler::GemHelper.install_tasks(:name => "bitclust-dev")
 Bundler::GemHelper.install_tasks(:name => "refe2")
