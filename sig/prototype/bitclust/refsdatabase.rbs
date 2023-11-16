@@ -1,6 +1,8 @@
 module BitClust
   # Corresponds to db-x.y.z/refs file.
   class RefsDatabase
+    @h: untyped
+
     def self.load: (untyped src) -> untyped
 
     def initialize: () -> void

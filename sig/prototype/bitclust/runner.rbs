@@ -1,6 +1,16 @@
 module BitClust
   # Body of bin/bitclust.
   class Runner
+    @prefix: untyped
+
+    @version: untyped
+
+    @capi: untyped
+
+    @parser: untyped
+
+    @subcommands: untyped
+
     def initialize: () -> void
 
     def run: (untyped argv) -> untyped

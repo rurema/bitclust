@@ -1,6 +1,16 @@
 module BitClust
   module Subcommands
     class AncestorsCommand < Subcommand
+      @prefix: untyped
+
+      @requires: untyped
+
+      @version: untyped
+
+      @all: untyped
+
+      @verbose: untyped
+
       include CrossRubyUtils
 
       def initialize: () -> void

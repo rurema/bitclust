@@ -1,6 +1,26 @@
 module BitClust
   # Body of bin/refe.
   class Searcher
+    @dblocation: untyped
+
+    @name: untyped
+
+    @describe_all: untyped
+
+    @linep: untyped
+
+    @encoding: untyped
+
+    @target_type: untyped
+
+    @listen_url: untyped
+
+    @foreground: untyped
+
+    @parser: untyped
+
+    @view: untyped
+
     include NameUtils
 
     def initialize: () -> void
@@ -63,6 +83,16 @@ module BitClust
   end
 
   class TerminalView
+    @compiler: untyped
+
+    @describe_all: untyped
+
+    @line: untyped
+
+    @encoding: untyped
+
+    @database: untyped
+
     def initialize: (untyped compiler, untyped opts) -> void
 
     attr_accessor database: untyped

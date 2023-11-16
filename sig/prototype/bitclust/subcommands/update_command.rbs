@@ -1,6 +1,10 @@
 module BitClust
   module Subcommands
     class UpdateCommand < Subcommand
+      @root: untyped
+
+      @library: untyped
+
       def initialize: () -> void
 
       def parse: (untyped argv) -> untyped

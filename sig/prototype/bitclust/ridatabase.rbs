@@ -7,6 +7,18 @@ end
 # Handle RDoc(ri) database for tools/bc-rdoc.rb and
 # `bitclust methods --diff`.
 class RiDatabase
+  @ripath: untyped
+
+  @reader: untyped
+
+  @version: untyped
+
+  @klass: untyped
+
+  @singleton_methods: untyped
+
+  @instance_methods: untyped
+
   def self.open_system_db: () -> untyped
 
   def self.open: (untyped dir, untyped version) -> untyped
@@ -33,6 +45,10 @@ class RiDatabase
 end
 
 class Ent
+  @name: untyped
+
+  @entry: untyped
+
   def initialize: (untyped name, untyped ent) -> void
 
   attr_reader name: untyped
@@ -90,6 +106,8 @@ module RI
   end
 
   class MethodDescription
+    @is_class_method: untyped
+
     def fullname: () -> untyped
 
     def singleton_method?: () -> untyped
@@ -107,6 +125,8 @@ module HTMLUtils
 end
 
 class Formatter
+  @f: untyped
+
   include HTMLUtils
 
   def method_info: (untyped m) -> untyped

@@ -26,9 +26,5 @@ module BitClust
   # All attributes are optional.
   class MethodNamePattern
     def inspect: () -> ::String
-
-    private
-
-    public
   end
 end

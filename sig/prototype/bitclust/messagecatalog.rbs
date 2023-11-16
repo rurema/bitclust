@@ -1,6 +1,0 @@
-module BitClust
-  # Provides methods to use MessageCatalog
-  module Translatable
-    private
-  end
-end

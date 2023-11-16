@@ -1,10 +1,10 @@
 module BitClust
   # Ancestor of entry classes.
   class Entry
+    self.@slots: untyped
+
     include NameUtils
 
     alias self.load self.new
-
-    private
   end
 end

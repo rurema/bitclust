@@ -1,6 +1,0 @@
-module BitClust
-  # Represents a class, a module or a singleton object (like ARGF, main, etc.).
-  class ClassEntry < Entry
-    private
-  end
-end

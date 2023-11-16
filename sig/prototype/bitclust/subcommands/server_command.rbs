@@ -1,6 +1,34 @@
 module BitClust
   module Subcommands
     class ServerCommand < Subcommand
+      @params: untyped
+
+      @baseurl: untyped
+
+      @dbpath: untyped
+
+      @srcdir: untyped
+
+      @encoding: untyped
+
+      @debugp: untyped
+
+      @autop: untyped
+
+      @browser: untyped
+
+      @pid_file: untyped
+
+      @capi: untyped
+
+      @datadir: untyped
+
+      @themedir: untyped
+
+      @port: untyped
+
+      @database_prefix: untyped
+
       def initialize: () -> void
 
       def parse: (untyped argv) -> untyped

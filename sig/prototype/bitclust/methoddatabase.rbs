@@ -1,28 +1,6 @@
 module BitClust
   # Database for Ruby entries (library, class, method).
   class MethodDatabase < Database
-    private
-
-    public
-
-    private
-
-    public
-
-    private
-
-    public
-
-    private
-
-    public
-
-    private
-
-    public
-
-    private
-
-    public
+    @in_transaction: untyped
   end
 end

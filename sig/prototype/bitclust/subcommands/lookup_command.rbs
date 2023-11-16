@@ -1,6 +1,12 @@
 module BitClust
   module Subcommands
     class LookupCommand < Subcommand
+      @format: untyped
+
+      @type: untyped
+
+      @key: untyped
+
       def initialize: () -> void
 
       def parse: (untyped argv) -> untyped

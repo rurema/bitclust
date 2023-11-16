@@ -7,10 +7,6 @@ module BitClust
 
     class Context
       include NameUtils
-
-      private
-
-      public
     end
 
     class Chunk
@@ -27,7 +23,5 @@ module BitClust
     include NameUtils
 
     include ParseUtils
-
-    private
   end
 end

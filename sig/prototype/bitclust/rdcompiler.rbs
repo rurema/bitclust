@@ -1,6 +1,30 @@
 module BitClust
   # Compiles doc into HTML.
   class RDCompiler
+    @urlmapper: untyped
+
+    @catalog: untyped
+
+    @hlevel: untyped
+
+    @type: untyped
+
+    @library: untyped
+
+    @class: untyped
+
+    @method: untyped
+
+    @option: untyped
+
+    @opt: untyped
+
+    @f: untyped
+
+    @out: untyped
+
+    @item_stack: untyped
+
     include HTMLUtils
 
     include TextUtils

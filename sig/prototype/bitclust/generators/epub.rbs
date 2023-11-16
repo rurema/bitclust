@@ -1,6 +1,28 @@
 module BitClust
   module Generators
     class EPUB
+      @options: untyped
+
+      @prefix: untyped
+
+      @capi: untyped
+
+      @outputdir: untyped
+
+      @filename: untyped
+
+      @templatedir: untyped
+
+      @catalog: untyped
+
+      @themedir: untyped
+
+      @fs_casesensitive: untyped
+
+      @keep: untyped
+
+      @verbose: untyped
+
       def initialize: (?::Hash[untyped, untyped] options) -> void
 
       CONTENTS_DIR_NAME: "OEBPS"

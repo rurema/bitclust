@@ -1,6 +1,18 @@
 module BitClust
   module Subcommands
     class HtmlfileCommand < Subcommand
+      @target: untyped
+
+      @templatedir: untyped
+
+      @baseurl: untyped
+
+      @version: untyped
+
+      @capi: untyped
+
+      @rd_file: untyped
+
       def initialize: () -> void
 
       def exec: (untyped argv, untyped options) -> (nil | untyped)

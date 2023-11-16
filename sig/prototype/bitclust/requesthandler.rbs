@@ -1,6 +1,14 @@
 module BitClust
   # Actions of BitClust server.
   class RequestHandler
+    @db: untyped
+
+    @cdb: untyped
+
+    @screenmanager: untyped
+
+    @conf: untyped
+
     def initialize: (untyped db, untyped manager) -> void
 
     def handle: (untyped webrick_req) -> untyped
@@ -39,6 +47,8 @@ module BitClust
   end
 
   class Request
+    @wreq: untyped
+
     include NameUtils
 
     def initialize: (untyped wreq) -> void
@@ -81,6 +91,8 @@ module BitClust
   end
 
   class RackRequest < Request
+    @rack_req: untyped
+
     def initialize: (untyped rack_req) -> void
 
     def query: () -> untyped
@@ -95,6 +107,8 @@ module BitClust
   end
 
   class Response
+    @screen: untyped
+
     def initialize: (untyped screen) -> void
 
     def update: (untyped webrick_res) -> untyped

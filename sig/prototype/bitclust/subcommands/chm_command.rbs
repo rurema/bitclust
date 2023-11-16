@@ -9,6 +9,12 @@ module BitClust
 
       class Sitemap
         class Content
+          @name: untyped
+
+          @local: untyped
+
+          @contents: untyped
+
           include ERB::Util
 
           def initialize: (untyped name, ?untyped? local) -> void
@@ -27,6 +33,10 @@ module BitClust
 
           def to_html: () -> untyped
         end
+        @name: untyped
+
+        @contents: untyped
+
         def initialize: (untyped name, ?untyped? local) -> void
 
         def method_missing: (untyped name, *untyped args) { () -> untyped } -> untyped
@@ -43,6 +53,16 @@ module BitClust
       end
 
       FIX_UNDEF: ::Hash[::String, "\\" | ::String]
+      @sitemap: untyped
+
+      @stdlibs: untyped
+
+      @index_contents: untyped
+
+      @html_files: untyped
+
+      @manager_config: untyped
+
       def initialize: () -> void
 
       def exec: (untyped argv, untyped options) -> untyped

@@ -2,6 +2,14 @@ module BitClust
   # Represents detailed signature of a method in a class/module.
   # Includes parameters, block specification and return type.
   class MethodSignature
+    @name: untyped
+
+    @params: untyped
+
+    @block: untyped
+
+    @type: untyped
+
     include NameUtils
 
     METHOD_SIGNATURE_RE: ::Regexp

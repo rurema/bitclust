@@ -1,6 +1,18 @@
 module BitClust
   module Subcommands
     class SetupCommand < Subcommand
+      @prepare: untyped
+
+      @cleanup: untyped
+
+      @purge: untyped
+
+      @versions: untyped
+
+      @update: untyped
+
+      @config: untyped
+
       REPOSITORY_PATH: "https://github.com/rurema/doctree.git"
 
       def initialize: () -> void

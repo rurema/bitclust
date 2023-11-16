@@ -2,6 +2,20 @@ module BitClust
   # Provides completion search methods like _search_classes, _search_methods. 
   # Included by MethodDatabase and FunctionDatabase.
   module Completion
+    @ts: untyped
+
+    @intern_table: untyped
+
+    @classnametable: untyped
+
+    @method_index_small: untyped
+
+    @method_names: untyped
+
+    @method_index: untyped
+
+    @method_index_0: untyped
+
     private
 
     def _search_classes: (untyped pattern) -> untyped
@@ -84,6 +98,14 @@ module BitClust
   # Represents result of completion search.
   # Has many SearchResult::Record.
   class SearchResult
+    @database: untyped
+
+    @pattern: untyped
+
+    @classes: untyped
+
+    @records: untyped
+
     def self.empty: (untyped db, untyped pattern) -> untyped
 
     def initialize: (untyped db, untyped pattern, untyped classes, untyped records) -> void
@@ -114,6 +136,16 @@ module BitClust
 
     # Wraps an Entry.
     class Record
+      @db: untyped
+
+      @specs: untyped
+
+      @origin: untyped
+
+      @entry: untyped
+
+      @hash: untyped
+
       def initialize: (untyped db, untyped spec, ?untyped? origin, ?untyped? entry) -> void
 
       attr_writer db: untyped

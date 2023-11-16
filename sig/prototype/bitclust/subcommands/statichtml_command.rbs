@@ -1,9 +1,39 @@
 module BitClust
   module Subcommands
     class StatichtmlCommand < Subcommand
+      @verbose: untyped
+
+      @catalogdir: untyped
+
+      @templatedir: untyped
+
+      @themedir: untyped
+
+      @suffix: untyped
+
+      @gtm_tracking_id: untyped
+
+      @meta_robots_content: untyped
+
+      @stop_on_syntax_error: untyped
+
+      @manager_config: untyped
+
+      @urlmapper: untyped
+
       include NameUtils
 
       class URLMapperEx < URLMapper
+        @bitclust_html_base: untyped
+
+        @suffix: untyped
+
+        @fs_casesensitive: untyped
+
+        @canonical_base_url: untyped
+
+        @edit_base_url: untyped
+
         include NameUtils
 
         attr_accessor bitclust_html_base: untyped

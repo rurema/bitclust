@@ -3,6 +3,12 @@ module BitClust
   # Much simpler than Ruby API reference parser(RRDParser)
   # because C APIs does not have library, class, etc.
   class FunctionReferenceParser
+    @db: untyped
+
+    @filename: untyped
+
+    @path: untyped
+
     # Returns an array of FunctionEntry
     def self.parse_file: (untyped path, ?::Hash[untyped, untyped] params) -> untyped
 

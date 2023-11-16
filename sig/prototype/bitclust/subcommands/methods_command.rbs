@@ -1,6 +1,16 @@
 module BitClust
   module Subcommands
     class MethodsCommand < Subcommand
+      @requires: untyped
+
+      @verbose: untyped
+
+      @version: untyped
+
+      @mode: untyped
+
+      @target: untyped
+
       include CrossRubyUtils
 
       def initialize: () -> void

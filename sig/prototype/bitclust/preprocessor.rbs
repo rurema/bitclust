@@ -7,8 +7,6 @@ module BitClust
   # Handle pragmas like #@todo, #@include, #@since, etc.
   class Preprocessor < LineFilter
     def initialize: (untyped f, ?::Hash[untyped, untyped] params) -> void
-
-    private
   end
 
   # Used by tools/stattodo.rb

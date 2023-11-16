@@ -4,6 +4,15 @@ module BitClust
   #
   # Supports Rack and WEBrick.
   class App
+    @options: untyped
+
+    @interfaces: untyped
+
+    @versions: untyped
+
+    # Redirect from '/' to "#{viewpath}/"
+    @index: untyped
+
     def initialize: (untyped options) -> void
 
     attr_reader interfaces: untyped

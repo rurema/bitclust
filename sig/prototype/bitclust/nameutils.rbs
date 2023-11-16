@@ -20,5 +20,7 @@ module BitClust
     GVAR_RE: ::Regexp
 
     MID: ::Regexp
+
+    @@split_method_id: untyped
   end
 end

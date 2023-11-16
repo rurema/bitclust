@@ -1,6 +1,10 @@
 module BitClust
   # Web server interface for BitClust server
   class Interface
+    @webrick_conf: untyped
+
+    @handler: untyped
+
     def initialize: (?::Hash[untyped, untyped] webrick_conf) { () -> untyped } -> void
 
     # for WEBrick servlet
@@ -18,6 +22,8 @@ module BitClust
     def mod_ruby?: () -> false
 
     class CGI < ::WEBrick::CGI
+      @handler: untyped
+
       def main: (untyped handler) -> untyped
 
       def do_GET: (untyped wreq, untyped wres) -> untyped
@@ -26,6 +32,8 @@ module BitClust
     end
 
     class FCGI < CGI
+      @handler: untyped
+
       def main: (untyped handler) -> untyped
     end
 

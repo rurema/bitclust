@@ -1,5 +1,7 @@
 module BitClust
   class ScreenManager
+    @conf: untyped
+
     def initialize: (untyped h) -> void
 
     private
@@ -36,6 +38,16 @@ module BitClust
   end
 
   class URLMapper
+    @base_url: untyped
+
+    @cgi_url: untyped
+
+    @css_url: untyped
+
+    @favicon_url: untyped
+
+    @theme: untyped
+
     include NameUtils
 
     def initialize: (untyped h) -> void
@@ -78,6 +90,8 @@ module BitClust
   end
 
   class TemplateRepository
+    @prefix: untyped
+
     def initialize: (untyped prefix) -> void
 
     def load: (untyped id) -> untyped
@@ -94,6 +108,8 @@ module BitClust
   end
 
   class ErrorScreen < Screen
+    @error: untyped
+
     include HTMLUtils
 
     def initialize: (untyped err) -> void
@@ -106,6 +122,8 @@ module BitClust
   end
 
   class NotFoundScreen < Screen
+    @error: untyped
+
     include HTMLUtils
 
     def initialize: (untyped err) -> void
@@ -118,6 +136,18 @@ module BitClust
   end
 
   class TemplateScreen < Screen
+    @urlmapper: untyped
+
+    @template_repository: untyped
+
+    @default_encoding: untyped
+
+    @target_version: untyped
+
+    @conf: untyped
+
+    @hlevel: untyped
+
     include Translatable
 
     include HTMLUtils
@@ -204,6 +234,8 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
+    @entries: untyped
+
     def initialize: (untyped h, untyped entries, untyped opt) -> void
 
     def encoding: () -> untyped
@@ -212,6 +244,8 @@ module BitClust
   end
 
   class EntryBoundScreen < TemplateScreen
+    @entry: untyped
+
     def initialize: (untyped h, untyped entry, untyped opt) -> void
 
     def encoding: () -> untyped
@@ -244,6 +278,8 @@ module BitClust
   end
 
   class OpenSearchDescriptionScreen < TemplateScreen
+    @search_full_url: untyped
+
     def initialize: (untyped h, untyped request_full_uri, untyped opt) -> void
 
     attr_reader search_full_url: untyped
@@ -254,12 +290,18 @@ module BitClust
   end
 
   class SearchScreen < IndexScreen
+    @query: untyped
+
+    @elapsed_time: untyped
+
     def initialize: (untyped h, untyped entries, untyped opt) -> void
 
     def body: () -> untyped
   end
 
   class ClassScreen < EntryBoundScreen
+    @alevel: untyped
+
     def initialize: (untyped h, untyped entry, untyped opt) -> void
 
     def body: () -> untyped
@@ -268,6 +310,8 @@ module BitClust
   end
 
   class MethodScreen < TemplateScreen
+    @entries: untyped
+
     def initialize: (untyped h, untyped entries, untyped opt) -> void
 
     def encoding: () -> untyped

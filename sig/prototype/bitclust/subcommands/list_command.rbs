@@ -1,6 +1,8 @@
 module BitClust
   module Subcommands
     class ListCommand < Subcommand
+      @mode: untyped
+
       def initialize: () -> void
 
       def parse: (untyped argv) -> untyped
