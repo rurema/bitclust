@@ -21,7 +21,7 @@ module BitClust
     def name: () -> String
     alias label name
 
-    def name?: (untyped n) -> bool
+    def name?: (String n) -> bool
 
     def realname: () -> String
 

@@ -183,15 +183,16 @@ module BitClust
     private :tesc
 
     def match?(m)
-      (not @library or m.library.name?(@library)) and
-      (not @klass   or m.klass.name?(@klass)) and
+      (not @library or m.library.name?(@library || raise)) and
+      (not @klass   or m.klass.name?(@klass || raise)) and
       (not @type    or m.typemark == @type) and
-      (not @method  or m.name?(@method))
+      (not @method  or m.name?(@method || raise))
     end
 
     def select_classes(cs)
       return cs unless @klass
-      expand_ic(cs, @klass, @crecache)
+      raise "[MAYBE BUG] BitClust::MethodNamePattern#expand_ic is not defined"
+      # expand_ic(cs, @klass, @crecache)
     end
 
     def empty?
