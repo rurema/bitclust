@@ -83,7 +83,7 @@ module BitClust
           headline @f.gets
         when /\A(\s+)\*\s/, /\A(\s+)\(\d+\)\s/
           @item_stack = []
-          item_list($1.size)
+          item_list(($1 || raise).size)
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when %r<\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{>
           emlist
@@ -163,7 +163,7 @@ module BitClust
     def headline(line)
       level = @hlevel + (line.slice(/\A=+/).size - 3)
       label = line.sub(/\A=+(\[a:(.*?)\])?/, '').strip
-      frag = $2 if $2 and not $2.empty?
+      frag = $2 if $2 and not ($2 || raise).empty?
       line h(level, escape_html(label), frag)
     end
 
