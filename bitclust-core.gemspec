@@ -34,4 +34,6 @@ EOD
   s.add_runtime_dependency "rack"
   s.add_runtime_dependency "progressbar", ">= 1.9.0", "< 2.0"
   s.add_runtime_dependency "webrick"
+  s.add_runtime_dependency "drb"
+  s.add_runtime_dependency "nkf"
 end
