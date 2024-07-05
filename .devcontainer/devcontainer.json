@@ -37,6 +37,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"soutaro.rbs-syntax",
 				"soutaro.steep-vscode"
 			]
 		}
