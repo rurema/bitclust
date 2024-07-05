@@ -262,7 +262,7 @@ module BitClust
   class LibraryScreen < EntryBoundScreen
     def body: () -> untyped
 
-    def draw_tree: (untyped cs) { () -> untyped } -> (nil | untyped)
+    def draw_tree: (untyped cs) { (?) -> untyped } -> (nil | untyped)
 
     def current_url: () -> untyped
 

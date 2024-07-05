@@ -115,7 +115,7 @@ module RI
 end
 
 module HTMLUtils
-  ESC: ::Hash[::String, "&amp;" | "&lt;" | "&gt;" | "&quot;"]
+  ESC: { "&" => "&amp;", "<" => "&lt;", ">" => "&gt;", "\"" => "&quot;" }
 
   def self?.escape: (untyped str) -> untyped
 

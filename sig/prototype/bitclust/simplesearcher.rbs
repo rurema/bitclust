@@ -16,8 +16,8 @@ module BitClust
 
     def self?.to_pattern: (untyped pat) -> untyped
 
-    def self?.parse_method_spec_pattern: (untyped pat) -> untyped
+    def self?.parse_method_spec_pattern: (untyped pat) -> (untyped | ::Array[untyped | nil] | ::Array[nil | "$" | untyped] | ::Array[untyped])
 
-    def self?.parse_method_spec_pattern0: (untyped q) -> untyped
+    def self?.parse_method_spec_pattern0: (untyped q) -> ::Array[untyped | nil]
   end
 end

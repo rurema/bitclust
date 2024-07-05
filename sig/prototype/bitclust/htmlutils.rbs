@@ -24,7 +24,7 @@ module BitClust
 
     def a_href: (untyped url, untyped label) -> ::String
 
-    ESC: ::Hash[::String, "&amp;" | "&quot;" | "&lt;" | "&gt;"]
+    ESC: { "&" => "&amp;", "\"" => "&quot;", "<" => "&lt;", ">" => "&gt;" }
 
     def escape_html: (untyped str) -> untyped
 

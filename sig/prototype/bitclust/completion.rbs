@@ -132,7 +132,7 @@ module BitClust
 
     def record: () -> untyped
 
-    def each_record: () { () -> untyped } -> untyped
+    def each_record: () { (?) -> untyped } -> untyped
 
     # Wraps an Entry.
     class Record

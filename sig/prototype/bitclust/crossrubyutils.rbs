@@ -4,7 +4,7 @@ module BitClust
   module CrossRubyUtils
     private
 
-    def print_crossruby_table: () { () -> untyped } -> untyped
+    def print_crossruby_table: () { (?) -> untyped } -> untyped
 
     def print_table: (untyped vers, untyped table) -> untyped
 
@@ -16,9 +16,9 @@ module BitClust
 
     def get_ruby: (untyped version) -> (untyped | nil)
 
-    def build_crossruby_table: () { (untyped) -> untyped } -> untyped
+    def build_crossruby_table: () { (untyped) -> untyped } -> ::Array[untyped]
 
-    def forall_ruby: (untyped path) { () -> untyped } -> untyped
+    def forall_ruby: (untyped path) { (?) -> untyped } -> untyped
 
     def rubys: (untyped path) -> untyped
 

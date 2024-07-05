@@ -39,7 +39,7 @@ module BitClust
 
         def initialize: (untyped name, ?untyped? local) -> void
 
-        def method_missing: (untyped name, *untyped args) { () -> untyped } -> untyped
+        def method_missing: (untyped name, *untyped args) { (?) -> untyped } -> untyped
       end
 
       class URLMapperEx < URLMapper
@@ -52,7 +52,7 @@ module BitClust
         def document_url: (untyped name) -> ::String
       end
 
-      FIX_UNDEF: ::Hash[::String, "\\" | ::String]
+      FIX_UNDEF: { "¥" => "\\", "·" => ::String, "̈" => ::String, "—" => ::String, "−" => ::String, "〜" => ::String }
       @sitemap: untyped
 
       @stdlibs: untyped

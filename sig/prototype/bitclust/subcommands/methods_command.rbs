@@ -23,7 +23,7 @@ module BitClust
 
       def crossrubyutils_sort_entries: (untyped ents) -> untyped
 
-      ORDER: ::Hash[::String, 1 | 2 | 3]
+      ORDER: { "." => 1, "#" => 2, "::" => 3 }
 
       def m_order: (untyped m) -> ::Array[untyped]
 

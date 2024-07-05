@@ -75,7 +75,7 @@ module BitClust
 
     def find_constant: (untyped db, untyped pattern) -> untyped
 
-    def parse_method_spec_pattern: (untyped pat) -> untyped
+    def parse_method_spec_pattern: (untyped pat) -> ::Array[untyped]
   end
 
   class Plain

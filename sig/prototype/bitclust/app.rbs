@@ -25,6 +25,6 @@ module BitClust
 
     def service: (untyped req, untyped res) -> untyped
 
-    def call: (untyped env) -> ::Array[200 | ::Hash[::String, "text/html; charset=utf-8"] | ::Array[untyped]]
+    def call: (untyped env) -> ::Array[200 | { "Content-Type" => "text/html; charset=utf-8" } | ::Array[untyped]]
   end
 end

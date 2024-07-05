@@ -85,7 +85,7 @@ module BitClust
 
     def type_param: () -> (nil | untyped)
 
-    def parse_path_info: () -> (nil | untyped)
+    def parse_path_info: () -> (nil | ::Array[untyped])
 
     def path_info: () -> untyped
   end
@@ -113,6 +113,6 @@ module BitClust
 
     def update: (untyped webrick_res) -> untyped
 
-    def rack_finish: () -> ::Array[untyped | ::Hash[::String, untyped] | ::Array[untyped]]
+    def rack_finish: () -> ::Array[untyped | { "Content-Type" => untyped } | ::Array[untyped]]
   end
 end
