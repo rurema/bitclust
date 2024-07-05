@@ -126,6 +126,7 @@ module BitClust
       Dir.entries(realpath(rel))\
           .reject {|ent| /\A[\.=]/ =~ ent }\
           .map {|ent| decodeid(ent) }
+          .sort
     rescue Errno::ENOENT
       return []
     end
