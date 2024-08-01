@@ -209,6 +209,8 @@ module BitClust
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         FileUtils.cp(@manager_config[:themedir] + "script.js",
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
+        FileUtils.cp(@manager_config[:themedir] + "run.mjs",
+                    @outputdir.to_s, :verbose => @verbose, :preserve => true)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:favicon_url],
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         Dir.mktmpdir do |tmpdir|
