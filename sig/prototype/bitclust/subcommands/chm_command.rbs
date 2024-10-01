@@ -3,9 +3,9 @@ module BitClust
     class ChmCommand < Subcommand
       HHP_SKEL: ::String
 
-      HHC_SKEL: "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n<HTML>\n<HEAD>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Windows-31J\">\n</HEAD>\n<BODY>\n<UL><% [:library].each do |k| %>\n<%= @sitemap[k].to_html %>\n<% end %></UL>\n</BODY>\n</HTML>\n"
+      HHC_SKEL: ::String
 
-      HHK_SKEL: "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n<HTML>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Windows-31J\">\n<HEAD>\n</HEAD>\n<BODY>\n<UL><% @index_contents.sort.each do |content| %>\n<%= content.to_html %>\n<% end %></UL>\n</BODY>\n</HTML>\n"
+      HHK_SKEL: ::String
 
       class Sitemap
         class Content

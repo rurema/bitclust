@@ -134,7 +134,7 @@ EOS
         end
 
         def method_url(spec)
-          cname, tmark, mname = *split_method_spec(spec)
+          cname, tmark, mname = split_method_spec(spec)
           "/method/#{encodename_fs(cname)}/#{typemark2char(tmark)}/#{encodename_fs(mname)}.html"
         end
 
@@ -219,7 +219,7 @@ EOS
         create_file(@outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort, {:database => db}).body)
         create_file(@outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort, {:database => db}).body)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
-                     @outputdir.to_s, {:verbose => true, :preserve => true})
+                     @outputdir.to_s, verbose: true, preserve: true)
       end
 
       private
@@ -243,7 +243,7 @@ EOS
                     "\u0308" => "\u2025",
                     "\u2014" => "\u2015",
                     "\u2212" => "\uff0d",
-                    "\u301c" => "\uff5e" } 
+                    "\u301c" => "\uff5e" }
 
       def create_html_file(entry, manager, outputdir, db)
         html = manager.entry_screen(entry, {:database => db}).body
