@@ -21,6 +21,7 @@ gems:
   - name: steep
     ignore: true
 
+  - name: date
   #- name: drb
   - name: erb
   - name: fileutils

@@ -5,6 +5,10 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: date
+  version: '0'
+  source:
+    type: stdlib
 - name: dbm
   version: '0'
   source:
@@ -46,7 +50,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 25b8cf2135233e112d93d6b64083ee5e419875b6
+    revision: f5f878b82e8a8d341b8630040bb1e006ace1ddd7
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -54,7 +58,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 25b8cf2135233e112d93d6b64083ee5e419875b6
+    revision: f5f878b82e8a8d341b8630040bb1e006ace1ddd7
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
