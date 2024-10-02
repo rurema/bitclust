@@ -28,6 +28,8 @@ module BitClust
               show_library lib
             end
           rescue WriterError => err
+            # @type var err: StandardError
+            err = _ = err
             raise if $DEBUG
             $stderr.puts "#{File.basename($0, '.*')}: FAIL: #{err.message}"
             success = false
