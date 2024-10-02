@@ -1,12 +1,82 @@
 module BitClust
   module Subcommands
     class ChmCommand < Subcommand
+      HHP_SKEL: ::String
+
+      HHC_SKEL: ::String
+
+      HHK_SKEL: ::String
+
       class Sitemap
         class Content
           include Enumerable[untyped]
           def each: () { (untyped) -> untyped } -> untyped
+
+          @name: untyped
+
+          @local: untyped
+
+          @contents: untyped
+
+          include ERB::Util
+
+          def initialize: (untyped name, ?untyped? local) -> void
+
+          attr_reader name: untyped
+
+          attr_reader local: untyped
+
+          attr_reader contents: untyped
+
+          def []: (untyped index) -> untyped
+
+          def <<: (untyped content) -> untyped
+
+          def <=>: (untyped other) -> untyped
+
+          def to_html: () -> untyped
         end
+        @name: untyped
+
+        @contents: untyped
+
+        def initialize: (untyped name, ?untyped? local) -> void
+
+        def method_missing: (untyped name, *untyped args) { (?) -> untyped } -> untyped
       end
+
+      class URLMapperEx < URLMapper
+        def library_url: (untyped name) -> ("/library/index.html" | ::String)
+
+        def class_url: (untyped name) -> ::String
+
+        def method_url: (untyped spec) -> ::String
+
+        def document_url: (untyped name) -> ::String
+      end
+
+      FIX_UNDEF: { "¥" => "\\", "·" => ::String, "̈" => ::String, "—" => ::String, "−" => ::String, "〜" => ::String }
+      @sitemap: untyped
+
+      @stdlibs: untyped
+
+      @index_contents: untyped
+
+      @html_files: untyped
+
+      @manager_config: untyped
+
+      def initialize: () -> void
+
+      def exec: (untyped argv, untyped options) -> untyped
+
+      private
+
+      def create_manager_config: () -> untyped
+
+      def create_html_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+
+      def create_file: (untyped path, untyped skel) -> untyped
     end
   end
 end
