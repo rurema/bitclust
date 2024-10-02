@@ -1,5 +1,7 @@
 module BitClust
   class Error < StandardError
+    # 型エラー回避のため、nilの可能性を外した。
+    def backtrace: () -> Array[String]
   end
 
   class RequestError < Error
@@ -60,6 +62,8 @@ module BitClust
   end
 
   module WriterError
+    # 型エラー回避のため Exception#message の型をコピー
+    def message: () -> String
   end
 
   class DocumentError

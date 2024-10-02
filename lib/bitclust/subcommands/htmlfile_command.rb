@@ -66,7 +66,7 @@ module BitClust
             return
           rescue ParseError => ex
             $stderr.puts ex.message
-            $stderr.puts ex.backtrace[0], ex.backtrace[1..-1].map{|s| "\tfrom " + s}
+            $stderr.puts ex.backtrace[0], ex.backtrace[1..-1]&.map{|s| "\tfrom " + s}
           end
         end
 
