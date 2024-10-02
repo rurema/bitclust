@@ -57,7 +57,7 @@ module BitClust
     def align_progress_bar_title(title)
       size = title.size
       if size > 14
-        title[0..13] #: String
+        title[0..13] || raise
       else
         title + ' ' * (14 - size)
       end
