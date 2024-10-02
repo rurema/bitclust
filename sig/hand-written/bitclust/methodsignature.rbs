@@ -1,0 +1,25 @@
+module BitClust
+  class MethodSignature
+    include NameUtils
+
+    METHOD_SIGNATURE_RE: ::Regexp
+
+    def self.parse: (String line) -> instance
+
+    def initialize: (String name, String? params, String? block, String? type) -> void
+
+    attr_reader name: String
+
+    attr_reader params: String?
+
+    attr_reader block: String?
+
+    attr_reader type: String?
+
+    def to_s: () -> String
+
+    def friendly_string: () -> String
+
+    def inspect: () -> ::String
+  end
+end
