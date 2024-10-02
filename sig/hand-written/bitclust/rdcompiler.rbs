@@ -1,0 +1,150 @@
+module BitClust
+  class RDCompiler
+    @urlmapper: URLMapper
+
+    @catalog: MessageCatalog
+
+    @hlevel: Integer
+
+    @type: (:function | :method | nil)
+
+    @library: untyped
+
+    @class: untyped
+
+    @method: MethodEntry
+
+    @option: ::Hash[untyped, untyped]
+
+    @opt: untyped
+
+    @f: LineInput
+
+    @out: StringIO
+
+    @item_stack: untyped
+
+    include HTMLUtils
+
+    include TextUtils
+
+    include Translatable
+
+    def initialize: (URLMapper urlmapper, ?::Integer hlevel, ?::Hash[untyped, untyped] opt) -> void
+
+    def compile: (String src) -> String
+
+    def compile_function: (FunctionEntry f, ?untyped? opt) -> String
+
+    def compile_method: (MethodEntry m, ?untyped? opt) -> String
+
+    private
+
+    def setup: (String src, ?untyped? entry) { () -> untyped } -> String
+
+    def library_file: () -> void
+
+    def entry: () -> void
+
+    def entry_chunk: () -> void
+
+    def headline: (String line) -> void
+
+    def h: (untyped level, untyped label, ?untyped? frag) -> ::String
+
+    ITEM_RE: ::Regexp
+
+    def item_list: (?::Integer level) -> void
+
+    def dlist: () -> void
+
+    # empty lines separate paragraphs.
+    def dd_with_p: () -> void
+
+    # empty lines do not separate paragraphs.
+    def dd_without_p: () -> void
+
+    def dt: (untyped s) -> ::String
+
+    def stop_on_syntax_error?: () -> (true | untyped)
+
+    def emlist: () -> void
+
+    def list: () -> void
+
+    def canonicalize: (untyped lines) -> untyped
+
+    def paragraph: () -> untyped
+
+    def read_paragraph: (untyped f) -> untyped
+
+    def see: () -> void
+
+    def todo: () -> void
+
+    def entry_info: () -> void
+
+    # FIXME: parse @param, @return, ...
+    def entry_paragraph: () -> untyped
+
+    def read_entry_paragraph: (LineInput f) -> Array[String]
+
+    def method_signature: (String sig_line, bool first) -> void
+
+    BracketLink: ::Regexp
+
+    NeedESC: ::Regexp
+
+    def compile_text: (String str) -> String
+
+    def bracket_link: (String link, ?String? label, ?String? frag) -> String
+
+    def protect: (String src) { () -> String } -> String
+
+    def direct_url: (String url) -> String
+
+    def reference_link: (String arg) -> String
+
+    BLADE_URL: "https://blade.ruby-lang.org/%s/%s"
+
+    def blade_link: (String ml, String num) -> String
+
+    RFC_URL: String
+
+    def rfc_link: (String num) -> String
+
+    MAN_CMD_URL: String
+
+    MAN_FCN_URL: String
+
+    MAN_HEADER_URL: String
+
+    MAN_LINUX_URL: String
+
+    MAN_FREEBSD_URL: String
+
+    def man_url: (String? section, String? page) -> String?
+
+    def man_link: (String spec) -> String
+
+    BUGS_URL: String
+
+    def bugs_link: (String type, String id) -> String
+
+    def rdoc_url: (String method_id, String version) -> String
+
+    def rdoc_link: (String method_id, String version) -> String
+
+    def complete_spec: (String spec0) -> String
+
+    def seems_code: (String text) -> String
+
+    def string: (String str) -> void
+
+    def line: (String? str) -> void
+
+    def nl: () -> void
+
+    def text_node_from_lines: (Array[String] lines) -> String
+  end
+end
