@@ -4,12 +4,20 @@ module BitClust
 
     @db: FunctionDatabase | MethodDatabase
 
-    def error: (untyped message) -> bot
+    def initialize: () -> void
 
-    def option_error: (untyped message) -> bot
+    def parse: (Array[String] argv) -> void
+
+    def help: () -> String
+
+    def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+
+    def error: (_ToS message) -> bot
+
+    def option_error: (String message) -> bot
 
     def srcdir_root: () -> Pathname
 
-    def align_progress_bar_title: (untyped title) -> String
+    def align_progress_bar_title: (String title) -> String
   end
 end
