@@ -1,97 +1,103 @@
 module BitClust
   module Subcommands
     class StatichtmlCommand < Subcommand
-      @verbose: untyped
+      @verbose: bool
 
-      @catalogdir: untyped
+      @catalogdir: Pathname?
 
-      @templatedir: untyped
+      @templatedir: Pathname
 
-      @themedir: untyped
+      @themedir: Pathname
 
-      @suffix: untyped
+      @suffix: String
 
-      @gtm_tracking_id: untyped
+      @fs_casesensitive: bool
 
-      @meta_robots_content: untyped
+      @canonical_base_url: String?
 
-      @stop_on_syntax_error: untyped
+      @edit_base_url: String?
 
-      @manager_config: untyped
+      @gtm_tracking_id: String?
 
-      @urlmapper: untyped
+      @meta_robots_content: Array[String]
+
+      @stop_on_syntax_error: bool
+
+      @outputdir: Pathname
+
+      @manager_config: Hash[Symbol, untyped]
+
+      @urlmapper: URLMapperEx
 
       include NameUtils
 
       class URLMapperEx < URLMapper
-        @bitclust_html_base: untyped
+        @suffix: String
 
-        @suffix: untyped
+        @fs_casesensitive: bool
 
-        @fs_casesensitive: untyped
+        @canonical_base_url: String
 
-        @canonical_base_url: untyped
-
-        @edit_base_url: untyped
+        @edit_base_url: String
 
         include NameUtils
 
-        attr_accessor bitclust_html_base: untyped
+        attr_accessor bitclust_html_base: String
 
-        def initialize: (untyped h) -> void
+        def initialize: (Hash[Symbol, untyped] h) -> void
 
-        def library_url: (untyped name) -> untyped
+        def library_url: (String name) -> String
 
-        def class_url: (untyped name) -> untyped
+        def class_url: (String name) -> String
 
-        def method_url: (untyped spec) -> untyped
+        def method_url: (String spec) -> String
 
-        def function_url: (untyped name) -> untyped
+        def function_url: (String name) -> String
 
-        def document_url: (untyped name) -> untyped
+        def document_url: (String name) -> String
 
-        def css_url: () -> untyped
+        def css_url: () -> String
 
-        def custom_css_url: (untyped filename) -> untyped
+        def custom_css_url: (String filename) -> String
 
-        def custom_js_url: (untyped filename) -> untyped
+        def custom_js_url: (String filename) -> String
 
-        def favicon_url: () -> untyped
+        def favicon_url: () -> String
 
-        def library_index_url: () -> untyped
+        def library_index_url: () -> String
 
-        def function_index_url: () -> untyped
+        def function_index_url: () -> String
 
-        def canonical_url: (untyped current_url) -> untyped
+        def canonical_url: (String current_url) -> String
 
-        def edit_url: (untyped location) -> untyped
+        def edit_url: (Location location) -> String
 
-        def encodename_package: (untyped str) -> untyped
+        def encodename_package: (String str) -> String
       end
 
       def initialize: () -> void
 
-      def exec: (untyped argv, untyped options) -> untyped
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
 
       private
 
-      def create_manager_config: () -> untyped
+      def create_manager_config: () -> void
 
-      def create_html_entries: (untyped title, untyped entries, untyped manager, untyped db) -> untyped
+      def create_html_entries: (String title, Array[Entry] entries, ScreenManager manager, Database db) -> void
 
-      def create_html_methods: (untyped title, untyped methods, untyped manager, untyped db) -> untyped
+      def create_html_methods: (String title, Hash[String, Array[MethodEntry]] methods, ScreenManager manager, MethodDatabase db) -> void
 
-      def create_index_html: (untyped outputdir) -> untyped
+      def create_index_html: (Pathname outputdir) -> void
 
-      def create_html_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+      def create_html_file: (Entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
 
-      def create_html_method_file: (untyped method_name, untyped entries, untyped manager, untyped outputdir, untyped db) -> untyped
+      def create_html_method_file: (String method_name, Array[MethodEntry] entries, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> void
 
-      def create_html_function_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+      def create_html_function_file: (Entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
 
-      def create_html_file_p: (untyped entry, untyped manager, untyped path, untyped db) -> untyped
+      def create_html_file_p: (Entry | Array[MethodEntry] entry, ScreenManager manager, Pathname path, Database db) -> void
 
-      def create_file: (untyped path, untyped str, ?::Hash[untyped, untyped] options) -> untyped
+      def create_file: (Pathname path, untyped str, ?::Hash[Symbol, untyped] options) -> void
 
       def encodename_package: (untyped str) -> untyped
     end

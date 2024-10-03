@@ -38,55 +38,52 @@ module BitClust
   end
 
   class URLMapper
-    @base_url: untyped
 
-    @cgi_url: untyped
+    @css_url: String
 
-    @css_url: untyped
+    @favicon_url: String
 
-    @favicon_url: untyped
-
-    @theme: untyped
+    @theme: String
 
     include NameUtils
 
-    def initialize: (untyped h) -> void
+    def initialize: (Hash[Symbol, String?] h) -> void
 
-    attr_reader base_url: untyped
+    attr_reader base_url: String
 
-    def cgi_url: () -> untyped
+    attr_reader cgi_url: String
 
-    def css_url: () -> (untyped | ::String)
+    def css_url: () -> ::String
 
-    def custom_css_url: (untyped css) -> ::String
+    def custom_css_url: (String css) -> ::String
 
-    def js_url: () -> (untyped | ::String)
+    def js_url: () -> ::String
 
-    def custom_js_url: (untyped js) -> ::String
+    def custom_js_url: (String js) -> ::String
 
-    def favicon_url: () -> (untyped | ::String)
+    def favicon_url: () -> ::String
 
     def library_index_url: () -> ::String
 
-    def library_url: (untyped name) -> ::String
+    def library_url: (String name) -> ::String
 
-    def class_url: (untyped name) -> ::String
+    def class_url: (String name) -> ::String
 
-    def method_url: (untyped spec) -> ::String
+    def method_url: (String spec) -> ::String
 
     def function_index_url: () -> ::String
 
-    def function_url: (untyped name) -> ::String
+    def function_url: (String name) -> ::String
 
     def opensearchdescription_url: () -> ::String
 
     def search_url: () -> ::String
 
-    def spec_url: (untyped name) -> ::String
+    def spec_url: (String name) -> ::String
 
-    def document_url: (untyped name) -> ::String
+    def document_url: (String name) -> ::String
 
-    def canonical_url: (untyped current_url) -> untyped
+    def canonical_url: (String current_url) -> String
   end
 
   class TemplateRepository
