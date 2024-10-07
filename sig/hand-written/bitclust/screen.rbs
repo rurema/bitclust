@@ -1,40 +1,50 @@
 module BitClust
   class ScreenManager
-    @conf: untyped
+    @conf: Hash[Symbol, untyped]
 
-    def initialize: (untyped h) -> void
+    def initialize: (Hash[Symbol, untyped] h) -> void
 
     private
 
-    def default_message_catalog: (untyped h) -> untyped
+    def default_message_catalog: (Hash[Symbol, untyped] h) -> MessageCatalog
 
     public
 
-    def entry_screen: (untyped entry, untyped opt) -> untyped
+    def entry_screen: (untyped entry, untyped opt) -> Screen
 
-    def library_index_screen: (untyped libs, untyped opt) -> untyped
+    def library_index_screen: (untyped libs, untyped opt) -> LibraryIndexScreen
 
-    def library_screen: (untyped lib, untyped opt) -> untyped
+    def library_screen: (untyped lib, untyped opt) -> LibraryScreen
 
-    def class_index_screen: (untyped cs, untyped opt) -> untyped
+    def class_index_screen: (untyped cs, untyped opt) -> ClassIndexScreen
 
-    def class_screen: (untyped c, untyped opt) -> untyped
+    def class_screen: (untyped c, untyped opt) -> ClassScreen
 
-    def method_screen: (untyped ms, untyped opt) -> untyped
+    def method_screen: (untyped ms, untyped opt) -> MethodScreen
 
-    def opensearchdescription_screen: (untyped request_full_uri, untyped opt) -> untyped
+    def opensearchdescription_screen: (untyped request_full_uri, untyped opt) -> OpenSearchDescriptionScreen
 
-    def search_screen: (untyped result, untyped opt) -> untyped
+    def search_screen: (untyped result, untyped opt) -> SearchScreen
 
-    def doc_screen: (untyped d, untyped opt) -> untyped
+    def doc_screen: (untyped d, untyped opt) -> DocScreen
 
-    def function_screen: (untyped f, untyped opt) -> untyped
+    def function_screen: (untyped f, untyped opt) -> FunctionScreen
 
-    def function_index_screen: (untyped fs, untyped opt) -> untyped
+    def function_index_screen: (untyped fs, untyped opt) -> FunctionIndexScreen
 
     private
 
-    def new_screen: (untyped c, *untyped args) -> untyped
+    def new_screen: (singleton(LibraryIndexScreen) c, *untyped args) -> LibraryIndexScreen
+                  | (singleton(LibraryScreen) c, *untyped args) -> LibraryScreen
+                  | (singleton(ClassIndexScreen) c, *untyped args) -> ClassIndexScreen
+                  | (singleton(ClassScreen) c, *untyped args) -> ClassScreen
+                  | (singleton(MethodScreen) c, *untyped args) -> MethodScreen
+                  | (singleton(OpenSearchDescriptionScreen) c, *untyped args) -> OpenSearchDescriptionScreen
+                  | (singleton(SearchScreen) c, *untyped args) -> SearchScreen
+                  | (singleton(DocScreen) c, *untyped args) -> DocScreen
+                  | (singleton(FunctionScreen) c, *untyped args) -> FunctionScreen
+                  | (singleton(FunctionIndexScreen) c, *untyped args) -> FunctionIndexScreen
+                  | (untyped c, *untyped args) -> untyped
   end
 
   class URLMapper
@@ -87,33 +97,33 @@ module BitClust
   end
 
   class TemplateRepository
-    @prefix: untyped
+    @prefix: String
 
-    def initialize: (untyped prefix) -> void
+    def initialize: (String prefix) -> void
 
-    def load: (untyped id) -> untyped
+    def load: (String id) -> String
 
     private
 
-    def preproc: (untyped template) -> untyped
+    def preproc: (String template) -> String
   end
 
   class Screen
-    def self.for_entry: (untyped entry) -> untyped
+    def self.for_entry: (Entry | Array[Entry] entry) -> untyped
 
     def status: () -> nil
   end
 
   class ErrorScreen < Screen
-    @error: untyped
+    @error: Exception
 
     include HTMLUtils
 
-    def initialize: (untyped err) -> void
+    def initialize: (Exception err) -> void
 
     def status: () -> 500
 
-    def content_type: () -> "text/html"
+    def content_type: () -> String
 
     def body: () -> ::String
   end
@@ -127,115 +137,118 @@ module BitClust
 
     def status: () -> 404
 
-    def content_type: () -> "text/html"
+    def content_type: () -> String
 
     def body: () -> ::String
   end
 
   class TemplateScreen < Screen
-    @urlmapper: untyped
+    @urlmapper: URLMapper
 
-    @template_repository: untyped
+    @template_repository: TemplateRepository
 
-    @default_encoding: untyped
+    @default_encoding: String
 
-    @target_version: untyped
+    @target_version: String
 
-    @conf: untyped
+    @conf: Hash[Symbol, untyped]
 
-    @hlevel: untyped
+    @hlevel: Integer
 
     include Translatable
 
     include HTMLUtils
 
-    def initialize: (untyped h) -> void
+    def initialize: (Hash[Symbol, untyped] h) -> void
 
-    def content_type: () -> ::String
+    def content_type: () -> String
 
-    def encoding: () -> untyped
+    def encoding: () -> String
 
-    def ruby_version: () -> untyped
+    def ruby_version: () -> String
 
-    def google_tag_manager: () -> ("" | untyped)
+    def google_tag_manager: () -> String
 
-    def meta_robots: () -> ("" | ::String)
+    def meta_robots: () -> String
 
-    def meta_description: () -> "<meta name=\"description\" content=\"\">"
+    def meta_description: () -> String
 
     private
 
-    def default_encoding: () -> untyped
+    def default_encoding: () -> String
 
-    def run_template: (untyped id, ?bool layout) -> untyped
+    def run_template: (String id, ?bool layout) -> String
 
-    def h: (untyped str) -> untyped
+    # erb.def_method(self.class, 'layout', 'layout.erb')
+    def layout: () { () -> untyped } -> String
 
-    def css_url: () -> untyped
+    def h: (_ToS str) -> String
 
-    def custom_css_url: (untyped css) -> untyped
+    def css_url: () -> String
 
-    def js_url: () -> untyped
+    def custom_css_url: (String css) -> String
 
-    def custom_js_url: (untyped js) -> untyped
+    def js_url: () -> String
 
-    def favicon_url: () -> untyped
+    def custom_js_url: (String js) -> String
 
-    def current_url: () -> untyped
+    def favicon_url: () -> String
 
-    def canonical_url: () -> untyped
+    def current_url: () -> bot
 
-    def edit_url: (untyped location) -> untyped
+    def canonical_url: () -> String
 
-    def opensearchdescription_url: () -> untyped
+    def edit_url: (Location location) -> String
 
-    def search_url: () -> untyped
+    def opensearchdescription_url: () -> String
 
-    def library_index_url: () -> untyped
+    def search_url: () -> String
 
-    def function_index_url: () -> untyped
+    def library_index_url: () -> String
 
-    def headline_init: () -> untyped
+    def function_index_url: () -> String
 
-    def headline_push: () -> untyped
+    def headline_init: () -> void
 
-    def headline_pop: () -> untyped
+    def headline_push: () -> void
 
-    def headline: (untyped str, ?edit_url: untyped?) -> untyped
+    def headline_pop: () -> void
 
-    def headline_noescape: (untyped str) -> ::String
+    def headline: (String str, ?edit_url: String?) -> String
 
-    def search_form: () -> ("" | ::String)
+    def headline_noescape: (String str) -> String
 
-    def manual_home_name: () -> untyped
+    def search_form: () -> String
 
-    def manual_home_link: () -> untyped
+    def manual_home_name: () -> String
 
-    def friendly_library_link: (untyped id) -> untyped
+    def manual_home_link: () -> String
 
-    def friendly_library_name: (untyped id) -> untyped
+    def friendly_library_link: (String id) -> String
 
-    def compile_method: (untyped m, ?untyped? opt) -> untyped
+    def friendly_library_name: (String id) -> String
 
-    def compile_function: (untyped f, ?untyped? opt) -> untyped
+    def compile_method: (MethodEntry m, ?untyped? opt) -> String
 
-    def compile_rd: (untyped src) -> untyped
+    def compile_function: (FunctionEntry f, ?untyped? opt) -> String
 
-    def rdcompiler: () -> untyped
+    def compile_rd: (String src) -> String
 
-    def foreach_method_chunk: (untyped src) { (untyped, untyped) -> untyped } -> untyped
+    def rdcompiler: () -> RDCompiler
 
-    def breadcrumb_json_ld: (untyped items) -> untyped
+    def foreach_method_chunk: (String src) { (Array[MethodSignature], String) -> void } -> void
 
-    def absolute_url_to: (untyped path) -> untyped
+    def breadcrumb_json_ld: (Array[Hash[Symbol, String]] items) -> String
+
+    def absolute_url_to: (String path) -> untyped
   end
 
   class IndexScreen < TemplateScreen
-    @entries: untyped
+    @entries: Array[Entry]
 
-    def initialize: (untyped h, untyped entries, untyped opt) -> void
+    def initialize: (Hash[Symbol, untyped] h, Array[Entry] entries, Hash[Symbol, untyped] opt) -> void
 
-    def encoding: () -> untyped
+    def encoding: () -> String
 
     alias charset encoding
   end
@@ -243,102 +256,108 @@ module BitClust
   class EntryBoundScreen < TemplateScreen
     @entry: untyped
 
-    def initialize: (untyped h, untyped entry, untyped opt) -> void
+    def initialize: (Hash[Symbol, untyped] h, Entry entry, Hash[Symbol, untyped] opt) -> void
 
-    def encoding: () -> untyped
+    def encoding: () -> String
 
     alias charset encoding
   end
 
   class LibraryIndexScreen < IndexScreen
-    def body: () -> untyped
+    def body: () -> String
 
-    def current_url: () -> untyped
+    def current_url: () -> String
   end
 
   class LibraryScreen < EntryBoundScreen
-    def body: () -> untyped
+    @entry: LibraryEntry
 
-    def draw_tree: (untyped cs) { (?) -> untyped } -> (nil | untyped)
+    def body: () -> String
 
-    def current_url: () -> untyped
+    def draw_tree: (Array[ClassEntry] cs) { (?) -> untyped } -> void
+
+    def current_url: () -> String
 
     private
 
-    def draw_treed_entries: (untyped entries, untyped tree, ?::Integer indent) { (untyped, untyped) -> untyped } -> untyped
+    def draw_treed_entries: (Array[ClassEntry] entries, Hash[ClassEntry, Array[ClassEntry]] tree, ?Integer indent) { (ClassEntry, Integer) -> void } -> void
   end
 
   class ClassIndexScreen < IndexScreen
-    def body: () -> untyped
+    def body: () -> String
 
-    def current_url: () -> untyped
+    def current_url: () -> String
   end
 
   class OpenSearchDescriptionScreen < TemplateScreen
-    @search_full_url: untyped
+    def initialize: (Hash[Symbol, untyped] h, String request_full_uri, untyped opt) -> void
 
-    def initialize: (untyped h, untyped request_full_uri, untyped opt) -> void
+    attr_reader search_full_url: String
 
-    attr_reader search_full_url: untyped
+    def body: () -> String
 
-    def body: () -> untyped
-
-    def content_type: () -> ::String
+    def content_type: () -> String
   end
 
   class SearchScreen < IndexScreen
-    @query: untyped
+    @query: String?
 
-    @elapsed_time: untyped
+    @elapsed_time: Float
 
-    def initialize: (untyped h, untyped entries, untyped opt) -> void
+    def initialize: (Hash[Symbol, untyped] h, Array[Entry] entries, untyped opt) -> void
 
-    def body: () -> untyped
+    def body: () -> String
   end
 
   class ClassScreen < EntryBoundScreen
-    @alevel: untyped
+    @entry: ClassEntry
 
-    def initialize: (untyped h, untyped entry, untyped opt) -> void
+    @alevel: Integer
 
-    def body: () -> untyped
+    def initialize: (Hash[Symbol, untyped] h, ClassEntry entry, untyped opt) -> void
 
-    def current_url: () -> untyped
+    def body: () -> String
+
+    def current_url: () -> String
   end
 
   class MethodScreen < TemplateScreen
-    @entries: untyped
+    @entries: Array[MethodEntry]
 
-    def initialize: (untyped h, untyped entries, untyped opt) -> void
+    def initialize: (Hash[Symbol, untyped] h, Array[MethodEntry] entries, untyped opt) -> void
 
-    def encoding: () -> untyped
+    def encoding: () -> String
 
     alias charset encoding
 
-    def body: () -> untyped
+    def body: () -> String
 
-    def current_url: () -> untyped
+    def current_url: () -> String
   end
 
   class FunctionScreen < EntryBoundScreen
-    def body: () -> untyped
+    @entry: FunctionEntry
 
-    def current_url: () -> untyped
+    def body: () -> String
+
+    def current_url: () -> String
   end
 
   class FunctionIndexScreen < IndexScreen
-    def body: () -> untyped
+    def body: () -> String
 
-    def current_url: () -> untyped
+    def current_url: () -> String
   end
 
   class DocScreen < EntryBoundScreen
-    def breadcrumb_title: () -> untyped
+    @entry: DocEntry
 
-    def body: () -> untyped
+    def breadcrumb_title: () -> String
 
-    def rdcompiler: () -> untyped
+    def body: () -> String
 
-    def current_url: () -> untyped
+    def rdcompiler: () -> RDCompiler
+
+    def current_url: () -> String
   end
 end

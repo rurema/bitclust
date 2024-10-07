@@ -189,7 +189,7 @@ module BitClust
     private
 
     def preproc(template)
-      template.gsub(/^\.include ([\w\-]+)/) { load($1) }
+      template.gsub(/^\.include ([\w\-]+)/) { load($1 || raise) }
     end
   end
 
@@ -226,8 +226,8 @@ module BitClust
 <head><title>Error</title></head>
 <body>
 <h1>Error</h1>
-<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name)})
-#{@error.backtrace.map {|s| escape_html(s) }.join("\n")}</pre>
+<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name || raise)})
+#{@error.backtrace&.map {|s| escape_html(s) }&.join("\n")}</pre>
 </body>
 </html>
       EndHTML
