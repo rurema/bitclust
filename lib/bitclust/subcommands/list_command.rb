@@ -42,19 +42,19 @@ module BitClust
         case @mode
         when :library
           db = @db
-          db.is_a?(MethodDatabase) or raise
+          db.is_a?(MethodDatabase) or raise "invalid database given. Use without --capi option"
           db.libraries.map {|lib| lib.name }.sort.each do |name|
             puts name
           end
         when :class
           db = @db
-          db.is_a?(MethodDatabase) or raise
+          db.is_a?(MethodDatabase) or raise "invalid database given. Use without --capi option"
           db.classes.map {|c| c.name }.sort.each do |name|
             puts name
           end
         when :method
           db = @db
-          db.is_a?(MethodDatabase) or raise
+          db.is_a?(MethodDatabase) or raise "invalid database given. Use without --capi option"
           db.classes.sort_by {|c| c.name }.each do |c|
             c.entries.sort_by {|m| m.id }.each do |m|
               puts m.label
@@ -62,7 +62,7 @@ module BitClust
           end
         when :function
           db = @db
-          db.is_a?(FunctionDatabase) or raise
+          db.is_a?(FunctionDatabase) or raise "invalid database given. Use with --capi option"
           db.functions.sort_by {|f| f.name }.each do |f|
             puts f.name
           end
