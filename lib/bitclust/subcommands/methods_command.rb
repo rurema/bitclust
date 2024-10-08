@@ -60,6 +60,7 @@ module BitClust
           c = lib.fetch_class(classname)
           list0 = lib.classes.find_all{|c0| /\A#{classname}\b/o =~ c0.name }
           list0 = c.entries + list0
+          # @type var list: Array[String]
           list = list0.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
           if @content
             ri = @ri_path ? RiDatabase.open(@ri_path, nil) : RiDatabase.open_system_db

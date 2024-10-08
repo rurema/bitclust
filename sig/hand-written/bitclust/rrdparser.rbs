@@ -1,23 +1,23 @@
 module BitClust
   class RRDParser
 
-    def self.parse_stdlib_file: (String path, ?::Hash[String, String] params) -> untyped
+    def self.parse_stdlib_file: (String path, ?::Hash[String, String] params) -> LibraryEntry
 
-    def self.parse: (untyped s, untyped lib, ?::Hash[String, String] params) -> untyped
+    def self.parse: (untyped s, String lib, ?::Hash[String, String] params) -> [LibraryEntry, MethodDatabase]
 
     def self.split_doc: (String source) -> [String, String]
 
     def self.libname: (String path) -> String
 
-    def initialize: (untyped db) -> void
+    def initialize: (MethodDatabase db) -> void
 
-    attr_reader db: untyped
+    attr_reader db: MethodDatabase
 
     @context: Context
 
-    def parse_file: (untyped path, untyped libname, ?::Hash[untyped, untyped] params) -> untyped
+    def parse_file: (String path, String libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
 
-    def parse: (untyped f, untyped libname, ?::Hash[untyped, untyped] params) -> untyped
+    def parse: (untyped f, untyped libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
 
     private
 
@@ -58,12 +58,12 @@ module BitClust
     def method_signature: (String line) -> Signature
 
     class Context
-      def initialize: (untyped db, untyped libname) -> void
+      def initialize: (MethodDatabase db, untyped libname) -> void
 
-      @db: untyped
+      @db: MethodDatabase
       @kind: Symbol?
 
-      attr_reader library: untyped
+      attr_reader library: LibraryEntry
 
       attr_reader klass: untyped
 

@@ -2,7 +2,7 @@ module BitClust
   class MethodDatabase < Database
     include Completion
 
-    def self.dummy: (?::Hash[untyped, untyped] params) -> untyped
+    def self.dummy: (?::Hash[untyped, untyped] params) -> instance
 
     def initialize: (::String prefix) -> void
 
@@ -15,7 +15,7 @@ module BitClust
     @refs: RefsDatabase?
     @docmap: Hash[String, DocEntry]
 
-    attr_writer refs: untyped
+    attr_writer refs: RefsDatabase?
 
     def init: () -> void
 

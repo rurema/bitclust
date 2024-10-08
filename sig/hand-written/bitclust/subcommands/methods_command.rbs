@@ -1,0 +1,37 @@
+module BitClust
+  module Subcommands
+    class MethodsCommand < Subcommand
+      @requires: Array[String]
+
+      @verbose: bool
+
+      @version: String
+
+      @mode: (:list | :diff)
+
+      @target: String
+
+      @content: bool
+
+      @ri_path: String
+
+      include CrossRubyUtils
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+
+      def expand_mf: (String n) -> ([String, String] | String)
+
+      def crossrubyutils_sort_entries: (untyped ents) -> untyped
+
+      ORDER: { "." => 1, "#" => 2, "::" => 3 }
+
+      def m_order: (untyped m) -> ::Array[untyped]
+
+      def defined_methods: (untyped ruby, untyped classname) -> Array[String]
+    end
+  end
+end
