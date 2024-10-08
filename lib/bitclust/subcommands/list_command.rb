@@ -41,21 +41,29 @@ module BitClust
         super
         case @mode
         when :library
-          @db.libraries.map {|lib| lib.name }.sort.each do |name|
+          db = @db
+          db.is_a?(MethodDatabase) or raise
+          db.libraries.map {|lib| lib.name }.sort.each do |name|
             puts name
           end
         when :class
-          @db.classes.map {|c| c.name }.sort.each do |name|
+          db = @db
+          db.is_a?(MethodDatabase) or raise
+          db.classes.map {|c| c.name }.sort.each do |name|
             puts name
           end
         when :method
-          @db.classes.sort_by {|c| c.name }.each do |c|
+          db = @db
+          db.is_a?(MethodDatabase) or raise
+          db.classes.sort_by {|c| c.name }.each do |c|
             c.entries.sort_by {|m| m.id }.each do |m|
               puts m.label
             end
           end
         when :function
-          @db.functions.sort_by {|f| f.name }.each do |f|
+          db = @db
+          db.is_a?(FunctionDatabase) or raise
+          db.functions.sort_by {|f| f.name }.each do |f|
             puts f.name
           end
         else
