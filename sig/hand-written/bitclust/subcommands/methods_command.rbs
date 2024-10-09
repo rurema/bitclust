@@ -25,13 +25,13 @@ module BitClust
 
       def expand_mf: (String n) -> ([String, String] | String)
 
-      def crossrubyutils_sort_entries: (untyped ents) -> untyped
+      def crossrubyutils_sort_entries: (Array[String] ents) -> Array[String]
 
-      ORDER: { "." => 1, "#" => 2, "::" => 3 }
+      ORDER: Hash[String, Integer]
 
-      def m_order: (untyped m) -> ::Array[untyped]
+      def m_order: (String m) -> [Integer, String]
 
-      def defined_methods: (untyped ruby, untyped classname) -> Array[String]
+      def defined_methods: (String ruby, String classname) -> Array[String]
     end
   end
 end

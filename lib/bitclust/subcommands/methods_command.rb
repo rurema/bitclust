@@ -85,7 +85,7 @@ module BitClust
             end
           end
         else
-          raise "must not happen: #{mode.inspect}"
+          raise "must not happen: #{@mode.inspect}"
         end
       end
 
@@ -105,6 +105,8 @@ module BitClust
 
       def m_order(m)
         m, t = *m.reverse.split(/(\#|\.|::)/, 2)
+        m or raise
+        t or raise
         [ORDER[t] || 0, m.reverse]
       end
 
