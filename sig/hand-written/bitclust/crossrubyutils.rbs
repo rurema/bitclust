@@ -1,0 +1,31 @@
+module BitClust
+  # Provides utility methods like print_crossruby_table.
+  # Used by subcommands "ancestors" "classes" etc.
+  module CrossRubyUtils
+    @verbose: bool
+
+    type table_type = Hash[String, Hash[String, TrueClass?]]
+
+    private
+
+    def print_crossruby_table: () { (String) -> Array[String] } -> void
+
+    def print_table: (Array[String] vers, table_type table) -> void
+
+    def crossrubyutils_sort_entries: (Array[String] ents) -> Array[String]
+
+    def print_record: (Integer thcols, String th, Array[String] tds, ?Array[Integer]? width_list) -> void
+
+    def version_id: (String ver) -> String
+
+    def get_ruby: (String version) -> String?
+
+    def build_crossruby_table: () { (String) -> Array[String] } -> [Array[String], table_type]
+
+    def forall_ruby: (String path) { (String ruby, String verstr) -> void } -> void
+
+    def rubys: (String path) -> Array[String]
+
+    def parse_PATH: (String str) -> Array[String]
+  end
+end
