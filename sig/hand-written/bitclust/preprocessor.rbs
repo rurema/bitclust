@@ -1,5 +1,6 @@
 module BitClust
   class LineFilter
+    include ParseUtils
     include Enumerable[String]
 
     def initialize: (_Gets f) -> void
@@ -9,7 +10,7 @@ module BitClust
 
     def gets: () -> String?
 
-    def each: () { (String) -> untyped } -> untyped
+    def each: () { (String) -> void } -> void
 
     # abstract
     def next_line: (_Gets) -> String?
@@ -22,6 +23,8 @@ module BitClust
     @params: Hash[untyped, untyped]
     @last_if: String?
     @state_stack: Array[State]
+
+    def initialize: (untyped f, ?::Hash[untyped, untyped] params) -> void
 
     def self.read: (untyped path, ?::Hash[untyped, untyped] params) -> String
 
@@ -63,11 +66,11 @@ module BitClust
 
     def eval_primary: (StringScanner s) -> evaluated_result
 
-    def samplecode_begin: (untyped line, untyped description) -> (nil | untyped)
+    def samplecode_begin: (String line, String description) -> void
 
-    def samplecode_end: () -> (nil | untyped)
+    def samplecode_end: () -> void
 
-    def samplecode_push: (untyped description) -> void
+    def samplecode_push: (String description) -> void
 
     def samplecode_pop: () -> void
 
@@ -93,15 +96,15 @@ module BitClust
 
       def samplecode?: () -> bool
     end
+  end
 
-    class LineCollector < LineFilter
-      def self.process: (untyped path) -> instance
+  class LineCollector < LineFilter
+    def self.process: (untyped path) -> Array[String]
 
-      def self.wrap: (untyped f) -> instance
+    def self.wrap: (untyped f) -> instance
 
-      private
+    private
 
-      def next_line: (untyped f) -> String?
-    end
+    def next_line: (untyped f) -> String?
   end
 end
