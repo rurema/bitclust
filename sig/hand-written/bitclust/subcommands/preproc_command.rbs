@@ -1,11 +1,11 @@
 module BitClust
   module Subcommands
     class PreprocCommand < Subcommand
-      @params: untyped
+      @params: Hash[untyped, untyped]
 
       def initialize: () -> void
 
-      def exec: (untyped argv, untyped options) -> untyped
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
     end
   end
 end
