@@ -3,11 +3,14 @@ class LineInput
   def self.for_string: (String s) -> LineInput
 
   def initialize: (_Gets | StringIO f, ?untyped? entry) -> void
+
   @input: _Gets | StringIO
   @entry: untyped?
   @buf: Array[String]
   @lineno: Integer
   @eof_p: bool
+
+  def inspect: () -> String
 
   def eof?: () -> bool
 
@@ -37,9 +40,13 @@ class LineInput
 
   def getlines_while: (Regexp re) -> Array[String]
 
+  alias span getlines_while
+
   def until_match: (Regexp re) { (String) -> untyped } -> nil
 
   def getlines_until: (Regexp re) -> Array[String]
+
+  alias break getlines_until
 
   def until_terminator: (Regexp re) { (String) -> untyped } -> nil
 

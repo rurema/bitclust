@@ -7,13 +7,14 @@ module BitClust
     def name_match?: (Regexp re) -> Integer?
     def <=>: (FunctionEntry other) -> Integer?
 
-    def filename: () ->        String
-    def macro: () ->           bool
-    def private: () ->         bool
-    def type: () ->            String
-    def params: () ->          String
-    def source: () ->          String
-    def source_location: () -> Location
+    attr_accessor filename: String
+    attr_accessor macro: bool
+    attr_accessor private: bool
+    attr_accessor type: String
+    attr_writer name: String
+    attr_accessor params: String
+    attr_accessor source: String
+    attr_accessor source_location: Location
 
     def public?: () -> bool
     def callable?: () -> bool

@@ -1,8 +1,0 @@
-# Utility class for line-wise file parsing
-class LineInput
-  def inspect: () -> ::String
-
-  alias span getlines_while
-
-  alias break getlines_until
-end
