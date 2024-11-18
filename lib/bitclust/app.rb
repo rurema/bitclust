@@ -88,7 +88,7 @@ module BitClust
                          req.path_info
                        end
         if @versions.any?{|version| %r|\A/?#{version}/?\z| =~ request_path }
-          viewpath = File.join(request_path, @options[:viewpath])
+          viewpath = File.join(request_path || raise, @options[:viewpath])
           @index = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
         else
           links = "<ul>"

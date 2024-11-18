@@ -1,6 +1,10 @@
 ---
 path: ".gem_rbs_collection"
 gems:
+- name: bitclust-core
+  version: 1.4.0
+  source:
+    type: rubygems
 - name: cgi
   version: '0'
   source:
@@ -10,6 +14,10 @@ gems:
   source:
     type: stdlib
 - name: dbm
+  version: '0'
+  source:
+    type: stdlib
+- name: digest
   version: '0'
   source:
     type: stdlib
@@ -26,6 +34,10 @@ gems:
   source:
     type: stdlib
 - name: nkf
+  version: '0'
+  source:
+    type: stdlib
+- name: openssl
   version: '0'
   source:
     type: stdlib
@@ -50,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 7ae9e3cf731a9628e0cc39064ed6e2cf51d822da
+    revision: dcc30eaed71a6e36acde3a018e6f1ffd27f72d09
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -58,10 +70,18 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 7ae9e3cf731a9628e0cc39064ed6e2cf51d822da
+    revision: dcc30eaed71a6e36acde3a018e6f1ffd27f72d09
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
+  version: '0'
+  source:
+    type: stdlib
+- name: singleton
+  version: '0'
+  source:
+    type: stdlib
+- name: socket
   version: '0'
   source:
     type: stdlib
@@ -81,6 +101,10 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: webrick
+  version: 1.8.2
+  source:
+    type: rubygems
 - name: yaml
   version: '0'
   source:

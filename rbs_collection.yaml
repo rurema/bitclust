@@ -30,8 +30,10 @@ gems:
   - name: optparse
   - name: pathname
   - name: ripper
+  - name: singleton
   - name: strscan
   - name: tmpdir
+  - name: webrick
   - name: yaml
 
   - name: progressbar

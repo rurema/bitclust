@@ -1,23 +1,25 @@
 module BitClust
   # Web server interface for BitClust server
   class Interface
-    @webrick_conf: untyped
+    @webrick_conf: Hash[untyped, untyped]
 
-    @handler: untyped
+    @handler: ::BitClust::RackRequestHandler
 
-    def initialize: (?::Hash[untyped, untyped] webrick_conf) { () -> untyped } -> void
+    $bitclust_context_cache: ::BitClust::RackRequestHandler?
+
+    def initialize: (?::Hash[untyped, untyped] webrick_conf) { () -> (::BitClust::RackRequestHandler | ::BitClust::RequestHandler) } -> void
 
     # for WEBrick servlet
-    def get_instance: (untyped server) -> untyped
+    def get_instance: (untyped server) -> WEBrickServlet
 
-    def main: () -> untyped
+    def main: () -> void
 
     # for rack
-    def call: (untyped env) -> untyped
+    def call: (Rack::env env) -> Rack::response
 
     private
 
-    def fastcgi?: () -> untyped
+    def fastcgi?: () -> bool?
 
     def mod_ruby?: () -> false
 

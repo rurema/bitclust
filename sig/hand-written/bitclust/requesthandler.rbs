@@ -11,7 +11,7 @@ module BitClust
 
     def initialize: (untyped db, untyped manager) -> void
 
-    def handle: (untyped webrick_req) -> untyped
+    def handle: (Request webrick_req) -> Response
 
     private
 
@@ -43,7 +43,7 @@ module BitClust
   end
 
   class RackRequestHandler < RequestHandler
-    def handle: (untyped rack_req) -> untyped
+    def handle: (Rack::Request rack_req) -> Response
   end
 
   class Request
@@ -113,6 +113,6 @@ module BitClust
 
     def update: (untyped webrick_res) -> untyped
 
-    def rack_finish: () -> ::Array[untyped | { "Content-Type" => untyped } | ::Array[untyped]]
+    def rack_finish: () -> Rack::response
   end
 end
