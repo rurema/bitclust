@@ -22,18 +22,13 @@ module BitClust
 
           attr_reader contents: Array[Content]
 
-          # method_missing での共通化用
-          interface _Content
-            def []: (Integer index) -> Content
+          def []: (Integer index) -> Content
 
-            def <<: (Content content) -> Array[Content]
+          def <<: (Content content) -> Array[Content]
 
-            def <=>: (Content other) -> (-1 | 0 | 1)
+          def <=>: (Content other) -> (-1 | 0 | 1)
 
-            def to_html: () -> String
-          end
-
-          include _Content
+          def to_html: () -> String
         end
 
         @name: String
@@ -43,7 +38,13 @@ module BitClust
         def initialize: (String name, ?String? local) -> void
 
         def method_missing: (untyped name, *untyped args) { (?) -> untyped } -> untyped
-        include Content::_Content
+
+        # 以下は Content の型をコピー
+
+        def []: (Integer index) -> Content
+        def <<: (Content content) -> Array[Content]
+        def <=>: (Content other) -> (-1 | 0 | 1)
+        def to_html: () -> String
       end
 
       class URLMapperEx < URLMapper
