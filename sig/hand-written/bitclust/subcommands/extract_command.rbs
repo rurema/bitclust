@@ -1,0 +1,13 @@
+module BitClust
+  module Subcommands
+    class ExtractCommand < Subcommand
+      @check_only: true?
+
+      def initialize: () -> void
+
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+
+      def show_library: (LibraryEntry lib) -> void
+    end
+  end
+end
