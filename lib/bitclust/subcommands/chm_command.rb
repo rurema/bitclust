@@ -250,8 +250,10 @@ EOS
         e = entry.is_a?(Array) ? entry.sort.first : entry
         path = case e.type_id
                when :library, :class, :doc
-                 outputdir + e.type_id.to_s + (NameUtils.encodename_fs(e.name) + '.html')
+                # @type var e: LibraryEntry | ClassEntry | DocEntry
+                outputdir + e.type_id.to_s + (NameUtils.encodename_fs(e.name) + '.html')
                when :method
+                # @type var e: MethodEntry
                  outputdir + e.type_id.to_s + NameUtils.encodename_fs(e.klass.name) +
                    e.typechar + (NameUtils.encodename_fs(e.name) + '.html')
                else

@@ -9,62 +9,66 @@ module BitClust
 
       class Sitemap
         class Content
-          include Enumerable[untyped]
-          def each: () { (untyped) -> untyped } -> untyped
-
-          @name: untyped
-
-          @local: untyped
-
-          @contents: untyped
+          include Enumerable[Content]
+          def each: () { (Content) -> untyped } -> untyped
 
           include ERB::Util
 
-          def initialize: (untyped name, ?untyped? local) -> void
+          def initialize: (String name, ?String? local) -> void
 
-          attr_reader name: untyped
+          attr_reader name: String
 
-          attr_reader local: untyped
+          attr_reader local: String?
 
-          attr_reader contents: untyped
+          attr_reader contents: Array[Content]
 
-          def []: (untyped index) -> untyped
+          # method_missing での共通化用
+          interface _Content
+            def []: (Integer index) -> Content
 
-          def <<: (untyped content) -> untyped
+            def <<: (Content content) -> Array[Content]
 
-          def <=>: (untyped other) -> untyped
+            def <=>: (Content other) -> (-1 | 0 | 1)
 
-          def to_html: () -> untyped
+            def to_html: () -> String
+          end
+
+          include _Content
         end
-        @name: untyped
 
-        @contents: untyped
+        @name: String
 
-        def initialize: (untyped name, ?untyped? local) -> void
+        @contents: Content
+
+        def initialize: (String name, ?String? local) -> void
 
         def method_missing: (untyped name, *untyped args) { (?) -> untyped } -> untyped
+        include Content::_Content
       end
 
       class URLMapperEx < URLMapper
-        def library_url: (untyped name) -> ("/library/index.html" | ::String)
+        def library_url: (String name) -> String
 
-        def class_url: (untyped name) -> ::String
+        def class_url: (String name) -> String
 
-        def method_url: (untyped spec) -> ::String
+        def method_url: (String spec) -> String
 
-        def document_url: (untyped name) -> ::String
+        def document_url: (String name) -> String
       end
 
-      FIX_UNDEF: { "¥" => "\\", "·" => ::String, "̈" => ::String, "—" => ::String, "−" => ::String, "〜" => ::String }
-      @sitemap: untyped
+      FIX_UNDEF: Hash[String, String]
 
-      @stdlibs: untyped
+      @sitemap: Hash[Symbol, Sitemap]
 
-      @index_contents: untyped
+      @stdlibs: Hash[String, Sitemap::Content]
+
+      @index_contents: Array[Sitemap::Content]
 
       @html_files: untyped
 
-      @manager_config: untyped
+      @manager_config: Hash[Symbol, untyped]
+
+      @outputdir: Pathname
 
       def initialize: () -> void
 
@@ -72,11 +76,11 @@ module BitClust
 
       private
 
-      def create_manager_config: () -> untyped
+      def create_manager_config: () -> void
 
-      def create_html_file: (untyped entry, untyped manager, untyped outputdir, untyped db) -> untyped
+      def create_html_file: (Entry entry, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> String
 
-      def create_file: (untyped path, untyped skel) -> untyped
+      def create_file: (Pathname path, String skel) -> void
     end
   end
 end
