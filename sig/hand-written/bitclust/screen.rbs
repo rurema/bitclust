@@ -10,7 +10,7 @@ module BitClust
 
     public
 
-    def entry_screen: (untyped entry, untyped opt) -> Screen
+    def entry_screen: (Entry | Array[Entry] entry, Hash[Symbol, untyped] opt) -> Screen
 
     def library_index_screen: (untyped libs, untyped opt) -> LibraryIndexScreen
 
@@ -109,9 +109,12 @@ module BitClust
   end
 
   class Screen
-    def self.for_entry: (Entry | Array[Entry] entry) -> untyped
+    def self.for_entry: (Entry | Array[Entry] entry) -> singleton(Screen)
 
     def status: () -> nil
+
+    # TemplateScreen 以外にはある。
+    def body: () -> String
   end
 
   class ErrorScreen < Screen
@@ -158,6 +161,9 @@ module BitClust
     include Translatable
 
     include HTMLUtils
+
+    # この階層では定義されていないので undef の代わりに bot にしておく。
+    def body: () -> bot
 
     def initialize: (Hash[Symbol, untyped] h) -> void
 
