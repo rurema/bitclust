@@ -13,7 +13,7 @@ module BitClust
     # Redirect from '/' to "#{viewpath}/"
     @index: untyped
 
-    def initialize: (untyped options) -> void
+    def initialize: (Hash[Symbol, untyped] options) -> void
 
     attr_reader interfaces: untyped
 

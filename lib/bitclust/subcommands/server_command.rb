@@ -107,11 +107,11 @@ module BitClust
           exit 1
         end
         if @pid_file
-          if File.exist?(@pid_file)
+          if File.exist?(@pid_file || raise)
             $stderr.puts "There is still #{@pid_file}.  Is another process running?"
             exit 1
           end
-          @pid_file = File.expand_path(@pid_file)
+          @pid_file = File.expand_path(@pid_file || raise)
         end
       end
 
@@ -133,7 +133,7 @@ module BitClust
           @params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::INFO)
           @params[:AccessLog] = []
         end
-        basepath = URI.parse(@baseurl).path or raise
+        basepath = URI.parse(@baseurl || raise).path or raise
         server = WEBrick::HTTPServer.new(@params)
 
         if @autop
@@ -178,11 +178,11 @@ module BitClust
             Signal.trap(:TERM) {
               server.shutdown
               begin
-                File.unlink @pid_file if @pid_file
+                File.unlink @pid_file || raise if @pid_file
               rescue Errno::ENOENT
               end
             }
-            File.open(@pid_file, 'w') {|f| f.write Process.pid } if @pid_file
+            File.open(@pid_file || raise, 'w') {|f| f.write Process.pid } if @pid_file
           end
         end
         exit if $".include?("exerb/mkexy.rb")
