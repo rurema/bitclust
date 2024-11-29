@@ -19,7 +19,7 @@ module BitClust
 
       private
 
-      def lookup: (Array[FunctionEntry] | LibraryEntry lib, String key) -> (FunctionEntry | ClassEntry | Array[MethodEntry])
+      def lookup: (Array[FunctionEntry] | LibraryEntry lib, String key) -> (FunctionEntry | ClassEntry | Array[MethodEntry] | bot)
     end
   end
 end

@@ -86,8 +86,12 @@ module BitClust
       def lookup(lib, key)
         case
         when @capi && NameUtils.functionname?(key)
-          lib.find {|func| func.name == key}
+          # @type var lib: Array[FunctionEntry]
+          lib.is_a?(Array) or raise
+          lib.find {|func| func.name == key} or raise
         when NameUtils.method_spec?(key)
+          # @type var lib: LibraryEntry
+          lib.is_a?(LibraryEntry) or raise
           spec = MethodSpec.parse(key)
           if spec.constant?
             begin
@@ -99,6 +103,8 @@ module BitClust
             lib.fetch_methods(spec)
           end
         when NameUtils.classname?(key)
+          # @type var lib: LibraryEntry
+          lib.is_a?(LibraryEntry) or raise
           lib.fetch_class(key)
         else
           raise InvalidKey, "wrong search key: #{key.inspect}"
