@@ -209,7 +209,7 @@ module BitClust
       end
 
       def load_config_file
-        home_directory = Pathname(ENV['HOME'])
+        home_directory = Pathname(ENV.fetch('HOME'))
         config_path = home_directory + ".bitclust/config"
         if config_path.exist?
           config = YAML.load_file(config_path)

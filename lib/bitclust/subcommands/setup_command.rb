@@ -60,7 +60,7 @@ module BitClust
       private
 
       def purge
-        home_directory = Pathname(ENV["HOME"])
+        home_directory = Pathname(ENV.fetch("HOME"))
         config_dir = home_directory + ".bitclust"
         print "Remove all generated files..."
         FileUtils.rm_rf(config_dir.to_s)
@@ -69,7 +69,7 @@ module BitClust
       end
 
       def prepare
-        home_directory = Pathname(ENV["HOME"]).expand_path
+        home_directory = Pathname(ENV.fetch("HOME")).expand_path
         config_dir = home_directory + ".bitclust"
         config_dir.mkpath
         config_path = config_dir + "config"
