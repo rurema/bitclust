@@ -111,7 +111,7 @@ module BitClust
       end
     end
 
-    def get_instance(server)
+    def get_instance(_server, *_)
       self
     end
 

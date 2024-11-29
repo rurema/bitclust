@@ -133,7 +133,7 @@ module BitClust
           @params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::INFO)
           @params[:AccessLog] = []
         end
-        basepath = URI.parse(@baseurl).path
+        basepath = URI.parse(@baseurl).path or raise
         server = WEBrick::HTTPServer.new(@params)
 
         if @autop
@@ -172,10 +172,10 @@ module BitClust
         server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, @themedir
 
         if @debugp
-          trap(:INT) { server.shutdown }
+          Signal.trap(:INT) { server.shutdown }
         else
           WEBrick::Daemon.start do
-            trap(:TERM) {
+            Signal.trap(:TERM) {
               server.shutdown
               begin
                 File.unlink @pid_file if @pid_file

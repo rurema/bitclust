@@ -21,9 +21,9 @@ module BitClust
 
     def index: (untyped req) -> untyped
 
-    def get_instance: (untyped server) -> self
+    def get_instance: (WEBrick::HTTPServer server, *untyped) -> self
 
-    def service: (untyped req, untyped res) -> untyped
+    def service: (WEBrick::HTTPRequest req, WEBrick::HTTPResponse res) -> void
 
     def call: (untyped env) -> ::Array[200 | { "Content-Type" => "text/html; charset=utf-8" } | ::Array[untyped]]
   end
