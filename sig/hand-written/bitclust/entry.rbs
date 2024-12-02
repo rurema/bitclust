@@ -1,5 +1,7 @@
 module BitClust
   class Entry
+    include NameUtils
+
     interface _PersistentProperties
       def init_properties: () -> void
       def clear: () -> void
@@ -22,6 +24,8 @@ module BitClust
       def deserializer: () -> (String | bot)
       def serializer: () -> (String | bot)
     end
+
+    alias self.load self.new
 
     def initialize: (MethodDatabase db) -> void
     @db: MethodDatabase
