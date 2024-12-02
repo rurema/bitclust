@@ -2,6 +2,7 @@ module BitClust
   class Subcommand
     @parser: OptionParser
 
+    # capi オプションが指定されたときだけ FunctionDatabase
     @db: FunctionDatabase | MethodDatabase
 
     def initialize: () -> void
