@@ -89,7 +89,7 @@ module BitClust
           @config = YAML.load_file(config_path)
           unless @config[:versions].sort == @versions.sort
             print("overwrite config file? > [y/N]")
-            if /\Ay\z/i =~ $stdin.gets.chomp
+            if /\Ay\z/i =~ $stdin.gets&.chomp
               @config[:versions] = @versions
               @config[:default_version] = @versions.max
               generate_config(config_path, @config)

@@ -62,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 5fcf7d45b7c430a651c5996280d9991c781fcf14
+    revision: 0a6ea105a0afc7eaee4494585a7775f47eea6145
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -70,7 +70,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 5fcf7d45b7c430a651c5996280d9991c781fcf14
+    revision: 0a6ea105a0afc7eaee4494585a7775f47eea6145
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
@@ -102,7 +102,7 @@ gems:
   source:
     type: stdlib
 - name: webrick
-  version: 1.9.0
+  version: 1.9.1
   source:
     type: rubygems
 - name: yaml
