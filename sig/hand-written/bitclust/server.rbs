@@ -1,8 +1,29 @@
 module BitClust
   class Server
-    def initialize: (MethodDatabase db) -> void
     @db: MethodDatabase
+
+    def initialize: (MethodDatabase db) -> void
 
     def listen: (String url, ?bool foreground) -> Thread
   end
+
+  class Database
+    include DRb::DRbUndumped
+  end
+
+  class Entry
+    include DRb::DRbUndumped
+  end
+
+  class SearchResult
+    include DRb::DRbUndumped
+  end
+end
+
+class Object
+  def _remote_object?: () -> false
+end
+
+class DRb::DRbObject
+  def _remote_object?: () -> true
 end
