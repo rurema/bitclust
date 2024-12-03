@@ -21,11 +21,14 @@ module BitClust
 
       def exec(argv, options)
         prefix = options[:prefix]
-        db = MethodDatabase.new(prefix)
+        db = MethodDatabase.new(prefix || raise)
         db.init
         db.transaction {
           argv.each do |kv|
             k, v = kv.split('=', 2)
+            if k.nil? || v.nil?
+              raise "argument must be KEY=VALUE, but #{kv.inspect}"
+            end
             db.propset k, v
           end
         }
