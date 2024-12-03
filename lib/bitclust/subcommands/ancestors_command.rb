@@ -47,8 +47,8 @@ Options:
 
       def exec(argv, options)
         classname = argv[0]
-        db = MethodDatabase.new(@prefix)
-        ruby = get_ruby(@version)
+        db = MethodDatabase.new(@prefix || raise)
+        ruby = get_ruby(@version) || raise
         if classname && !@all
           check_ancestors(db, ruby, @requires, classname)
         else
