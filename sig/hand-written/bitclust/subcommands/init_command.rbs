@@ -3,9 +3,9 @@ module BitClust
     class InitCommand < Subcommand
       def initialize: () -> void
 
-      STANDARD_PROPERTIES: ::Array["encoding" | "version"]
+      STANDARD_PROPERTIES: Array[String]
 
-      def exec: (untyped argv, untyped options) -> untyped
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
     end
   end
 end
