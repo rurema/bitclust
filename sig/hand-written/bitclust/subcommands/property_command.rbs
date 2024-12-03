@@ -5,9 +5,9 @@ module BitClust
 
       def initialize: () -> void
 
-      def parse: (untyped argv) -> untyped
+      def parse: (Array[String] argv) -> void
 
-      def exec: (untyped argv, untyped options) -> untyped
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
     end
   end
 end
