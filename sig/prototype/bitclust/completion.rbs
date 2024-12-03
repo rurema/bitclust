@@ -98,42 +98,6 @@ module BitClust
   # Represents result of completion search.
   # Has many SearchResult::Record.
   class SearchResult
-    @database: untyped
-
-    @pattern: untyped
-
-    @classes: untyped
-
-    @records: untyped
-
-    def self.empty: (untyped db, untyped pattern) -> untyped
-
-    def initialize: (untyped db, untyped pattern, untyped classes, untyped records) -> void
-
-    attr_reader database: untyped
-
-    attr_reader pattern: untyped
-
-    attr_reader classes: untyped
-
-    attr_reader records: untyped
-
-    def inspect: () -> ::String
-
-    def fail?: () -> untyped
-
-    def success?: () -> untyped
-
-    def determined?: () -> untyped
-
-    def name: () -> untyped
-
-    def names: () -> untyped
-
-    def record: () -> untyped
-
-    def each_record: () { (?) -> untyped } -> untyped
-
     # Wraps an Entry.
     class Record
       @db: untyped
@@ -184,5 +148,40 @@ module BitClust
 
       def inherited_method?: () -> untyped
     end
+    @database: untyped
+
+    @pattern: untyped
+
+    @classes: untyped
+
+    @records: untyped
+
+    def self.empty: (untyped db, untyped pattern) -> untyped
+
+    def initialize: (untyped db, untyped pattern, untyped classes, untyped records) -> void
+
+    attr_reader database: untyped
+
+    attr_reader pattern: untyped
+
+    attr_reader classes: untyped
+
+    attr_reader records: untyped
+
+    def inspect: () -> ::String
+
+    def fail?: () -> untyped
+
+    def success?: () -> untyped
+
+    def determined?: () -> untyped
+
+    def name: () -> untyped
+
+    def names: () -> untyped
+
+    def record: () -> untyped
+
+    def each_record: () { (?) -> untyped } -> untyped
   end
 end
