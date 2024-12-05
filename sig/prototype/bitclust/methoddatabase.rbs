@@ -1,6 +1,0 @@
-module BitClust
-  # Database for Ruby entries (library, class, method).
-  class MethodDatabase < Database
-    @in_transaction: untyped
-  end
-end

@@ -9,6 +9,7 @@ module BitClust
     @librarymap: Hash[String, LibraryEntry]?
     @classmap: Hash[String, ClassEntry]
     @class_extent_loaded: bool
+    @in_transaction: bool
     @dirty_libraries: Hash[LibraryEntry, TrueClass]
     @dirty_classes: Hash[ClassEntry, TrueClass]
     @dirty_methods: Hash[MethodEntry, TrueClass]
