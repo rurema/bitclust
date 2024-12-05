@@ -8,6 +8,8 @@ module BitClust
 
     def ==: (untyped other) -> bool
 
+    alias eql? ==
+
     def hash: () -> ::Integer
 
     def <=>: (untyped other) -> ::Integer?
@@ -42,9 +44,15 @@ module BitClust
     def source: () ->          String
     def source_location: () -> Location
 
+    def inspect: () -> String
+
     def spec: () -> MethodSpec
 
     def spec_string: () -> String
+
+    def label: () -> String
+
+    def short_label: () -> String
 
     def index_id: () -> String
 
