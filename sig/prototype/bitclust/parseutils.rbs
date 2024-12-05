@@ -1,9 +1,0 @@
-module BitClust
-  # Encapsulates :file and :line.
-  # Used by LineStream(above)
-  class Location
-    def to_s: () -> ::String
-
-    def inspect: () -> ::String
-  end
-end

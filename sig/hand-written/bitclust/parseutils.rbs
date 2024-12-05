@@ -21,6 +21,10 @@ module BitClust
     attr_reader file: (String? | Pathname)
 
     attr_reader line: Integer
+
+    def to_s: () -> String
+
+    def inspect: () -> String
   end
 
   module ParseUtils
