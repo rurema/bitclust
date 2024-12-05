@@ -26,6 +26,7 @@ module BitClust
       buf&.each_line{|l|
         if /((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+)\n/ =~ l
           type, id, linkid, desc = [$1, $2, $3, $4].map{|e| e&.gsub(/\\(.)/){|s| $1 == ',' ? ',' : s } }
+          type || raise; id || raise; linkid || raise; desc || raise
           refs[type, id, linkid] = desc
         end
       }
@@ -67,7 +68,7 @@ module BitClust
       entry.source.each_line{|l|
         if /\A={1,6}\[a:(\w+)\] *(.*)/ =~ l
           entry.labels.each{|name|
-            self[entry.class.type_id, name, $1] = $2
+            self[entry.class.type_id, name, $1 || raise] = $2 || raise
           }
         end
       }

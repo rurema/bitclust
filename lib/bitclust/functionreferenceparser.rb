@@ -59,9 +59,9 @@ module BitClust
         f.private = h.private
         f.type = h.type
         f.name = h.name
-        f.params = h.params
+        f.params = h.params || raise
         f.source = body.join('')
-        f.source_location = body[0]&.location&.tap {|loc| break Location.new(@path, loc.line - 1) }
+        f.source_location = body[0]&.location&.tap {|loc| break Location.new(@path, loc.line - 1) } || raise
       }
     end
 
@@ -71,9 +71,9 @@ module BitClust
       raise ParseError, "syntax error: #{header.inspect}" unless m
       h.macro = m[1] ? true : false
       h.private = m[2] ? true : false
-      h.type = m[3].strip
-      h.name = m[4]
-      h.params = m[5].strip if m[5]
+      h.type = m[3]&.strip || raise
+      h.name = m[4] || raise
+      h.params = m[5]&.strip if m[5]
       h
     end
 

@@ -107,7 +107,7 @@ module BitClust
       d = @db.fetch_doc(req.doc_name || 'index' )
       @screenmanager.doc_screen(d, @conf).response
     end
-    
+
     def handle_function(req)
       return function_index() unless req.function_name
       f = @cdb.fetch_function(req.function_name)

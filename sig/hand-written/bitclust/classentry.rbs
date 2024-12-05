@@ -29,17 +29,18 @@ module BitClust
 
     def labels: () -> Array[String]
 
-    def type: () ->       Symbol
-    def superclass: () -> ClassEntry
-    def included: () ->   Array[ClassEntry]
-    def extended: () ->   Array[ClassEntry]
-    def dynamically_included: () -> Array[ClassEntry]
-    def dynamically_extended: () -> Array[ClassEntry]
-    def library: () ->    LibraryEntry
-    def aliases: () ->    Array[ClassEntry]
-    def aliasof: () ->    ClassEntry
-    def source: () ->     String
-    def source_location: () -> Location
+    attr_accessor type: Symbol #  :class | :module | :object
+    attr_accessor superclass: ClassEntry
+    attr_accessor included: Array[ClassEntry]
+    attr_accessor extended: Array[ClassEntry]
+    attr_accessor dynamically_included: Array[ClassEntry]
+    attr_accessor dynamically_extended: Array[ClassEntry]
+    attr_accessor library: LibraryEntry
+    attr_accessor aliases: Array[ClassEntry]
+    attr_accessor aliasof: ClassEntry
+    attr_accessor source: String
+    attr_accessor source_location: Location
+
     def orig_superclass: () -> ClassEntry
 
     def save: () -> void
