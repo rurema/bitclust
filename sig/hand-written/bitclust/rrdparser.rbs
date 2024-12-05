@@ -1,5 +1,7 @@
 module BitClust
   class RRDParser
+    include NameUtils
+    include ParseUtils
 
     def self.parse_stdlib_file: (String path, ?::Hash[String, String] params) -> LibraryEntry
 
@@ -55,9 +57,15 @@ module BitClust
 
     def check_chunk_signatures: (Array[Signature] sigs, String line) -> Signature
 
+    SIGNATURE: ::Regexp
+
+    GVAR: ::Regexp
+
     def method_signature: (String line) -> Signature
 
     class Context
+      include NameUtils
+
       def initialize: (MethodDatabase db, untyped libname) -> void
 
       @db: MethodDatabase
@@ -127,12 +135,16 @@ module BitClust
 
       attr_reader source: String
 
+      def inspect: () -> String
+
       def alias?: (Chunk other) -> bool
 
       def unify: (Chunk other) -> void
     end
 
     class Signature
+      include NameUtils
+
       def initialize: (String? c, NameUtils::typemark? t, String? m) -> void
 
       attr_reader klass: String?
@@ -140,6 +152,10 @@ module BitClust
       attr_reader type: NameUtils::typemark?
 
       attr_reader name: String?
+
+      def inspect: () -> String
+
+      def to_s: () -> String
 
       def typename: () -> NameUtils::typename
 
