@@ -1,5 +1,25 @@
 module BitClust
   module NameUtils
+    LIBNAME_RE: ::Regexp
+
+    CONST_RE: ::Regexp
+
+    CONST_PATH_RE: ::Regexp
+
+    CLASS_NAME_RE: ::Regexp
+
+    CLASS_PATH_RE: ::Regexp
+
+    METHOD_NAME_RE: ::Regexp
+
+    TYPEMARK_RE: ::Regexp
+
+    METHOD_SPEC_RE: ::Regexp
+
+    GVAR_RE: ::Regexp
+
+    MID: ::Regexp
+
     def self?.libname?: (String str) -> bool
 
     def self?.libname2id: (String name) -> String
@@ -37,6 +57,10 @@ module BitClust
     def self?.methodname?: (String str) -> bool
 
     def self?.build_method_id: (String libid, String cid, typename t, String name) -> ::String
+
+    # @@split_method_id: Hash[String, [String, typechar, String, String]] にしたいが *spilt の型がうまくいかないため、
+    # untyped にしておく。
+    @@split_method_id: Hash[String, untyped]
 
     def self?.split_method_id: (String id) -> [String, typechar, String, String]
 
