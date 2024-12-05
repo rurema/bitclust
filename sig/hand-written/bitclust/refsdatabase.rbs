@@ -1,0 +1,21 @@
+module BitClust
+  # Corresponds to db-x.y.z/refs file.
+  class RefsDatabase
+
+    type type_id = :class | :doc | :library | :method
+
+    @h: Hash[[String, String, String], String]
+
+    def self.load: (Object & (_ToStr | _ToIO | _Reader) src) -> instance
+
+    def initialize: () -> void
+
+    def []=: (type_id | String type, String mid, String linkid, String desc) -> String
+
+    def []: (type_id | String type, String mid, String linkid) -> String
+
+    def save: (Object & (_ToStr | _ToIO | _Writer) s) -> untyped
+
+    def extract: (ClassEntry | LibraryEntry | MethodEntry | DocEntry entry) -> void
+  end
+end
