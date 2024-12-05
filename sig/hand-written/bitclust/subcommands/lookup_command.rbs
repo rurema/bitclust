@@ -1,0 +1,27 @@
+module BitClust
+  module Subcommands
+    class LookupCommand < Subcommand
+      @format: (:text | :html)
+
+      @type: (nil | :library | :class | :method | :function)
+
+      @key: String?
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+
+      def fetch_entry: (FunctionDatabase | MethodDatabase db, (nil | :library | :class | :method | :function) type, String key) -> Entry
+
+      def fill_template: (String template, Entry entry) -> String
+
+      def get_template: ((:library | :class | :method | :function) type, (:text | :html) format) -> String
+
+      TEMPLATE: Hash[(:library | :class | :method | :function), Hash[(:text | :html), String]]
+
+      def compile_rd: (String src) -> String
+    end
+  end
+end
