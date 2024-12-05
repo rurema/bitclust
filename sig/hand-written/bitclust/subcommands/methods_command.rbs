@@ -21,7 +21,7 @@ module BitClust
 
       def parse: (Array[String] argv) -> void
 
-      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+      def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
 
       def expand_mf: (String n) -> ([String, String] | String)
 

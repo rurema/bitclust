@@ -1,0 +1,39 @@
+module BitClust
+  # Body of bin/bitclust.
+  class Runner
+    @prefix: String?
+
+    @version: String?
+
+    @capi: bool
+
+    @parser: OptionParser
+
+
+    interface _Subcommand
+      def parse: (Array[String] argv) -> void
+
+      def help: () -> String
+
+      def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
+    end
+
+    @subcommands: Hash[String, _Subcommand]
+
+    def initialize: () -> void
+
+    def run: (Array[String] argv) -> untyped
+
+    def prepare: () -> untyped
+
+    def _run: (Array[String] argv) -> untyped
+
+    def load_config: () -> Hash[Symbol, untyped]?
+
+    def error: (untyped message) -> untyped
+  end
+end
+
+class Object
+  def libdir: () -> Pathname
+end

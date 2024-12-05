@@ -5,7 +5,7 @@ module BitClust
 
       def initialize: () -> void
 
-      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+      def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
 
       def show_library: (LibraryEntry lib) -> void
     end
