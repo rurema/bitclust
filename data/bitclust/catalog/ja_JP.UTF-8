@@ -114,3 +114,7 @@ module %s
 %sモジュール
 object %s
 %sオブジェクト
+This reference manual is for a version of Ruby that is no longer maintained.
+このマニュアルは既にメンテナンスが終了したバージョンの Ruby を対象としています。
+Latest version
+最新版URL

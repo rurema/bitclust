@@ -406,6 +406,17 @@ hr {
  right: 10px;
 }
 
+.eol-warning {
+    background-color: #aa3333;
+    color: white;
+    padding: 0.4em;
+}
+
+.eol-warning a {
+    color: white;
+    text-decoration: underline;
+}
+
 @media only screen and (max-width:425px) {
     table.entries tr {
         display: block;
