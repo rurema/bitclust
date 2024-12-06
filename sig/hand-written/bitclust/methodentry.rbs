@@ -40,7 +40,7 @@ module BitClust
 
     attr_accessor names: Array[String]
     attr_accessor visibility: (:public | :private | :protected)
-    attr_accessor kind: (:defined | :added | :redefined)
+    attr_accessor kind: (:defined | :added | :redefined | :undefined)
     attr_accessor source: String
     attr_accessor source_location: Location
 

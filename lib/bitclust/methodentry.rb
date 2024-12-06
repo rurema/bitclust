@@ -98,7 +98,7 @@ module BitClust
     persistent_properties {
       property :names,           '[String]'
       property :visibility,      'Symbol'   ## :public | :private | :protected
-      property :kind,            'Symbol'   ## :defined | :added | :redefined
+      property :kind,            'Symbol'   ## :defined | :added | :redefined | :undefined
       property :source,          'String'
       property :source_location, 'Location'
     }

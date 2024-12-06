@@ -69,7 +69,7 @@ module BitClust
       def initialize: (MethodDatabase db, untyped libname) -> void
 
       @db: MethodDatabase
-      @kind: Symbol?
+      @kind: (:defined| :added | :redefined)
 
       attr_reader library: LibraryEntry
 
