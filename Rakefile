@@ -21,7 +21,7 @@ task :sig do
   sh 'rbs prototype rb --out-dir=sig/prototype lib'
   FileUtils.rm 'sig/prototype/bitclust/compat.rbs'
   sh 'rbs subtract --write sig/prototype sig/hand-written'
-  sh 'steep validate'
+  sh 'rbs validate'
 end
 
 namespace :rbs do
