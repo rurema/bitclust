@@ -170,6 +170,7 @@ EOS
         manager = ScreenManager.new(@manager_config)
         @html_files = []
         db.transaction do
+          # @type var methods: Hash[String, Array[MethodEntry]]
           methods = {}
           db.methods.each do |entry|
             method_name = entry.klass.name + entry.typemark + entry.name
@@ -184,6 +185,7 @@ EOS
             e = c.is_a?(Array) ? c.sort.first : c
             case e.type_id
             when :library
+              # @type var e: LibraryEntry
               content = Sitemap::Content.new(e.name.to_s, filename)
               if e.name.to_s != '_builtin'
                 @sitemap[:library][1] << content
@@ -191,6 +193,7 @@ EOS
               end
               @index_contents << Sitemap::Content.new(e.name.to_s, filename)
             when :class
+              # @type var e: ClassEntry
               content = Sitemap::Content.new(e.name.to_s, filename)
               if e.library.name.to_s == '_builtin'
                 @sitemap[:library][0] << content
@@ -199,6 +202,7 @@ EOS
               end
               @index_contents << Sitemap::Content.new("#{e.name} (#{e.library.name})", filename)
             when :method
+              # @type var e: MethodEntry
               e.names.each do |e_name|
                 name = e.typename == :special_variable ? "$#{e_name}" : e_name
                 @index_contents <<

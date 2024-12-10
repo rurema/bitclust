@@ -83,6 +83,7 @@ Options:
         rescue ClassNotFound => ex
           $stderr.puts ex.backtrace
           $stderr.puts "class not found in database : #{classname}"
+          # @type var b: Array[String]
           b = []
         end
         unless a.to_set == b.to_set
@@ -95,6 +96,7 @@ Options:
       end
 
       def check_all_ancestors(db, ruby, requires)
+        # @type var classnames: Array[String]
         classnames = []
         requires.each do |lib|
           classnames.push(*defined_classes(ruby, lib, []))

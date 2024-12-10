@@ -79,7 +79,7 @@ module BitClust
 
       def create_manager_config: () -> void
 
-      def create_html_file: (Entry entry, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> String
+      def create_html_file: (LibraryEntry | ClassEntry | DocEntry | Array[MethodEntry] entry, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> String
 
       def create_file: (Pathname path, String skel) -> void
     end
