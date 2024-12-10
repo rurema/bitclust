@@ -217,8 +217,10 @@ module BitClust
           [ myself, included().map {|m| m.ancestors },
             ancestors ].flatten
         else
+          # steep:ignore:start
           [ self, included().map {|m| m.ancestors },
             superclass() ? superclass().ancestors : [] ].flatten
+          # steep:ignore:end
         end
     end
 
@@ -299,7 +301,9 @@ module BitClust
           undefined.push m
         end
       end
+      # steep:ignore:start
       Parts.new(s,spv, i,ipv,ipt, mf, c, v, added, undefined)
+      # steep:ignore:end
     end
 
     def singleton_methods(level = 0)
@@ -453,6 +457,7 @@ module BitClust
         return aliasof().__send__("_#{typechar}map").dup
       end
       s = superclass()
+      # @type var map: Hash[String, String]
       map = s ? s.__send__("_#{typechar}map").dup : {}
       inherited_modules.each do |mod|
         map.update mod.__send__("_#{typechar == 'c' ? 'c' : 'i'}map")
@@ -484,9 +489,11 @@ module BitClust
     def _index
       @_index ||=
           begin
+            # @type var h: Hash[String, String]
             h = {}
             @db.foreach_line("method/#{@id}/=index") do |line|
               name, spec = line.split
+              name || raise; spec || raise
               h[name] = spec
             end
             h
