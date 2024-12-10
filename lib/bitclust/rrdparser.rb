@@ -256,7 +256,7 @@ module BitClust
 
     def read_chunks(f)
       f.skip_blank_lines
-      result = []
+      result = [] #: Array[Chunk]
       f.while_match(/\A---/) do |line|
         f.ungets line
         result.push read_chunk(f)

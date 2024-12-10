@@ -172,7 +172,7 @@ module BitClust
       # @type var ms: Array[MethodEntry]
       ms = if c = get_class(spec.klass)
            then c.fetch_methods(spec)
-           else []
+           else [] #: Array[MethodEntry]
            end +
            methods().select {|m| spec.match?(m) }
       if ms.empty?

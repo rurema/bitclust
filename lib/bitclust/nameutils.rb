@@ -125,7 +125,7 @@ module BitClust
       "#{cid}/#{typename2char(t)}.#{encodename_url(name)}.#{libid}"
     end
 
-    @@split_method_id = {}
+    @@split_method_id = {} #: Hash[String, untyped]
 
     # private module function
     def split_method_id(id)
