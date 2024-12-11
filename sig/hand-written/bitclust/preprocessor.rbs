@@ -30,7 +30,7 @@ module BitClust
 
     def self.process: (untyped path, ?::Hash[untyped, untyped] params) -> Array[String]
 
-    def self.wrap: (untyped f, ?::Hash[untyped, untyped] params) -> instance
+    def self.wrap: (File f, ?::Hash[untyped, untyped] params) -> instance
 
     def path: () -> String?
 

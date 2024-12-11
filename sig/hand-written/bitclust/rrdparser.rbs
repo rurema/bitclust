@@ -19,7 +19,7 @@ module BitClust
 
     def parse_file: (String path, String libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
 
-    def parse: (untyped f, untyped libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
+    def parse: (File f, String libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
 
     private
 
@@ -66,18 +66,19 @@ module BitClust
     class Context
       include NameUtils
 
-      def initialize: (MethodDatabase db, untyped libname) -> void
+      def initialize: (MethodDatabase db, String libname) -> void
 
       @db: MethodDatabase
       @kind: (:defined| :added | :redefined)
 
       attr_reader library: LibraryEntry
 
-      attr_reader klass: untyped
+      attr_reader klass: ClassEntry
 
       attr_accessor type: NameUtils::typename?
 
-      attr_accessor visibility: untyped
+      attr_reader visibility: (:public | :private | :protected)?
+      attr_writer visibility: Symbol?
 
       def categorize: (untyped category) -> untyped
 
