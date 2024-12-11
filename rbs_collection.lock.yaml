@@ -62,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 0a6ea105a0afc7eaee4494585a7775f47eea6145
+    revision: f4741eee0b2beeec437767c16d28b50ed7bd6fc8
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -70,7 +70,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 0a6ea105a0afc7eaee4494585a7775f47eea6145
+    revision: f4741eee0b2beeec437767c16d28b50ed7bd6fc8
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
@@ -82,6 +82,10 @@ gems:
   source:
     type: stdlib
 - name: socket
+  version: '0'
+  source:
+    type: stdlib
+- name: stringio
   version: '0'
   source:
     type: stdlib
