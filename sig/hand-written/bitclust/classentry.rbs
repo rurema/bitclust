@@ -30,7 +30,7 @@ module BitClust
     def labels: () -> Array[String]
 
     attr_accessor type: Symbol #  :class | :module | :object
-    attr_accessor superclass: ClassEntry
+    attr_accessor superclass: ClassEntry?
     attr_accessor included: Array[ClassEntry]
     attr_accessor extended: Array[ClassEntry]
     attr_accessor dynamically_included: Array[ClassEntry]
@@ -39,7 +39,7 @@ module BitClust
     attr_accessor aliases: Array[ClassEntry]
     attr_accessor aliasof: ClassEntry
     attr_accessor source: String
-    attr_accessor source_location: Location
+    attr_accessor source_location: Location?
 
     def orig_superclass: () -> ClassEntry
 

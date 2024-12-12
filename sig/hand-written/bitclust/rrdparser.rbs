@@ -73,58 +73,58 @@ module BitClust
 
       attr_reader library: LibraryEntry
 
-      attr_reader klass: ClassEntry
+      attr_reader klass: ClassEntry?
 
       attr_accessor type: NameUtils::typename?
 
       attr_reader visibility: (:public | :private | :protected)?
       attr_writer visibility: Symbol?
 
-      def categorize: (untyped category) -> untyped
+      def categorize: (String? category) -> void
 
-      def require: (untyped libname) -> untyped
+      def require: (String libname) -> void
 
-      def sublibrary: (untyped libname) -> untyped
+      def sublibrary: (String libname) -> void
 
-      def define_class: (untyped name, untyped supername, ?location: untyped?) -> untyped
+      def define_class: (String? name, String supername, ?location: Location?) -> void
 
-      def define_module: (untyped name, ?location: untyped?) -> untyped
+      def define_module: (String? name, ?location: Location?) -> void
 
-      def define_object: (untyped name, untyped singleton_object_class, ?location: untyped?) -> untyped
+      def define_object: (String? name, String? singleton_object_class, ?location: Location?) -> void
 
       private
 
-      def register_class: (untyped type, untyped name, untyped superclass, ?location: untyped?) -> untyped
+      def register_class: (Symbol type, String? name, ClassEntry? superclass, ?location: Location?) -> void
 
-      def clear_scope: () -> untyped
+      def clear_scope: () -> void
 
       public
 
-      def reopen_class: (untyped name) -> untyped
+      def reopen_class: (String? name) -> void
 
-      def redefine_class: (untyped name) -> untyped
+      def redefine_class: (String? name) -> void
 
-      def include: (untyped name) -> untyped
+      def include: (String name) -> void
 
-      def extend: (untyped name) -> untyped
+      def extend: (String name) -> void
 
-      def dynamic_include: (untyped name) -> untyped
+      def dynamic_include: (String name) -> void
 
-      def dynamic_extend: (untyped name) -> untyped
+      def dynamic_extend: (String name) -> void
 
-      def alias: (untyped name) -> untyped
+      def alias: (String name) -> void
 
-      def module_function: () -> untyped
+      def module_function: () -> void
 
-      def constant: () -> untyped
+      def constant: () -> void
 
-      def special_variable: () -> untyped
+      def special_variable: () -> void
 
-      def signature: () -> (nil | untyped)
+      def signature: () -> Signature?
 
-      def define_method: (untyped chunk) -> untyped
+      def define_method: (Chunk chunk) -> void
 
-      def method_id: (untyped chunk) -> untyped
+      def method_id: (Chunk chunk) -> MethodID
     end
 
     class Chunk

@@ -159,7 +159,7 @@ module BitClust
       read_extends f
       read_includes f
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
+      @context.klass&.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       read_level2_blocks f
     end
 
@@ -177,7 +177,7 @@ module BitClust
       f.skip_blank_lines
       read_extends f
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
+      @context.klass&.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       @context.visibility = :public
       @context.type = :singleton_method
       read_level2_blocks f
@@ -369,10 +369,13 @@ module BitClust
 
       def define_object(name, singleton_object_class, location: nil)
         singleton_object_class = @db.get_class(singleton_object_class) if singleton_object_class
+        # steep:ignore:start
         register_class :object, name, singleton_object_class, location: location
+        # steep:ignore:end
       end
 
       def register_class(type, name, superclass, location: nil)
+        name or raise
         @klass = @db.open_class(name) {|c|
           c.type = type
           c.superclass = superclass
@@ -404,30 +407,31 @@ module BitClust
       end
 
       def include(name)
-        @klass.include @db.get_class(name)
+        @klass&.include @db.get_class(name)
       end
 
       def extend(name)
-        @klass.extend @db.get_class(name)
+        @klass&.extend @db.get_class(name)
       end
 
       def dynamic_include(name)
-        @klass.dynamic_include(@db.get_class(name), @library)
+        @klass&.dynamic_include(@db.get_class(name), @library)
       end
 
       def dynamic_extend(name)
-        @klass.dynamic_extend(@db.get_class(name), @library)
+        @klass&.dynamic_extend(@db.get_class(name), @library)
       end
 
       # Add a alias +name+ to the alias list.
       def alias(name)
+        klass = @klass || raise
         @db.open_class(name) do |c|
-          c.type = @klass.type
+          c.type = klass.type
           c.library = @library
-          c.aliasof = @klass
-          c.source = "Alias of [[c:#{@klass.name}]]\n"
+          c.aliasof = klass
+          c.source = "Alias of [[c:#{klass.name}]]\n"
           @library.add_class c
-          @klass.alias c
+          klass.alias c
         end
       end
 
@@ -440,7 +444,7 @@ module BitClust
       end
 
       def special_variable
-        unless @klass and @klass.name == 'Kernel'
+        unless @klass and @klass&.name == 'Kernel'
           raise "must not happen: type=special_variable but class!=Kernel"
         end
         @type = :special_variable
@@ -448,7 +452,7 @@ module BitClust
 
       def signature
         return nil unless @klass
-        Signature.new(@klass.name, @type ? typename2mark(@type || raise) : nil, nil)
+        Signature.new(@klass&.name, @type ? typename2mark(@type || raise) : nil, nil)
       end
 
       def define_method(chunk)
@@ -456,7 +460,9 @@ module BitClust
         @db.open_method(id) {|m|
           m.names           = chunk.names.sort
           m.kind            = chunk.source.match?(/^@undef$/) ? :undefined : @kind
+          # steep:ignore:start
           m.visibility      = @visibility || :public
+          # steep:ignore:end
           m.source          = chunk.source
           m.source_location = chunk.source.location
           case @kind
@@ -469,7 +475,7 @@ module BitClust
       def method_id(chunk)
         id = MethodID.new
         id.library = @library
-        id.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : @klass
+        id.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : (@klass || raise)
         id.type    = chunk.signature.typename || @type
         id.name    = chunk.names.sort.first
         id

@@ -25,7 +25,7 @@ module BitClust
     attr_accessor source:   String
     attr_accessor sublibraries: Array[LibraryEntry]
     attr_accessor is_sublibrary: bool
-    attr_accessor category: String
+    attr_accessor category: String?
     attr_accessor source_location: Location
 
     def inspect: () -> ::String
