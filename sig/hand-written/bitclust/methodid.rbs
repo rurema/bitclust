@@ -9,6 +9,8 @@ module BitClust
     attr_accessor type: BitClust::NameUtils::typename
     attr_accessor name: String
 
+    def inspect: () -> String
+
     interface _MethodMatchable
       def library: () -> LibraryEntry
       def type: () -> BitClust::NameUtils::typename
@@ -16,6 +18,8 @@ module BitClust
     end
 
     def match?: (_MethodMatchable m) -> bool
+
+    alias typename type
 
     def typechar: () -> String
 
@@ -41,9 +45,15 @@ module BitClust
 
     attr_reader library: String?
 
+    def inspect: () -> ::String
+
+    def to_s: () -> ::String
+
     def display_name: () -> ::String
 
     def ==: (untyped other) -> bool
+
+    alias eql? ==
 
     def hash: () -> ::Integer
 
@@ -79,6 +89,8 @@ module BitClust
     attr_reader method: String?
 
     attr_reader library: String?
+
+    def inspect: () -> ::String
 
     # unused?
     @crecache: Array[untyped]
