@@ -136,7 +136,7 @@ module BitClust
     end
 
     def load_properties(rel)
-      h = {}
+      h = {} #: Hash[String, String?]
       fopen(realpath(rel), 'r:UTF-8') {|f|
         while line = f.gets
           k, v = line.strip.split('=', 2)
