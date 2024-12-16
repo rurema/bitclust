@@ -59,9 +59,9 @@ module BitClust
         f.private = h.private
         f.type = h.type
         f.name = h.name
-        f.params = h.params || raise
+        f.params = h.params
         f.source = body.join('')
-        f.source_location = body[0]&.location&.tap {|loc| break Location.new(@path, loc.line - 1) } || raise
+        f.source_location = body[0]&.location&.tap {|loc| break Location.new(@path, loc.line - 1) }
       }
     end
 
