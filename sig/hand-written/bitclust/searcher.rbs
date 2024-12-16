@@ -112,7 +112,7 @@ module BitClust
 
     def print_methods: (ClassEntry c, NameUtils::typename typename, String title) -> void
 
-    def describe_method: (untyped rec) -> void
+    def describe_method: (SearchResult::Record rec) -> void
 
     def describe_function: (FunctionEntry f) -> void
 

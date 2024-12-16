@@ -10,7 +10,7 @@
 
 module BitClust
 
-  # Provides completion search methods like _search_classes, _search_methods. 
+  # Provides completion search methods like _search_classes, _search_methods.
   # Included by MethodDatabase and FunctionDatabase.
   module Completion
 
@@ -21,10 +21,12 @@ module BitClust
     #
 
     def _search_classes(pattern)
+      # @type self: MethodDatabase
       expand_ic(classes(), pattern)
     end
 
     def _search_methods(pattern)
+      # @type self: MethodDatabase
       case
       when pattern.empty?
         recordclass = SearchResult::Record
@@ -32,7 +34,7 @@ module BitClust
             methods().map {|m| s = m.spec; recordclass.new(s, s, m) })
       when pattern.special_variable?
         c = fetch_class('Kernel')
-        SearchResult.new(self, pattern, [c], search_svar(c, pattern.method))
+        SearchResult.new(self, pattern, [c], search_svar(c, pattern.method || raise))
       when pattern.class?
         search_methods_from_cname(pattern)
       else
@@ -54,16 +56,19 @@ GC.enable; GC.start; x
     end
 
     def _search_functions(pattern)
+      # @type self: FunctionDatabase
       expand_ic(functions(), pattern)
     end
 
     def search_svar(c, pattern)
+      # @type self: MethodDatabase
       expand(c.special_variables, pattern)\
           .map {|m| SearchResult::Record.new(self, m.spec, m.spec, m) }
     end
 
     def search_methods_from_cname(pattern)
-      cs = expand_ic(classes(), pattern.klass)
+      # @type self: MethodDatabase
+      cs = expand_ic(classes(), pattern.klass || raise)
       return SearchResult.new(self, pattern, [], []) if cs.empty?
       recs = cs.map {|c|
         c.entries.map {|m|
@@ -79,13 +84,16 @@ GC.enable; GC.start; x
     end
 
     def mspec_from_cref_mname(cref, name)
+      # @type self: MethodDatabase
       m = /\A(#{NameUtils::CLASS_PATH_RE})(#{NameUtils::TYPEMARK_RE})\Z/.match(cref)
-      MethodSpec.new(m[1], m[2], name)
+      m || raise
+      MethodSpec.new(m[1] || raise, _ = m[2], name)
     end
 
     def search_methods_from_mname(pattern)
+      # @type self: MethodDatabase
 #timer_init
-      names = expand_name_narrow(method_names(), pattern.method)
+      names = expand_name_narrow(method_names(), pattern.method || raise)
 #split_time "m expandN (#{names.size})"
       records = names.map {|name|
         crefs = mname2crefs_narrow(name)
@@ -99,14 +107,16 @@ GC.enable; GC.start; x
     end
 
     def search_methods_from_cname_mname(pattern)
+      # @type self: MethodDatabase
 #timer_init
       recs = try(typechars(pattern.type, pattern.method)) {|ts|
-        expand_method_name(pattern.klass, ts, pattern.method)
+        expand_method_name(pattern.klass || raise, ts, pattern.method || raise)
       }
       SearchResult.new(self, pattern, recs.map {|rec| rec.class_name }, recs)
     end
 
     def expand_method_name(c, ts, m)
+      # @type self: MethodDatabase
       names_w = expand_name_wide(method_names(), m)
       return [] if names_w.empty?
 #split_time "m expandW (#{names_w.size})"
@@ -142,18 +152,20 @@ GC.enable; GC.start; x
     end
 
     def count_class(recs)
+      # @type self: MethodDatabase
       recs.map {|rec| rec.class_name }.uniq.size
     end
 
     def make_cm_combination(cpat, ts, mnames)
-      result = []
+      # @type self: MethodDatabase
+      result = [] #: Array[SearchResult::Record]
 $cm_comb_m = 0
       mnames.each do |m|
         crefs = expand_name_narrow(mname2crefs_wide(m), cpat, ts)
         next if crefs.empty?
 $cm_comb_m += 1
         crefs.each do |ref|
-          spec = MethodSpec.new(classid2name(ref.chop), ref[-1,1], m)
+          spec = MethodSpec.new(classid2name(ref.chop), _ = ref[-1,1], m)
           result.push SearchResult::Record.new(self, spec)
         end
       end
@@ -176,7 +188,7 @@ $cm_comb_m += 1
     end
 
     def unify_entries(ents)
-      h = {}
+      h = {} #: Hash[SearchResult::Record, SearchResult::Record]
       ents.each do |ent|
         if ent0 = h[ent]
           ent0.merge ent
@@ -189,6 +201,7 @@ $cm_comb_m += 1
 
     # Case-insensitive search.  Optimized for constant search.
     def expand_ic(xs, pattern)
+      # @type self: MethodDatabase | FunctionDatabase
       re1 = /\A#{Regexp.quote(pattern)}/i
       result1 = xs.select {|x| x.name_match?(re1) }
       return [] if result1.empty?
@@ -201,6 +214,7 @@ $cm_comb_m += 1
     end
 
     def expand(xs, pattern)
+      # @type self: MethodDatabase
       re1 = /\A#{Regexp.quote(pattern)}/i
       result1 = xs.select {|x| x.name_match?(re1) }
       return [] if result1.empty?
@@ -217,12 +231,14 @@ $cm_comb_m += 1
 
     # list up all matched items (without squeezing)
     def expand_name_wide(names, pattern)
+      # @type self: MethodDatabase
       re1 = /\A#{Regexp.quote(pattern)}/i
       names.grep(re1)
     end
 
     # list up matched items (with squeezing)
     def expand_name_narrow(names, pattern, suffixes = nil)
+      # @type self: MethodDatabase
       re1 = /\A#{Regexp.quote(pattern)}/i
       result1 = names.grep(re1)
       return [] if result1.empty?
@@ -232,6 +248,7 @@ $cm_comb_m += 1
 
     # squeeze result of #expand_name_wide
     def squeeze_names(result1, pattern, suffixes = nil)
+      # @type self: MethodDatabase
       regexps =
         [
          /\A#{Regexp.quote(pattern)}.*#{suffix_pattern(suffixes)}\z/i,
@@ -258,6 +275,7 @@ $cm_comb_m += 1
     #
 
     def save_completion_index
+      # @type self: MethodDatabase
       save_class_index
       save_method_index
       save_method_index_narrow
@@ -268,9 +286,9 @@ $cm_comb_m += 1
     end
 
     def intern_table
-      @intern_table ||= 
+      @intern_table ||=
           begin
-            h = {}
+            h = {} #: Hash[String, String]
             classnametable().each do |id, names|
               names.each do |n|
                 h[n] = id
@@ -281,6 +299,7 @@ $cm_comb_m += 1
     end
 
     def save_class_index
+      # @type self: MethodDatabase
       atomic_write_open('class/=index') {|f|
         classes().each do |c|
           #f.puts "#{c.id}\t#{c.names.join(' ')}"  # FIXME: support class alias
@@ -290,11 +309,13 @@ $cm_comb_m += 1
     end
 
     def classnametable
+      # @type self: MethodDatabase
       @classnametable ||=
           begin
-            h = {}
+            h = {} #: Hash[String, Array[String]]
             foreach_line('class/=index') do |line|
               id, *names = line.split
+              id || raise
               h[id] = names
             end
             h
@@ -304,9 +325,10 @@ $cm_comb_m += 1
     end
 
     def save_method_index_narrow
+      # @type self: MethodDatabase
       index =
           begin
-            h = {}
+            h = {} #: Hash[String, Array[String]]
             classes().each do |c|
               c.entries.each do |m|
                 ref = c.id + m.typemark
@@ -325,11 +347,13 @@ $cm_comb_m += 1
     end
 
     def method_index_small
+      # @type self: MethodDatabase
       @method_index_small ||=
           begin
-            h = {}
+            h = {} #: Hash[String, Array[String]]
             foreach_line('method/=sindex') do |line|
               name, *crefs = line.split(nil)
+              name || raise
               h[name] = crefs
             end
             h
@@ -342,13 +366,16 @@ $cm_comb_m += 1
     end
 
     def save_method_index
+      # @type self: MethodDatabase
       index =
           begin
-            h = {}
+            h = {} #: Hash[String, Array[String]]
             classes().each do |c|
               [ ['#', c._imap.keys],
                 ['.', c._smap.keys],
                 [':', c._cmap.keys] ].each do |t, names|
+                # @type var t: String
+                # @type var names: Array[String]
                 ref = c.id + t
                 names.each do |name|
                   (h[name] ||= []).push ref
@@ -371,24 +398,27 @@ $cm_comb_m += 1
     # includes class aliases, includes inherited methods
     def mname2crefs_wide(name)
       tbl = classnametable()
-      mname2crefs_0(name).map {|ref|
-        tbl[ref.chop].map {|c| c + ref[-1,1] }
+      (mname2crefs_0(name) || raise).map {|ref|
+        tbl[ref.chop].map {|c| c + ref[-1,1] } # steep:ignore
       }.flatten
     end
 
     def mname2crefs_0(name)
-      crefs = (@method_index ||= {})[name]
+      crefs = (@method_index ||= {})[name] # steep:ignore
       return crefs if crefs
       crefsstr = method_index_0()[name] or return nil
       @method_index[name] = crefsstr.split(nil)
     end
 
     def method_index_0
+      # @type self: MethodDatabase
       @method_index_0 ||=
           begin
-            h = {}
+            h = {} #: Hash[String, String]
             foreach_line('method/=index') do |line|
               name, cnames = line.split(nil, 2)
+              name || raise
+              cnames.is_a?(String) || raise
               h[name] = cnames
             end
             h
@@ -467,7 +497,7 @@ $cm_comb_m += 1
             begin
               spec = @specs.first
               c = @db.fetch_class(spec.klass)
-              MethodSpec.parse(c.match_entry(spec.type, spec.method))
+              MethodSpec.parse(c.match_entry(spec.type, spec.method) || raise)
             end
       end
 
@@ -476,7 +506,7 @@ $cm_comb_m += 1
       end
 
       def entry
-        @entry ||= @db.get_method(origin())
+        @entry ||= @db.get_method(origin()) || raise
       end
 
       def name
@@ -522,9 +552,9 @@ $cm_comb_m += 1
       def owned_method?
         @specs.any? {|spec| spec.klass == origin().klass }
       end
-      
+
       def method_of_alias_class?
-        @entry.klass.aliases.any?{|aliasclass| aliasclass.name?(class_name())}
+        entry.klass.aliases.any?{|aliasclass| aliasclass.name?(class_name())}
       end
 
       def inherited_method?
