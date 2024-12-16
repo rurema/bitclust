@@ -1,27 +1,27 @@
 module BitClust
   module Generators
     class EPUB
-      @options: untyped
+      @options: Hash[Symbol, untyped]
 
-      @prefix: untyped
+      @prefix: String?
 
-      @capi: untyped
+      @capi: bool
 
-      @outputdir: untyped
+      @outputdir: Pathname
 
-      @filename: untyped
+      @filename: String
 
-      @templatedir: untyped
+      @templatedir: Pathname
 
-      @catalog: untyped
+      @catalog: nil
 
-      @themedir: untyped
+      @themedir: Pathname
 
-      @fs_casesensitive: untyped
+      @fs_casesensitive: true?
 
-      @keep: untyped
+      @keep: bool
 
-      @verbose: untyped
+      @verbose: bool
 
       def initialize: (?::Hash[Symbol, untyped] options) -> void
 
