@@ -27,7 +27,9 @@ module BitClust
 
     alias self.load self.new
 
-    def initialize: (MethodDatabase db) -> void
+    def initialize: ((MethodDatabase | FunctionDatabase) db) -> void
+
+    # FunctionEntry では FunctionDatabase
     @db: MethodDatabase
 
     # サブクラスで定義されている

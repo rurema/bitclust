@@ -2,8 +2,10 @@ module BitClust
   class FunctionEntry < Entry
     def self.type_id: () -> :function
 
-    def initialize: (untyped db, untyped id) -> void
-    attr_reader id: untyped
+    @db: FunctionDatabase
+
+    def initialize: (FunctionDatabase db, String id) -> void
+    attr_reader id: String
 
     def inspect: () -> String
     def name_match?: (Regexp re) -> Integer?

@@ -1,0 +1,127 @@
+module BitClust
+  # Body of bin/refe.
+  class Searcher
+    @dblocation: (URI::File | URI::Generic)?
+
+    @name: String
+
+    @describe_all: bool
+
+    @linep: bool
+
+    @encoding: String?
+
+    @target_type: (nil | :class)
+
+    @listen_url: String?
+
+    @foreground: bool
+
+    @view: TerminalView
+
+    include NameUtils
+
+    def initialize: () -> void
+
+    attr_reader parser: OptionParser
+
+    def parse: (Array[String] argv) -> void
+
+    def exec: (Array[String] argv, ?Hash[Symbol, untyped] options) -> void
+
+    def help: () -> String
+
+    private
+
+    def server_mode_check: (Array[String] argv) -> void
+
+    def refe_mode_check: (Array[String] argv) -> void
+
+    def spawn_server: (nil db) -> Thread
+
+    def new_local_database: (MethodDatabase? db) -> MethodDatabase
+
+    def new_database: () -> (MethodDatabase | ::DRb::DRbObject)
+
+    def dblocation_name: () -> (URI::File | URI::Generic | String)
+
+    def dblocation: () -> (URI::File | URI::Generic)
+
+    def find_dblocation: () -> (URI::File | URI::Generic)?
+
+    def dbpath: () -> String?
+
+    def env_dbpath: () -> String?
+
+    def default_dbpath: () -> String?
+
+    def search_pattern: ((MethodDatabase | ::DRb::DRbObject)? db, Array[String] argv) -> untyped
+
+    def show_all_classes: (MethodDatabase db) -> untyped
+
+    def show_all_functions: (FunctionDatabase db) -> untyped
+
+    def find_class: (MethodDatabase db, String c) -> untyped
+
+    def find_method: (MethodDatabase db, String? c, String? t, String? m) -> untyped
+
+    def find_function: (FunctionDatabase db, String f) -> untyped
+
+    def check_method_type: (untyped t) -> untyped
+
+    def find_class_or_method: (MethodDatabase db, String pattern) -> untyped
+
+    def find_constant: (MethodDatabase db, untyped pattern) -> untyped
+
+    def parse_method_spec_pattern: (untyped pat) -> ::Array[untyped]
+  end
+
+  class Plain
+    def compile: (String src) -> String
+  end
+
+  class TerminalView
+    @compiler: Plain
+
+    @describe_all: bool
+
+    @line: bool
+
+    @encoding: String?
+
+    def initialize: (Plain compiler, Hash[Symbol, untyped] opts) -> void
+
+    attr_writer database: (MethodDatabase | ::DRb::DRbObject)
+    attr_reader database: MethodDatabase
+
+    def show_class: (Array[ClassEntry] cs) -> void
+
+    def show_method: (SearchResult result) -> void
+
+    def show_function: (Array[FunctionEntry] fs) -> void
+
+    private
+
+    def print_names: (Array[String] names) -> void
+
+    def print_packed_names: (Array[String] names) -> void
+
+    def terminal_column: () -> Integer
+
+    def describe_class: (ClassEntry c) -> void
+
+    def print_methods: (ClassEntry c, NameUtils::typename typename, String title) -> void
+
+    def describe_method: (untyped rec) -> void
+
+    def describe_function: (FunctionEntry f) -> void
+
+    def puts: (*String args) -> void
+
+    def convert: (untyped string) -> untyped
+
+    def output_encoding: () -> String?
+
+    def encoding_to_nkf_option: (untyped encoding) -> String?
+  end
+end

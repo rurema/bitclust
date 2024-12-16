@@ -107,7 +107,7 @@ module BitClust
 
     def server_mode_check(argv)
       if @dblocation
-        unless @dblocation.scheme == 'file'
+        unless @dblocation&.scheme == 'file'
           $stderr.puts "Give local path to --database option on server mode"
           exit 1
         end
@@ -140,19 +140,19 @@ module BitClust
       #compiler = RDCompiler::Text.new
       compiler = Plain.new
       @view = TerminalView.new(compiler,
-                              {:describe_all => @describe_all, 
+                              {:describe_all => @describe_all,
                                :line => @linep,
                                :encoding => @encoding})
     end
 
     def spawn_server(db)
-      Server.new(new_local_database(db)).listen @listen_url, @foreground
+      Server.new(new_local_database(db)).listen (@listen_url || raise), @foreground
     end
 
     def new_local_database(db)
       return db if db
-      path = @dblocation ? @dblocation.path : dbpath()
-      MethodDatabase.new(path)
+      path = @dblocation ? @dblocation&.path : dbpath()
+      MethodDatabase.new(path || raise)
     end
 
     def new_database
@@ -213,10 +213,14 @@ module BitClust
     def search_pattern(db, argv)
       db ||= new_database()
       @view.database ||= db if @view
+      # FIXME なぜか else 節にきかないのでここに書いておく
+      # @type var db: MethodDatabase
       case @target_type || db
       when :class
+        # @type var db: MethodDatabase
         find_class db, argv[0]
       when FunctionDatabase
+        # @type var db: FunctionDatabase
         case argv.size
         when 0
           show_all_functions db
@@ -226,6 +230,7 @@ module BitClust
           raise "must not happen: #{argv.size}"
         end
       else
+        # @type var db: MethodDatabase
         case argv.size
         when 0
           show_all_classes db
@@ -466,7 +471,7 @@ module BitClust
       puts title
       print_names methods.map{|m| m.name }
     end
-    
+
     def describe_method(rec)
       unless rec.entry.library.name == '_builtin'
         puts "require '#{rec.entry.library.name}'"
