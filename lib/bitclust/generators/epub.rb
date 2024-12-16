@@ -79,7 +79,10 @@ module BitClust
           }
         end
         items.sort_by!{|item| item[:path] }
+        # steep:ignore:start
+        # FIXME: ERB.new のキーワード引数化に対応が必要
         contents = ERB.new(File.read(@templatedir + "contents"), nil, "-").result(binding)
+        # steep:ignore:end
         File.open(epub_directory + "contents.opf", "w") do |f|
           f.write contents
         end
@@ -94,7 +97,7 @@ module BitClust
       end
 
       def glob_relative_path(path, pattern)
-        relative_paths = []
+        relative_paths = [] #: Array[Pathname]
         absolute_path_to_search = Pathname.new(path).realpath
         Dir.glob(absolute_path_to_search + pattern) do |absolute_path|
           absolute_path = Pathname.new(absolute_path)
