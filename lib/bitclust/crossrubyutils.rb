@@ -72,11 +72,13 @@ module BitClust
     end
 
     def forall_ruby(path, &block)
+      # steep:ignore:start
       rubys(path)\
           .map {|ruby| [ruby, `#{ruby} --version`] }\
           .reject {|ruby, verstr| `which #{ruby}`.include?('@') }\
           .sort_by {|ruby, verstr| verstr }\
           .each(&block)
+      # steep:ignore:end
     end
 
     def rubys(path)
