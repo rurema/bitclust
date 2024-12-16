@@ -62,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: f4741eee0b2beeec437767c16d28b50ed7bd6fc8
+    revision: 56038c8a383c25bae14a891e3c0cc5c2e5a9c976
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -70,7 +70,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: f4741eee0b2beeec437767c16d28b50ed7bd6fc8
+    revision: 56038c8a383c25bae14a891e3c0cc5c2e5a9c976
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
@@ -94,6 +94,10 @@ gems:
   source:
     type: stdlib
 - name: tempfile
+  version: '0'
+  source:
+    type: stdlib
+- name: time
   version: '0'
   source:
     type: stdlib

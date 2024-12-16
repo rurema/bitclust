@@ -32,6 +32,7 @@ gems:
   - name: ripper
   - name: singleton
   - name: strscan
+  - name: time
   - name: tmpdir
   - name: webrick
   - name: yaml
