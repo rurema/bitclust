@@ -26,7 +26,7 @@ module BitClust
 
     def search_methods_from_cname: (MethodNamePattern pattern) -> SearchResult
 
-    def mspec_from_cref_mname: (untyped cref, untyped name) -> MethodSpec
+    def mspec_from_cref_mname: (String cref, String name) -> MethodSpec
 
     def search_methods_from_mname: (MethodNamePattern pattern) -> SearchResult
 
@@ -40,11 +40,11 @@ module BitClust
 
     def count_class: (Array[SearchResult::Record] recs) -> Integer
 
-    def make_cm_combination: (String cpat, String? ts, untyped mnames) -> Array[SearchResult::Record]
+    def make_cm_combination: (String cpat, String? ts, Array[String] mnames) -> Array[SearchResult::Record]
 
     def try: [T, U] (_Each[T] candidates) { (T) -> Array[U] } -> Array[U]
 
-    def typechars: (untyped type, untyped mpattern) -> (::Array[untyped] | ::Array[":" | ".#"] | ::Array[".#" | ":"])
+    def typechars: (String? type, String? mpattern) -> ([String] | [":", ".#"] | [".#", ":"])
 
     def unify_entries: (Array[SearchResult::Record] ents) -> Array[SearchResult::Record]
 
