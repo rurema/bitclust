@@ -1,5 +1,7 @@
 module BitClust
   class SyntaxHighlighter < Ripper::Filter
+    include BitClust::HTMLUtils
+
     class Error < StandardError
       def initialize: (String name, Integer? lineno, Integer? column, String error_message) -> void
 
@@ -7,11 +9,29 @@ module BitClust
       @lineno: Integer?
       @column: Integer?
       @error_message: String
+
+      def message: () -> String
+    end
+
+    class ParseError < Error
+    end
+
+    class CompileError < Error
     end
 
     COLORS: Hash[Symbol, String?]
 
+    LABELS: Hash[untyped, untyped]
+
+    KEYWORDS: Array[String]
+
+    KEYWORDS_PSEUDO: Array[String]
+
     BUILTINS_G: Array[String]
+
+    BUILTINS_Q: Array[String]
+
+    BUILTINS_B: Array[String]
 
     def initialize: (String src, ?::String filename, ?::Integer lineno) -> void
 
