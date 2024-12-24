@@ -62,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 56038c8a383c25bae14a891e3c0cc5c2e5a9c976
+    revision: 71fb7ae83789ae150bdee1cd8a7cd3035b5d79e2
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -70,7 +70,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 56038c8a383c25bae14a891e3c0cc5c2e5a9c976
+    revision: 71fb7ae83789ae150bdee1cd8a7cd3035b5d79e2
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
