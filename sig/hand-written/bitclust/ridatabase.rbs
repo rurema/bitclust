@@ -15,11 +15,11 @@ class RiDatabase
 
   def self.open_system_db: () -> instance
 
-  def self.open: (String dir, String version) -> instance
+  def self.open: (String dir, String? version) -> instance
 
-  def initialize: (Array[String] ripath, String version) -> void
+  def initialize: (Array[String] ripath, String? version) -> void
 
-  attr_reader version: String
+  attr_reader version: String?
 
   def get_method: (RI::MethodEntry m) -> RI::MethodDescription
 
@@ -149,7 +149,7 @@ class Formatter
 
   include HTMLUtils
 
-  def method_info: (RI::MethodDescription m) -> untyped
+  def method_info: (RI::MethodDescription m) -> String
 
   private
 
