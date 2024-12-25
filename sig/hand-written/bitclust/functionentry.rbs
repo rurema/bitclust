@@ -16,7 +16,8 @@ module BitClust
     attr_accessor private: bool
     attr_accessor type: String
     attr_accessor name: String
-    attr_accessor params: String?
+    attr_reader params: String
+    attr_writer params: String?
     attr_accessor source: String
     attr_accessor source_location: Location?
 
