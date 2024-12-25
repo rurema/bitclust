@@ -3,7 +3,7 @@ require 'pathname'
 require 'optparse'
 
 unless Object.const_defined?(:Encoding)
-  $KCODE = 'UTF-8'
+  $KCODE = 'UTF-8' # steep:ignore
 end
 
 def libdir

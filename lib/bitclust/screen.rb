@@ -542,14 +542,16 @@ module BitClust
     def draw_tree(cs, &block)
       return if cs.empty?
       if cs.first.class?
-        tree = cs.group_by{|c| c.superclass }
+        tree = cs.group_by{|c| c.superclass } # steep:ignore
         tree.each {|key, list| list.sort_by!{|c| c ? c.name : "" } }
         roots = tree.keys.select{|c| !c || !cs.include?(c) }
-        roots.map!{|c| tree[c] }.flatten!
+        roots.map!{|c| tree[c] }.flatten! # steep:ignore
       else
         tree = {}
         roots = cs
       end
+      # @type var roots: Array[ClassEntry]
+      # @type var tree: Hash[ClassEntry, Array[ClassEntry]]
       draw_treed_entries(roots, tree, &block)
     end
 

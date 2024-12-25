@@ -94,6 +94,9 @@ module BitClust
     def document_url: (String name) -> ::String
 
     def canonical_url: (String current_url) -> String
+
+    # defined in URLMapperEx
+    def edit_url: (Location location) -> String
   end
 
   class TemplateRepository
