@@ -10,7 +10,7 @@ module BitClust
       class Sitemap
         class Content
           include Enumerable[Content]
-          def each: () { (Content) -> untyped } -> untyped
+          def each: () { (Content) -> void } -> void
 
           include ERB::Util
 
@@ -65,15 +65,27 @@ module BitClust
 
       @index_contents: Array[Sitemap::Content]
 
-      @html_files: untyped
+      @html_files: Array[String]
 
-      @manager_config: Hash[Symbol, untyped]
+      type manager_config = {
+        :baseurl     => String,
+        :suffix      => String,
+        :catalogdir  => Pathname,
+        :templatedir => Pathname,
+        :themedir    => Pathname,
+        :css_url     => String,
+        :cgi_url     => String,
+        :tochm_mode  => true,
+        ?:urlmapper  => URLMapperEx,
+      }
+
+      @manager_config: manager_config
 
       @outputdir: Pathname
 
       def initialize: () -> void
 
-      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> untyped
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
 
       private
 

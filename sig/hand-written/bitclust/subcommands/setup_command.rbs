@@ -25,13 +25,13 @@ module BitClust
 
       def prepare: () -> void
 
-      def generate_config: (Pathname path, Hash[Symbol, untyped] config) -> untyped
+      def generate_config: (Pathname path, Hash[Symbol, untyped] config) -> void
 
       def checkout: (Pathname rubydoc_dir) -> void
 
-      def update_method_database: (String prefix, Array[String] argv) -> untyped
+      def update_method_database: (String prefix, Array[String] argv) -> void
 
-      def update_function_database: (String prefix, Array[String] argv) -> untyped
+      def update_function_database: (String prefix, Array[String] argv) -> void
     end
   end
 end

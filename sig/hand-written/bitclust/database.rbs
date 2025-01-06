@@ -19,9 +19,9 @@ module BitClust
 
     def dummy?: () -> bool
 
-    def transaction: () { () -> untyped } -> void
+    def transaction: () { () -> void } -> void
 
-    def dirty?: () -> void
+    def dirty?: () -> bool
     def clear_dirty: () -> void
     def commit: () -> void
 
@@ -39,7 +39,7 @@ module BitClust
 
     def propset: (propkey_type key, untyped value) -> void
 
-    def encoding: () -> untyped
+    def encoding: () -> String?
 
     def exist?: (::String rel) -> bool
 

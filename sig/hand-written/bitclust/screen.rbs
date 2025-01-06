@@ -1,36 +1,58 @@
 module BitClust
   class ScreenManager
-    @conf: Hash[Symbol, untyped]
+    type conf = {
+      ?:urlmapper => URLMapper,
+      ?:templatedir => (Pathname | String),
+      ?:template_repository => TemplateRepository,
+      ?:message_catalog => MessageCatalog,
+      ?:catalogdir => (Pathname | String)?,
+      ?:default_encoding => String,
+      ?:encoding => String,
+      ?:themedir => (Pathname | String),
+      # entry_screen
+      ?:target_version => String?,
+      # URLMapper
+      ?:base_url => String,
+      ?:cgi_url => String,
+      ?:css_url => String,
+      ?:favicon_url => String,
+      ?:theme => String,
+      # TemplateScreen
+      ?:gtm_tracking_id => String?,
+      ?:meta_robots_content => Array[String],
+    }
 
-    def initialize: (Hash[Symbol, untyped] h) -> void
+    @conf: conf
+
+    def initialize: (conf h) -> void
 
     private
 
-    def default_message_catalog: (Hash[Symbol, untyped] h) -> MessageCatalog
+    def default_message_catalog: (conf h) -> MessageCatalog
 
     public
 
-    def entry_screen: (Entry | Array[Entry] entry, Hash[Symbol, untyped] opt) -> Screen
+    def entry_screen: (Entry | Array[Entry] entry, RequestHandler::conf_entry opt) -> Screen
 
-    def library_index_screen: (untyped libs, untyped opt) -> LibraryIndexScreen
+    def library_index_screen: (Array[LibraryEntry] libs, RequestHandler::conf opt) -> LibraryIndexScreen
 
-    def library_screen: (untyped lib, untyped opt) -> LibraryScreen
+    def library_screen: (LibraryEntry lib, RequestHandler::conf opt) -> LibraryScreen
 
-    def class_index_screen: (untyped cs, untyped opt) -> ClassIndexScreen
+    def class_index_screen: (Array[ClassEntry] cs, RequestHandler::conf opt) -> ClassIndexScreen
 
-    def class_screen: (untyped c, untyped opt) -> ClassScreen
+    def class_screen: (ClassEntry c, RequestHandler::conf_class opt) -> ClassScreen
 
-    def method_screen: (untyped ms, untyped opt) -> MethodScreen
+    def method_screen: (Array[MethodEntry] ms, RequestHandler::conf opt) -> MethodScreen
 
-    def opensearchdescription_screen: (untyped request_full_uri, untyped opt) -> OpenSearchDescriptionScreen
+    def opensearchdescription_screen: (URI::Generic? request_full_uri, RequestHandler::conf opt) -> OpenSearchDescriptionScreen
 
-    def search_screen: (untyped result, untyped opt) -> SearchScreen
+    def search_screen: (Array[(ClassEntry | MethodEntry)] result, RequestHandler::conf_search opt) -> SearchScreen
 
-    def doc_screen: (untyped d, untyped opt) -> DocScreen
+    def doc_screen: (DocEntry d, RequestHandler::conf opt) -> DocScreen
 
-    def function_screen: (untyped f, untyped opt) -> FunctionScreen
+    def function_screen: (FunctionEntry f, RequestHandler::conf opt) -> FunctionScreen
 
-    def function_index_screen: (untyped fs, untyped opt) -> FunctionIndexScreen
+    def function_index_screen: (Array[FunctionEntry] fs, RequestHandler::conf_function opt) -> FunctionIndexScreen
 
     private
 
@@ -48,6 +70,13 @@ module BitClust
   end
 
   class URLMapper
+    type conf = {
+      ?:base_url => String,
+      ?:cgi_url => String,
+      ?:css_url => String,
+      ?:favicon_url => String,
+      ?:theme => String,
+    }
 
     @css_url: String
 
@@ -57,7 +86,7 @@ module BitClust
 
     include NameUtils
 
-    def initialize: (Hash[Symbol, String?] h) -> void
+    def initialize: (conf h) -> void
 
     attr_reader base_url: String
 
@@ -100,9 +129,9 @@ module BitClust
   end
 
   class TemplateRepository
-    @prefix: String
+    @prefix: (Pathname | String)
 
-    def initialize: (String prefix) -> void
+    def initialize: ((Pathname | String) prefix) -> void
 
     def load: (String id) -> String
 
@@ -114,7 +143,10 @@ module BitClust
   class Screen
     def self.for_entry: (Entry | Array[Entry] entry) -> singleton(Screen)
 
-    def status: () -> nil
+    def status: () -> Integer?
+
+    # ほとんどのサブクラスにある。
+    def content_type: () -> String
 
     # TemplateScreen 以外にはある。
     def body: () -> String
@@ -135,11 +167,11 @@ module BitClust
   end
 
   class NotFoundScreen < Screen
-    @error: untyped
+    @error: Exception
 
     include HTMLUtils
 
-    def initialize: (untyped err) -> void
+    def initialize: (Exception err) -> void
 
     def status: () -> 404
 
@@ -157,7 +189,22 @@ module BitClust
 
     @target_version: String
 
-    @conf: Hash[Symbol, untyped]
+    type conf = {
+      :urlmapper => URLMapper,
+      :template_repository => TemplateRepository,
+      ?:default_encoding => String,
+      :database => Database,
+      ?:target_version => String,
+      :message_catalog => MessageCatalog,
+      ?:gtm_tracking_id => String?,
+      ?:meta_robots_content => Array[String],
+      # IndexScreen
+      ?:entries => Array[Entry],
+      # EntryBoundScreen
+      :entry => Entry,
+    }
+
+    @conf: conf
 
     @hlevel: Integer
 
@@ -168,7 +215,7 @@ module BitClust
     # この階層では定義されていないので undef の代わりに bot にしておく。
     def body: () -> bot
 
-    def initialize: (Hash[Symbol, untyped] h) -> void
+    def initialize: (conf h) -> void
 
     def content_type: () -> String
 
@@ -189,7 +236,7 @@ module BitClust
     def run_template: (String id, ?bool layout) -> String
 
     # erb.def_method(self.class, 'layout', 'layout.erb')
-    def layout: () { () -> untyped } -> String
+    def layout: () { () -> String } -> String
 
     def h: (_ToS str) -> String
 
@@ -249,13 +296,13 @@ module BitClust
 
     def breadcrumb_json_ld: (Array[Hash[Symbol, String]] items) -> String
 
-    def absolute_url_to: (String path) -> untyped
+    def absolute_url_to: (String path) -> URI::Generic
   end
 
   class IndexScreen < TemplateScreen
     @entries: Array[Entry]
 
-    def initialize: (Hash[Symbol, untyped] h, Array[Entry] entries, Hash[Symbol, untyped] opt) -> void
+    def initialize: (TemplateScreen::conf h, Array[Entry] entries, RequestHandler::conf opt) -> void
 
     def encoding: () -> String
 
@@ -263,9 +310,9 @@ module BitClust
   end
 
   class EntryBoundScreen < TemplateScreen
-    @entry: untyped
+    @entry: Entry
 
-    def initialize: (Hash[Symbol, untyped] h, Entry entry, Hash[Symbol, untyped] opt) -> void
+    def initialize: (TemplateScreen::conf h, Entry entry, RequestHandler::conf opt) -> void
 
     def encoding: () -> String
 
@@ -283,7 +330,7 @@ module BitClust
 
     def body: () -> String
 
-    def draw_tree: (Array[ClassEntry] cs) { (?) -> untyped } -> void
+    def draw_tree: (Array[ClassEntry] cs) { (?) -> void } -> void
 
     def current_url: () -> String
 
@@ -299,7 +346,7 @@ module BitClust
   end
 
   class OpenSearchDescriptionScreen < TemplateScreen
-    def initialize: (Hash[Symbol, untyped] h, String request_full_uri, untyped opt) -> void
+    def initialize: (TemplateScreen::conf h, String request_full_uri, RequestHandler::conf opt) -> void
 
     attr_reader search_full_url: String
 
@@ -313,7 +360,7 @@ module BitClust
 
     @elapsed_time: Float
 
-    def initialize: (Hash[Symbol, untyped] h, Array[Entry] entries, untyped opt) -> void
+    def initialize: (TemplateScreen::conf h, Array[Entry] entries, RequestHandler::conf_search opt) -> void
 
     def body: () -> String
   end
@@ -323,7 +370,7 @@ module BitClust
 
     @alevel: Integer
 
-    def initialize: (Hash[Symbol, untyped] h, ClassEntry entry, untyped opt) -> void
+    def initialize: (TemplateScreen::conf h, ClassEntry entry, RequestHandler::conf_class opt) -> void
 
     def body: () -> String
 
@@ -333,7 +380,7 @@ module BitClust
   class MethodScreen < TemplateScreen
     @entries: Array[MethodEntry]
 
-    def initialize: (Hash[Symbol, untyped] h, Array[MethodEntry] entries, untyped opt) -> void
+    def initialize: (TemplateScreen::conf h, Array[MethodEntry] entries, RequestHandler::conf opt) -> void
 
     def encoding: () -> String
 

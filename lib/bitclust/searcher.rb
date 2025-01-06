@@ -241,7 +241,7 @@ module BitClust
           find_method db, c, nil, m
         when 3
           c, t, m = *argv
-          check_method_type t
+          check_method_type t || raise
           find_method db, c, t, m
         else
           raise "must not happen: #{argv.size}"
@@ -313,9 +313,9 @@ module BitClust
 
     def parse_method_spec_pattern(pat)
       _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,])/, 2)
-      c = _c.reverse
-      t = _t.tr(',', '#').sub(/\#\./, '.#')
-      m = _m.reverse
+      c = (_c || raise).reverse
+      t = (_t || raise).tr(',', '#').sub(/\#\./, '.#')
+      m = (_m || raise).reverse
       return c, t, m
     end
 

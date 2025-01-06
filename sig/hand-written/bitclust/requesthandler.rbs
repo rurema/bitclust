@@ -1,43 +1,49 @@
 module BitClust
   # Actions of BitClust server.
   class RequestHandler
-    @db: untyped
+    @db: MethodDatabase
 
-    @cdb: untyped
+    @cdb: FunctionDatabase
 
-    @screenmanager: untyped
+    @screenmanager: ScreenManager
 
-    @conf: untyped
+    type conf = { :database => MethodDatabase }
+    type conf_entry = { :database => Database, ?:target_version => String }
+    type conf_class = { :database => MethodDatabase, :level => Integer }
+    type conf_function = { :database => (MethodDatabase | FunctionDatabase) }
+    type conf_search = { :database => MethodDatabase, :q => WEBrick::HTTPUtils::FormData, :elapsed_time => Float }
 
-    def initialize: (untyped db, untyped manager) -> void
+    @conf: conf
 
-    def handle: (Request webrick_req) -> Response
+    def initialize: (([MethodDatabase, FunctionDatabase] | MethodDatabase) db, ScreenManager manager) -> void
+
+    def handle: (WEBrick::HTTPRequest webrick_req) -> Response
 
     private
 
-    def _handle: (untyped req) -> untyped
+    def _handle: (Request req) -> Response
 
-    def error_response: (untyped err) -> untyped
+    def error_response: (Exception err) -> Response
 
-    def not_found_response: (untyped err) -> untyped
+    def not_found_response: (Exception err) -> Response
 
-    def handle_library: (untyped req) -> untyped
+    def handle_library: (Request req) -> Response
 
-    def handle_class: (untyped req) -> untyped
+    def handle_class: (Request req) -> Response
 
-    def handle_method: (untyped req) -> untyped
+    def handle_method: (Request req) -> Response
 
     def library_index: () -> untyped
 
     def class_index: () -> untyped
 
-    def handle_opensearchdescription: (untyped req) -> untyped
+    def handle_opensearchdescription: (Request req) -> untyped
 
-    def handle_search: (untyped req) -> untyped
+    def handle_search: (Request req) -> untyped
 
-    def handle_doc: (untyped req) -> untyped
+    def handle_doc: (Request req) -> untyped
 
-    def handle_function: (untyped req) -> untyped
+    def handle_function: (Request req) -> untyped
 
     def function_index: () -> untyped
   end
@@ -47,71 +53,71 @@ module BitClust
   end
 
   class Request
-    @wreq: untyped
+    @wreq: WEBrick::HTTPRequest
 
     include NameUtils
 
-    def initialize: (untyped wreq) -> void
+    def initialize: (WEBrick::HTTPRequest wreq) -> void
 
-    def library?: () -> untyped
+    def library?: () -> bool
 
-    def class?: () -> untyped
+    def class?: () -> bool
 
-    def method?: () -> untyped
+    def method?: () -> bool
 
-    def doc_name: () -> untyped
+    def doc_name: () -> String?
 
-    def library_name: () -> (nil | untyped)
+    def library_name: () -> String?
 
-    def class_name: () -> (nil | untyped)
+    def class_name: () -> String?
 
-    def method_spec: () -> (nil | untyped)
+    def method_spec: () -> MethodSpec?
 
-    def defined_type?: () -> untyped
+    def defined_type?: () -> bool
 
-    def type_id: () -> untyped
+    def type_id: () -> Symbol?
 
-    def function?: () -> untyped
+    def function?: () -> bool
 
-    def function_name: () -> (nil | untyped)
+    def function_name: () -> String?
 
-    def ancestors_level: () -> untyped
+    def ancestors_level: () -> Integer
 
-    def query: () -> untyped
+    def query: () -> Hash[String, WEBrick::HTTPUtils::FormData]
 
-    def full_uri: () -> untyped
+    def full_uri: () -> URI::Generic?
 
     private
 
-    def type_param: () -> (nil | untyped)
+    def type_param: () -> String?
 
-    def parse_path_info: () -> (nil | ::Array[untyped])
+    def parse_path_info: () -> [String?, String?]?
 
-    def path_info: () -> untyped
+    def path_info: () -> String?
   end
 
   class RackRequest < Request
-    @rack_req: untyped
+    @rack_req: Rack::Request
 
-    def initialize: (untyped rack_req) -> void
+    def initialize: (Rack::Request rack_req) -> void
 
-    def query: () -> untyped
+    def query: () -> Hash[untyped, untyped]
 
-    def path_info: () -> untyped
+    def path_info: () -> String
 
-    def full_uri: () -> untyped
+    def full_uri: () -> URI::Generic
   end
 
   class Screen
-    def response: () -> untyped
+    def response: () -> Response
   end
 
   class Response
-    @screen: untyped
+    @screen: Screen
 
-    def initialize: (untyped screen) -> void
+    def initialize: (Screen screen) -> void
 
-    def update: (untyped webrick_res) -> untyped
+    def update: (WEBrick::HTTPResponse webrick_res) -> void
 
     def rack_finish: () -> Rack::response
   end

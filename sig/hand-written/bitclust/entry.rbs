@@ -46,7 +46,7 @@ module BitClust
     @loaded: bool
     def loaded?: () -> bool
 
-    def encoding: () -> untyped
+    def encoding: () -> String?
 
     # サブクラスで定義されている
     def source: () -> String

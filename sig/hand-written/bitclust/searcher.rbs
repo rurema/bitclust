@@ -55,25 +55,25 @@ module BitClust
 
     def default_dbpath: () -> String?
 
-    def search_pattern: ((MethodDatabase | ::DRb::DRbObject)? db, Array[String] argv) -> untyped
+    def search_pattern: ((MethodDatabase | ::DRb::DRbObject)? db, Array[String] argv) -> void
 
-    def show_all_classes: (MethodDatabase db) -> untyped
+    def show_all_classes: (MethodDatabase db) -> void
 
-    def show_all_functions: (FunctionDatabase db) -> untyped
+    def show_all_functions: (FunctionDatabase db) -> void
 
-    def find_class: (MethodDatabase db, String c) -> untyped
+    def find_class: (MethodDatabase db, String c) -> void
 
-    def find_method: (MethodDatabase db, String? c, String? t, String? m) -> untyped
+    def find_method: (MethodDatabase db, String? c, String? t, String? m) -> void
 
-    def find_function: (FunctionDatabase db, String f) -> untyped
+    def find_function: (FunctionDatabase db, String f) -> void
 
-    def check_method_type: (untyped t) -> untyped
+    def check_method_type: (String t) -> void
 
-    def find_class_or_method: (MethodDatabase db, String pattern) -> untyped
+    def find_class_or_method: (MethodDatabase db, String pattern) -> void
 
-    def find_constant: (MethodDatabase db, untyped pattern) -> untyped
+    def find_constant: (MethodDatabase db, String pattern) -> void
 
-    def parse_method_spec_pattern: (untyped pat) -> ::Array[untyped]
+    def parse_method_spec_pattern: (String pat) -> [String, String, String]
   end
 
   class Plain
@@ -118,10 +118,10 @@ module BitClust
 
     def puts: (*String args) -> void
 
-    def convert: (untyped string) -> untyped
+    def convert: (String string) -> String
 
     def output_encoding: () -> String?
 
-    def encoding_to_nkf_option: (untyped encoding) -> String?
+    def encoding_to_nkf_option: (String? encoding) -> String?
   end
 end

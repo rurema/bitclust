@@ -16,13 +16,13 @@ module BitClust
 
     def self.encoding2locale: (String enc) -> String
 
-    def self.load: (String prefix) -> instance
+    def self.load: (_ToS prefix) -> instance
 
-    def self.load_with_locales: (String prefix, Array[String] locales) -> instance
+    def self.load_with_locales: (_ToS prefix, Array[String] locales) -> instance
 
     def self.env_locales: () -> Array[String]
 
-    def self.find_catalog: (String prefix, Array[String] locales) -> ([String, String] | nil)
+    def self.find_catalog: (_ToS prefix, Array[String] locales) -> ([String, String] | nil)
 
     def self.load_file: (String path, String locale) -> instance
 

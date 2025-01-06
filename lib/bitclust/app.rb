@@ -29,7 +29,7 @@ module BitClust
         dbpath = File.expand_path(dbpath)
         db = BitClust::MethodDatabase.new(dbpath)
         if capi
-          db = [db, BitClust::FunctionDatabase.new(dbpath)]
+          db = [db, BitClust::FunctionDatabase.new(dbpath)] #: [MethodDatabase, FunctionDatabase]
         end
         manager = BitClust::ScreenManager.new(
           :base_url => baseurl,
@@ -56,7 +56,7 @@ module BitClust
           end
           db = BitClust::MethodDatabase.new(dbpath)
           if capi
-            db = [db, BitClust::FunctionDatabase.new(dbpath)]
+            db = [db, BitClust::FunctionDatabase.new(dbpath)] #: [MethodDatabase, FunctionDatabase]
           end
           manager = BitClust::ScreenManager.new(
             :base_url => baseurl,

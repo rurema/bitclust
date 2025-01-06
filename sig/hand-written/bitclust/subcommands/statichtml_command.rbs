@@ -25,7 +25,25 @@ module BitClust
 
       @outputdir: Pathname
 
-      @manager_config: Hash[Symbol, untyped]
+      type manager_config = {
+        :catalogdir  => Pathname?,
+        :suffix      => String,
+        :templatedir => Pathname,
+        :themedir    => Pathname,
+        :css_url     => String,
+        :favicon_url => String,
+        :cgi_url     => String,
+        :tochm_mode  => true,
+        :fs_casesensitive => bool,
+        :canonical_base_url => String?,
+        :edit_base_url => String?,
+        :gtm_tracking_id => String?,
+        :meta_robots_content => Array[String],
+        :stop_on_syntax_error => bool,
+        ?:urlmapper  => URLMapperEx,
+      }
+
+      @manager_config: manager_config
 
       @urlmapper: URLMapperEx
 
@@ -97,9 +115,9 @@ module BitClust
 
       def create_html_file_p: (Entry | Array[MethodEntry] entry, ScreenManager manager, Pathname path, Database db) -> void
 
-      def create_file: (Pathname path, untyped str, ?::Hash[Symbol, untyped] options) -> void
+      def create_file: (Pathname path, String str, ?::Hash[Symbol, untyped] options) -> void
 
-      def encodename_package: (untyped str) -> untyped
+      def encodename_package: (String str) -> String
     end
   end
 end

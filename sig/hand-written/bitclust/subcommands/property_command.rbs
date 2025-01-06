@@ -1,7 +1,7 @@
 module BitClust
   module Subcommands
     class PropertyCommand < Subcommand
-      @mode: untyped
+      @mode: (nil | :list | :get | :set)
 
       def initialize: () -> void
 
