@@ -20,8 +20,8 @@ module BitClust
     def name?: (String n) -> bool
 
     attr_accessor requires: Array[LibraryEntry]
-    attr_accessor classes:  Array[ClassEntry]   ## :defined classes
-    attr_accessor methods:  Array[MethodEntry]  ## :added/:redefined entries
+    attr_accessor classes:  Array[ClassEntry]
+    attr_accessor methods:  Array[MethodEntry]
     attr_accessor source:   String
     attr_accessor sublibraries: Array[LibraryEntry]
     attr_accessor is_sublibrary: bool
@@ -51,7 +51,7 @@ module BitClust
 
     def classnames: () -> Array[String]
 
-    def each_class: () { (ClassEntry) -> untyped } -> untyped
+    def each_class: () { (ClassEntry) -> void } -> void
 
     private
 
@@ -64,7 +64,7 @@ module BitClust
 
     def fetch_method: (MethodSpec spec) -> MethodEntry
 
-    def each_method: () { (MethodEntry) -> untyped } -> untyped
+    def each_method: () { (MethodEntry) -> void } -> void
 
     private
 
@@ -73,8 +73,8 @@ module BitClust
 
     public
 
-    def add_class: (ClassEntry c) -> (untyped | nil)
+    def add_class: (ClassEntry c) -> void
 
-    def add_method: (MethodEntry m) -> (untyped | nil)
+    def add_method: (MethodEntry m) -> void
   end
 end
