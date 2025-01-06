@@ -34,21 +34,21 @@ class LineInput
 
   def gets_unless: (Regexp re) -> String?
 
-  def each: () { (String) -> untyped } -> untyped
+  def each: () { (String) -> void } -> void
 
-  def while_match: (Regexp re) { (String) -> untyped } -> nil
+  def while_match: (Regexp re) { (String) -> void } -> nil
 
   def getlines_while: (Regexp re) -> Array[String]
 
   alias span getlines_while
 
-  def until_match: (Regexp re) { (String) -> untyped } -> nil
+  def until_match: (Regexp re) { (String) -> void } -> nil
 
   def getlines_until: (Regexp re) -> Array[String]
 
   alias break getlines_until
 
-  def until_terminator: (Regexp re) { (String) -> untyped } -> nil
+  def until_terminator: (Regexp re) { (String) -> void } -> nil
 
   def getblock: (Regexp term_re) -> Array[String]
 end
