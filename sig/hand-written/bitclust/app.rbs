@@ -4,18 +4,36 @@ module BitClust
   #
   # Supports Rack and WEBrick.
   class App
-    @options: untyped
+    type options_auto = {
+      # auto
+      :dbpath => Array[String],
+      :baseurl => String?,
+      :datadir => String?,
+      :templatedir => String?,
+      :theme => String?,
+      :encoding => String,
+      :capi => bool,
+    }
+    type options_noauto = {
+      :viewpath => String,
+      :dbpath => String?,
+      :baseurl => String?,
+      :datadir => String?,
+      :templatedir => String?,
+      :theme => String?,
+      :encoding => String,
+      :capi => bool,
+    }
+    type options = options_auto | options_noauto
 
-    @interfaces: untyped
-
-    @versions: untyped
+    @options: options
 
     # Redirect from '/' to "#{viewpath}/"
     @index: untyped
 
-    def initialize: (Hash[Symbol, untyped] options) -> void
+    def initialize: (options options) -> void
 
-    attr_reader interfaces: untyped
+    attr_reader interfaces: Hash[String, Interface]
 
     attr_reader versions: untyped
 

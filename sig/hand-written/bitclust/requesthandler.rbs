@@ -33,19 +33,19 @@ module BitClust
 
     def handle_method: (Request req) -> Response
 
-    def library_index: () -> untyped
+    def library_index: () -> Response
 
-    def class_index: () -> untyped
+    def class_index: () -> Response
 
-    def handle_opensearchdescription: (Request req) -> untyped
+    def handle_opensearchdescription: (Request req) -> Response
 
-    def handle_search: (Request req) -> untyped
+    def handle_search: (Request req) -> Response
 
-    def handle_doc: (Request req) -> untyped
+    def handle_doc: (Request req) -> Response
 
-    def handle_function: (Request req) -> untyped
+    def handle_function: (Request req) -> Response
 
-    def function_index: () -> untyped
+    def function_index: () -> Response
   end
 
   class RackRequestHandler < RequestHandler

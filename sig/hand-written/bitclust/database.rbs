@@ -39,7 +39,7 @@ module BitClust
 
     def propset: (propkey_type key, untyped value) -> void
 
-    def encoding: () -> String?
+    def encoding: () -> String
 
     def exist?: (::String rel) -> bool
 

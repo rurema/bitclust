@@ -26,6 +26,7 @@ module BitClust
       @interfaces = {}
       case dbpath
       when String
+        # @type var viewpath: String
         dbpath = File.expand_path(dbpath)
         db = BitClust::MethodDatabase.new(dbpath)
         if capi
@@ -42,6 +43,7 @@ module BitClust
         handler = request_handler_class.new(db, manager)
         @interfaces[viewpath] = BitClust::Interface.new { handler }
       when Array
+        # @type var viewpath: String?
         dbpaths = dbpath
         @versions = []
         dbpaths.each do |dbpath|
@@ -88,13 +90,15 @@ module BitClust
                          req.path_info
                        end
         if @versions.any?{|version| %r|\A/?#{version}/?\z| =~ request_path }
-          viewpath = File.join(request_path || raise, @options[:viewpath])
+          viewpath = @options[:viewpath]
+          raise unless viewpath.is_a?(String)
+          viewpath = File.join(request_path || raise, viewpath)
           @index = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
         else
           links = "<ul>"
           @interfaces.keys.sort.each do |v|
-            if @options[:viewpath]
-              version = v.sub(@options[:viewpath], '')
+            if (viewpath = @options[:viewpath]).is_a?(String)
+              version = v.sub(viewpath, '')
             else
               version = v
             end
@@ -116,7 +120,7 @@ module BitClust
     end
 
     def service(req, res)
-      unless  %r|/#{File.basename(@options[:baseurl])}/?\z| =~ req.path
+      unless  %r|/#{File.basename(@options[:baseurl] || raise)}/?\z| =~ req.path
         raise WEBrick::HTTPStatus::NotFound
       end
       res.body = index(req)

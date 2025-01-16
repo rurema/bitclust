@@ -22,15 +22,15 @@ module BitClust
 
     def initialize: () -> void
 
-    def run: (Array[String] argv) -> untyped
+    def run: (Array[String] argv) -> void
 
-    def prepare: () -> untyped
+    def prepare: () -> void
 
-    def _run: (Array[String] argv) -> untyped
+    def _run: (Array[String] argv) -> void
 
     def load_config: () -> Hash[Symbol, untyped]?
 
-    def error: (untyped message) -> untyped
+    def error: (_ToS message) -> bot
   end
 end
 

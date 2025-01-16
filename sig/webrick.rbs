@@ -10,6 +10,7 @@ module WEBrick
 
     def mount: (String dir, singleton(HTTPServlet::AbstractServlet) servlet, *untyped options) -> void
              | (String dir, _GetInstance servlet, *untyped options) -> void
+             | (String dir, BitClust::Interface servlet, *untyped options) -> void # なぜか _GetInstance にならないようなので明示的に許可
              | ...
   end
 end

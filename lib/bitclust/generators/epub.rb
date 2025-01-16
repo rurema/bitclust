@@ -71,7 +71,7 @@ module BitClust
       end
 
       def generate_contents_opf(epub_directory)
-        items = [] #: Array[untyped]
+        items = [] #: Array[{:id => String, :path => Pathname}]
         glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.xhtml").each do |path|
           items << {
             :id => decodename_package(path.basename(".*").to_s),
