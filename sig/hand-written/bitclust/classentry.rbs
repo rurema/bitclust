@@ -82,10 +82,10 @@ module BitClust
 
     def extended_modules: () -> Array[ClassEntry]
 
-    def entries: (?::Integer level) -> Array[MethodEntry]
+    def entries: (?Integer level) -> Array[MethodEntry]
     alias methods entries
 
-    def each: () { (MethodEntry) -> untyped } -> untyped
+    def each: () { (MethodEntry) -> void } -> void
 
     def add_method: (MethodEntry m) -> void
 

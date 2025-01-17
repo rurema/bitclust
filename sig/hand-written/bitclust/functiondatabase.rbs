@@ -17,7 +17,7 @@ module BitClust
 
     def dirty?: () -> bool
 
-    def each_dirty_function: () { (FunctionEntry) -> untyped } -> void
+    def each_dirty_function: () { (FunctionEntry) -> void } -> void
 
     def clear_dirty: () -> void
 
@@ -25,7 +25,7 @@ module BitClust
 
     def search_functions: (string pattern) -> Array[FunctionEntry]
 
-    def open_function: (String id) { (FunctionEntry) -> untyped } -> FunctionEntry
+    def open_function: (String id) { (FunctionEntry) -> void } -> FunctionEntry
 
     def fetch_function: (String id) -> (FunctionEntry | bot)
 

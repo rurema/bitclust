@@ -112,6 +112,8 @@ module BitClust
             @index = "<html><head><title>bitclust</title></head><body>#{links}</body></html>"
           end
         end
+      else
+        raise '[BUG]'
       end
     end
 

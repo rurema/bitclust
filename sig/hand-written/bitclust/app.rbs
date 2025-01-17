@@ -28,21 +28,20 @@ module BitClust
 
     @options: options
 
-    # Redirect from '/' to "#{viewpath}/"
-    @index: untyped
+    @index: String
 
     def initialize: (options options) -> void
 
     attr_reader interfaces: Hash[String, Interface]
 
-    attr_reader versions: untyped
+    attr_reader versions: Array[String]
 
-    def index: (untyped req) -> untyped
+    def index: (Rack::Request | WEBrick::HTTPRequest req) -> String
 
     def get_instance: (WEBrick::HTTPServer server, *untyped) -> self
 
     def service: (WEBrick::HTTPRequest req, WEBrick::HTTPResponse res) -> void
 
-    def call: (untyped env) -> ::Array[200 | { "Content-Type" => "text/html; charset=utf-8" } | ::Array[untyped]]
+    def call: (Rack::env env) -> Rack::response
   end
 end
