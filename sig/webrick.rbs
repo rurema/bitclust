@@ -4,13 +4,17 @@ module WEBrick
       def service: (HTTPRequest req, HTTPResponse res) -> void
     end
 
-    interface _GetInstance
+    interface _GetInstanceWithOptions
       def get_instance: (HTTPServer, *untyped options) -> _Service
     end
 
+    interface _GetInstanceWithoutOptions
+      def get_instance: (HTTPServer) -> _Service
+    end
+
     def mount: (String dir, singleton(HTTPServlet::AbstractServlet) servlet, *untyped options) -> void
-             | (String dir, _GetInstance servlet, *untyped options) -> void
-             | (String dir, BitClust::Interface servlet, *untyped options) -> void # なぜか _GetInstance にならないようなので明示的に許可
+             | (String dir, _GetInstanceWithOptions servlet, *untyped options) -> void
+             | (String dir, _GetInstanceWithoutOptions servlet) -> void
              | ...
   end
 end

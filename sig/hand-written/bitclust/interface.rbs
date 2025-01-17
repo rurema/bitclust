@@ -10,7 +10,7 @@ module BitClust
     def initialize: (?::Hash[untyped, untyped] webrick_conf) { () -> (::BitClust::RackRequestHandler | ::BitClust::RequestHandler) } -> void
 
     # for WEBrick servlet
-    def get_instance: (untyped server) -> WEBrickServlet
+    def get_instance: (WEBrick::HTTPServer server) -> WEBrickServlet
 
     def main: () -> void
 
