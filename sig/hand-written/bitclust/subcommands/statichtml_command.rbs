@@ -62,7 +62,14 @@ module BitClust
 
         attr_accessor bitclust_html_base: String
 
-        def initialize: (Hash[Symbol, untyped] h) -> void
+        type config = {
+          :suffix => String,
+          :fs_casesensitive => bool,
+          :canonical_base_url => String?,
+          :edit_base_url => String?,
+        }
+
+        def initialize: (config h) -> void
 
         def library_url: (String name) -> String
 
