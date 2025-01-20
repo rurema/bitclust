@@ -8,7 +8,7 @@ module BitClust
 
     def message_catalog: () -> MessageCatalog
 
-    def _: (untyped key, *untyped args) -> untyped
+    def _: (String key, *untyped args) -> String
   end
 
   class MessageCatalog
