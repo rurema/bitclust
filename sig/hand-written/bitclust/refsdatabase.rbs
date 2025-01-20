@@ -14,7 +14,7 @@ module BitClust
 
     def []: (type_id | String type, String mid, String linkid) -> String
 
-    def save: (Object & (_ToStr | _ToIO | _Writer) s) -> untyped
+    def save: (Object & (_ToStr | _ToIO | _Writer) s) -> void
 
     def extract: (ClassEntry | LibraryEntry | MethodEntry | DocEntry entry) -> void
   end

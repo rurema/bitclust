@@ -89,7 +89,7 @@ module BitClust
 
     @encoding: String?
 
-    def initialize: (Plain compiler, Hash[Symbol, untyped] opts) -> void
+    def initialize: (Plain compiler, { :describe_all => bool, :line => bool, :encoding => String? } opts) -> void
 
     attr_writer database: (MethodDatabase | ::DRb::DRbObject)
     attr_reader database: MethodDatabase
