@@ -9,6 +9,9 @@ module BitClust
     type propkey_type = ::String
     type properties_type = ::Hash[propkey_type, String]
 
+    type database_propkey = 'version' | 'encoding'
+    type database_properties = Hash[database_propkey, String]
+
     def self.dummy: (?properties_type params) -> instance
 
     def initialize: (String? prefix) -> void

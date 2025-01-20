@@ -15,7 +15,7 @@ module BitClust
 
       def initialize: () -> void
 
-      def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
 
       private
 

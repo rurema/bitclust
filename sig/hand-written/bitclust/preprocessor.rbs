@@ -20,7 +20,7 @@ module BitClust
   end
 
   class Preprocessor < LineFilter
-    @params: Hash[untyped, untyped]
+    @params: Database::database_properties
     @last_if: String?
     @state_stack: Array[State]
 

@@ -95,7 +95,7 @@ module BitClust
 
       def initialize: () -> void
 
-      def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
 
       private
 
@@ -115,7 +115,7 @@ module BitClust
 
       def create_html_file_p: (Entry | Array[MethodEntry] entry, ScreenManager manager, Pathname path, Database db) -> void
 
-      def create_file: (Pathname path, String str, ?::Hash[Symbol, untyped] options) -> void
+      def create_file: (Pathname path, String str, ?{?:verbose => bool} options) -> void
 
       def encodename_package: (String str) -> String
     end

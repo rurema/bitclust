@@ -7,11 +7,14 @@ module BitClust
 
     def initialize: () -> void
 
-    def parse: (Array[String] argv) -> void
+    type argv = Array[String]
+    type options = Hash[Symbol, untyped]
+
+    def parse: (argv argv) -> void
 
     def help: () -> String
 
-    def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
+    def exec: (argv argv, options options) -> void
 
     def error: (_ToS message) -> bot
 

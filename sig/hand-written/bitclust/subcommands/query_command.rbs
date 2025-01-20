@@ -3,7 +3,7 @@ module BitClust
     class QueryCommand < Subcommand
       def initialize: () -> void
 
-      def exec: (Array[String] argv, Hash[Symbol, untyped] options) -> void
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
     end
   end
 end
