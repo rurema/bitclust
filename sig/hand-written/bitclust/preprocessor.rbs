@@ -24,11 +24,11 @@ module BitClust
     @last_if: String?
     @state_stack: Array[State]
 
-    def initialize: (untyped f, ?Database::database_properties params) -> void
+    def initialize: (_Gets f, ?Database::database_properties params) -> void
 
-    def self.read: (untyped path, ?Database::database_properties params) -> String
+    def self.read: (File | String path, ?Database::database_properties params) -> String
 
-    def self.process: (untyped path, ?Database::database_properties params) -> Array[String]
+    def self.process: (string | _ToPath path, ?Database::database_properties params) -> Array[String]
 
     def self.wrap: (File f, ?Database::database_properties params) -> instance
 
@@ -99,12 +99,12 @@ module BitClust
   end
 
   class LineCollector < LineFilter
-    def self.process: (untyped path) -> Array[String]
+    def self.process: (String path) -> Array[String]
 
-    def self.wrap: (untyped f) -> instance
+    def self.wrap: (File f) -> instance
 
     private
 
-    def next_line: (untyped f) -> String?
+    def next_line: (_Gets f) -> String?
   end
 end

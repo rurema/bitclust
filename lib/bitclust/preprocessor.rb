@@ -44,6 +44,7 @@ module BitClust
 
     def self.read(path, params = {})
       if path.respond_to?(:gets)
+        # @type var path: File
         io = wrap(path, params)
       else
         io = wrap(fopen(path, 'r:UTF-8'), params)
@@ -324,7 +325,7 @@ module BitClust
         if /\A\#@include\s*\((.*?)\)/ =~ line
           begin
             file = ($1 || raise).strip
-            basedir = File.dirname(line.location.file)
+            basedir = File.dirname(line.location.file || raise)
             @buf.concat LineCollector.process("#{basedir}/#{file}")
           rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
