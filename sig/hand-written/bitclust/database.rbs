@@ -13,7 +13,7 @@ module BitClust
     type database_propkey = 'version' | 'encoding' | 'source'
     type database_properties = Hash[database_propkey, String]
 
-    def self.dummy: (?properties_type params) -> instance
+    def self.dummy: (?database_properties params) -> instance
 
     def initialize: (String? prefix) -> void
     @prefix: String?

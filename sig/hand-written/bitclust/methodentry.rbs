@@ -16,7 +16,7 @@ module BitClust
 
     KIND_NUM: { defined: 0, redefined: 1, added: 2 }
 
-    def sort_key: () -> ::Array[untyped]
+    def sort_key: () -> [String, (0 | 1 | 2)]
 
     def name: () -> String
 

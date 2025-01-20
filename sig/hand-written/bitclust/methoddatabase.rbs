@@ -2,9 +2,9 @@ module BitClust
   class MethodDatabase < Database
     include Completion
 
-    def self.dummy: (?::Hash[untyped, untyped] params) -> instance
+    def self.dummy: (?Database::database_properties params) -> instance
 
-    def initialize: (::String prefix) -> void
+    def initialize: (String prefix) -> void
 
     @librarymap: Hash[String, LibraryEntry]?
     @classmap: Hash[String, ClassEntry]
@@ -53,7 +53,7 @@ module BitClust
 
     private
 
-    def parse_LIBRARIES: (String path, ::Hash[untyped, untyped] properties) -> Array[String]
+    def parse_LIBRARIES: (String path, Database::database_properties properties) -> Array[String]
 
     public
 
