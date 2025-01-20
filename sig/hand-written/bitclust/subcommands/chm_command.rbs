@@ -37,7 +37,7 @@ module BitClust
 
         def initialize: (String name, ?String? local) -> void
 
-        def method_missing: (untyped name, *untyped args) { (?) -> untyped } -> untyped
+        def method_missing: (Symbol name, *untyped args) { (?) -> untyped } -> untyped
 
         # 以下は Content の型をコピー
 

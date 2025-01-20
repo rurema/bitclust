@@ -1,7 +1,7 @@
 module BitClust
   module Subcommands
     class PreprocCommand < Subcommand
-      @params: Hash[untyped, untyped]
+      @params: Database::database_properties
 
       def initialize: () -> void
 
