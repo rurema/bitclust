@@ -24,13 +24,13 @@ module BitClust
     @last_if: String?
     @state_stack: Array[State]
 
-    def initialize: (untyped f, ?::Hash[untyped, untyped] params) -> void
+    def initialize: (untyped f, ?Database::database_properties params) -> void
 
-    def self.read: (untyped path, ?::Hash[untyped, untyped] params) -> String
+    def self.read: (untyped path, ?Database::database_properties params) -> String
 
-    def self.process: (untyped path, ?::Hash[untyped, untyped] params) -> Array[String]
+    def self.process: (untyped path, ?Database::database_properties params) -> Array[String]
 
-    def self.wrap: (File f, ?::Hash[untyped, untyped] params) -> instance
+    def self.wrap: (File f, ?Database::database_properties params) -> instance
 
     def path: () -> String?
 

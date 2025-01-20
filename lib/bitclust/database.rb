@@ -100,12 +100,12 @@ module BitClust
     end
 
     def propget(key)
-      properties()[key]
+      properties()[key] # steep:ignore
     end
 
     def propset(key, value)
       check_transaction
-      properties()[key] = value
+      properties()[key] = value # steep:ignore
       @properties_dirty = true
     end
 

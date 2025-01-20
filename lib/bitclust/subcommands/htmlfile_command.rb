@@ -45,7 +45,7 @@ module BitClust
         if /refm\/doc\// =~ target_file
           @rd_file = true if @rd_file.nil?
         end
-        options = { 'version' => @version }
+        options = { 'version' => @version } #: Database::database_properties
         manager = ScreenManager.new(:templatedir => @templatedir,
                                     :base_url => @baseurl,
                                     :cgi_url => @baseurl,

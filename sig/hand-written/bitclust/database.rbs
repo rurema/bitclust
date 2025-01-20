@@ -9,7 +9,8 @@ module BitClust
     type propkey_type = ::String
     type properties_type = ::Hash[propkey_type, String]
 
-    type database_propkey = 'version' | 'encoding'
+    # 'source' is internal use only
+    type database_propkey = 'version' | 'encoding' | 'source'
     type database_properties = Hash[database_propkey, String]
 
     def self.dummy: (?properties_type params) -> instance
@@ -34,13 +35,17 @@ module BitClust
 
     public
 
-    def properties: () -> properties_type
+    def properties: () -> database_properties
 
     def propkeys: () -> ::Array[propkey_type]
 
-    def propget: (propkey_type key) -> String
+    # accept propkey_type, but should not happen
+    def propget: (database_propkey key) -> String
+               | (propkey_type key) -> String?
 
-    def propset: (propkey_type key, String value) -> void
+    # accept propkey_type, but should not happen
+    def propset: (database_propkey key, String value) -> void
+               | (propkey_type key, String value) -> void
 
     def encoding: () -> String
 
@@ -50,7 +55,8 @@ module BitClust
 
     def makepath: (::String rel) -> void
 
-    def load_properties: (::String rel) -> properties_type
+    def load_properties: ('properties' rel) -> database_properties
+                       | (::String rel) -> properties_type
 
     def save_properties: (::String rel, properties_type h) -> void
 
