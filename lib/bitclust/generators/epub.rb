@@ -61,6 +61,7 @@ module BitClust
         ]
         argv << "--fs-casesensitive" if @fs_casesensitive
         argv << "--quiet" unless @verbose
+        # @type var options: Subcommand::options
         options = {
           :prefix => @prefix,
           :capi   => @capi,

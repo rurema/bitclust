@@ -134,8 +134,9 @@ Global Options:
         @version ||= config[:default_version]
         @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
+      # @type var options: Subcommand::options
       options = {
-        :prefix => @prefix,
+        :prefix => (@prefix || raise),
         :capi   => @capi
       }
       cmd.exec(argv, options)

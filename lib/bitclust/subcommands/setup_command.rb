@@ -49,6 +49,7 @@ module BitClust
           prefix = "#{@config[:database_prefix]}-#{version}"
           FileUtils.rm_rf(prefix) if @cleanup
           init_argv = ["version=#{version}", "encoding=#{@config[:encoding]}"]
+          # @type var init_options: Subcommand::options
           init_options = { :prefix => prefix }
           InitCommand.new.exec(init_argv, init_options)
           update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
@@ -132,6 +133,7 @@ module BitClust
       end
 
       def update_method_database(prefix, argv)
+        # @type var options: Subcommand::options
         options = {
           :prefix => prefix,
           :capi => false,
@@ -142,6 +144,7 @@ module BitClust
       end
 
       def update_function_database(prefix, argv)
+        # @type var options: Subcommand::options
         options = {
           :prefix => prefix,
           :capi => true,

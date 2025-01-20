@@ -21,7 +21,7 @@ module BitClust
 
       def exec(argv, options)
         prefix = options[:prefix]
-        db = MethodDatabase.new(prefix || raise)
+        db = MethodDatabase.new(prefix)
         db.init
         db.transaction {
           argv.each do |kv|

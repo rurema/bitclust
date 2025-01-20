@@ -8,7 +8,10 @@ module BitClust
     def initialize: () -> void
 
     type argv = Array[String]
-    type options = Hash[Symbol, untyped]
+    type options = {
+      :prefix => String,
+      :capi => bool,
+    }
 
     def parse: (argv argv) -> void
 
