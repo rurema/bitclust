@@ -30,8 +30,6 @@ module BitClust
       @catalog = opt[:catalog]
       @hlevel = hlevel
       @type = nil
-      @library = nil
-      @class = nil
       @method = nil
       @option = opt.dup
       init_message_catalog(@catalog)

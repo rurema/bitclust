@@ -8,10 +8,6 @@ module BitClust
 
     @type: (:function | :method | nil)
 
-    @library: nil
-
-    @class: nil
-
     @method: MethodEntry
 
     # 正しく設定されているときしか使っていないはずなので、型をわけて使う部分でのチェックは省略する。
