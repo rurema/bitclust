@@ -1,7 +1,12 @@
 module BitClust
   module Subcommands
     class ServerCommand < Subcommand
-      @params: Hash[Symbol, untyped]
+      @params: {
+        :BindAddress => String,
+        :Port => Integer,
+        ?:Logger => WEBrick::Log,
+        ?:AccessLog => Array[[IO, String]],
+      }
 
       @baseurl: String?
 
