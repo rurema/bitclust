@@ -10,20 +10,20 @@ module BitClust
     @path: String
 
     # Returns an array of FunctionEntry
-    def self.parse_file: (String path, ?Hash[untyped, untyped] params) -> Array[FunctionEntry]
+    def self.parse_file: (String path, ?Database::database_properties params) -> Array[FunctionEntry]
 
     def initialize: (FunctionDatabase db) -> void
 
-    def parse_file: (String path, String filename, untyped properties) -> Array[FunctionEntry]
+    def parse_file: (String path, String filename, Database::database_properties properties) -> Array[FunctionEntry]
 
-    def parse: (File f, String filename, ?Hash[untyped, untyped] params) -> Array[FunctionEntry]
+    def parse: (File f, String filename, ?Database::database_properties params) -> Array[FunctionEntry]
 
 
     private
 
     def file_entries: (LineInput f) -> void
 
-    def entry: (String header, Array[String] body) -> untyped
+    def entry: (String header, Array[String] body) -> FunctionEntry
 
     def parse_header: (String header) -> FunctionHeader
   end
