@@ -229,10 +229,10 @@ module BitClust
     def eval_primary(s)
       s.skip(/\s+/)
       if t = s.scan(/\w+/)
-        unless @params.key?(t)
+        unless @params.key?(t) # steep:ignore
           scan_error "database property `#{t}' not exist"
         end
-        @params[t]
+        @params[t] # steep:ignore
       elsif t = s.scan(/".*?"/)
         eval(t)
       elsif t = s.scan(/'.*?'/)
