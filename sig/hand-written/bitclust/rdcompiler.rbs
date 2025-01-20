@@ -63,7 +63,7 @@ module BitClust
 
     def headline: (String line) -> void
 
-    def h: (untyped level, untyped label, ?untyped? frag) -> ::String
+    def h: (Integer level, String label, ?String? frag) -> String
 
     ITEM_RE: ::Regexp
 
