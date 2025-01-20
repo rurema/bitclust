@@ -1,13 +1,14 @@
 module BitClust
   # Web server interface for BitClust server
   class Interface
-    @webrick_conf: Hash[untyped, untyped]
+    type webrick_conf = {}
+    @webrick_conf: webrick_conf
 
-    @handler: ::BitClust::RackRequestHandler
+    @handler: BitClust::RequestHandler
 
-    $bitclust_context_cache: ::BitClust::RackRequestHandler?
+    $bitclust_context_cache: ::BitClust::RequestHandler?
 
-    def initialize: (?::Hash[untyped, untyped] webrick_conf) { () -> (::BitClust::RackRequestHandler | ::BitClust::RequestHandler) } -> void
+    def initialize: (?webrick_conf webrick_conf) { () -> BitClust::RequestHandler } -> void
 
     # for WEBrick servlet
     def get_instance: (WEBrick::HTTPServer server) -> WEBrickServlet
@@ -24,23 +25,25 @@ module BitClust
     def mod_ruby?: () -> false
 
     class CGI < ::WEBrick::CGI
-      @handler: untyped
+      @handler: BitClust::RequestHandler
 
-      def main: (untyped handler) -> untyped
+      def main: (BitClust::RequestHandler handler) -> void
 
-      def do_GET: (untyped wreq, untyped wres) -> untyped
+      def do_GET: (WEBrick::HTTPRequest wreq, WEBrick::HTTPResponse wres) -> void
 
       alias do_POST do_GET
     end
 
     class FCGI < CGI
-      @handler: untyped
+      @handler: BitClust::RequestHandler
 
-      def main: (untyped handler) -> untyped
+      def main: (BitClust::RequestHandler handler) -> void
     end
 
     class WEBrickServlet < ::WEBrick::HTTPServlet::AbstractServlet
-      def do_GET: (untyped wreq, untyped wres) -> untyped
+      @options: [BitClust::RequestHandler]
+
+      def do_GET: (WEBrick::HTTPRequest wreq, WEBrick::HTTPResponse wres) -> void
 
       alias do_POST do_GET
     end
