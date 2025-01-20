@@ -1,7 +1,20 @@
 module BitClust
   module Generators
     class EPUB
-      @options: Hash[Symbol, untyped]
+      type options = {
+        :prefix => String?,
+        :capi => bool,
+        :outputdir => Pathname,
+        :filename => String,
+        :templatedir => Pathname,
+        :catalog => nil,
+        :themedir => Pathname,
+        :fs_casesensitive => true?,
+        :keep => bool,
+        :verbose => bool,
+      }
+
+      @options: options
 
       @prefix: String?
 
@@ -23,7 +36,7 @@ module BitClust
 
       @verbose: bool
 
-      def initialize: (?::Hash[Symbol, untyped] options) -> void
+      def initialize: (?options options) -> void
 
       CONTENTS_DIR_NAME: "OEBPS"
 
