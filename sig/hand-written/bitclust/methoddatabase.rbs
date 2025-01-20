@@ -120,11 +120,7 @@ module BitClust
                    | (singleton(LibraryEntry) entry_class) -> Hash[String, LibraryEntry]
                   #  | (untyped entry_class) -> Hash[String, untyped]
 
-    interface _TypeId
-      def type_id: () -> Symbol
-    end
-
-    def id_extent: (_TypeId entry_class) -> Array[String]
+    def id_extent: (Entry::_TypeId entry_class) -> Array[String]
 
     public
 

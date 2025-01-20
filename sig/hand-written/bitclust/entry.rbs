@@ -43,6 +43,11 @@ module BitClust
 
     def type_id: () -> Symbol
 
+    # for entry_class.type_id
+    interface _TypeId
+      def type_id: () -> Symbol
+    end
+
     @loaded: bool
     def loaded?: () -> bool
 

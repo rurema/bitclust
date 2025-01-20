@@ -42,6 +42,6 @@ module BitClust
     attr_reader functionmap: Hash[String, FunctionEntry]
 
     # entry_class は BitClust::Entry のサブクラスのクラスオブジェクト
-    def id_extent: (untyped entry_class) -> Array[String]
+    def id_extent: (Entry::_TypeId entry_class) -> Array[String]
   end
 end
