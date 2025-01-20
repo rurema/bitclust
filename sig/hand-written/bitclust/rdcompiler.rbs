@@ -12,15 +12,16 @@ module BitClust
 
     # 正しく設定されているときしか使っていないはずなので、型をわけて使う部分でのチェックは省略する。
     type option_internal = {
-      :catalog => MessageCatalog,
       :database => MethodDatabase,
       :entry => Entry,
+      :force => bool,
       :stop_on_syntax_error => bool,
     }
     type option = {
       :catalog => MessageCatalog,
       ?:database => Database,
       ?:entry => Entry,
+      ?:force => bool,
       ?:stop_on_syntax_error => bool,
     }
 

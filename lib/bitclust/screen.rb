@@ -455,7 +455,7 @@ module BitClust
     end
 
     def rdcompiler
-      opt = {:catalog => message_catalog()}.merge(@conf)
+      opt = {:catalog => message_catalog()}.merge(@conf) #: RDCompiler::option
       RDCompiler.new(@urlmapper, @hlevel, opt)
     end
 
@@ -686,7 +686,7 @@ module BitClust
     end
 
     def rdcompiler
-      h = {:force => true, :catalog => message_catalog() }.merge(@conf)
+      h = {:force => true, :catalog => message_catalog() }.merge(@conf) #: RDCompiler::option
       RDCompiler.new(@urlmapper, @hlevel, h)
     end
 
