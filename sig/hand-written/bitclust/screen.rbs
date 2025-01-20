@@ -58,17 +58,21 @@ module BitClust
 
     private
 
-    def new_screen: (singleton(LibraryIndexScreen) c, *untyped args) -> LibraryIndexScreen
-                  | (singleton(LibraryScreen) c, *untyped args) -> LibraryScreen
-                  | (singleton(ClassIndexScreen) c, *untyped args) -> ClassIndexScreen
-                  | (singleton(ClassScreen) c, *untyped args) -> ClassScreen
-                  | (singleton(MethodScreen) c, *untyped args) -> MethodScreen
-                  | (singleton(OpenSearchDescriptionScreen) c, *untyped args) -> OpenSearchDescriptionScreen
-                  | (singleton(SearchScreen) c, *untyped args) -> SearchScreen
-                  | (singleton(DocScreen) c, *untyped args) -> DocScreen
-                  | (singleton(FunctionScreen) c, *untyped args) -> FunctionScreen
-                  | (singleton(FunctionIndexScreen) c, *untyped args) -> FunctionIndexScreen
-                  | (untyped c, *untyped args) -> untyped
+    type screen_class = untyped
+    type screen_new_args = untyped
+    type screen_instance = untyped
+
+    def new_screen: (singleton(LibraryIndexScreen) c, *screen_new_args args) -> LibraryIndexScreen
+                  | (singleton(LibraryScreen) c, *screen_new_args args) -> LibraryScreen
+                  | (singleton(ClassIndexScreen) c, *screen_new_args args) -> ClassIndexScreen
+                  | (singleton(ClassScreen) c, *screen_new_args args) -> ClassScreen
+                  | (singleton(MethodScreen) c, *screen_new_args args) -> MethodScreen
+                  | (singleton(OpenSearchDescriptionScreen) c, *screen_new_args args) -> OpenSearchDescriptionScreen
+                  | (singleton(SearchScreen) c, *screen_new_args args) -> SearchScreen
+                  | (singleton(DocScreen) c, *screen_new_args args) -> DocScreen
+                  | (singleton(FunctionScreen) c, *screen_new_args args) -> FunctionScreen
+                  | (singleton(FunctionIndexScreen) c, *screen_new_args args) -> FunctionIndexScreen
+                  | (screen_class c, *screen_new_args args) -> screen_instance
   end
 
   class URLMapper
@@ -286,9 +290,9 @@ module BitClust
 
     def friendly_library_name: (String id) -> String
 
-    def compile_method: (MethodEntry m, ?untyped? opt) -> String
+    def compile_method: (MethodEntry m, ?RDCompiler::opt opt) -> String
 
-    def compile_function: (FunctionEntry f, ?untyped? opt) -> String
+    def compile_function: (FunctionEntry f, ?RDCompiler::opt opt) -> String
 
     def compile_rd: (String src) -> String
 
