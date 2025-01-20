@@ -484,6 +484,7 @@ module BitClust
       case arg
       when /(\w+):(.*)\#(\w+)\z/
         type, name, frag = $1, $2, $3
+        type || raise; name || raise; frag || raise
         case type
         when 'lib'
           title, t, id = name, LibraryEntry.type_id.to_s, name
@@ -495,6 +496,7 @@ module BitClust
           title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
         else
           raise "must not happen"
+          title = t = id = '' # for steep
         end
         label = @option[:database].refs[t, id, frag]
         label = title + '/' + label if label and name

@@ -8,21 +8,38 @@ module BitClust
 
     @type: (:function | :method | nil)
 
-    @library: untyped
+    @library: nil
 
-    @class: untyped
+    @class: nil
 
     @method: MethodEntry
 
-    @option: ::Hash[untyped, untyped]
+    # 正しく設定されているときしか使っていないはずなので、型をわけて使う部分でのチェックは省略する。
+    type option_internal = {
+      :catalog => MessageCatalog,
+      :database => MethodDatabase,
+      :entry => Entry,
+      :stop_on_syntax_error => bool,
+    }
+    type option = {
+      :catalog => MessageCatalog,
+      ?:database => Database,
+      ?:entry => Entry,
+      ?:stop_on_syntax_error => bool,
+    }
 
-    @opt: untyped
+    @option: option_internal
+
+    type opt = bool?
+
+    # method_signature で `string @method.klass.name + @method.typemark` を実行するかどうか
+    @opt: opt
 
     @f: LineInput
 
     @out: StringIO
 
-    @item_stack: untyped
+    @item_stack: Array[String?]
 
     include HTMLUtils
 
@@ -30,17 +47,17 @@ module BitClust
 
     include Translatable
 
-    def initialize: (URLMapper urlmapper, ?::Integer hlevel, ?::Hash[untyped, untyped] opt) -> void
+    def initialize: (URLMapper urlmapper, ?::Integer hlevel, ?option opt) -> void
 
     def compile: (String src) -> String
 
-    def compile_function: (FunctionEntry f, ?untyped? opt) -> String
+    def compile_function: (FunctionEntry f, ?opt opt) -> String
 
-    def compile_method: (MethodEntry m, ?untyped? opt) -> String
+    def compile_method: (MethodEntry m, ?opt opt) -> String
 
     private
 
-    def setup: (String src, ?untyped? entry) { () -> untyped } -> String
+    def setup: (String src, ?Entry? entry) { () -> void } -> String
 
     def library_file: () -> void
 
@@ -64,19 +81,19 @@ module BitClust
     # empty lines do not separate paragraphs.
     def dd_without_p: () -> void
 
-    def dt: (untyped s) -> ::String
+    def dt: (String s) -> String
 
-    def stop_on_syntax_error?: () -> (true | untyped)
+    def stop_on_syntax_error?: () -> bool
 
     def emlist: () -> void
 
     def list: () -> void
 
-    def canonicalize: (untyped lines) -> untyped
+    def canonicalize: (Array[String] lines) -> Array[String]
 
-    def paragraph: () -> untyped
+    def paragraph: () -> void
 
-    def read_paragraph: (untyped f) -> untyped
+    def read_paragraph: (LineInput f) -> Array[String]
 
     def see: () -> void
 
@@ -85,7 +102,7 @@ module BitClust
     def entry_info: () -> void
 
     # FIXME: parse @param, @return, ...
-    def entry_paragraph: () -> untyped
+    def entry_paragraph: () -> void
 
     def read_entry_paragraph: (LineInput f) -> Array[String]
 
