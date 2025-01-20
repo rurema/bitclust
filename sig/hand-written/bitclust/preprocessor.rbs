@@ -30,7 +30,7 @@ module BitClust
 
     def self.process: (string | _ToPath path, ?Database::database_properties params) -> Array[String]
 
-    def self.wrap: (File f, ?Database::database_properties params) -> instance
+    def self.wrap: (File | StringIO f, ?Database::database_properties params) -> instance
 
     def path: () -> String?
 

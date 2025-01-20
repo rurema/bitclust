@@ -33,14 +33,17 @@ module BitClust
     def RRDParser.parse(s, lib, params = {"version" => "1.9.0"})
       parser = new(MethodDatabase.dummy(params))
       if s.respond_to?(:to_io)
+        # @type var s: File
         io = s.to_io
       elsif s.respond_to?(:to_str)
+        # @type var s: String
         s1 = s.to_str
         require 'stringio'
         io = StringIO.new(s1)
       else
         io = s
       end
+      # @type var io: File | StringIO
       l = parser.parse(io, lib, params)
       return l, parser.db
     end

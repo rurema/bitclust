@@ -3,9 +3,9 @@ module BitClust
     include NameUtils
     include ParseUtils
 
-    def self.parse_stdlib_file: (String path, ?::Hash[String, String] params) -> LibraryEntry
+    def self.parse_stdlib_file: (String path, ?Database::database_properties params) -> LibraryEntry
 
-    def self.parse: (untyped s, String lib, ?::Hash[String, String] params) -> [LibraryEntry, MethodDatabase]
+    def self.parse: (File | String s, String lib, ?Database::database_properties params) -> [LibraryEntry, MethodDatabase]
 
     def self.split_doc: (String source) -> [String, String]
 
@@ -17,9 +17,9 @@ module BitClust
 
     @context: Context
 
-    def parse_file: (String path, String libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
+    def parse_file: (String path, String libname, ?Database::database_properties params) -> LibraryEntry
 
-    def parse: (File f, String libname, ?::Hash[untyped, untyped] params) -> LibraryEntry
+    def parse: (File | StringIO f, String libname, ?Database::database_properties params) -> LibraryEntry
 
     private
 
@@ -43,7 +43,7 @@ module BitClust
 
     def read_extends: (LineInput f, ?bool reopen) -> void
 
-    def tty_warn: (untyped msg) -> void
+    def tty_warn: (_ToS msg) -> void
 
     def read_level2_blocks: (LineInput f) -> void
 
