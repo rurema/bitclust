@@ -21,7 +21,7 @@ module BitClust
 
     COLORS: Hash[Symbol, String?]
 
-    LABELS: Hash[untyped, untyped]
+    LABELS: {}
 
     KEYWORDS: Array[String]
 

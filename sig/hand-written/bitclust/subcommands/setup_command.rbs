@@ -11,7 +11,18 @@ module BitClust
 
       @update: bool
 
-      @config: Hash[Symbol, untyped]
+      type config = {
+        :database_prefix => String,
+        :encoding        => String,
+        :versions        => Array[String],
+        :default_version => String,
+        :stdlibtree      => String,
+        :capi_src        => String,
+        :baseurl         => String,
+        :port            => String,
+        :pid_file        => String,
+      }
+      @config: config
 
       REPOSITORY_PATH: String
 
@@ -25,7 +36,7 @@ module BitClust
 
       def prepare: () -> void
 
-      def generate_config: (Pathname path, Hash[Symbol, untyped] config) -> void
+      def generate_config: (Pathname path, config config) -> void
 
       def checkout: (Pathname rubydoc_dir) -> void
 
