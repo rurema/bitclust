@@ -78,10 +78,13 @@ module BitClust
 
     def restore_methods: (String str) -> Array[MethodEntry]
 
+    interface _LoadableClass[T]
+      def load: (MethodDatabase, String) -> T
+    end
     # klass < Entry, Array[klass]
-    def restore_entries: (String str, untyped klass) -> ::Array[untyped]
+    def restore_entries: [S < _LoadableClass[T], T < Entry](String? str, S klass) -> Array[T]
 
-    def serialize_entry: (Entry x) -> String
+    def serialize_entry: (Entry? x) -> String
 
     def serialize_entries: (Array[Entry] xs) -> String
 
