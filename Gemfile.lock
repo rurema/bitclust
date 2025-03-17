@@ -15,7 +15,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (8.0.1)
+    activesupport (8.0.2)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -50,22 +50,22 @@ GEM
     fileutils (1.7.3)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    json (2.9.1)
+    json (2.10.2)
     language_server-protocol (3.17.0.4)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
-    logger (1.6.5)
-    minitest (5.25.4)
+    logger (1.6.6)
+    minitest (5.25.5)
     nkf (0.2.0)
-    parser (3.3.7.0)
+    parser (3.3.7.1)
       ast (~> 2.4.1)
       racc
     pathname (0.4.0)
     power_assert (2.0.5)
     progressbar (1.13.0)
     racc (1.8.1)
-    rack (3.1.8)
+    rack (3.1.12)
     rainbow (3.1.1)
     rake (13.2.1)
     rb-fsevent (0.11.2)
@@ -75,7 +75,7 @@ GEM
       logger
     rr (3.1.1)
     securerandom (0.4.1)
-    steep (1.9.3)
+    steep (1.9.4)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -104,7 +104,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
-    uri (1.0.2)
+    uri (1.0.3)
     webrick (1.9.1)
 
 PLATFORMS
