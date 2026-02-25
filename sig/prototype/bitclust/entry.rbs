@@ -1,6 +1,0 @@
-module BitClust
-  # Ancestor of entry classes.
-  class Entry
-    self.@slots: untyped
-  end
-end
