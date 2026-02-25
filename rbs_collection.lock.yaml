@@ -1,18 +1,14 @@
 ---
 path: ".gem_rbs_collection"
 gems:
-- name: bitclust-core
-  version: 1.4.0
-  source:
-    type: rubygems
 - name: cgi
-  version: '0'
+  version: '0.5'
   source:
-    type: stdlib
-- name: cgi-escape
-  version: '0'
-  source:
-    type: stdlib
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: date
   version: '0'
   source:
@@ -38,18 +34,18 @@ gems:
   source:
     type: stdlib
 - name: nkf
-  version: '0'
+  version: '0.2'
   source:
-    type: stdlib
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: openssl
   version: '0'
   source:
     type: stdlib
 - name: optparse
-  version: '0'
-  source:
-    type: stdlib
-- name: pathname
   version: '0'
   source:
     type: stdlib
@@ -66,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 71fb7ae83789ae150bdee1cd8a7cd3035b5d79e2
+    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -74,7 +70,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 71fb7ae83789ae150bdee1cd8a7cd3035b5d79e2
+    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
@@ -114,7 +110,7 @@ gems:
   source:
     type: stdlib
 - name: webrick
-  version: 1.9.1
+  version: 1.9.2
   source:
     type: rubygems
 - name: yaml
