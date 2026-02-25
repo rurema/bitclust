@@ -9,6 +9,10 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: cgi-escape
+  version: '0'
+  source:
+    type: stdlib
 - name: date
   version: '0'
   source:
