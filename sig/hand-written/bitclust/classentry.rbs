@@ -147,13 +147,13 @@ module BitClust
 
     def match_entry: (String t, String mname) -> String?
 
-    def singleton_method_names: () -> Array[String?]
+    def singleton_method_names: () -> Array[String]
 
-    def instance_method_names: () -> Array[String?]
+    def instance_method_names: () -> Array[String]
 
-    def constant_names: () -> Array[String?]
+    def constant_names: () -> Array[String]
 
-    def special_variable_names: () -> Array[String?]
+    def special_variable_names: () -> Array[String]
 
     def inherited_method_specs: () -> Array[MethodSpec]
 
