@@ -80,6 +80,7 @@ module BitClust
       when '.#' then 'module function'
       when '::' then 'constant'
       when '$'  then 'variable'
+      else raise "invalid typemark: #{typemark().inspect}"
       end
     end
 
