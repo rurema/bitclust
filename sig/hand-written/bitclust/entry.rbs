@@ -20,9 +20,9 @@ module BitClust
       attr_reader name: Symbol
       @type: property_type
 
-      def initial_value: () -> (String | bot)
-      def deserializer: () -> (String | bot)
-      def serializer: () -> (String | bot)
+      def initial_value: () -> String
+      def deserializer: () -> String
+      def serializer: () -> String
     end
 
     alias self.load self.new
