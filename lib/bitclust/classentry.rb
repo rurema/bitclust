@@ -406,15 +406,15 @@ module BitClust
 
     def singleton_method_names
       # should remove module functions?
-      _index().keys.select {|name| /\A\./ =~ name }.map {|name| name[1..-1] }
+      _index().keys.select {|name| /\A\./ =~ name }.filter_map {|name| name[1..-1] }
     end
 
     def instance_method_names
-      _index().keys.select {|name| /\A\#/ =~ name }.map {|name| name[1..-1] }
+      _index().keys.select {|name| /\A\#/ =~ name }.filter_map {|name| name[1..-1] }
     end
 
     def constant_names
-      _index().keys.select {|name| /\A\:/ =~ name }.map {|name| name[1..-1] }
+      _index().keys.select {|name| /\A\:/ =~ name }.filter_map {|name| name[1..-1] }
     end
 
     def special_variable_names
