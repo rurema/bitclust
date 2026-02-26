@@ -21,9 +21,9 @@ module BitClust
 
     alias typename type
 
-    def typechar: () -> String
+    def typechar: () -> NameUtils::typechar
 
-    def typemark: () -> String
+    def typemark: () -> NameUtils::typemark
 
     def idstring: () -> String
   end
