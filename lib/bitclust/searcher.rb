@@ -507,10 +507,10 @@ module BitClust
     end
 
     def convert(string)
-      return string if @database.nil?
+      return string if database.nil?
       _output_encoding = output_encoding
       return string if _output_encoding.nil?
-      input_nkf_option = encoding_to_nkf_option(@database.encoding)
+      input_nkf_option = encoding_to_nkf_option(database.encoding)
       output_nkf_option = encoding_to_nkf_option(_output_encoding)
       if input_nkf_option and output_nkf_option
         NKF.nkf("-#{input_nkf_option.upcase}#{output_nkf_option}", string)
