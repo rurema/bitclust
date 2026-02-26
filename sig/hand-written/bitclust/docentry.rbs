@@ -12,7 +12,7 @@ module BitClust
 
     def hash: () -> Integer
 
-    def <=>: (DocEntry other) -> (-1 | 0 | 1)
+    def <=>: (DocEntry other) -> ::Integer?
 
     def name: () -> String
 
