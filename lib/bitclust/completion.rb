@@ -31,7 +31,7 @@ module BitClust
       when pattern.empty?
         recordclass = SearchResult::Record
         SearchResult.new(self, pattern, classes(),
-            methods().map {|m| s = m.spec; recordclass.new(s, s, m) })
+            methods().map {|m| s = m.spec; recordclass.new(s, s, m) }) # steep:ignore
       when pattern.special_variable?
         c = fetch_class('Kernel')
         SearchResult.new(self, pattern, [c], search_svar(c, pattern.method || raise))
@@ -74,7 +74,7 @@ GC.enable; GC.start; x
         c.entries.map {|m|
           if not pattern.type or m.typemark == pattern.type
             s = m.spec
-            SearchResult::Record.new(s, s, m)
+            SearchResult::Record.new(s, s, m) # steep:ignore
           else
             nil
           end
@@ -112,7 +112,7 @@ GC.enable; GC.start; x
       recs = try(typechars(pattern.type, pattern.method)) {|ts|
         expand_method_name(pattern.klass || raise, ts, pattern.method || raise)
       }
-      SearchResult.new(self, pattern, recs.map {|rec| rec.class_name }, recs)
+      SearchResult.new(self, pattern, recs.map {|rec| rec.class_name }, recs) # steep:ignore
     end
 
     def expand_method_name(c, ts, m)
