@@ -1,6 +1,6 @@
 interface _Gets
   def gets: () -> String?
-  def respond_to?: (Object::name name, ?boolish include_all) -> bool
+  def respond_to?: (interned name, ?boolish include_all) -> bool
   def path: () -> String?
   def lineno: () -> Integer
   def inspect: () -> String
