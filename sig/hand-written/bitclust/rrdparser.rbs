@@ -77,8 +77,7 @@ module BitClust
 
       attr_accessor type: NameUtils::typename?
 
-      attr_reader visibility: (:public | :private | :protected)?
-      attr_writer visibility: Symbol?
+      attr_accessor visibility: (:public | :private | :protected)?
 
       def categorize: (String? category) -> void
 
