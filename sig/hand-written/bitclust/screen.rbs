@@ -22,6 +22,15 @@ module BitClust
       ?:meta_robots_content => Array[String],
       # App
       ?:datadir => String,
+      # ::BitClust::Subcommands::StatichtmlCommand::manager_config
+      ?:suffix      => String,
+      ?:tochm_mode  => true,
+      ?:fs_casesensitive => bool,
+      ?:canonical_base_url => String?,
+      ?:edit_base_url => String?,
+      ?:stop_on_syntax_error => bool,
+      # ::BitClust::Subcommands::ChmCommand::manager_config
+      ?:baseurl     => String,
     }
 
     @conf: conf
@@ -76,13 +85,13 @@ module BitClust
   end
 
   class URLMapper
-    type conf = {
-      ?:base_url => String,
-      ?:cgi_url => String,
-      ?:css_url => String,
-      ?:favicon_url => String,
-      ?:theme => String?,
-    }
+    # type conf = {
+    #   ?:base_url => String,
+    #   ?:cgi_url => String,
+    #   ?:css_url => String,
+    #   ?:favicon_url => String,
+    #   ?:theme => String?,
+    # }
 
     @css_url: String
 
@@ -92,7 +101,8 @@ module BitClust
 
     include NameUtils
 
-    def initialize: (conf h) -> void
+    # `conf` causes Ruby::ArgumentTypeMismatch
+    def initialize: (ScreenManager::conf h) -> void
 
     attr_reader base_url: String
 

@@ -62,14 +62,15 @@ module BitClust
 
         attr_accessor bitclust_html_base: String
 
-        type config = {
-          :suffix => String,
-          :fs_casesensitive => bool,
-          :canonical_base_url => String?,
-          :edit_base_url => String?,
-        }
+        # type config = {
+        #   :suffix => String,
+        #   :fs_casesensitive => bool,
+        #   :canonical_base_url => String?,
+        #   :edit_base_url => String?,
+        # }
 
-        def initialize: (config h) -> void
+        # `config` causes Ruby::ArgumentTypeMismatch
+        def initialize: (manager_config h) -> void
 
         def library_url: (String name) -> String
 
