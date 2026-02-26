@@ -92,7 +92,8 @@ module BitClust
     def initialize: (Plain compiler, { :describe_all => bool, :line => bool, :encoding => String? } opts) -> void
 
     attr_writer database: (MethodDatabase | ::DRb::DRbObject)
-    attr_reader database: MethodDatabase
+    # DRbObject forwards methods call to its remote MethodDatabase
+    def database: () -> MethodDatabase
 
     def show_class: (Array[ClassEntry] cs) -> void
 
