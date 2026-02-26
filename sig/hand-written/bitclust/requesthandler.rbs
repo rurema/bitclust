@@ -12,6 +12,14 @@ module BitClust
     type conf_class = { :database => MethodDatabase, :level => Integer }
     type conf_function = { :database => (MethodDatabase | FunctionDatabase) }
     type conf_search = { :database => MethodDatabase, :q => WEBrick::HTTPUtils::FormData, :elapsed_time => Float }
+    type any_conf = {
+      :database => MethodDatabase,
+      # accept but ignore
+      ?:target_version => untyped,
+      ?:level => Integer,
+      ?:q => WEBrick::HTTPUtils::FormData,
+      ?:elapsed_time => Float,
+    }
 
     @conf: conf
 

@@ -308,7 +308,7 @@ module BitClust
   class IndexScreen < TemplateScreen
     @entries: Array[any_entry]
 
-    def initialize: (TemplateScreen::conf h, Array[any_entry] entries, RequestHandler::conf opt) -> void
+    def initialize: (TemplateScreen::conf h, Array[any_entry] entries, RequestHandler::any_conf opt) -> void
 
     def encoding: () -> String
 
@@ -318,7 +318,7 @@ module BitClust
   class EntryBoundScreen[E < any_entry] < TemplateScreen
     @entry: E
 
-    def initialize: (TemplateScreen::conf h, E entry, RequestHandler::conf opt) -> void
+    def initialize: (TemplateScreen::conf h, E entry, RequestHandler::any_conf opt) -> void
 
     def encoding: () -> String
 
