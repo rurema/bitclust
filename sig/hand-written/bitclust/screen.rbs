@@ -34,7 +34,7 @@ module BitClust
 
     public
 
-    def entry_screen: (Entry | Array[Entry] entry, RequestHandler::conf_entry opt) -> Screen
+    def entry_screen: (any_entry | Array[any_entry] entry, RequestHandler::conf_entry opt) -> Screen
 
     def library_index_screen: (Array[LibraryEntry] libs, RequestHandler::conf opt) -> LibraryIndexScreen
 
@@ -147,7 +147,7 @@ module BitClust
   end
 
   class Screen
-    def self.for_entry: (Entry | Array[Entry] entry) -> singleton(Screen)
+    def self.for_entry: (any_entry | Array[any_entry] entry) -> singleton(Screen)
 
     def status: () -> Integer?
 
@@ -205,9 +205,9 @@ module BitClust
       ?:gtm_tracking_id => String?,
       ?:meta_robots_content => Array[String],
       # IndexScreen
-      ?:entries => Array[Entry],
+      ?:entries => Array[any_entry],
       # EntryBoundScreen
-      :entry => Entry,
+      :entry => any_entry,
     }
 
     @conf: conf
@@ -306,19 +306,19 @@ module BitClust
   end
 
   class IndexScreen < TemplateScreen
-    @entries: Array[Entry]
+    @entries: Array[any_entry]
 
-    def initialize: (TemplateScreen::conf h, Array[Entry] entries, RequestHandler::conf opt) -> void
+    def initialize: (TemplateScreen::conf h, Array[any_entry] entries, RequestHandler::conf opt) -> void
 
     def encoding: () -> String
 
     alias charset encoding
   end
 
-  class EntryBoundScreen < TemplateScreen
-    @entry: Entry
+  class EntryBoundScreen[E < any_entry] < TemplateScreen
+    @entry: E
 
-    def initialize: (TemplateScreen::conf h, Entry entry, RequestHandler::conf opt) -> void
+    def initialize: (TemplateScreen::conf h, E entry, RequestHandler::conf opt) -> void
 
     def encoding: () -> String
 
@@ -331,9 +331,7 @@ module BitClust
     def current_url: () -> String
   end
 
-  class LibraryScreen < EntryBoundScreen
-    @entry: LibraryEntry
-
+  class LibraryScreen < EntryBoundScreen[LibraryEntry]
     def body: () -> String
 
     def draw_tree: (Array[ClassEntry] cs) { (?) -> void } -> void
@@ -366,14 +364,12 @@ module BitClust
 
     @elapsed_time: Float
 
-    def initialize: (TemplateScreen::conf h, Array[Entry] entries, RequestHandler::conf_search opt) -> void
+    def initialize: (TemplateScreen::conf h, Array[any_entry] entries, RequestHandler::conf_search opt) -> void
 
     def body: () -> String
   end
 
-  class ClassScreen < EntryBoundScreen
-    @entry: ClassEntry
-
+  class ClassScreen < EntryBoundScreen[ClassEntry]
     @alevel: Integer
 
     def initialize: (TemplateScreen::conf h, ClassEntry entry, RequestHandler::conf_class opt) -> void
@@ -397,9 +393,7 @@ module BitClust
     def current_url: () -> String
   end
 
-  class FunctionScreen < EntryBoundScreen
-    @entry: FunctionEntry
-
+  class FunctionScreen < EntryBoundScreen[FunctionEntry]
     def body: () -> String
 
     def current_url: () -> String
@@ -411,9 +405,7 @@ module BitClust
     def current_url: () -> String
   end
 
-  class DocScreen < EntryBoundScreen
-    @entry: DocEntry
-
+  class DocScreen < EntryBoundScreen[DocEntry]
     def breadcrumb_title: () -> String
 
     def body: () -> String

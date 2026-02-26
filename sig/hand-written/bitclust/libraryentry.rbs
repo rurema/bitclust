@@ -1,5 +1,5 @@
 module BitClust
-  class LibraryEntry < Entry
+  class LibraryEntry < Entry[MethodDatabase]
     def self.type_id: () -> :library
 
     def initialize: (MethodDatabase db, String id) -> void

@@ -1,5 +1,6 @@
 module BitClust
-  class Entry
+  class Entry[DB < Database]
+
     include NameUtils
 
     interface _PersistentProperties
@@ -27,10 +28,10 @@ module BitClust
 
     alias self.load self.new
 
-    def initialize: ((MethodDatabase | FunctionDatabase) db) -> void
+    def initialize: (DB db) -> void
 
-    # FunctionEntry では FunctionDatabase
-    @db: MethodDatabase
+    # FunctionEntry では FunctionDatabase、他は MethodDatabase
+    @db: DB
 
     # サブクラスで定義されている
     attr_reader id: String
@@ -84,12 +85,14 @@ module BitClust
     # klass < Entry, Array[klass]
     def restore_entries: [S < _LoadableClass[T], T < Entry](String? str, S klass) -> Array[T]
 
-    def serialize_entry: (Entry? x) -> String
+    def serialize_entry: (any_entry? x) -> String
 
-    def serialize_entries: (Array[Entry] xs) -> String
+    def serialize_entries: (Array[any_entry] xs) -> String
 
     def objpath: () -> ::String
 
     def path_string: (Array[String] path) -> String
   end
+
+  type any_entry = Entry[FunctionDatabase] | Entry[MethodDatabase]
 end

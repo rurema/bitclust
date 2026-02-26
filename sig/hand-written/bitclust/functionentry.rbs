@@ -1,8 +1,6 @@
 module BitClust
-  class FunctionEntry < Entry
+  class FunctionEntry < Entry[FunctionDatabase]
     def self.type_id: () -> :function
-
-    @db: FunctionDatabase
 
     def initialize: (FunctionDatabase db, String id) -> void
     attr_reader id: String

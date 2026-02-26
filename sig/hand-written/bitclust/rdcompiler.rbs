@@ -13,14 +13,14 @@ module BitClust
     # 正しく設定されているときしか使っていないはずなので、型をわけて使う部分でのチェックは省略する。
     type option_internal = {
       :database => MethodDatabase,
-      :entry => Entry,
+      :entry => Entry[MethodDatabase],
       :force => bool,
       :stop_on_syntax_error => bool,
     }
     type option = {
       :catalog => MessageCatalog,
       ?:database => Database,
-      ?:entry => Entry,
+      ?:entry => any_entry,
       ?:force => bool,
       ?:stop_on_syntax_error => bool,
     }
@@ -54,7 +54,7 @@ module BitClust
 
     private
 
-    def setup: (String src, ?Entry? entry) { () -> void } -> String
+    def setup: (String src, ?any_entry? entry) { () -> void } -> String
 
     def library_file: () -> void
 

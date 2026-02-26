@@ -1,5 +1,5 @@
 module BitClust
-  class ClassEntry < Entry
+  class ClassEntry < Entry[MethodDatabase]
     include Enumerable[MethodEntry]
 
     def self.type_id: () -> :class

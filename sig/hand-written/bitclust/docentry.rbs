@@ -1,5 +1,5 @@
 module BitClust
-  class DocEntry < Entry
+  class DocEntry < Entry[MethodDatabase]
     def self.type_id: () -> :doc
 
     def initialize: (MethodDatabase db, String id) -> void

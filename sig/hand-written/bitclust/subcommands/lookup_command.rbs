@@ -13,9 +13,9 @@ module BitClust
 
       def exec: (Subcommand::argv argv, Subcommand::options options) -> void
 
-      def fetch_entry: (FunctionDatabase | MethodDatabase db, (nil | :library | :class | :method | :function) type, String key) -> Entry
+      def fetch_entry: (FunctionDatabase | MethodDatabase db, (nil | :library | :class | :method | :function) type, String key) -> any_entry
 
-      def fill_template: (String template, Entry entry) -> String
+      def fill_template: (String template, any_entry entry) -> String
 
       def get_template: ((:library | :class | :method | :function) type, (:text | :html) format) -> String
 

@@ -28,7 +28,7 @@ module BitClust
 
     def dirty?: () -> bool
 
-    def each_dirty_entry: () { (Entry) -> void } -> void
+    def each_dirty_entry: () { (any_entry) -> void } -> void
 
     def dirty_library: (LibraryEntry lib) -> void
 

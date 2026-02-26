@@ -2,10 +2,10 @@
 class LineInput
   def self.for_string: (String s) -> LineInput
 
-  def initialize: (_Gets | StringIO f, ?BitClust::Entry? entry) -> void
+  def initialize: (_Gets | StringIO f, ?BitClust::any_entry? entry) -> void
 
   @input: _Gets | StringIO
-  @entry: BitClust::Entry?
+  @entry: BitClust::any_entry?
   @buf: Array[String]
   @lineno: Integer
   @eof_p: bool

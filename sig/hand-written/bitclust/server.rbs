@@ -11,7 +11,7 @@ module BitClust
     include DRb::DRbUndumped
   end
 
-  class Entry
+  class Entry[DB < Database]
     include DRb::DRbUndumped
   end
 
