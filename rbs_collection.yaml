@@ -38,7 +38,6 @@ gems:
   - name: yaml
 
   - name: progressbar
-  - name: webrick
   - name: test-unit
   - name: test-unit-notify
   - name: test-unit-rr
