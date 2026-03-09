@@ -17,10 +17,12 @@ end
 
 desc "Re-generate sig/prototype"
 task :sig do
-  FileUtils.rm_rf 'sig/prototype'
-  sh 'rbs prototype rb --out-dir=sig/prototype lib'
-  FileUtils.rm 'sig/prototype/bitclust/compat.rbs'
-  sh 'rbs subtract --write sig/prototype sig/hand-written'
+  out_dir = 'sig-prototype'
+  FileUtils.rm_rf out_dir
+  sh "rbs prototype rb --out-dir=#{out_dir} lib"
+  FileUtils.rm "#{out_dir}/bitclust/compat.rbs"
+  sh "rbs subtract --write #{out_dir} sig"
+  FileUtils.rmdir ["#{out_dir}/bitclust/generators", "#{out_dir}/bitclust/subcommands", "#{out_dir}/bitclust", "#{out_dir}"]
   sh 'rbs validate'
 end
 
