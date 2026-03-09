@@ -80,10 +80,13 @@ module BitClust
           }
         end
         items.sort_by!{|item| item[:path] }
-        # steep:ignore:start
-        # FIXME: ERB.new のキーワード引数化に対応が必要
-        contents = ERB.new(File.read(@templatedir + "contents"), nil, "-").result(binding)
-        # steep:ignore:end
+        template = (@templatedir + "contents").read
+        if ::ERB.instance_method(:initialize).parameters.last.first == :key
+          erb = ::ERB.new(template, trim_mode: '-')
+        else
+          erb = ::ERB.new(template, nil, "-") # steep:ignore UnexpectedPositionalArgument
+        end
+        contents = erb.result(binding)
         File.open(epub_directory + "contents.opf", "w") do |f|
           f.write contents
         end
