@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gem "rake"
-gem "steep", require: false
+gem "steep", "~> 1.9.0", require: false
 
 gem "uri"
 gem "pathname"
