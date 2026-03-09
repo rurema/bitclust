@@ -6,7 +6,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: date
@@ -38,7 +38,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: openssl
@@ -62,7 +62,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: rake
@@ -70,7 +70,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 1acc2fda1726ddac0bd60c4da369ce7266479413
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: ripper
