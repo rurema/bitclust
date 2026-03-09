@@ -50,7 +50,7 @@ module BitClust
           FileUtils.rm_rf(prefix) if @cleanup
           init_argv = ["version=#{version}", "encoding=#{@config[:encoding]}"]
           # @type var init_options: Subcommand::options
-          init_options = { :prefix => prefix }
+          init_options = { :prefix => prefix, :capi => false }
           InitCommand.new.exec(init_argv, init_options)
           update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
           update_argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
