@@ -267,7 +267,7 @@ EOS
 
         begin
           new_html = html.gsub(/charset=utf-8/i, 'charset=Windows-31J').
-                     encode('windows-31j', **{ :fallback => FIX_UNDEF })
+                     encode('windows-31j', fallback: FIX_UNDEF)
           mode = 'w:windows-31j'
         rescue
           new_html = html # write file as it is, utf-8
@@ -283,7 +283,7 @@ EOS
         $stderr.print("creating #{path} ...")
         str = ERB.new(skel).result(binding).
               gsub(/charset=utf-8/i, 'charset=Windows-31J').
-              encode('windows-31j', **{ :fallback => FIX_UNDEF } )
+              encode('windows-31j', fallback: FIX_UNDEF)
         path.open('w:windows-31j') do |f|
           f.write(str)
         end
