@@ -189,12 +189,6 @@ module BitClust
       (not @method  or m.name?(@method || raise))
     end
 
-    def select_classes(cs)
-      return cs unless @klass
-      raise "[MAYBE BUG] BitClust::MethodNamePattern#expand_ic is not defined"
-      # expand_ic(cs, @klass, @crecache)
-    end
-
     def empty?
       not @klass and not @type and not @method
     end

@@ -384,11 +384,6 @@ module BitClust
       fetch_class(spec.klass).fetch_method(spec)
     end
 
-    def search_method(pattern)
-      raise "[MAYBE BUG] BitClust::SearchResult#first is not defined"
-      # search_methods(pattern).first
-    end
-
     def search_methods(pattern)
       result = _search_methods(pattern)
       if result.fail?

@@ -106,9 +106,6 @@ module BitClust
 
     def match?: (MethodEntry m) -> bool
 
-    # unused?
-    def select_classes: (untyped cs) -> untyped
-
     def empty?: () -> bool
 
     def class?: () -> boolish

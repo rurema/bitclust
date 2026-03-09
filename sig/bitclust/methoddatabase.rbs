@@ -134,8 +134,6 @@ module BitClust
 
     def fetch_method: (MethodSpec spec) -> (MethodEntry | bot)
 
-    def search_method: (MethodNamePattern pattern) -> MethodEntry?
-
     def search_methods: (MethodNamePattern pattern) -> (SearchResult | bot)
   end
 end
