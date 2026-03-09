@@ -354,8 +354,7 @@ module BitClust
       if inherit
         _smap().key?(name)
       else
-        raise '[MAYBE BUG] singleton_methods(level=0) should pass Integer'
-        # singleton_methods(false).detect {|m| m.name?(name) }
+        singleton_methods(0).detect {|m| m.name?(name) }
       end
     end
 
@@ -363,8 +362,7 @@ module BitClust
       if inherit
         _imap().key?(name)
       else
-        raise '[MAYBE BUG] instance_methods(level=0) should pass Integer'
-        # instance_methods(false).detect {|m| m.name?(name) }
+        instance_methods(0).detect {|m| m.name?(name) }
       end
     end
 
@@ -372,8 +370,7 @@ module BitClust
       if inherit
         ancestors().any? {|c| c.constant?(name, false) }
       else
-        raise '[MAYBE BUG] constants(level=0) should pass Integer'
-        # constants(false).detect {|m| m.name?(name) }
+        constants(0).detect {|m| m.name?(name) }
       end
     end
 
