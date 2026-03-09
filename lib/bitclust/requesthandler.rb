@@ -95,7 +95,7 @@ module BitClust
 
     def handle_search(req)
       q0 = req.query['q'] || ''
-      q = ERB::Util.url_encode(q0)
+      q = URI.decode_www_form_component(q0)
       start = Time.now.to_i
       ret = SimpleSearcher.search_pattern(@db, q)
       elapsed_time = Time.now.to_f - start.to_f
