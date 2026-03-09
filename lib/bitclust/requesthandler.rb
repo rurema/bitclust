@@ -94,7 +94,7 @@ module BitClust
     end
 
     def handle_search(req)
-      q0 = req.query['q'] || ''
+      q0 = req.query['q'].to_s || ''
       q = URI.decode_www_form_component(q0)
       start = Time.now.to_i
       ret = SimpleSearcher.search_pattern(@db, q)
