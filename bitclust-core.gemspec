@@ -36,4 +36,5 @@ EOD
   s.add_runtime_dependency "webrick"
   s.add_runtime_dependency "drb"
   s.add_runtime_dependency "nkf"
+  s.add_runtime_dependency "json"
 end
