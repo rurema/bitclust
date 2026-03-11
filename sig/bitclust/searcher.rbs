@@ -41,7 +41,7 @@ module BitClust
 
     def new_local_database: (MethodDatabase? db) -> MethodDatabase
 
-    def new_database: () -> (MethodDatabase | ::DRb::DRbObject)
+    def new_database: () -> MethodDatabase
 
     def dblocation_name: () -> (URI::File | URI::Generic | String)
 
@@ -55,7 +55,7 @@ module BitClust
 
     def default_dbpath: () -> String?
 
-    def search_pattern: ((MethodDatabase | ::DRb::DRbObject)? db, Array[String] argv) -> void
+    def search_pattern: (MethodDatabase? db, Array[String] argv) -> void
 
     def show_all_classes: (MethodDatabase db) -> void
 
@@ -91,9 +91,7 @@ module BitClust
 
     def initialize: (Plain compiler, { :describe_all => bool, :line => bool, :encoding => String? } opts) -> void
 
-    attr_writer database: (MethodDatabase | ::DRb::DRbObject)
-    # DRbObject forwards methods call to its remote MethodDatabase
-    def database: () -> MethodDatabase
+    attr_accessor database: MethodDatabase
 
     def show_class: (Array[ClassEntry] cs) -> void
 

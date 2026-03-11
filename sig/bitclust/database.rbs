@@ -4,7 +4,7 @@ module BitClust
 
     def self.datadir?: (::String dir) -> bool
 
-    def self.connect: (::URI::Generic uri) -> (instance | ::DRb::DRbObject)
+    def self.connect: (::URI::Generic uri) -> instance
 
     type propkey_type = ::String
     type properties_type = ::Hash[propkey_type, String]
