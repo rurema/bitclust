@@ -92,6 +92,10 @@ module BitClust
 
     def exec(argv, options = {})
       db = nil
+      prefix = options[:prefix]
+      if prefix
+        db = BitClust::MethodDatabase.new(prefix)
+      end
       if @listen_url
         spawn_server db
       else

@@ -37,7 +37,7 @@ module BitClust
 
     def refe_mode_check: (Array[String] argv) -> void
 
-    def spawn_server: (nil db) -> Thread
+    def spawn_server: (MethodDatabase? db) -> Thread
 
     def new_local_database: (MethodDatabase? db) -> MethodDatabase
 
