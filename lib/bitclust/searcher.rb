@@ -94,7 +94,11 @@ module BitClust
       db = nil
       prefix = options[:prefix]
       if prefix
-        db = BitClust::MethodDatabase.new(prefix)
+        if options[:capi]
+          db = BitClust::FunctionDatabase.new(prefix)
+        else
+          db = BitClust::MethodDatabase.new(prefix)
+        end
       end
       if @listen_url
         spawn_server db

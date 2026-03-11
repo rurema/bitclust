@@ -37,11 +37,11 @@ module BitClust
 
     def refe_mode_check: (Array[String] argv) -> void
 
-    def spawn_server: (MethodDatabase? db) -> Thread
+    def spawn_server: ((MethodDatabase | FunctionDatabase)? db) -> Thread
 
-    def new_local_database: (MethodDatabase? db) -> MethodDatabase
+    def new_local_database: ((MethodDatabase | FunctionDatabase)? db) -> (MethodDatabase | FunctionDatabase)
 
-    def new_database: () -> MethodDatabase
+    def new_database: () -> (MethodDatabase | FunctionDatabase)
 
     def dblocation_name: () -> (URI::File | URI::Generic | String)
 
@@ -55,7 +55,7 @@ module BitClust
 
     def default_dbpath: () -> String?
 
-    def search_pattern: (MethodDatabase? db, Array[String] argv) -> void
+    def search_pattern: ((MethodDatabase | FunctionDatabase)? db, Array[String] argv) -> void
 
     def show_all_classes: (MethodDatabase db) -> void
 
