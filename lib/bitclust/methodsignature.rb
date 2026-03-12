@@ -65,8 +65,9 @@ module BitClust
         "self[#{@params}]" + (@type ? " -> #{@type}" : "")
       when "[]="    # aset
         params = @params&.split(',')
-        val = params&.pop
-        "self[#{params&.join(',')&.strip}] = #{val&.strip}"
+        raise ParseError, "invalid parameters for []= operator: #{@params.inspect}" if params.nil? || params.size < 2
+        val = params.pop or raise ParseError, "missing value parameter for []= operator: #{@params.inspect}"
+        "self[#{params.join(',').strip}] = #{val.strip}"
       when "`"  # `command`
         "`#{@params}`" + (@type ? " -> #{@type}" : "")
       when /\A\W/   # binary operator
