@@ -226,7 +226,7 @@ module BitClust
 <head><title>Error</title></head>
 <body>
 <h1>Error</h1>
-<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name || raise)})
+<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name)})
 #{@error.backtrace&.map {|s| escape_html(s) }&.join("\n")}</pre>
 </body>
 </html>
@@ -255,7 +255,7 @@ module BitClust
 <head><title>NotFound</title></head>
 <body>
 <h1>NotFound</h1>
-<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name || raise)})</pre>
+<pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name)})</pre>
 </body>
 </html>
       EndHTML
