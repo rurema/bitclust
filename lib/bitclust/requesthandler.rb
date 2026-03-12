@@ -268,7 +268,6 @@ module BitClust
     end
 
     def parse_path_info
-      path_info = path_info()
       return nil unless path_info
       _, type, param = path_info.split('/', 3)
       param = nil if not param or param.empty?

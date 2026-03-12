@@ -101,6 +101,7 @@ module BitClust
 
     def parse_path_info: () -> [String?, String?]?
 
+    %a{pure}
     def path_info: () -> String?
   end
 
