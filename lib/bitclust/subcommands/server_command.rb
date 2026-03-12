@@ -178,11 +178,13 @@ module BitClust
             Signal.trap(:TERM) {
               server.shutdown
               begin
-                File.unlink @pid_file || raise if @pid_file
+                pid_file = @pid_file
+                File.unlink pid_file if pid_file
               rescue Errno::ENOENT
               end
             }
-            File.open(@pid_file || raise, 'w') {|f| f.write Process.pid } if @pid_file
+            pid_file = @pid_file
+            File.open(pid_file, 'w') {|f| f.write Process.pid } if pid_file
           end
         end
         exit if $".include?("exerb/mkexy.rb")
