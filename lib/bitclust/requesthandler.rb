@@ -75,8 +75,8 @@ module BitClust
     end
 
     def handle_method(req)
-      method_spec = req.method_spec
-      ms = @db.fetch_methods(method_spec) if method_spec
+      method_spec = req.method_spec or raise RequestError, 'method request but method_spec is nil'
+      ms = @db.fetch_methods(method_spec)
       raise MethodNotFound.new(method_spec.to_s) if ms.nil? || ms.empty?
       @screenmanager.method_screen(ms, @conf).response
     end
