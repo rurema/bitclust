@@ -5,7 +5,7 @@ require 'bitclust/interface'
 module BitClust
 
   # Main class of BitClust server application.
-  # Actual actions are implemneted by RequestHandler.
+  # Actual actions are implemented by RequestHandler.
   #
   # Supports Rack and WEBrick.
   class App
