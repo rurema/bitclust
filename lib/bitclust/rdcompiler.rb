@@ -481,8 +481,13 @@ module BitClust
     def reference_link(arg)
       case arg
       when /(\w+):(.*)\#(\w+)\z/
+        # @type var type: String
+        # @type var name: String
+        # @type var frag: String
         type, name, frag = $1, $2, $3
-        type || raise; name || raise; frag || raise
+        # @type var title: String
+        # @type var t: String
+        # @type var id: String
         case type
         when 'lib'
           title, t, id = name, LibraryEntry.type_id.to_s, name
@@ -494,7 +499,6 @@ module BitClust
           title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
         else
           raise "must not happen"
-          title = t = id = '' # for steep
         end
         label = @option[:database].refs[t, id, frag]
         label = title + '/' + label if label and name
