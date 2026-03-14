@@ -314,6 +314,12 @@ module BitClust
       %Q(<meta name="description" content="">)
     end
 
+    MINIMUM_SUPPORTED_RUBY_VERSION = '3.1'
+
+    def eol?
+      /\A\d(\.\d)+\z/ =~ ruby_version && ruby_version < MINIMUM_SUPPORTED_RUBY_VERSION
+    end
+
     private
 
     def default_encoding

@@ -13,6 +13,12 @@
   <link rel="search" type="application/opensearchdescription+xml" title="<%= _('Ruby %s Reference Manual', ruby_version()) %>" href="<%=h opensearchdescription_url() %>">
 </head>
 <body>
+<% if eol?() %>
+<p class="eol-warning">
+<%= _('This reference manual is for a version of Ruby that is no longer maintained.') %>
+<a href="https://www.ruby-lang.org/ja/documentation/"><%= _('Latest version') %></a>
+</p>
+<% end %>
 <%= yield %>
 <div id="footer">
   <a rel="license" href="https://creativecommons.org/licenses/by/3.0/">
