@@ -45,7 +45,7 @@ module BitClust
         if /refm\/doc\// =~ target_file
           @rd_file = true if @rd_file.nil?
         end
-        options = { 'version' => @version }
+        options = { 'version' => @version } #: Database::database_properties
         manager = ScreenManager.new(:templatedir => @templatedir,
                                     :base_url => @baseurl,
                                     :cgi_url => @baseurl,
@@ -66,7 +66,7 @@ module BitClust
             return
           rescue ParseError => ex
             $stderr.puts ex.message
-            $stderr.puts ex.backtrace[0], ex.backtrace[1..-1].map{|s| "\tfrom " + s}
+            $stderr.puts ex.backtrace[0], ex.backtrace[1..-1]&.map{|s| "\tfrom " + s}
           end
         end
 
@@ -86,8 +86,12 @@ module BitClust
       def lookup(lib, key)
         case
         when @capi && NameUtils.functionname?(key)
-          lib.find {|func| func.name == key}
+          # @type var lib: Array[FunctionEntry]
+          lib.is_a?(Array) or raise
+          lib.find {|func| func.name == key} or raise
         when NameUtils.method_spec?(key)
+          # @type var lib: LibraryEntry
+          lib.is_a?(LibraryEntry) or raise
           spec = MethodSpec.parse(key)
           if spec.constant?
             begin
@@ -99,6 +103,8 @@ module BitClust
             lib.fetch_methods(spec)
           end
         when NameUtils.classname?(key)
+          # @type var lib: LibraryEntry
+          lib.is_a?(LibraryEntry) or raise
           lib.fetch_class(key)
         else
           raise InvalidKey, "wrong search key: #{key.inspect}"

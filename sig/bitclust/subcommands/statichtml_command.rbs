@@ -1,0 +1,131 @@
+module BitClust
+  module Subcommands
+    class StatichtmlCommand < Subcommand
+      @verbose: bool
+
+      @catalogdir: Pathname?
+
+      @templatedir: Pathname
+
+      @themedir: Pathname
+
+      @suffix: String
+
+      @fs_casesensitive: bool
+
+      @canonical_base_url: String?
+
+      @edit_base_url: String?
+
+      @gtm_tracking_id: String?
+
+      @meta_robots_content: Array[String]
+
+      @stop_on_syntax_error: bool
+
+      @outputdir: Pathname
+
+      type manager_config = {
+        :catalogdir  => Pathname?,
+        :suffix      => String,
+        :templatedir => Pathname,
+        :themedir    => Pathname,
+        :css_url     => String,
+        :favicon_url => String,
+        :cgi_url     => String,
+        :tochm_mode  => true,
+        :fs_casesensitive => bool,
+        :canonical_base_url => String?,
+        :edit_base_url => String?,
+        :gtm_tracking_id => String?,
+        :meta_robots_content => Array[String],
+        :stop_on_syntax_error => bool,
+        ?:urlmapper  => URLMapperEx,
+      }
+
+      @manager_config: manager_config
+
+      @urlmapper: URLMapperEx
+
+      include NameUtils
+
+      class URLMapperEx < URLMapper
+        @suffix: String
+
+        @fs_casesensitive: bool
+
+        @canonical_base_url: String
+
+        @edit_base_url: String
+
+        include NameUtils
+
+        attr_accessor bitclust_html_base: String
+
+        # type config = {
+        #   :suffix => String,
+        #   :fs_casesensitive => bool,
+        #   :canonical_base_url => String?,
+        #   :edit_base_url => String?,
+        # }
+
+        # `config` causes Ruby::ArgumentTypeMismatch
+        def initialize: (manager_config h) -> void
+
+        def library_url: (String name) -> String
+
+        def class_url: (String name) -> String
+
+        def method_url: (String spec) -> String
+
+        def function_url: (String name) -> String
+
+        def document_url: (String name) -> String
+
+        def css_url: () -> String
+
+        def custom_css_url: (String filename) -> String
+
+        def custom_js_url: (String filename) -> String
+
+        def favicon_url: () -> String
+
+        def library_index_url: () -> String
+
+        def function_index_url: () -> String
+
+        def canonical_url: (String current_url) -> String
+
+        def edit_url: (Location location) -> String
+
+        def encodename_package: (String str) -> String
+      end
+
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def create_manager_config: () -> void
+
+      def create_html_entries: (String title, Array[any_entry] entries, ScreenManager manager, Database db) -> void
+
+      def create_html_methods: (String title, Hash[String, Array[MethodEntry]] methods, ScreenManager manager, MethodDatabase db) -> void
+
+      def create_index_html: (Pathname outputdir) -> void
+
+      def create_html_file: (any_entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
+
+      def create_html_method_file: (String method_name, Array[MethodEntry] entries, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> void
+
+      def create_html_function_file: (any_entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
+
+      def create_html_file_p: (any_entry | Array[MethodEntry] entry, ScreenManager manager, Pathname path, Database db) -> void
+
+      def create_file: (Pathname path, String str, ?{?:verbose => bool} options) -> void
+
+      def encodename_package: (String str) -> String
+    end
+  end
+end

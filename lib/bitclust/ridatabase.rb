@@ -169,7 +169,7 @@ module RI
       name = full_name()
       unless /\#/ =~ name
         components = name.split('::')
-        m = components.pop
+        m = components.pop || raise
         components.join('::') + '.' + m
       else
         name
@@ -259,15 +259,17 @@ class Formatter
     s = trim_space(s)
     s.sub!(/\A[a-z]\w+\./, '')
     s.sub!(/=>/, '->')
+    # steep:ignore:start
     s.sub!(/(->.*)\bstr(ing)?\b/){ $1 + 'String' }
     s.sub!(/(->.*)\bint(eger)?\b/){ $1 + 'Integer' }
     s.sub!(/(->.*)\b(an_)?obj\b/){ $1 + 'object' }
     s.sub!(/(->.*)\b(a_)?hash\b/){ $1 + 'Hash' }
     s.sub!(/(->.*)\b(an_)?array\b/){ $1 + 'Array' }
-    s.sub!(/ or /, ' | ')    
+    # steep:ignore:end
+    s.sub!(/ or /, ' | ')
     s
   end
-  
+
   def format_elements(elems)
     return "" unless elems
     return "" if elems.empty?
@@ -275,6 +277,7 @@ class Formatter
   end
 
   def format_element(e)
+    # steep:ignore:start
     case e
     when SM::Flow::P, SM::Flow::LI
       paragraph(e)
@@ -289,6 +292,7 @@ class Formatter
     else
       raise "unkwnown markup: #{e.class}"
     end
+    # steep:ignore:end
   end
 
   def headline(e)
@@ -306,6 +310,7 @@ class Formatter
   end
 
   def list(e)
+    # steep:ignore:start
     case e.type
     when SM::ListBase::BULLET
       e.contents.map {|item| "* #{format_element(e)}" }.join("\n")
@@ -329,6 +334,7 @@ class Formatter
     else
       raise "unknown list type: #{e.type.inspect}"
     end
+    # steep:ignore:end
   end
 
   def remove_inline(str)

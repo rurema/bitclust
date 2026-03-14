@@ -33,7 +33,7 @@ module BitClust
       m = METHOD_SIGNATURE_RE.match(line) or
           raise ParseError, %Q(unknown signature format: "#{line.strip}")
       method, gvar, params, block, type = m.captures
-      new(method || gvar, params && params.strip, block && block.strip, type && type.strip)
+      new(method || gvar || raise, params && params.strip, block && block.strip, type && type.strip)
     end
 
     def initialize(name, params, block, type)
@@ -64,8 +64,9 @@ module BitClust
       when "[]"     # aref
         "self[#{@params}]" + (@type ? " -> #{@type}" : "")
       when "[]="    # aset
-        params = @params.split(',')
-        val = params.pop
+        params = @params&.split(',')
+        raise ParseError, "invalid parameters for []= operator: #{@params.inspect}" if params.nil? || params.size < 2
+        val = params.pop or raise ParseError, "missing value parameter for []= operator: #{@params.inspect}"
         "self[#{params.join(',').strip}] = #{val.strip}"
       when "`"  # `command`
         "`#{@params}`" + (@type ? " -> #{@type}" : "")

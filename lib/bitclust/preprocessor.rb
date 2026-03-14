@@ -44,6 +44,7 @@ module BitClust
 
     def self.read(path, params = {})
       if path.respond_to?(:gets)
+        # @type var path: File
         io = wrap(path, params)
       else
         io = wrap(fopen(path, 'r:UTF-8'), params)
@@ -93,8 +94,8 @@ module BitClust
         when /\A\#@include\s*\((.*?)\)/
           next unless current_cond.processing?
           begin
-            file = $1.strip
-            basedir = File.dirname(line.location.file)
+            file = ($1 || raise).strip
+            basedir = File.dirname(line.location.file || raise)
             @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
           rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
@@ -123,7 +124,7 @@ module BitClust
       end
       if @buf.empty?
         unless cond_toplevel?
-          parse_error "unterminated \#@if", @last_if
+          parse_error "unterminated \#@if", @last_if || raise
         end
       end
       @buf.shift
@@ -150,7 +151,7 @@ module BitClust
     end
 
     def current_cond
-      @state_stack.last
+      @state_stack.last || raise
     end
 
     def cond_init
@@ -162,13 +163,13 @@ module BitClust
     end
 
     def cond_push(bool)
-      last = @state_stack.last
+      last = @state_stack.last || raise
       @state_stack.push(last.next(bool, :condition))
     end
 
     def cond_invert
-      b = @state_stack.pop.processing?
-      last = @state_stack.last
+      b = (@state_stack.pop || raise).processing?
+      last = @state_stack.last || raise
       @state_stack.push(last.next(!b, :condition))
     end
 
@@ -229,10 +230,10 @@ module BitClust
     def eval_primary(s)
       s.skip(/\s+/)
       if t = s.scan(/\w+/)
-        unless @params.key?(t)
+        unless @params.key?(t) # steep:ignore
           scan_error "database property `#{t}' not exist"
         end
-        @params[t]
+        @params[t] # steep:ignore
       elsif t = s.scan(/".*?"/)
         eval(t)
       elsif t = s.scan(/'.*?'/)
@@ -258,7 +259,7 @@ module BitClust
     end
 
     def samplecode_push(description)
-      last = @state_stack.last
+      last = @state_stack.last || raise
       @state_stack.push(last.next(true, :samplecode))
     end
 
@@ -267,7 +268,7 @@ module BitClust
     end
 
     def samplecode_processing?
-      @state_stack.last.samplecode?
+      (@state_stack.last || raise).samplecode?
     end
 
     def samplecode_description_by_value(line)
@@ -323,8 +324,8 @@ module BitClust
       while line = f.gets
         if /\A\#@include\s*\((.*?)\)/ =~ line
           begin
-            file = $1.strip
-            basedir = File.dirname(line.location.file)
+            file = ($1 || raise).strip
+            basedir = File.dirname(line.location.file || raise)
             @buf.concat LineCollector.process("#{basedir}/#{file}")
           rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"

@@ -1,0 +1,43 @@
+module BitClust
+  # Parser for C API reference file (refm/capi/src/*)
+  # Much simpler than Ruby API reference parser(RRDParser)
+  # because C APIs does not have library, class, etc.
+  class FunctionReferenceParser
+    @db: FunctionDatabase
+
+    @filename: String
+
+    @path: String
+
+    # Returns an array of FunctionEntry
+    def self.parse_file: (String path, ?Database::database_properties params) -> Array[FunctionEntry]
+
+    def initialize: (FunctionDatabase db) -> void
+
+    def parse_file: (String path, String filename, Database::database_properties properties) -> Array[FunctionEntry]
+
+    def parse: (File f, String filename, ?Database::database_properties params) -> Array[FunctionEntry]
+
+
+    private
+
+    def file_entries: (LineInput f) -> void
+
+    def entry: (String header, Array[String] body) -> FunctionEntry
+
+    def parse_header: (String header) -> FunctionHeader
+  end
+
+  # Represents C function signature
+  # (Used internally in this file)
+  class FunctionHeader < Struct[untyped]
+    attr_accessor macro: bool
+    attr_accessor private: bool
+    attr_accessor type: String
+    attr_accessor name: String
+    attr_accessor params: String?
+
+    def self.new: () -> instance
+                | ...
+  end
+end

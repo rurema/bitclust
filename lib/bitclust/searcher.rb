@@ -92,6 +92,14 @@ module BitClust
 
     def exec(argv, options = {})
       db = nil
+      prefix = options[:prefix]
+      if prefix
+        if options[:capi]
+          db = BitClust::FunctionDatabase.new(prefix)
+        else
+          db = BitClust::MethodDatabase.new(prefix)
+        end
+      end
       if @listen_url
         spawn_server db
       else
@@ -107,7 +115,7 @@ module BitClust
 
     def server_mode_check(argv)
       if @dblocation
-        unless @dblocation.scheme == 'file'
+        unless @dblocation&.scheme == 'file'
           $stderr.puts "Give local path to --database option on server mode"
           exit 1
         end
@@ -140,19 +148,19 @@ module BitClust
       #compiler = RDCompiler::Text.new
       compiler = Plain.new
       @view = TerminalView.new(compiler,
-                              {:describe_all => @describe_all, 
+                              {:describe_all => @describe_all,
                                :line => @linep,
                                :encoding => @encoding})
     end
 
     def spawn_server(db)
-      Server.new(new_local_database(db)).listen @listen_url, @foreground
+      Server.new(new_local_database(db)).listen (@listen_url || raise), @foreground
     end
 
     def new_local_database(db)
       return db if db
-      path = @dblocation ? @dblocation.path : dbpath()
-      MethodDatabase.new(path)
+      path = @dblocation ? @dblocation&.path : dbpath()
+      MethodDatabase.new(path || raise)
     end
 
     def new_database
@@ -172,7 +180,7 @@ module BitClust
 
     def find_dblocation
       %w( REFE2_SERVER BITCLUST_SERVER ).each do |key|
-        return URI.parse(ENV[key]) if ENV[key]
+        return URI.parse(ENV.fetch(key)) if ENV[key]
       end
       if path = dbpath()
         URI.parse("file://#{path}")
@@ -188,7 +196,7 @@ module BitClust
     def env_dbpath
       [ 'REFE2_DATADIR', 'BITCLUST_DATADIR' ].each do |key|
         if ENV.key?(key)
-          unless MethodDatabase.datadir?(ENV[key])
+          unless MethodDatabase.datadir?(ENV.fetch(key))
             raise InvalidDatabase, "environment variable #{key} given but #{ENV[key]} is not a valid BitClust database"
           end
           return ENV[key]
@@ -202,7 +210,7 @@ module BitClust
       [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
         return path if MethodDatabase.datadir?(path)
       end
-      config_path = Pathname(ENV['HOME']) + ".bitclust" + "config"
+      config_path = Pathname(ENV.fetch('HOME')) + ".bitclust" + "config"
       if config_path.exist?
         config = YAML.load_file(config_path)
         return "#{config[:database_prefix]}-#{config[:default_version]}"
@@ -213,10 +221,14 @@ module BitClust
     def search_pattern(db, argv)
       db ||= new_database()
       @view.database ||= db if @view
+      # FIXME なぜか else 節にきかないのでここに書いておく
+      # @type var db: MethodDatabase
       case @target_type || db
       when :class
+        # @type var db: MethodDatabase
         find_class db, argv[0]
       when FunctionDatabase
+        # @type var db: FunctionDatabase
         case argv.size
         when 0
           show_all_functions db
@@ -226,6 +238,7 @@ module BitClust
           raise "must not happen: #{argv.size}"
         end
       else
+        # @type var db: MethodDatabase
         case argv.size
         when 0
           show_all_classes db
@@ -236,7 +249,7 @@ module BitClust
           find_method db, c, nil, m
         when 3
           c, t, m = *argv
-          check_method_type t
+          check_method_type t || raise
           find_method db, c, t, m
         else
           raise "must not happen: #{argv.size}"
@@ -278,7 +291,8 @@ module BitClust
       when /\A\$/   # Special variable.
         find_method db, 'Kernel', '$', pattern.sub(/\A\$/, '')
       when /[\#,]\.|\.[\#,]|[\#\.\,]/   # method spec
-        find_method db, *parse_method_spec_pattern(pattern)
+        c, t, m = parse_method_spec_pattern(pattern)
+        find_method db, c, t, m
       when /::/   # Class name or constant name.
         find_constant db, pattern
       when /\A[A-Z]/   # Method name or class name, but class name is better.
@@ -307,9 +321,9 @@ module BitClust
 
     def parse_method_spec_pattern(pat)
       _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,])/, 2)
-      c = _c.reverse
-      t = _t.tr(',', '#').sub(/\#\./, '.#')
-      m = _m.reverse
+      c = (_c || raise).reverse
+      t = (_t || raise).tr(',', '#').sub(/\#\./, '.#')
+      m = (_m || raise).reverse
       return c, t, m
     end
 
@@ -465,7 +479,7 @@ module BitClust
       puts title
       print_names methods.map{|m| m.name }
     end
-    
+
     def describe_method(rec)
       unless rec.entry.library.name == '_builtin'
         puts "require '#{rec.entry.library.name}'"
@@ -501,10 +515,10 @@ module BitClust
     end
 
     def convert(string)
-      return string if @database.nil?
+      return string if database.nil?
       _output_encoding = output_encoding
       return string if _output_encoding.nil?
-      input_nkf_option = encoding_to_nkf_option(@database.encoding)
+      input_nkf_option = encoding_to_nkf_option(database.encoding)
       output_nkf_option = encoding_to_nkf_option(_output_encoding)
       if input_nkf_option and output_nkf_option
         NKF.nkf("-#{input_nkf_option.upcase}#{output_nkf_option}", string)

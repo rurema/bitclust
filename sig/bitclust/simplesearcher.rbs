@@ -1,0 +1,23 @@
+module BitClust
+  # Tiny search engine for BitClust server.
+  # Note: loads all the entries onto memory, so first search will be slow.
+  module SimpleSearcher
+    include NameUtils
+
+    def self?.search_pattern: (MethodDatabase db, _ToStr pat) -> Array[ClassEntry | MethodEntry]
+
+    def self?.find_class: (MethodDatabase db, String cname) -> Array[ClassEntry]
+
+    def self?.find_class_method: (MethodDatabase db, String cname, String? type, String mname) -> Array[MethodEntry]
+
+    def self?.find_methods: (MethodDatabase db, String mname) -> Array[MethodEntry]
+
+    def self?.find_special_vars: (MethodDatabase db, String mname) -> Array[MethodEntry]
+
+    def self?.to_pattern: (_ToStr pat) -> String
+
+    def self?.parse_method_spec_pattern: (String pat) -> [String?, String?, String?]
+
+    def self?.parse_method_spec_pattern0: (String q) -> [String, nil, String]
+  end
+end

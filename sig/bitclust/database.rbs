@@ -1,0 +1,73 @@
+module BitClust
+  class Database
+    include NameUtils
+
+    def self.datadir?: (::String dir) -> bool
+
+    def self.connect: (::URI::Generic uri) -> instance
+
+    type propkey_type = ::String
+    type properties_type = ::Hash[propkey_type, String]
+
+    # 'source' is internal use only
+    type database_propkey = 'version' | 'encoding' | 'source'
+    type database_properties = Hash[database_propkey, String]
+
+    def self.dummy: (?database_properties params) -> instance
+
+    def initialize: (String? prefix) -> void
+    @prefix: String?
+    @properties: properties_type?
+    @in_transaction: bool
+    @properties_dirty: bool
+
+    def dummy?: () -> bool
+
+    def transaction: () { () -> void } -> void
+
+    def dirty?: () -> bool
+    def clear_dirty: () -> void
+    def commit: () -> void
+
+    private
+
+    def check_transaction: () -> void
+
+    public
+
+    def properties: () -> database_properties
+
+    def propkeys: () -> ::Array[propkey_type]
+
+    # accept propkey_type, but should not happen
+    def propget: (database_propkey key) -> String
+               | (propkey_type key) -> String?
+
+    # accept propkey_type, but should not happen
+    def propset: (database_propkey key, String value) -> void
+               | (propkey_type key, String value) -> void
+
+    def encoding: () -> String
+
+    def exist?: (::String rel) -> bool
+
+    def entries: (::String rel) -> ::Array[::String]
+
+    def makepath: (::String rel) -> void
+
+    def load_properties: ('properties' rel) -> database_properties
+                       | (::String rel) -> properties_type
+
+    def save_properties: (::String rel, properties_type h) -> void
+
+    def read: (::String rel) -> ::String
+
+    def foreach_line: (::String rel) { (::String line) -> void } -> nil
+
+    def atomic_write_open: [T] (::String rel) { (::File) -> T } -> void
+
+    private
+
+    def realpath: (::String rel) -> ::String
+  end
+end

@@ -133,7 +133,7 @@ module BitClust
     end
 
     def on_default(event, token, data)
-      event_name = event.to_s.sub(/\Aon_/, "")   # :on_event --> "event"
+      event_name = event.to_s.sub(/\Aon_/, "")   ## :on_event --> "event"
       style = COLORS[event_name.to_sym]
       escaped_token = escape_html(token)
       data << (style ? "<span class=\"#{style}\">#{escaped_token}</span>" : escaped_token)
@@ -221,7 +221,7 @@ module BitClust
 
     def on_op(token, data)
       case
-      when token == "::" && [:class, :module].include?(@stack.last)
+      when token == "::" && [:class, :module].include?(_ = @stack.last)
         @name_buffer << token
       when token == "<<" && @stack.last == :class
         @stack.pop
@@ -346,7 +346,7 @@ module BitClust
       case
       when token == "'"
         data << "#{token}</span>"
-      when %i[qwords words qsymbols symbols].include?(@stack.last)
+      when %i[qwords words qsymbols symbols].include?(_ = @stack.last)
         @stack.pop
         data << "#{token}</span>"
       else
@@ -407,7 +407,7 @@ module BitClust
     def on___end__(token, data)
       on_default(:on___end__, token, data)
       style = COLORS[:comment]
-      data << "<span class=\"#{style}\">#{escape_html(@src.lines[lineno..-1].join)}</span>"
+      data << "<span class=\"#{style}\">#{escape_html((@src.lines[lineno..-1] || raise).join)}</span>"
       data
     end
 

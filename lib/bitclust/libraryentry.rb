@@ -16,8 +16,6 @@ module BitClust
   # Entry for libraries ("_builtin", "yaml", etc.)
   class LibraryEntry < Entry
 
-    include Enumerable
-
     def LibraryEntry.type_id
       :library
     end
@@ -68,8 +66,8 @@ module BitClust
 
     persistent_properties {
       property :requires, '[LibraryEntry]'
-      property :classes,  '[ClassEntry]'   # :defined classes
-      property :methods,  '[MethodEntry]'  # :added/:redefined entries
+      property :classes,  '[ClassEntry]'   ## :defined classes
+      property :methods,  '[MethodEntry]'  ## :added/:redefined entries
       property :source,   'String'
       property :sublibraries, '[LibraryEntry]'
       property :is_sublibrary,   'bool'
@@ -108,7 +106,7 @@ module BitClust
     end
 
     def all_classes
-      return @all_classes if @all_classes
+      return (@all_classes || raise) if @all_classes
       required_classes = (sublibraries & requires).map{|l| l.classes }.flatten
       @all_classes = (classes() + required_classes).uniq.sort
     end
@@ -160,6 +158,7 @@ module BitClust
     def classmap
       @classmap ||=
           begin
+            # @type var h: Hash[String, ClassEntry]
             h = {}
             classes().each do |c|
               h[c.name] = c
@@ -170,9 +169,10 @@ module BitClust
     private :classmap
 
     def fetch_methods(spec)
+      # @type var ms: Array[MethodEntry]
       ms = if c = get_class(spec.klass)
            then c.fetch_methods(spec)
-           else []
+           else [] #: Array[MethodEntry]
            end +
            methods().select {|m| spec.match?(m) }
       if ms.empty?
@@ -197,6 +197,7 @@ module BitClust
     def methodmap
       @methodmap ||=
           begin
+            # @type var h: Hash[MethodEntry, MethodEntry]
             h = {}
             methods().each do |m|
               h[m] = m

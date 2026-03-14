@@ -66,7 +66,8 @@ module BitClust
   class MethodSpec
 
     def MethodSpec.parse(str)
-      new(*NameUtils.split_method_spec(str))
+      c, t, m = NameUtils.split_method_spec(str)
+      new(c, t, m)
     end
 
     def initialize(c, t, m, library = nil)
@@ -182,15 +183,10 @@ module BitClust
     private :tesc
 
     def match?(m)
-      (not @library or m.library.name?(@library)) and
-      (not @klass   or m.klass.name?(@klass)) and
+      (not @library or m.library.name?(@library || raise)) and
+      (not @klass   or m.klass.name?(@klass || raise)) and
       (not @type    or m.typemark == @type) and
-      (not @method  or m.name?(@method))
-    end
-
-    def select_classes(cs)
-      return cs unless @klass
-      expand_ic(cs, @klass, @crecache)
+      (not @method  or m.name?(@method || raise))
     end
 
     def empty?

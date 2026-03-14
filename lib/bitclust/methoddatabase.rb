@@ -47,14 +47,15 @@ module BitClust
     attr_writer :refs
 
     def init
-      FileUtils.rm_rf @prefix
-      FileUtils.mkdir_p @prefix
-      Dir.mkdir "#{@prefix}/library"
-      Dir.mkdir "#{@prefix}/class"
-      Dir.mkdir "#{@prefix}/method"
-      Dir.mkdir "#{@prefix}/doc"
-      FileUtils.touch "#{@prefix}/properties"
-      FileUtils.touch "#{@prefix}/refs"
+      prefix = @prefix || raise
+      FileUtils.rm_rf prefix
+      FileUtils.mkdir_p prefix
+      Dir.mkdir "#{prefix}/library"
+      Dir.mkdir "#{prefix}/class"
+      Dir.mkdir "#{prefix}/method"
+      Dir.mkdir "#{prefix}/doc"
+      FileUtils.touch "#{prefix}/properties"
+      FileUtils.touch "#{prefix}/refs"
     end
 
     #
@@ -179,7 +180,7 @@ module BitClust
       root_path = Pathname.new(@root).expand_path
       Dir.glob("#{@root}/../../doc/**/*.rd").each do |f|
         if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f
-          id = libname2id($1)
+          id = libname2id($1 || raise)
           se = DocEntry.new(self, id)
           s = Preprocessor.read(f, properties)
           title, source = RRDParser.split_doc(s)
@@ -311,7 +312,7 @@ module BitClust
       check_transaction
       id = classname2id(name)
       if exist?("class/#{id}")
-        c = load_class(id)
+        c = load_class(id) || raise
         c.clear
       else
         c = (@classmap[id] ||= ClassEntry.new(self, id))
@@ -331,6 +332,7 @@ module BitClust
     private :load_class
 
     def load_extent(entry_class)
+      # @type var h: Hash[String, untyped]
       h = {}
       id_extent(entry_class).each do |id|
         h[id] = entry_class.new(self, id)
@@ -380,10 +382,6 @@ module BitClust
 
     def fetch_method(spec)
       fetch_class(spec.klass).fetch_method(spec)
-    end
-
-    def search_method(pattern)
-      search_methods(pattern).first
     end
 
     def search_methods(pattern)

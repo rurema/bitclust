@@ -1,0 +1,51 @@
+module BitClust
+  # Web server interface for BitClust server
+  class Interface
+    type webrick_conf = {}
+    @webrick_conf: webrick_conf
+
+    @handler: BitClust::RequestHandler
+
+    $bitclust_context_cache: ::BitClust::RequestHandler?
+
+    def initialize: (?webrick_conf webrick_conf) { () -> BitClust::RequestHandler } -> void
+
+    # for WEBrick servlet
+    def get_instance: (WEBrick::HTTPServer server) -> WEBrickServlet
+
+    def main: () -> void
+
+    # for rack
+    def call: (Rack::env env) -> Rack::response
+
+    private
+
+    def fastcgi?: () -> bool?
+
+    def mod_ruby?: () -> false
+
+    class CGI < ::WEBrick::CGI
+      @handler: BitClust::RequestHandler
+
+      def main: (BitClust::RequestHandler handler) -> void
+
+      def do_GET: (WEBrick::HTTPRequest wreq, WEBrick::HTTPResponse wres) -> void
+
+      alias do_POST do_GET
+    end
+
+    class FCGI < CGI
+      @handler: BitClust::RequestHandler
+
+      def main: (BitClust::RequestHandler handler) -> void
+    end
+
+    class WEBrickServlet < ::WEBrick::HTTPServlet::AbstractServlet
+      @options: [BitClust::RequestHandler]
+
+      def do_GET: (WEBrick::HTTPRequest wreq, WEBrick::HTTPResponse wres) -> void
+
+      alias do_POST do_GET
+    end
+  end
+end

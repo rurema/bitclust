@@ -1,0 +1,96 @@
+module BitClust
+  class SyntaxHighlighter < Ripper::Filter
+    include BitClust::HTMLUtils
+
+    class Error < StandardError
+      def initialize: (String name, Integer? lineno, Integer? column, String error_message) -> void
+
+      @name: String
+      @lineno: Integer?
+      @column: Integer?
+      @error_message: String
+
+      def message: () -> String
+    end
+
+    class ParseError < Error
+    end
+
+    class CompileError < Error
+    end
+
+    COLORS: Hash[Symbol, String?]
+
+    LABELS: {}
+
+    KEYWORDS: Array[String]
+
+    KEYWORDS_PSEUDO: Array[String]
+
+    BUILTINS_G: Array[String]
+
+    BUILTINS_Q: Array[String]
+
+    BUILTINS_B: Array[String]
+
+    def initialize: (String src, ?::String filename, ?::Integer lineno) -> void
+
+    @src: String
+    @stack: Array[Symbol]
+    @name_buffer: Array[String]
+
+    def on_default: (Symbol event, String token, String data) -> String
+
+    def on_embdoc_beg: (String token, String data) -> String
+
+    def on_embdoc_end: (String token, String data) -> String
+
+    def on_ident: (String token, String data) -> String
+
+    def on_const: (String token, String data) -> String
+
+    def on_kw: (String token, String data) -> String
+
+    def on_period: (String token, String data) -> String
+
+    def on_op: (String token, String data) -> String
+
+    def on_sp: (String token, String data) -> String
+
+    def on_nl: (String token, String data) -> String
+
+    def on_semicolon: (String token, String data) -> String
+
+    def on_regexp_beg: (String token, String data) -> String
+
+    def on_regexp_end: (String token, String data) -> String
+
+    def on_symbeg: (String token, String data) -> String
+
+    def on_tstring_beg: (String token, String data) -> String
+
+    def on_tstring_content: (String token, String data) -> String
+
+    def on_tstring_end: (String token, String data) -> String
+
+    def on_qwords_beg: (String token, String data) -> String
+
+    def on_words_beg: (String token, String data) -> String
+
+    def on_qsymbols_beg: (String token, String data) -> String
+
+    def on_symbols_beg: (String token, String data) -> String
+
+    def on_heredoc_beg: (String token, String data) -> String
+
+    def on_heredoc_end: (String token, String data) -> String
+
+    def on_embexpr_beg: (String token, String data) -> String
+
+    def on_embexpr_end: (String token, String data) -> String
+
+    def on___end__: (String token, String data) -> String
+
+    def highlight: () -> String
+  end
+end

@@ -37,7 +37,9 @@ module BitClust
         super
         @db.transaction {
           if @root
-            @db.update_by_stdlibtree @root
+            db = @db
+            db.is_a?(MethodDatabase) or raise
+            db.update_by_stdlibtree(@root || raise)
           end
           argv.each do |path|
             @db.update_by_file path, @library || guess_library_name(path)

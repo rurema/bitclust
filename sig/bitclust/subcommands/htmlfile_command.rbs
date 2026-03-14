@@ -1,0 +1,25 @@
+module BitClust
+  module Subcommands
+    class HtmlfileCommand < Subcommand
+      @target: String
+
+      @templatedir: Pathname | String
+
+      @baseurl: String
+
+      @version: String
+
+      @capi: bool
+
+      @rd_file: bool?
+
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def lookup: (Array[FunctionEntry] | LibraryEntry lib, String key) -> (FunctionEntry | ClassEntry | Array[MethodEntry] | bot)
+    end
+  end
+end

@@ -1,0 +1,36 @@
+module BitClust
+  module HTMLUtils
+    include NameUtils
+
+    @urlmapper: URLMapper
+
+    private
+
+    def link_to_method: (MethodEntry m, ?bool specp) -> String
+
+    def library_link: (String name, ?String? label, ?String? frag) -> String
+
+    def class_link: (String name, ?String? label, ?String? frag) -> String
+
+    def method_link: (String spec, ?String? label, ?String? frag) -> String
+
+    def method_url: (String spec, ?String? frag) -> String
+
+    def function_link: (String name, ?String? label, ?String? frag) -> String
+
+    def document_link: (String name, ?String? label, ?String? frag) -> String
+
+    def fragment: (String? str) -> String
+
+    def a_href: (String url, String label) -> ::String
+
+    ESC: Hash[String, String]
+
+    def escape_html: (String str) -> String
+
+    ESCrev: Hash[String, String]
+
+    # '&amp;', '&quot;', '&lt;', '&gt;' 以外の /&\w+;/ が nil に置き換えられるので使わない方が良い。
+    def unescape_html: (String str) -> String
+  end
+end

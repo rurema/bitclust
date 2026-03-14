@@ -26,6 +26,9 @@ module BitClust
         db.transaction {
           argv.each do |kv|
             k, v = kv.split('=', 2)
+            if k.nil? || v.nil?
+              raise "argument must be KEY=VALUE, but #{kv.inspect}"
+            end
             db.propset k, v
           end
         }

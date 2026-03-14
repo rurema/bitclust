@@ -12,17 +12,21 @@ module BitClust
   class RefsDatabase
     def self.load(src)
       if src.respond_to?(:to_str)
+        # @type var src: _ToStr
         buf = fopen(src.to_str, 'r:UTF-8'){|f| f.read}
       elsif src.respond_to?(:to_io)
+        # @type var src: _ToIO
         buf = src.to_io.read
       else
+        # @type var src: _Reader
         buf = src.read
       end
 
       refs = self.new
-      buf.each_line{|l|
+      buf&.each_line{|l|
         if /((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+),((?:\\,|[^,])+)\n/ =~ l
-          type, id, linkid, desc = [$1, $2, $3, $4].map{|e| e.gsub(/\\(.)/){|s| $1 == ',' ? ',' : s } }
+          type, id, linkid, desc = [$1, $2, $3, $4].map{|e| e&.gsub(/\\(.)/){|s| $1 == ',' ? ',' : s } }
+          type || raise; id || raise; linkid || raise; desc || raise
           refs[type, id, linkid] = desc
         end
       }
@@ -43,13 +47,16 @@ module BitClust
 
     def save(s)
       if s.respond_to?(:to_str)
+        # @type var s: _ToStr
         path = s.to_str
         io = fopen(path, 'w:UTF-8')
       elsif s.respond_to?(:to_io)
+        # @type var s: _ToIO
         io = s.to_io
       else
         io = s
       end
+      # @type var io: IO
 
       @h.sort.each{|k, v|
         io.write(  [k, v].flatten.map{|e| e.gsub(/,/, '\\,') }.join(',') + "\n" )
@@ -61,7 +68,7 @@ module BitClust
       entry.source.each_line{|l|
         if /\A={1,6}\[a:(\w+)\] *(.*)/ =~ l
           entry.labels.each{|name|
-            self[entry.class.type_id, name, $1] = $2
+            self[entry.class.type_id, name, $1 || raise] = $2 || raise
           }
         end
       }

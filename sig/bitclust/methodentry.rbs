@@ -1,0 +1,101 @@
+module BitClust
+  class MethodEntry < Entry[MethodDatabase]
+    def self.type_id: () -> :method
+
+    def initialize: (MethodDatabase db, String id) -> void
+
+    attr_reader id: String
+
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def hash: () -> ::Integer
+
+    def <=>: (untyped other) -> ::Integer?
+
+    KIND_NUM: { defined: 0, redefined: 1, added: 2 }
+
+    def sort_key: () -> [String, (0 | 1 | 2)]
+
+    def name: () -> String
+
+    def typename: () -> NameUtils::typename
+
+    alias type typename
+
+    def typemark: () -> NameUtils::typemark
+
+    def typechar: () -> NameUtils::typechar
+
+    def type_label: () -> String
+
+    def library: () -> LibraryEntry
+
+    attr_writer library: LibraryEntry
+
+    def klass: () -> ClassEntry
+
+    attr_writer klass: ClassEntry
+
+    attr_accessor names: Array[String]
+    attr_accessor visibility: (:public | :private | :protected)
+    attr_accessor kind: (:defined | :added | :redefined | :undefined)
+    attr_accessor source: String
+    attr_accessor source_location: Location
+
+    def inspect: () -> String
+
+    def spec: () -> MethodSpec
+
+    def spec_string: () -> String
+
+    def label: () -> String
+
+    def short_label: () -> String
+
+    def index_id: () -> String
+
+    def labels: () -> Array[String]
+
+    def name?: (String name) -> bool
+
+    def name_match?: (Regexp re) -> bool
+
+    def really_public?: () -> bool
+
+    def public?: () -> bool
+
+    def protected?: () -> bool
+
+    def private?: () -> bool
+
+    def public_singleton_method?: () -> bool
+
+    def private_singleton_method?: () -> bool
+
+    def public_instance_method?: () -> bool
+
+    def private_instance_method?: () -> bool
+
+    def protected_instance_method?: () -> bool
+
+    def singleton_method?: () -> bool
+
+    def instance_method?: () -> bool
+
+    def constant?: () -> bool
+
+    def special_variable?: () -> bool
+
+    def defined?: () -> bool
+
+    def added?: () -> bool
+
+    def redefined?: () -> bool
+
+    def undefined?: () -> bool
+
+    def description: () -> String?
+  end
+end

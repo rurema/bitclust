@@ -1,0 +1,31 @@
+module BitClust
+  module Subcommands
+    class AncestorsCommand < Subcommand
+      @prefix: String?
+
+      @requires: Array[String]
+
+      @version: String
+
+      @all: bool
+
+      @verbose: bool
+
+      include CrossRubyUtils
+
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def ancestors: (String ruby, Array[String] requires, String classname) -> Array[String]
+
+      def check_ancestors: (MethodDatabase db, String ruby, Array[String] requires, String classname) -> void
+
+      def check_all_ancestors: (MethodDatabase db, String ruby, Array[String] requires) -> void
+
+      def defined_classes: (String ruby, String lib, Array[String] rejects) -> Array[String]
+    end
+  end
+end

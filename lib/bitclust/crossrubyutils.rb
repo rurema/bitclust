@@ -14,7 +14,8 @@ module BitClust
     private
 
     def print_crossruby_table(&block)
-      print_table(*build_crossruby_table(&block))
+      vers, table = build_crossruby_table(&block)
+      print_table(vers, table)
     end
 
     def print_table(vers, table)
@@ -44,7 +45,7 @@ module BitClust
     end
 
     def get_ruby(version)
-      forall_ruby(ENV['PATH']) do |ruby, |
+      forall_ruby(ENV.fetch('PATH')) do |ruby, |
         v = `#{ruby} -e 'print RUBY_VERSION'`
         patch = `#{ruby} -e 'print RUBY_PATCHLEVEL if defined? RUBY_PATCHLEVEL'`
         if version == v or ( version == v.succ and patch == '5000')
@@ -58,9 +59,9 @@ module BitClust
       ENV.delete 'RUBYOPT'
       ENV.delete 'RUBYLIB'
       ENV.delete 'GEM_HOME'
-      vers = []
-      table = {}
-      forall_ruby(ENV['PATH']) do |ruby, ver|
+      vers = [] #: Array[String]
+      table = {} #: table_type
+      forall_ruby(ENV.fetch('PATH')) do |ruby, ver|
         puts "#{version_id(ver)}: #{ver}" if @verbose
         vers.push ver
         yield(ruby).each do |c|
@@ -71,11 +72,13 @@ module BitClust
     end
 
     def forall_ruby(path, &block)
+      # steep:ignore:start
       rubys(path)\
           .map {|ruby| [ruby, `#{ruby} --version`] }\
           .reject {|ruby, verstr| `which #{ruby}`.include?('@') }\
           .sort_by {|ruby, verstr| verstr }\
           .each(&block)
+      # steep:ignore:end
     end
 
     def rubys(path)

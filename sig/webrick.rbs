@@ -1,0 +1,20 @@
+module WEBrick
+  class HTTPServer < ::WEBrick::GenericServer
+    interface _Service
+      def service: (HTTPRequest req, HTTPResponse res) -> void
+    end
+
+    interface _GetInstanceWithOptions
+      def get_instance: (HTTPServer, *untyped options) -> _Service
+    end
+
+    interface _GetInstanceWithoutOptions
+      def get_instance: (HTTPServer) -> _Service
+    end
+
+    def mount: (String dir, singleton(HTTPServlet::AbstractServlet) servlet, *untyped options) -> void
+             | (String dir, _GetInstanceWithOptions servlet, *untyped options) -> void
+             | (String dir, _GetInstanceWithoutOptions servlet) -> void
+             | ...
+  end
+end

@@ -79,7 +79,7 @@ module BitClust
     end
 
     persistent_properties {
-      property :type,       'Symbol'         # :class | :module | :object
+      property :type,       'Symbol'         ## :class | :module | :object
       property :superclass, 'ClassEntry'
       property :included,   '[ClassEntry]'
       property :extended,   '[ClassEntry]'
@@ -217,8 +217,10 @@ module BitClust
           [ myself, included().map {|m| m.ancestors },
             ancestors ].flatten
         else
+          # steep:ignore:start
           [ self, included().map {|m| m.ancestors },
             superclass() ? superclass().ancestors : [] ].flatten
+          # steep:ignore:end
         end
     end
 
@@ -235,8 +237,8 @@ module BitClust
     def entries(level = 0)
       @entries ||= @db.entries("method/#{@id}")\
           .map {|ent| MethodEntry.new(@db, "#{@id}/#{ent}") }
-      ret = @entries
-      ancestors[1..level].each{|c| ret += c.entries }
+      ret = @entries || raise
+      (ancestors[1..level] || raise).each{|c| ret += c.entries }
       ret
     end
 
@@ -258,6 +260,16 @@ module BitClust
                        :added, :undefined)
 
     def partitioned_entries(level = 0)
+      # @type var s: Array[MethodEntry]
+      # @type var spv: Array[MethodEntry]
+      # @type var i: Array[MethodEntry]
+      # @type var ipv: Array[MethodEntry]
+      # @type var ipt: Array[MethodEntry]
+      # @type var mf: Array[MethodEntry]
+      # @type var c: Array[MethodEntry]
+      # @type var v: Array[MethodEntry]
+      # @type var added: Array[MethodEntry]
+      # @type var undefined: Array[MethodEntry]
       s = []; spv = []
       i = []; ipv = []; ipt = []
       mf = []
@@ -289,7 +301,9 @@ module BitClust
           undefined.push m
         end
       end
+      # steep:ignore:start
       Parts.new(s,spv, i,ipv,ipt, mf, c, v, added, undefined)
+      # steep:ignore:end
     end
 
     def singleton_methods(level = 0)
@@ -340,7 +354,7 @@ module BitClust
       if inherit
         _smap().key?(name)
       else
-        singleton_methods(false).detect {|m| m.name?(name) }
+        singleton_methods(0).detect {|m| m.name?(name) }
       end
     end
 
@@ -348,7 +362,7 @@ module BitClust
       if inherit
         _imap().key?(name)
       else
-        instance_methods(false).detect {|m| m.name?(name) }
+        instance_methods(0).detect {|m| m.name?(name) }
       end
     end
 
@@ -356,7 +370,7 @@ module BitClust
       if inherit
         ancestors().any? {|c| c.constant?(name, false) }
       else
-        constants(false).detect {|m| m.name?(name) }
+        constants(0).detect {|m| m.name?(name) }
       end
     end
 
@@ -389,15 +403,15 @@ module BitClust
 
     def singleton_method_names
       # should remove module functions?
-      _index().keys.select {|name| /\A\./ =~ name }.map {|name| name[1..-1] }
+      _index().keys.select {|name| /\A\./ =~ name }.filter_map {|name| name[1..-1] }
     end
 
     def instance_method_names
-      _index().keys.select {|name| /\A\#/ =~ name }.map {|name| name[1..-1] }
+      _index().keys.select {|name| /\A\#/ =~ name }.filter_map {|name| name[1..-1] }
     end
 
     def constant_names
-      _index().keys.select {|name| /\A\:/ =~ name }.map {|name| name[1..-1] }
+      _index().keys.select {|name| /\A\:/ =~ name }.filter_map {|name| name[1..-1] }
     end
 
     def special_variable_names
@@ -440,11 +454,12 @@ module BitClust
         return aliasof().__send__("_#{typechar}map").dup
       end
       s = superclass()
+      # @type var map: Hash[String, String]
       map = s ? s.__send__("_#{typechar}map").dup : {}
       inherited_modules.each do |mod|
         map.update mod.__send__("_#{typechar == 'c' ? 'c' : 'i'}map")
       end
-      defined, undefined = *ents.partition {|m| m.defined? }
+      defined, undefined = ents.partition {|m| m.defined? }
       (undefined + defined).each do |m|
         m.names.each do |name|
           map[name] = m.spec_string
@@ -471,9 +486,11 @@ module BitClust
     def _index
       @_index ||=
           begin
+            # @type var h: Hash[String, String]
             h = {}
             @db.foreach_line("method/#{@id}/=index") do |line|
               name, spec = line.split
+              name || raise; spec || raise
               h[name] = spec
             end
             h

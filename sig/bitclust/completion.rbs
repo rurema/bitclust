@@ -1,0 +1,181 @@
+module BitClust
+  module Completion
+    @ts: Array[Time]
+
+    @intern_table: Hash[String, String]
+
+    @classnametable: Hash[String, Array[String]]
+
+    @method_index_small: Hash[String, Array[String]]
+
+    @method_names: Array[String]
+
+    @method_index: Hash[String, Array[String]]
+
+    @method_index_0: Hash[String, String]
+
+    private
+
+    def _search_classes: (String pattern) -> Array[ClassEntry]
+
+    def _search_methods: (MethodNamePattern pattern) -> (SearchResult | bot)
+
+    def _search_functions: (string pattern) -> Array[FunctionEntry]
+
+    def search_svar: (ClassEntry c, String pattern) -> Array[SearchResult::Record]
+
+    def search_methods_from_cname: (MethodNamePattern pattern) -> SearchResult
+
+    def mspec_from_cref_mname: (String cref, String name) -> MethodSpec
+
+    def search_methods_from_mname: (MethodNamePattern pattern) -> SearchResult
+
+    def search_methods_from_cname_mname: (MethodNamePattern pattern) -> SearchResult
+
+    def expand_method_name: (String c, String? ts, String m) -> Array[SearchResult::Record]
+
+    def timer_init: () -> void
+
+    def split_time: (_ToS msg) -> void
+
+    def count_class: (Array[SearchResult::Record] recs) -> Integer
+
+    def make_cm_combination: (String cpat, String? ts, Array[String] mnames) -> Array[SearchResult::Record]
+
+    def try: [T, U] (_Each[T] candidates) { (T) -> Array[U] } -> Array[U]
+
+    def typechars: (String? type, String? mpattern) -> ([String] | [":", ".#"] | [".#", ":"])
+
+    def unify_entries: (Array[SearchResult::Record] ents) -> Array[SearchResult::Record]
+
+    # Case-insensitive search.  Optimized for constant search.
+    def expand_ic: (Array[ClassEntry] xs, string pattern) -> Array[ClassEntry]
+                 | (Array[FunctionEntry] xs, string pattern) -> Array[FunctionEntry]
+
+    def expand: (Array[MethodEntry] xs, String pattern) -> Array[MethodEntry]
+
+    # list up all matched items (without squeezing)
+    def expand_name_wide: (Array[String] names, String pattern) -> Array[String]
+
+    # list up matched items (with squeezing)
+    def expand_name_narrow: (Array[String] names, String pattern, ?String? suffixes) -> Array[String]
+
+    # squeeze result of #expand_name_wide
+    def squeeze_names: (Array[String] result1, String pattern, ?String? suffixes) -> Array[String]
+
+    def suffix_pattern: (String? suffixes) -> String
+
+    def save_completion_index: () -> void
+
+    def intern_classname: (String name) -> String
+
+    def intern_table: () -> Hash[String, String]
+
+    def save_class_index: () -> void
+
+    def classnametable: () -> Hash[String, Array[String]]
+
+    def save_method_index_narrow: () -> void
+
+    def method_index_small: () -> Hash[String, Array[String]]
+
+    # canonical class name, no inheritance
+    def mname2crefs_narrow: (String name) -> Array[String]
+
+    def save_method_index: () -> void
+
+    def method_names: () -> Array[String]
+
+    # includes class aliases, includes inherited methods
+    def mname2crefs_wide: (String name) -> Array[String]
+
+    def mname2crefs_0: (String name) -> Array[String]?
+
+    def method_index_0: () -> Hash[String, String]
+  end
+
+  # Represents result of completion search.
+  # Has many SearchResult::Record.
+  class SearchResult
+    # Wraps an Entry.
+    class Record
+      @db: MethodDatabase
+
+      @origin: MethodSpec?
+
+      @entry: MethodEntry?
+
+      @idstring: nil
+
+      @hash: Integer
+
+      def initialize: (MethodDatabase db, MethodSpec spec, ?MethodSpec? origin, ?MethodEntry? entry) -> void
+
+      attr_writer db: MethodDatabase
+
+      attr_reader specs: Array[MethodSpec]
+
+      def origin: () -> MethodSpec
+
+      def idstring: () -> String
+
+      def entry: () -> MethodEntry
+
+      def name: () -> String
+
+      def names: () -> Array[String]
+
+      def class_name: () -> String
+
+      def method_name: () -> String
+
+      def original_name: () -> nil
+
+      def ==: (untyped other) -> bool
+
+      alias eql? ==
+
+      def hash: () -> Integer
+
+      def <=>: (untyped other) -> Integer?
+
+      def merge: (instance other) -> void
+
+      def owned_method?: () -> bool
+
+      def method_of_alias_class?: () -> bool
+
+      def inherited_method?: () -> bool
+    end
+
+    def self.empty: (MethodDatabase db, MethodNamePattern pattern) -> instance
+
+    def initialize: (MethodDatabase db, MethodNamePattern pattern, Array[ClassEntry] classes, Array[Record] records) -> void
+
+    attr_reader database: MethodDatabase
+
+    attr_reader pattern: MethodNamePattern
+
+    attr_reader classes: Array[ClassEntry]
+
+    attr_reader records: Array[Record]
+
+    def inspect: () -> String
+
+    def fail?: () -> bool
+
+    def success?: () -> bool
+
+    def determined?: () -> bool
+
+    def name: () -> String
+
+    def names: () -> Array[String]
+
+    def record: () -> Record
+
+    def each_record: () { (Record) -> void } -> void
+  end
+end
+
+$cm_comb_m: Integer

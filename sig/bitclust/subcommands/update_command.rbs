@@ -1,0 +1,21 @@
+module BitClust
+  module Subcommands
+    class UpdateCommand < Subcommand
+      @root: String?
+
+      @library: String?
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def guess_library_name: (String path) -> String
+
+      def get_c_filename: (String path) -> String
+    end
+  end
+end

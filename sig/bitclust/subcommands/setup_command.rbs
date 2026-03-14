@@ -1,0 +1,48 @@
+module BitClust
+  module Subcommands
+    class SetupCommand < Subcommand
+      @prepare: true?
+
+      @cleanup: true?
+
+      @purge: true?
+
+      @versions: Array[String]
+
+      @update: bool
+
+      type config = {
+        :database_prefix => String,
+        :encoding        => String,
+        :versions        => Array[String],
+        :default_version => String,
+        :stdlibtree      => String,
+        :capi_src        => String,
+        :baseurl         => String,
+        :port            => String,
+        :pid_file        => String,
+      }
+      @config: config
+
+      REPOSITORY_PATH: String
+
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def purge: () -> bot
+
+      def prepare: () -> void
+
+      def generate_config: (Pathname path, config config) -> void
+
+      def checkout: (Pathname rubydoc_dir) -> void
+
+      def update_method_database: (String prefix, Array[String] argv) -> void
+
+      def update_function_database: (String prefix, Array[String] argv) -> void
+    end
+  end
+end

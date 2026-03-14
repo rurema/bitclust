@@ -1,0 +1,13 @@
+module BitClust
+  module Subcommands
+    class PropertyCommand < Subcommand
+      @mode: (nil | :list | :get | :set)
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+    end
+  end
+end

@@ -107,11 +107,11 @@ module BitClust
           exit 1
         end
         if @pid_file
-          if File.exist?(@pid_file)
+          if File.exist?(@pid_file || raise)
             $stderr.puts "There is still #{@pid_file}.  Is another process running?"
             exit 1
           end
-          @pid_file = File.expand_path(@pid_file)
+          @pid_file = File.expand_path(@pid_file || raise)
         end
       end
 
@@ -133,7 +133,7 @@ module BitClust
           @params[:Logger] = WEBrick::Log.new($stderr, WEBrick::Log::INFO)
           @params[:AccessLog] = []
         end
-        basepath = URI.parse(@baseurl).path
+        basepath = URI.parse(@baseurl || raise).path or raise
         server = WEBrick::HTTPServer.new(@params)
 
         if @autop
@@ -172,17 +172,19 @@ module BitClust
         server.mount File.join(basepath, 'theme/'), WEBrick::HTTPServlet::FileHandler, @themedir
 
         if @debugp
-          trap(:INT) { server.shutdown }
+          Signal.trap(:INT) { server.shutdown }
         else
           WEBrick::Daemon.start do
-            trap(:TERM) {
+            Signal.trap(:TERM) {
               server.shutdown
               begin
-                File.unlink @pid_file if @pid_file
+                pid_file = @pid_file
+                File.unlink pid_file if pid_file
               rescue Errno::ENOENT
               end
             }
-            File.open(@pid_file, 'w') {|f| f.write Process.pid } if @pid_file
+            pid_file = @pid_file
+            File.open(pid_file, 'w') {|f| f.write Process.pid } if pid_file
           end
         end
         exit if $".include?("exerb/mkexy.rb")
@@ -209,7 +211,7 @@ module BitClust
       end
 
       def load_config_file
-        home_directory = Pathname(ENV['HOME'])
+        home_directory = Pathname(ENV.fetch('HOME'))
         config_path = home_directory + ".bitclust/config"
         if config_path.exist?
           config = YAML.load_file(config_path)

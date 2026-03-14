@@ -1,0 +1,179 @@
+class ApplicationError < StandardError
+end
+
+class RiClassNotFound < ApplicationError
+end
+
+# Handle RDoc(ri) database for tools/bc-rdoc.rb and
+# `bitclust methods --diff`.
+class RiDatabase
+  @ripath: Array[String]
+
+  @reader: RI::RiReader
+
+  @klass: untyped
+
+  def self.open_system_db: () -> instance
+
+  def self.open: (String dir, String? version) -> instance
+
+  def initialize: (Array[String] ripath, String? version) -> void
+
+  attr_reader version: String?
+
+  def get_method: (RI::MethodEntry m) -> RI::MethodDescription
+
+  def current_class=: (String name) -> void
+
+  attr_reader class: nil
+
+  attr_reader singleton_methods: Array[RiMethodEntry]
+
+  attr_reader instance_methods: Array[RiMethodEntry]
+
+  def lookup_class: (String name) -> untyped
+
+  private
+
+  def wrap_entries: (Array[RI::MethodDescription] ents) -> Array[RiMethodEntry]
+end
+
+class Ent
+  def initialize: (String name, untyped ent) -> void
+
+  attr_reader name: String
+
+  attr_reader entry: untyped
+
+  def ==: (untyped other) -> bool
+
+  alias eql? ==
+
+  def hash: () -> Integer
+
+  def <=>: (untyped other) -> Integer?
+end
+
+class BCMethodEntry < Ent
+  attr_reader entry: BitClust::MethodEntry
+
+  def bitclust?: () -> true
+
+  def inspect: () -> String
+
+  def fullname: () -> String
+
+  def id: () -> String
+end
+
+class RiMethodEntry < Ent
+  attr_reader entry: RI::MethodDescription
+
+  def bitclust?: () -> false
+
+  def inspect: () -> String
+
+  def singleton_method?: () -> bool
+
+  def fullname: () -> String
+end
+
+module RI
+  module Paths
+    def self.path: (bool, bool, bool, bool, *String) -> Array[String]
+  end
+
+  class RiCache
+    def initialize: (Array[String]) -> void
+  end
+
+  class RiReader
+    def initialize: (RiCache) -> void
+
+    def get_method: (MethodEntry) -> MethodDescription
+
+    def singleton_methods: (ClassEntry c) -> Array[MethodDescription]
+
+    def instance_methods: (ClassEntry c) -> Array[MethodDescription]
+
+    def top_level_namespace: () -> Array[untyped]
+  end
+
+  class ClassEntry
+    def singleton_methods: () -> Array[MethodEntry]
+
+    attr_reader instance_methods: Array[MethodEntry]
+
+    def method_entries: () -> Array[MethodEntry]
+  end
+
+  class MethodEntry
+    def fullname: () -> String
+
+    def name: () -> String
+
+    def singleton_method?: () -> bool
+  end
+
+  class MethodDescription
+    @is_class_method: bool
+
+    def fullname: () -> String
+
+    def full_name: () -> String
+
+    def name: () -> String
+
+    def aliases: () -> Array[MethodDescription]
+
+    def params: () -> String
+
+    def comment: () -> untyped
+
+    def singleton_method?: () -> bool
+  end
+end
+
+module HTMLUtils
+  ESC: Hash[String, String]
+
+  def self?.escape: (String str) -> String
+
+  UNESC: Hash[String, String]
+
+  def self?.unescape: (String str) -> String
+end
+
+class Formatter
+  @f: StringIO
+
+  include HTMLUtils
+
+  def method_info: (RI::MethodDescription m) -> String
+
+  private
+
+  def line: (?String? s) -> void
+
+  def describe_method: (RI::MethodDescription m) -> void
+
+  def trim_space: (String s) -> String
+
+  def trim_sig: (String s) -> String
+
+  def format_elements: (untyped elems) -> String
+
+  def format_element: (untyped e) -> String?
+
+  def headline: (untyped e) -> String
+
+  def paragraph: (untyped e) -> String
+
+  def verbatim: (untyped e) -> String
+
+  def list: (untyped e) -> String
+
+  def remove_inline: (String str) -> String
+
+  def wrap: (String str) -> String
+end
