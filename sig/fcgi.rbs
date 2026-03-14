@@ -1,0 +1,5 @@
+class FCGI
+  def self.fastcgi?: () -> bool
+
+  def self.each_cgi_request: () { (untyped) -> void } -> void
+end

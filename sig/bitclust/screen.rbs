@@ -1,0 +1,427 @@
+module BitClust
+  class ScreenManager
+    type conf = {
+      ?:urlmapper => URLMapper,
+      ?:templatedir => (Pathname | String)?,
+      ?:template_repository => TemplateRepository,
+      ?:message_catalog => MessageCatalog,
+      ?:catalogdir => (Pathname | String)?,
+      ?:default_encoding => String,
+      ?:encoding => String,
+      ?:themedir => (Pathname | String),
+      # entry_screen
+      ?:target_version => String?,
+      # URLMapper
+      ?:base_url => String,
+      ?:cgi_url => String,
+      ?:css_url => String,
+      ?:favicon_url => String,
+      ?:theme => String?,
+      # TemplateScreen
+      ?:gtm_tracking_id => String?,
+      ?:meta_robots_content => Array[String],
+      # App
+      ?:datadir => String,
+      # ::BitClust::Subcommands::StatichtmlCommand::manager_config
+      ?:suffix      => String,
+      ?:tochm_mode  => true,
+      ?:fs_casesensitive => bool,
+      ?:canonical_base_url => String?,
+      ?:edit_base_url => String?,
+      ?:stop_on_syntax_error => bool,
+      # ::BitClust::Subcommands::ChmCommand::manager_config
+      ?:baseurl     => String,
+    }
+
+    @conf: conf
+
+    def initialize: (conf h) -> void
+
+    private
+
+    def default_message_catalog: (conf h) -> MessageCatalog
+
+    public
+
+    def entry_screen: (any_entry | Array[any_entry] entry, RequestHandler::conf_entry opt) -> Screen
+
+    def library_index_screen: (Array[LibraryEntry] libs, RequestHandler::conf opt) -> LibraryIndexScreen
+
+    def library_screen: (LibraryEntry lib, RequestHandler::conf opt) -> LibraryScreen
+
+    def class_index_screen: (Array[ClassEntry] cs, RequestHandler::conf opt) -> ClassIndexScreen
+
+    def class_screen: (ClassEntry c, RequestHandler::conf_class opt) -> ClassScreen
+
+    def method_screen: (Array[MethodEntry] ms, RequestHandler::conf opt) -> MethodScreen
+
+    def opensearchdescription_screen: (URI::Generic? request_full_uri, RequestHandler::conf opt) -> OpenSearchDescriptionScreen
+
+    def search_screen: (Array[(ClassEntry | MethodEntry)] result, RequestHandler::conf_search opt) -> SearchScreen
+
+    def doc_screen: (DocEntry d, RequestHandler::conf opt) -> DocScreen
+
+    def function_screen: (FunctionEntry f, RequestHandler::conf opt) -> FunctionScreen
+
+    def function_index_screen: (Array[FunctionEntry] fs, RequestHandler::conf_function opt) -> FunctionIndexScreen
+
+    private
+
+    type screen_class = untyped
+    type screen_new_args = untyped
+    type screen_instance = untyped
+
+    def new_screen: (singleton(LibraryIndexScreen) c, *screen_new_args args) -> LibraryIndexScreen
+                  | (singleton(LibraryScreen) c, *screen_new_args args) -> LibraryScreen
+                  | (singleton(ClassIndexScreen) c, *screen_new_args args) -> ClassIndexScreen
+                  | (singleton(ClassScreen) c, *screen_new_args args) -> ClassScreen
+                  | (singleton(MethodScreen) c, *screen_new_args args) -> MethodScreen
+                  | (singleton(OpenSearchDescriptionScreen) c, *screen_new_args args) -> OpenSearchDescriptionScreen
+                  | (singleton(SearchScreen) c, *screen_new_args args) -> SearchScreen
+                  | (singleton(DocScreen) c, *screen_new_args args) -> DocScreen
+                  | (singleton(FunctionScreen) c, *screen_new_args args) -> FunctionScreen
+                  | (singleton(FunctionIndexScreen) c, *screen_new_args args) -> FunctionIndexScreen
+                  | (screen_class c, *screen_new_args args) -> screen_instance
+  end
+
+  class URLMapper
+    # type conf = {
+    #   ?:base_url => String,
+    #   ?:cgi_url => String,
+    #   ?:css_url => String,
+    #   ?:favicon_url => String,
+    #   ?:theme => String?,
+    # }
+
+    @css_url: String
+
+    @favicon_url: String
+
+    @theme: String
+
+    include NameUtils
+
+    # `conf` causes Ruby::ArgumentTypeMismatch
+    def initialize: (ScreenManager::conf h) -> void
+
+    attr_reader base_url: String
+
+    attr_reader cgi_url: String
+
+    def css_url: () -> ::String
+
+    def custom_css_url: (String css) -> ::String
+
+    def js_url: () -> ::String
+
+    def custom_js_url: (String js) -> ::String
+
+    def favicon_url: () -> ::String
+
+    def library_index_url: () -> ::String
+
+    def library_url: (String name) -> ::String
+
+    def class_url: (String name) -> ::String
+
+    def method_url: (String spec) -> ::String
+
+    def function_index_url: () -> ::String
+
+    def function_url: (String name) -> ::String
+
+    def opensearchdescription_url: () -> ::String
+
+    def search_url: () -> ::String
+
+    def spec_url: (String name) -> ::String
+
+    def document_url: (String name) -> ::String
+
+    def canonical_url: (String current_url) -> String
+
+    # defined in URLMapperEx
+    def edit_url: (Location location) -> String
+  end
+
+  class TemplateRepository
+    @prefix: (Pathname | String)
+
+    def initialize: ((Pathname | String) prefix) -> void
+
+    def load: (String id) -> String
+
+    private
+
+    def preproc: (String template) -> String
+  end
+
+  class Screen
+    def self.for_entry: (any_entry | Array[any_entry] entry) -> singleton(Screen)
+
+    def status: () -> Integer?
+
+    # ほとんどのサブクラスにある。
+    def content_type: () -> String
+
+    # TemplateScreen 以外にはある。
+    def body: () -> String
+  end
+
+  class ErrorScreen < Screen
+    @error: Exception
+
+    include HTMLUtils
+
+    def initialize: (Exception err) -> void
+
+    def status: () -> 500
+
+    def content_type: () -> String
+
+    def body: () -> ::String
+  end
+
+  class NotFoundScreen < Screen
+    @error: Exception
+
+    include HTMLUtils
+
+    def initialize: (Exception err) -> void
+
+    def status: () -> 404
+
+    def content_type: () -> String
+
+    def body: () -> ::String
+  end
+
+  class TemplateScreen < Screen
+    @urlmapper: URLMapper
+
+    @template_repository: TemplateRepository
+
+    @default_encoding: String
+
+    @target_version: String
+
+    type conf = {
+      :urlmapper => URLMapper,
+      :template_repository => TemplateRepository,
+      ?:default_encoding => String,
+      :database => Database,
+      ?:target_version => String,
+      :message_catalog => MessageCatalog,
+      ?:gtm_tracking_id => String?,
+      ?:meta_robots_content => Array[String],
+      # IndexScreen
+      ?:entries => Array[any_entry],
+      # EntryBoundScreen
+      :entry => any_entry,
+    }
+
+    @conf: conf
+
+    @hlevel: Integer
+
+    include Translatable
+
+    include HTMLUtils
+
+    # この階層では定義されていないので undef の代わりに bot にしておく。
+    def body: () -> bot
+
+    def initialize: (conf h) -> void
+
+    def content_type: () -> String
+
+    def encoding: () -> String
+
+    def ruby_version: () -> String
+
+    def google_tag_manager: () -> String
+
+    def meta_robots: () -> String
+
+    def meta_description: () -> String
+
+    private
+
+    def default_encoding: () -> String
+
+    def run_template: (String id, ?bool layout) -> String
+
+    # erb.def_method(self.class, 'layout', 'layout.erb')
+    def layout: () { () -> String } -> String
+
+    def h: (_ToS str) -> String
+
+    def css_url: () -> String
+
+    def custom_css_url: (String css) -> String
+
+    def js_url: () -> String
+
+    def custom_js_url: (String js) -> String
+
+    def favicon_url: () -> String
+
+    def current_url: () -> bot
+
+    def canonical_url: () -> String
+
+    def edit_url: (Location location) -> String
+
+    def opensearchdescription_url: () -> String
+
+    def search_url: () -> String
+
+    def library_index_url: () -> String
+
+    def function_index_url: () -> String
+
+    def headline_init: () -> void
+
+    def headline_push: () -> void
+
+    def headline_pop: () -> void
+
+    def headline: (String str, ?edit_url: String?) -> String
+
+    def headline_noescape: (String str) -> String
+
+    def search_form: () -> String
+
+    def manual_home_name: () -> String
+
+    def manual_home_link: () -> String
+
+    def friendly_library_link: (String id) -> String
+
+    def friendly_library_name: (String id) -> String
+
+    def compile_method: (MethodEntry m, ?RDCompiler::opt opt) -> String
+
+    def compile_function: (FunctionEntry f, ?RDCompiler::opt opt) -> String
+
+    def compile_rd: (String src) -> String
+
+    def rdcompiler: () -> RDCompiler
+
+    def foreach_method_chunk: (String src) { (Array[MethodSignature], String) -> void } -> void
+
+    def breadcrumb_json_ld: (Array[Hash[Symbol, String]] items) -> String
+
+    def absolute_url_to: (String path) -> URI::Generic
+  end
+
+  class IndexScreen < TemplateScreen
+    @entries: Array[any_entry]
+
+    def initialize: (TemplateScreen::conf h, Array[any_entry] entries, RequestHandler::any_conf opt) -> void
+
+    def encoding: () -> String
+
+    alias charset encoding
+  end
+
+  class EntryBoundScreen[E < any_entry] < TemplateScreen
+    @entry: E
+
+    def initialize: (TemplateScreen::conf h, E entry, RequestHandler::any_conf opt) -> void
+
+    def encoding: () -> String
+
+    alias charset encoding
+  end
+
+  class LibraryIndexScreen < IndexScreen
+    def body: () -> String
+
+    def current_url: () -> String
+  end
+
+  class LibraryScreen < EntryBoundScreen[LibraryEntry]
+    def body: () -> String
+
+    def draw_tree: (Array[ClassEntry] cs) { (?) -> void } -> void
+
+    def current_url: () -> String
+
+    private
+
+    def draw_treed_entries: (Array[ClassEntry] entries, Hash[ClassEntry, Array[ClassEntry]] tree, ?Integer indent) { (ClassEntry, Integer) -> void } -> void
+  end
+
+  class ClassIndexScreen < IndexScreen
+    def body: () -> String
+
+    def current_url: () -> String
+  end
+
+  class OpenSearchDescriptionScreen < TemplateScreen
+    def initialize: (TemplateScreen::conf h, String request_full_uri, RequestHandler::conf opt) -> void
+
+    attr_reader search_full_url: String
+
+    def body: () -> String
+
+    def content_type: () -> String
+  end
+
+  class SearchScreen < IndexScreen
+    @query: String?
+
+    @elapsed_time: Float
+
+    def initialize: (TemplateScreen::conf h, Array[any_entry] entries, RequestHandler::conf_search opt) -> void
+
+    def body: () -> String
+  end
+
+  class ClassScreen < EntryBoundScreen[ClassEntry]
+    @alevel: Integer
+
+    def initialize: (TemplateScreen::conf h, ClassEntry entry, RequestHandler::conf_class opt) -> void
+
+    def body: () -> String
+
+    def current_url: () -> String
+  end
+
+  class MethodScreen < TemplateScreen
+    @entries: Array[MethodEntry]
+
+    def initialize: (TemplateScreen::conf h, Array[MethodEntry] entries, RequestHandler::conf opt) -> void
+
+    def encoding: () -> String
+
+    alias charset encoding
+
+    def body: () -> String
+
+    def current_url: () -> String
+  end
+
+  class FunctionScreen < EntryBoundScreen[FunctionEntry]
+    def body: () -> String
+
+    def current_url: () -> String
+  end
+
+  class FunctionIndexScreen < IndexScreen
+    def body: () -> String
+
+    def current_url: () -> String
+  end
+
+  class DocScreen < EntryBoundScreen[DocEntry]
+    def breadcrumb_title: () -> String
+
+    def body: () -> String
+
+    def rdcompiler: () -> RDCompiler
+
+    def current_url: () -> String
+  end
+end

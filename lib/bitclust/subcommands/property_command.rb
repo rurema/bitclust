@@ -49,7 +49,7 @@ module BitClust
       end
 
       def exec(argv, options)
-        prefix = options[:prefix]
+        prefix = options[:prefix] || raise
         db = MethodDatabase.new(prefix)
         case @mode
         when :list
@@ -62,6 +62,7 @@ module BitClust
           end
         when :set
           key, val = *argv
+          key || raise; val || raise
           db.transaction {
             db.propset key, val
           }

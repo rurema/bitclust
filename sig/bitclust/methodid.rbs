@@ -1,0 +1,117 @@
+module BitClust
+  class MethodID
+    include NameUtils
+
+    def initialize: (?LibraryEntry? library, ?ClassEntry? klass, ?BitClust::NameUtils::typename? type, ?String? name) -> void
+
+    attr_accessor library: LibraryEntry
+    attr_accessor klass: ClassEntry
+    attr_accessor type: BitClust::NameUtils::typename
+    attr_accessor name: String
+
+    def inspect: () -> String
+
+    interface _MethodMatchable
+      def library: () -> LibraryEntry
+      def type: () -> BitClust::NameUtils::typename
+      def name:() -> String
+    end
+
+    def match?: (_MethodMatchable m) -> bool
+
+    alias typename type
+
+    def typechar: () -> NameUtils::typechar
+
+    def typemark: () -> NameUtils::typemark
+
+    def idstring: () -> String
+  end
+
+  interface _MethodMatcher
+    def match?: (MethodID::_MethodMatchable & MethodSpec::_MethodMatchable m) -> bool
+  end
+
+  class MethodSpec
+    def self.parse: (String str) -> instance
+
+    def initialize: (String c, NameUtils::typemark t, String m, ?String? library) -> void
+
+    attr_reader klass: String
+
+    attr_reader type: String
+
+    attr_reader method: String
+
+    attr_reader library: String?
+
+    def inspect: () -> ::String
+
+    def to_s: () -> ::String
+
+    def display_name: () -> ::String
+
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def hash: () -> ::Integer
+
+    def <=>: (untyped other) -> ::Integer?
+
+    interface _MethodMatchable
+      def typemark: () -> NameUtils::typemark
+      def name?: (String name) -> bool
+    end
+
+    def match?: (_MethodMatchable m) -> bool
+
+    def singleton_method?: () -> bool
+
+    def instance_method?: () -> bool
+
+    def module_function?: () -> bool
+
+    def method?: () -> bool
+
+    def constant?: () -> bool
+
+    def special_variable?: () -> bool
+  end
+
+  class MethodNamePattern
+    def initialize: (?String? c, ?String? t, ?String? m, ?String? lib) -> void
+
+    attr_reader klass: String?
+
+    attr_reader type: String?
+
+    attr_reader method: String?
+
+    attr_reader library: String?
+
+    def inspect: () -> ::String
+
+    # unused?
+    @crecache: Array[untyped]
+    @mrecache: Array[untyped]
+
+    private
+
+    def esc: (String? s) -> String
+
+    def tesc: (String? s) -> String
+
+    public
+
+    def match?: (MethodEntry m) -> bool
+
+    def empty?: () -> bool
+
+    def class?: () -> boolish
+
+    def method?: () -> boolish
+
+    def special_variable?: () -> bool
+  end
+end

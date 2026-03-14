@@ -33,21 +33,24 @@ module BitClust
     def RRDParser.parse(s, lib, params = {"version" => "1.9.0"})
       parser = new(MethodDatabase.dummy(params))
       if s.respond_to?(:to_io)
+        # @type var s: File
         io = s.to_io
       elsif s.respond_to?(:to_str)
+        # @type var s: String
         s1 = s.to_str
         require 'stringio'
         io = StringIO.new(s1)
       else
         io = s
       end
+      # @type var io: File | StringIO
       l = parser.parse(io, lib, params)
       return l, parser.db
     end
 
     def RRDParser.split_doc(source)
       if m = /^=(\[a:.*?\])?( +(.*)|([^=].*))\r?\n/.match(source)
-        title = $3 || $4
+        title = $3 || $4 || raise
         s = m.post_match
         return title, s
       end
@@ -141,7 +144,7 @@ module BitClust
       unless m
         parse_error "level-1 header syntax error", line
       end
-      return m[1], isconst(m[2], line), isconst(m[3], line)
+      return (m[1] || raise), isconst((m[2]), line), isconst((m[3]), line)
     end
 
     def isconst(name, line)
@@ -159,7 +162,7 @@ module BitClust
       read_extends f
       read_includes f
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
+      @context.klass&.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       read_level2_blocks f
     end
 
@@ -177,7 +180,7 @@ module BitClust
       f.skip_blank_lines
       read_extends f
       f.skip_blank_lines
-      @context.klass.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
+      @context.klass&.source = f.break(/\A==?[^=]|\A---/).join('').rstrip
       @context.visibility = :public
       @context.type = :singleton_method
       read_level2_blocks f
@@ -219,9 +222,11 @@ module BitClust
       f.while_match(/\A==[^=]/) do |line|
         case line.sub(/\A==/, '').strip
         when /\A((?:public|private|protected)\s+)?(?:(class|singleton|instance)\s+)?methods?\z/i
-          @context.visibility = ($1 || 'public').downcase.strip.intern
+          # @type var visibility: :public | :private | :protected
+          visibility = ($1 || 'public').downcase.strip.intern
+          @context.visibility = visibility
           t = ($2 || 'instance').downcase.sub(/class/, 'singleton')
-          @context.type = "#{t}_method".intern
+          @context.type = _ = "#{t}_method".intern
         when /\AModule\s+Functions?\z/i
           @context.module_function
         when /\AConstants?\z/i
@@ -243,10 +248,10 @@ module BitClust
 
     def concat_aliases(chunks)
       return [] if chunks.empty?
-      result = [chunks.shift]
+      result = [chunks.shift || raise]
       chunks.each do |chunk|
-        if result.last.alias?(chunk)
-          result.last.unify chunk
+        if result.last&.alias?(chunk)
+          result.last&.unify chunk
         else
           result.push chunk
         end
@@ -256,7 +261,7 @@ module BitClust
 
     def read_chunks(f)
       f.skip_blank_lines
-      result = []
+      result = [] #: Array[Chunk]
       f.while_match(/\A---/) do |line|
         f.ungets line
         result.push read_chunk(f)
@@ -271,7 +276,7 @@ module BitClust
       src.location = header[0].location
       sigs = header.map {|line| method_signature(line) }
       mainsig = check_chunk_signatures(sigs, header[0])
-      names = sigs.map {|s| s.name }.uniq.sort
+      names = sigs.map {|s| s.name }.compact.uniq.sort
       Chunk.new(mainsig, names, src)
     end
 
@@ -313,9 +318,12 @@ module BitClust
     def method_signature(line)
       case
       when m = SIGNATURE.match(line)
-        Signature.new(*m.captures)
+        klass, typemark_, name = m.captures
+        # @type var typemark: NameUtils::typemark
+        typemark = _ = typemark_
+        Signature.new(klass, typemark, name)
       when m = GVAR.match(line)
-        Signature.new(nil, '$', m[1][1..-1])
+        Signature.new(nil, '$', (m[1] || raise)[1..-1])
       else
         parse_error "wrong method signature", line
       end
@@ -366,10 +374,13 @@ module BitClust
 
       def define_object(name, singleton_object_class, location: nil)
         singleton_object_class = @db.get_class(singleton_object_class) if singleton_object_class
+        # steep:ignore:start
         register_class :object, name, singleton_object_class, location: location
+        # steep:ignore:end
       end
 
       def register_class(type, name, superclass, location: nil)
+        name or raise
         @klass = @db.open_class(name) {|c|
           c.type = type
           c.superclass = superclass
@@ -401,30 +412,31 @@ module BitClust
       end
 
       def include(name)
-        @klass.include @db.get_class(name)
+        @klass&.include @db.get_class(name)
       end
 
       def extend(name)
-        @klass.extend @db.get_class(name)
+        @klass&.extend @db.get_class(name)
       end
 
       def dynamic_include(name)
-        @klass.dynamic_include(@db.get_class(name), @library)
+        @klass&.dynamic_include(@db.get_class(name), @library)
       end
 
       def dynamic_extend(name)
-        @klass.dynamic_extend(@db.get_class(name), @library)
+        @klass&.dynamic_extend(@db.get_class(name), @library)
       end
 
       # Add a alias +name+ to the alias list.
       def alias(name)
+        klass = @klass || raise
         @db.open_class(name) do |c|
-          c.type = @klass.type
+          c.type = klass.type
           c.library = @library
-          c.aliasof = @klass
-          c.source = "Alias of [[c:#{@klass.name}]]\n"
+          c.aliasof = klass
+          c.source = "Alias of [[c:#{klass.name}]]\n"
           @library.add_class c
-          @klass.alias c
+          klass.alias c
         end
       end
 
@@ -437,7 +449,7 @@ module BitClust
       end
 
       def special_variable
-        unless @klass and @klass.name == 'Kernel'
+        unless @klass and @klass&.name == 'Kernel'
           raise "must not happen: type=special_variable but class!=Kernel"
         end
         @type = :special_variable
@@ -445,7 +457,7 @@ module BitClust
 
       def signature
         return nil unless @klass
-        Signature.new(@klass.name, @type ? typename2mark(@type) : nil, nil)
+        Signature.new(@klass&.name, @type ? typename2mark(@type || raise) : nil, nil)
       end
 
       def define_method(chunk)
@@ -453,7 +465,9 @@ module BitClust
         @db.open_method(id) {|m|
           m.names           = chunk.names.sort
           m.kind            = chunk.source.match?(/^@undef$/) ? :undefined : @kind
+          # steep:ignore:start
           m.visibility      = @visibility || :public
+          # steep:ignore:end
           m.source          = chunk.source
           m.source_location = chunk.source.location
           case @kind
@@ -466,7 +480,7 @@ module BitClust
       def method_id(chunk)
         id = MethodID.new
         id.library = @library
-        id.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : @klass
+        id.klass   = chunk.signature.klass ? @db.get_class(chunk.signature.klass) : (@klass || raise)
         id.type    = chunk.signature.typename || @type
         id.name    = chunk.names.sort.first
         id
@@ -521,7 +535,7 @@ module BitClust
       end
 
       def typename
-        typemark2name(@type)
+        typemark2name(_ = @type)
       end
 
       def same_type?(other)

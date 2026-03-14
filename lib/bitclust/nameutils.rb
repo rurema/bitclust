@@ -59,51 +59,55 @@ module BitClust
     def split_method_spec(spec)
       case spec
       when /\AKernel\$/
-        return 'Kernel', '$', $'
+        return ['Kernel', '$', $' || raise]
       else
         m = /\A(#{CLASS_PATH_RE})(#{TYPEMARK_RE})(#{METHOD_NAME_RE})\z/o.match(spec) or
             raise ArgumentError, "wrong method spec: #{spec.inspect}"
-        return *m.captures
+        cname = m[1] || raise
+        # @type var tmark: NameUtils::typemark
+        tmark = _ = m[2] || raise
+        mname = m[3] || raise
+        return [cname, tmark, mname]
       end
     end
 
     def methodid2specstring(id)
-      c, t, m, _lib = *split_method_id(id)
+      c, t, m, _lib = split_method_id(id)
       classid2name(c) + typechar2mark(t) + decodename_url(m)
     end
 
     def methodid2specparts(id)
-      c, t, m, lib = *split_method_id(id)
-      return classid2name(c), typechar2mark(t), decodename_url(m), libid2name(lib)
+      c, t, m, lib = split_method_id(id)
+      [classid2name(c), typechar2mark(t), decodename_url(m), libid2name(lib)]
     end
 
     def methodid2libid(id)
-      _c, _t, _m, lib = *split_method_id(id)
+      _c, _t, _m, lib = split_method_id(id)
       lib
     end
 
     def methodid2classid(id)
-      c, _t, _m, _lib = *split_method_id(id)
+      c, _t, _m, _lib = split_method_id(id)
       c
     end
 
     def methodid2typechar(id)
-      _c, t, _m, _lib = *split_method_id(id)
+      _c, t, _m, _lib = split_method_id(id)
       t
     end
 
     def methodid2typename(id)
-      _c, t, _m, _lib = *split_method_id(id)
+      _c, t, _m, _lib = split_method_id(id)
       typechar2name(t)
     end
 
     def methodid2typemark(id)
-      _c, t, _m, _lib = *split_method_id(id)
+      _c, t, _m, _lib = split_method_id(id)
       typechar2mark(t)
     end
 
     def methodid2mname(id)
-      _c, _t, m, _lib = *split_method_id(id)
+      _c, _t, m, _lib = split_method_id(id)
       decodename_url(m)
     end
 
@@ -121,13 +125,13 @@ module BitClust
       "#{cid}/#{typename2char(t)}.#{encodename_url(name)}.#{libid}"
     end
 
-    @@split_method_id = {}
+    @@split_method_id = {} #: Hash[String, untyped]
 
     # private module function
     def split_method_id(id)
       @@split_method_id[id] ||= begin
         c, rest = id.split("/")
-        [c, *rest.split(%r<[/\.]>, 3)]
+        [c, *rest&.split(%r<[/\.]>, 3)]
       end
     end
 
@@ -142,7 +146,7 @@ module BitClust
     MARK_TO_NAME = NAME_TO_MARK.invert
 
     def typename?(n)
-      NAME_TO_MARK.key?(n)
+      NAME_TO_MARK.key?(_ = n)
     end
 
     def typename2mark(name)
@@ -166,7 +170,7 @@ module BitClust
     CHAR_TO_NAME = NAME_TO_CHAR.invert
 
     def typechar?(c)
-      CHAR_TO_NAME.key?(c)
+      CHAR_TO_NAME.key?(_ = c)
     end
 
     def typename2char(name)
@@ -190,7 +194,7 @@ module BitClust
     CHAR_TO_MARK = MARK_TO_CHAR.invert
 
     def typemark?(m)
-      MARK_TO_CHAR.key?(m)
+      MARK_TO_CHAR.key?(_ = m)
     end
 
     def typechar2mark(char)
@@ -209,18 +213,18 @@ module BitClust
 
     # string -> case-sensitive ID
     def encodename_url(str)
-      str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('=%02x', ch[0].ord) }
+      str.gsub(/[^A-Za-z0-9_]/n) {|ch| sprintf('=%02x', (ch[0] || raise).ord) }
     end
 
     # case-sensitive ID -> string
     def decodename_url(str)
-      str.gsub(/=[\da-h]{2}/ni) {|s| s[1,2].hex.chr }
+      str.gsub(/=[\da-h]{2}/ni) {|s| (s[1,2] || raise).hex.chr }
     end
 
     # string -> encoded string in a rdoc way
     def encodename_rdocurl(str)
       str = str.gsub(/[^A-Za-z0-9_.]/n) {|ch|
-        sprintf('-%02X', ch[0].ord)
+        sprintf('-%02X', (ch[0] || raise).ord)
       }
       str.sub(/\A-/, '')
     end
@@ -232,18 +236,18 @@ module BitClust
 
     # encoded string -> case-sensitive ID (decode only [A-Z])
     def decodeid(str)
-      str.gsub(/-[a-z]/ni) {|s| s[1,1].upcase }
+      str.gsub(/-[a-z]/ni) {|s| (s[1,1] || raise).upcase }
     end
 
     def encodename_fs(str)
       str.gsub(/[^a-z0-9_]/n) {|ch|
-        (/[A-Z]/n =~ ch) ? "-#{ch}" : sprintf('=%02x', ch[0].ord)
+        (/[A-Z]/n =~ ch) ? "-#{ch}" : sprintf('=%02x', (ch[0] || raise).ord)
       }.downcase
     end
 
     def decodename_fs(str)
       str.gsub(/=[\da-h]{2}|-[a-z]/ni) {|s|
-        (/\A-/ =~ s) ? s[1,1].upcase : s[1,2].hex.chr
+        (/\A-/ =~ s) ? (s[1,1] || raise).upcase : (s[1,2] || raise).hex.chr
       }
     end
 

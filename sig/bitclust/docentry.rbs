@@ -1,0 +1,41 @@
+module BitClust
+  class DocEntry < Entry[MethodDatabase]
+    def self.type_id: () -> :doc
+
+    def initialize: (MethodDatabase db, String id) -> void
+
+    attr_reader id: String
+
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def hash: () -> Integer
+
+    def <=>: (DocEntry other) -> ::Integer?
+
+    def name: () -> String
+
+    alias label name
+
+    def labels: () -> [String]
+
+    def name?: (String n) -> bool
+
+    attr_accessor title: String
+    attr_accessor source: String
+    attr_accessor source_location: Location
+
+    def inspect: () -> ::String
+
+    def classes: () -> Array[ClassEntry]
+
+    def error_classes: () -> Array[ClassEntry]
+
+    def methods: () -> Array[MethodEntry]
+
+    def libraries: () -> Array[LibraryEntry]
+
+    def description: () -> String
+  end
+end

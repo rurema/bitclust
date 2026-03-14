@@ -41,7 +41,9 @@ module BitClust
 
     # for rack
     def call(env)
-      @handler.handle(Rack::Request.new(env)).rack_finish
+      # @type var handler: BitClust::RackRequestHandler
+      handler = _ = @handler
+      handler.handle(Rack::Request.new(env)).rack_finish
     end
 
     private
@@ -83,7 +85,7 @@ module BitClust
 
       alias do_POST do_GET
     end
-  
+
   end
 
 end

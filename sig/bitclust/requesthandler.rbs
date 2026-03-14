@@ -1,0 +1,133 @@
+module BitClust
+  # Actions of BitClust server.
+  class RequestHandler
+    @db: MethodDatabase
+
+    @cdb: FunctionDatabase
+
+    @screenmanager: ScreenManager
+
+    type conf = { :database => MethodDatabase }
+    type conf_entry = { :database => Database, ?:target_version => String }
+    type conf_class = { :database => MethodDatabase, :level => Integer }
+    type conf_function = { :database => (MethodDatabase | FunctionDatabase) }
+    type conf_search = { :database => MethodDatabase, :q => String, :elapsed_time => Float }
+    type any_conf = {
+      :database => MethodDatabase,
+      # accept but ignore
+      ?:target_version => untyped,
+      ?:level => Integer,
+      ?:q => String,
+      ?:elapsed_time => Float,
+    }
+
+    @conf: conf
+
+    def initialize: (([MethodDatabase, FunctionDatabase] | MethodDatabase) db, ScreenManager manager) -> void
+
+    def handle: (WEBrick::HTTPRequest webrick_req) -> Response
+
+    private
+
+    def _handle: (Request req) -> Response
+
+    def error_response: (Exception err) -> Response
+
+    def not_found_response: (Exception err) -> Response
+
+    def handle_library: (Request req) -> Response
+
+    def handle_class: (Request req) -> Response
+
+    def handle_method: (Request req) -> Response
+
+    def library_index: () -> Response
+
+    def class_index: () -> Response
+
+    def handle_opensearchdescription: (Request req) -> Response
+
+    def handle_search: (Request req) -> Response
+
+    def handle_doc: (Request req) -> Response
+
+    def handle_function: (Request req) -> Response
+
+    def function_index: () -> Response
+  end
+
+  class RackRequestHandler < RequestHandler
+    def handle: (Rack::Request rack_req) -> Response
+  end
+
+  class Request
+    @wreq: WEBrick::HTTPRequest
+
+    include NameUtils
+
+    def initialize: (WEBrick::HTTPRequest wreq) -> void
+
+    def library?: () -> bool
+
+    def class?: () -> bool
+
+    def method?: () -> bool
+
+    def doc_name: () -> String?
+
+    def library_name: () -> String?
+
+    def class_name: () -> String?
+
+    def method_spec: () -> MethodSpec?
+
+    def defined_type?: () -> bool
+
+    def type_id: () -> Symbol?
+
+    def function?: () -> bool
+
+    def function_name: () -> String?
+
+    def ancestors_level: () -> Integer
+
+    def query: () -> Hash[String, WEBrick::HTTPUtils::FormData]
+
+    def full_uri: () -> URI::Generic?
+
+    private
+
+    def type_param: () -> String?
+
+    def parse_path_info: () -> [String?, String?]?
+
+    %a{pure}
+    def path_info: () -> String?
+  end
+
+  class RackRequest < Request
+    @rack_req: Rack::Request
+
+    def initialize: (Rack::Request rack_req) -> void
+
+    def query: () -> Hash[untyped, untyped]
+
+    def path_info: () -> String
+
+    def full_uri: () -> URI::Generic
+  end
+
+  class Screen
+    def response: () -> Response
+  end
+
+  class Response
+    @screen: Screen
+
+    def initialize: (Screen screen) -> void
+
+    def update: (WEBrick::HTTPResponse webrick_res) -> void
+
+    def rack_finish: () -> Rack::response
+  end
+end

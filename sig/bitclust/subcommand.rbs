@@ -1,0 +1,30 @@
+module BitClust
+  class Subcommand
+    @parser: OptionParser
+
+    # capi オプションが指定されたときだけ FunctionDatabase
+    @db: FunctionDatabase | MethodDatabase
+
+    def initialize: () -> void
+
+    type argv = Array[String]
+    type options = {
+      :prefix => String,
+      :capi => bool,
+    }
+
+    def parse: (argv argv) -> void
+
+    def help: () -> String
+
+    def exec: (argv argv, options options) -> void
+
+    def error: (_ToS message) -> bot
+
+    def option_error: (String message) -> bot
+
+    def srcdir_root: () -> Pathname
+
+    def align_progress_bar_title: (String title) -> String
+  end
+end

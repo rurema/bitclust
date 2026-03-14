@@ -1,0 +1,15 @@
+module BitClust
+  class SilentProgressBar
+    attr_accessor title: String
+    attr_accessor total: Integer
+    attr_accessor output: untyped
+
+    def self.create: (title: String, total: Integer, ?output: untyped) -> instance
+
+    def initialize: (output: untyped, title: String, total: Integer) -> void
+
+    def increment: () -> void
+
+    def finish: () -> void
+  end
+end

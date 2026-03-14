@@ -1,0 +1,36 @@
+module BitClust
+  class FunctionEntry < Entry[FunctionDatabase]
+    def self.type_id: () -> :function
+
+    def initialize: (FunctionDatabase db, String id) -> void
+    attr_reader id: String
+
+    def inspect: () -> String
+    def name_match?: (Regexp re) -> Integer?
+    def <=>: (FunctionEntry other) -> Integer?
+
+    attr_accessor filename: String
+    attr_accessor macro: bool
+    attr_accessor private: bool
+    attr_accessor type: String
+    attr_accessor name: String
+    attr_writer params: String?
+    def params: () -> String
+    attr_accessor source: String
+    attr_accessor source_location: Location?
+
+    alias label id
+    alias macro? macro
+    alias private? private
+
+    def public?: () -> bool
+    def callable?: () -> bool
+
+    def type_label: () -> ("macro" | "function")
+    alias kind type_label
+
+    def header: () -> String
+
+    def description: () -> String
+  end
+end

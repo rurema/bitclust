@@ -1,0 +1,56 @@
+module BitClust
+  module Subcommands
+    class ServerCommand < Subcommand
+      @params: {
+        :BindAddress => String,
+        :Port => Integer,
+        ?:Logger => WEBrick::Log,
+        ?:AccessLog => Array[[IO, String]],
+      }
+
+      @baseurl: String?
+
+      @dbpath: String?
+
+      @srcdir: Pathname?
+
+      @encoding: String
+
+      @debugp: bool
+
+      @autop: bool
+
+      @browser: String?
+
+      @pid_file: String?
+
+      @capi: bool
+
+      @datadir: String?
+
+      @themedir: String?
+
+      @theme: String?
+
+      @templatedir: String?
+
+      @port: String?
+
+      @database_prefix: String?
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def srcdir_root: () -> Pathname
+
+      def set_srcdir: (Pathname dir) -> void
+
+      def load_config_file: () -> void
+    end
+  end
+end

@@ -5,7 +5,7 @@ require 'bitclust/interface'
 module BitClust
 
   # Main class of BitClust server application.
-  # Actual actions are implemneted by RequestHandler.
+  # Actual actions are implemented by RequestHandler.
   #
   # Supports Rack and WEBrick.
   class App
@@ -26,10 +26,11 @@ module BitClust
       @interfaces = {}
       case dbpath
       when String
+        # @type var viewpath: String
         dbpath = File.expand_path(dbpath)
         db = BitClust::MethodDatabase.new(dbpath)
         if capi
-          db = [db, BitClust::FunctionDatabase.new(dbpath)]
+          db = [db, BitClust::FunctionDatabase.new(dbpath)] #: [MethodDatabase, FunctionDatabase]
         end
         manager = BitClust::ScreenManager.new(
           :base_url => baseurl,
@@ -42,12 +43,13 @@ module BitClust
         handler = request_handler_class.new(db, manager)
         @interfaces[viewpath] = BitClust::Interface.new { handler }
       when Array
+        # @type var viewpath: String?
         dbpaths = dbpath
         @versions = []
         dbpaths.each do |dbpath|
           next unless /db-([\d_\.]+)/ =~ dbpath
           dbpath = File.expand_path(dbpath)
-          version = $1.tr("_", ".")
+          version = ($1 || raise).tr("_", ".")
           @versions << version
           if viewpath
             version_viewpath = File.join(version, viewpath)
@@ -56,7 +58,7 @@ module BitClust
           end
           db = BitClust::MethodDatabase.new(dbpath)
           if capi
-            db = [db, BitClust::FunctionDatabase.new(dbpath)]
+            db = [db, BitClust::FunctionDatabase.new(dbpath)] #: [MethodDatabase, FunctionDatabase]
           end
           manager = BitClust::ScreenManager.new(
             :base_url => baseurl,
@@ -88,13 +90,15 @@ module BitClust
                          req.path_info
                        end
         if @versions.any?{|version| %r|\A/?#{version}/?\z| =~ request_path }
-          viewpath = File.join(request_path, @options[:viewpath])
+          viewpath = @options[:viewpath]
+          raise unless viewpath.is_a?(String)
+          viewpath = File.join(request_path || raise, viewpath)
           @index = "<html><head><meta http-equiv='Refresh' content='0;URL=#{viewpath}'></head></html>"
         else
           links = "<ul>"
           @interfaces.keys.sort.each do |v|
-            if @options[:viewpath]
-              version = v.sub(@options[:viewpath], '')
+            if (viewpath = @options[:viewpath]).is_a?(String)
+              version = v.sub(viewpath, '')
             else
               version = v
             end
@@ -108,15 +112,17 @@ module BitClust
             @index = "<html><head><title>bitclust</title></head><body>#{links}</body></html>"
           end
         end
+      else
+        raise '[BUG]'
       end
     end
 
-    def get_instance(server)
+    def get_instance(_server, *_)
       self
     end
 
     def service(req, res)
-      unless  %r|/#{File.basename(@options[:baseurl])}/?\z| =~ req.path
+      unless  %r|/#{File.basename(@options[:baseurl] || raise)}/?\z| =~ req.path
         raise WEBrick::HTTPStatus::NotFound
       end
       res.body = index(req)

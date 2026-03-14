@@ -62,5 +62,13 @@ HERE
     assert('Exception', @lib.fetch_class("Err").superclass.name)
     assert('Exception', @lib.fetch_class("ErrErr").superclass.name)
   end
-end
 
+  def test_instance_method?
+    bar = @lib.fetch_class("Bar")
+    assert(bar.instance_method?('fugafuga'))
+    assert(!bar.instance_method?('fugafuga', false))
+    hoge = @lib.fetch_class("Hoge")
+    assert(hoge.instance_method?('fugafuga'))
+    assert(hoge.instance_method?('fugafuga', false))
+  end
+end

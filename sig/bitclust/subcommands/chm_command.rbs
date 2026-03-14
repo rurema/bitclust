@@ -1,0 +1,99 @@
+module BitClust
+  module Subcommands
+    class ChmCommand < Subcommand
+      HHP_SKEL: ::String
+
+      HHC_SKEL: ::String
+
+      HHK_SKEL: ::String
+
+      class Sitemap
+        class Content
+          include Enumerable[Content]
+          def each: () { (Content) -> void } -> void
+
+          include ERB::Util
+
+          def initialize: (String name, ?String? local) -> void
+
+          attr_reader name: String
+
+          attr_reader local: String?
+
+          attr_reader contents: Array[Content]
+
+          def []: (Integer index) -> Content
+
+          def <<: (Content content) -> Array[Content]
+
+          def <=>: (Content other) -> (-1 | 0 | 1)
+
+          def to_html: () -> String
+        end
+
+        @name: String
+
+        @contents: Content
+
+        def initialize: (String name, ?String? local) -> void
+
+        def method_missing: (Symbol name, *untyped args) { (?) -> untyped } -> untyped
+
+        # 以下は Content の型をコピー
+
+        def []: (Integer index) -> Content
+        def <<: (Content content) -> Array[Content]
+        def <=>: (Content other) -> (-1 | 0 | 1)
+        def to_html: () -> String
+      end
+
+      class URLMapperEx < URLMapper
+        def library_url: (String name) -> String
+
+        def class_url: (String name) -> String
+
+        def method_url: (String spec) -> String
+
+        def document_url: (String name) -> String
+      end
+
+      FIX_UNDEF: Hash[String, String]
+
+      @sitemap: Hash[Symbol, Sitemap]
+
+      @stdlibs: Hash[String, Sitemap::Content]
+
+      @index_contents: Array[Sitemap::Content]
+
+      @html_files: Array[String]
+
+      type manager_config = {
+        :baseurl     => String,
+        :suffix      => String,
+        :catalogdir  => Pathname,
+        :templatedir => Pathname,
+        :themedir    => Pathname,
+        :css_url     => String,
+        :cgi_url     => String,
+        :tochm_mode  => true,
+        ?:urlmapper  => URLMapperEx,
+      }
+
+      @manager_config: manager_config
+
+      @outputdir: Pathname
+
+      def initialize: () -> void
+
+      def exec: (Array[String] argv, Hash[Symbol, String?] options) -> void
+
+      private
+
+      def create_manager_config: () -> void
+
+      def create_html_file: (LibraryEntry | ClassEntry | DocEntry | Array[MethodEntry] entry, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> String
+
+      def create_file: (Pathname path, String skel) -> void
+    end
+  end
+end

@@ -28,10 +28,10 @@ module BitClust
     def Database.connect(uri)
       case uri.scheme
       when 'file'
-        new(uri.path)
+        new(uri.path || raise)
       when 'druby'
         require 'drb'
-        DRbObject.new_with_uri(uri.to_s)
+        _ = DRbObject.new_with_uri(uri.to_s) #: ::BitClust::Database
       else
         raise InvalidScheme, "unknown database scheme: #{uri.scheme}"
       end
@@ -63,7 +63,7 @@ module BitClust
       yield
       return if dummy?
       if @properties_dirty
-        save_properties 'properties', @properties
+        save_properties 'properties', (@properties || raise)
         @properties_dirty = false
       end
       commit if dirty?
@@ -101,12 +101,12 @@ module BitClust
     end
 
     def propget(key)
-      properties()[key]
+      properties()[key] # steep:ignore
     end
 
     def propset(key, value)
       check_transaction
-      properties()[key] = value
+      properties()[key] = value # steep:ignore
       @properties_dirty = true
     end
 
@@ -137,12 +137,12 @@ module BitClust
     end
 
     def load_properties(rel)
-      h = {}
+      h = {} #: Hash[String, String]
       fopen(realpath(rel), 'r:UTF-8') {|f|
         while line = f.gets
           k, v = line.strip.split('=', 2)
           break unless k
-          h[k] = v
+          h[k] = v || raise
         end
         h['source'] = f.read
       }

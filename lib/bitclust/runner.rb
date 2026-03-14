@@ -3,7 +3,7 @@ require 'pathname'
 require 'optparse'
 
 unless Object.const_defined?(:Encoding)
-  $KCODE = 'UTF-8'
+  $KCODE = 'UTF-8' # steep:ignore
 end
 
 def libdir
@@ -134,8 +134,9 @@ Global Options:
         @version ||= config[:default_version]
         @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
+      # @type var options: Subcommand::options
       options = {
-        :prefix => @prefix,
+        :prefix => (@prefix || raise),
         :capi   => @capi
       }
       cmd.exec(argv, options)
@@ -145,7 +146,7 @@ Global Options:
     end
 
     def load_config
-      home_directory = Pathname(ENV['HOME'])
+      home_directory = Pathname(ENV.fetch('HOME'))
       config_path = home_directory + ".bitclust/config"
       if config_path.exist?
         YAML.load_file(config_path)

@@ -1,0 +1,123 @@
+module BitClust
+  module NameUtils
+    LIBNAME_RE: ::Regexp
+
+    CONST_RE: ::Regexp
+
+    CONST_PATH_RE: ::Regexp
+
+    CLASS_NAME_RE: ::Regexp
+
+    CLASS_PATH_RE: ::Regexp
+
+    METHOD_NAME_RE: ::Regexp
+
+    TYPEMARK_RE: ::Regexp
+
+    METHOD_SPEC_RE: ::Regexp
+
+    GVAR_RE: ::Regexp
+
+    MID: ::Regexp
+
+    def self?.libname?: (String str) -> bool
+
+    def self?.libname2id: (String name) -> String
+
+    def self?.libid2name: (String id) -> String
+
+    def self?.classname?: (String str) -> bool
+
+    def self?.classname2id: (String name) -> String
+
+    def self?.classid2name: (String id) -> String
+
+    def self?.method_spec?: (String str) -> bool
+
+    def self?.split_method_spec: (String spec) -> [String, typemark, String]
+
+    def self?.methodid2specstring: (String id) -> String
+
+    def self?.methodid2specparts: (String id) -> [String, typemark, String, String]
+
+    def self?.methodid2libid: (String id) -> String
+
+    def self?.methodid2classid: (String id) -> String
+
+    def self?.methodid2typechar: (String id) -> typechar
+
+    def self?.methodid2typename: (String id) -> typename
+
+    def self?.methodid2typemark: (String id) -> typemark
+
+    def self?.methodid2mname: (String id) -> String
+
+    def self?.gvarname?: (String str) -> bool
+
+    def self?.methodname?: (String str) -> bool
+
+    def self?.build_method_id: (String libid, String cid, typename t, String name) -> ::String
+
+    # @@split_method_id: Hash[String, [String, typechar, String, String]] にしたいが *spilt の型がうまくいかないため、
+    # untyped にしておく。
+    @@split_method_id: Hash[String, untyped]
+
+    def self?.split_method_id: (String id) -> [String, typechar, String, String]
+
+    type typename = (:singleton_method | :instance_method | :module_function | :constant | :special_variable)
+    type typemark = ('.' | '#' | '.#' | '::' | '$')
+
+    NAME_TO_MARK: Hash[typename, typemark]
+    MARK_TO_NAME: Hash[typemark, typename]
+
+    def self?.typename?: (Symbol n) -> bool
+
+    def self?.typename2mark: (typename name) -> typemark
+
+    def self?.typemark2name: (typemark mark) -> typename
+
+    type typechar = ('s' | 'i' | 'm' | 'c' | 'v')
+
+    NAME_TO_CHAR: Hash[typename, typechar]
+    CHAR_TO_NAME: Hash[typechar, typename]
+
+    def self?.typechar?: (typechar | String c) -> bool
+
+    def self?.typename2char: (typename name) -> typechar
+
+    def self?.typechar2name: (typechar char) -> typename
+
+    MARK_TO_CHAR: Hash[typemark, typechar]
+
+    CHAR_TO_MARK: Hash[typechar, typemark]
+
+    def self?.typemark?: (typemark | String m) -> bool
+
+    def self?.typechar2mark: (typechar char) -> typemark
+
+    def self?.typemark2char: (typemark mark) -> typechar
+
+    def self?.functionname?: (String n) -> bool
+
+    # string -> case-sensitive ID
+    def self?.encodename_url: (String str) -> String
+
+    # case-sensitive ID -> string
+    def self?.decodename_url: (String str) -> String
+
+    # string -> encoded string in a rdoc way
+    def self?.encodename_rdocurl: (String str) -> String
+
+    # case-sensitive ID -> encoded string (encode only [A-Z])
+    def self?.encodeid: (String str) -> String
+
+    # encoded string -> case-sensitive ID (decode only [A-Z])
+    def self?.decodeid: (String str) -> String
+
+    def self?.encodename_fs: (String str) -> String
+
+    def self?.decodename_fs: (String str) -> String
+
+    def self?.html_filename: (String basename, String suffix) -> ::String
+  end
+end

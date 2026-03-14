@@ -38,7 +38,7 @@ end
 def fopen(*args, &block)
   option = args[1]
   if option and !Object.const_defined?(:Encoding)
-    args[1] = option.sub(/:.*\z/, '')
+    args[1] = option.sub(/:.*\z/, '') # steep:ignore
   end
-  File.open(*args, &block)
+  File.open(*args, &block) # steep:ignore
 end

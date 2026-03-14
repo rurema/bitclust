@@ -1,0 +1,9 @@
+module BitClust
+  module Subcommands
+    class QueryCommand < Subcommand
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+    end
+  end
+end

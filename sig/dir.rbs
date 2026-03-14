@@ -1,0 +1,7 @@
+
+# https://github.com/ruby/rbs/pull/2158
+class Dir
+  def self.mktmpdir: (?string | [ string, string ] | nil, ?(string | _ToPath)?, ?max_try: Integer?) -> String
+                   | [X] (?string | [ string, string ] | nil, ?(string | _ToPath)?, ?max_try: Integer?) { (String) -> X } -> X
+                   | ...
+end

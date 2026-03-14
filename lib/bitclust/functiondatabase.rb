@@ -69,7 +69,7 @@ module BitClust
     def open_function(id)
       check_transaction
       if exist?("function/#{id}")
-        f = load_function(id)
+        f = load_function(id) || raise
         f.clear
       else
         f = (@functionmap[id] ||= FunctionEntry.new(self, id))

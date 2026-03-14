@@ -1,0 +1,9 @@
+class Object
+  # same as Object#send
+  alias __send send
+  alias funcall __send
+
+  # same as File.open
+  def fopen: ((::string | ::_ToPath | ::int), ?(::string | ::int), ?::int) -> ::File
+           | [T] ((::string | ::_ToPath | ::int), ?(::string | ::int), ?::int) { (::File) -> T } -> T
+end

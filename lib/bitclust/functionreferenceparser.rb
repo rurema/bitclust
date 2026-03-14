@@ -71,9 +71,9 @@ module BitClust
       raise ParseError, "syntax error: #{header.inspect}" unless m
       h.macro = m[1] ? true : false
       h.private = m[2] ? true : false
-      h.type = m[3].strip
-      h.name = m[4]
-      h.params = m[5].strip if m[5]
+      h.type = m[3]&.strip || raise
+      h.name = m[4] || raise
+      h.params = m[5]&.strip if m[5]
       h
     end
 

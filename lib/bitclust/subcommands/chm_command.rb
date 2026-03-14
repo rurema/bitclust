@@ -134,7 +134,7 @@ EOS
         end
 
         def method_url(spec)
-          cname, tmark, mname = *split_method_spec(spec)
+          cname, tmark, mname = split_method_spec(spec)
           "/method/#{encodename_fs(cname)}/#{typemark2char(tmark)}/#{encodename_fs(mname)}.html"
         end
 
@@ -170,6 +170,7 @@ EOS
         manager = ScreenManager.new(@manager_config)
         @html_files = []
         db.transaction do
+          # @type var methods: Hash[String, Array[MethodEntry]]
           methods = {}
           db.methods.each do |entry|
             method_name = entry.klass.name + entry.typemark + entry.name
@@ -184,6 +185,7 @@ EOS
             e = c.is_a?(Array) ? c.sort.first : c
             case e.type_id
             when :library
+              # @type var e: LibraryEntry
               content = Sitemap::Content.new(e.name.to_s, filename)
               if e.name.to_s != '_builtin'
                 @sitemap[:library][1] << content
@@ -191,6 +193,7 @@ EOS
               end
               @index_contents << Sitemap::Content.new(e.name.to_s, filename)
             when :class
+              # @type var e: ClassEntry
               content = Sitemap::Content.new(e.name.to_s, filename)
               if e.library.name.to_s == '_builtin'
                 @sitemap[:library][0] << content
@@ -199,6 +202,7 @@ EOS
               end
               @index_contents << Sitemap::Content.new("#{e.name} (#{e.library.name})", filename)
             when :method
+              # @type var e: MethodEntry
               e.names.each do |e_name|
                 name = e.typename == :special_variable ? "$#{e_name}" : e_name
                 @index_contents <<
@@ -219,7 +223,7 @@ EOS
         create_file(@outputdir + 'library/index.html', manager.library_index_screen(db.libraries.sort, {:database => db}).body)
         create_file(@outputdir + 'class/index.html', manager.class_index_screen(db.classes.sort, {:database => db}).body)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
-                     @outputdir.to_s, {:verbose => true, :preserve => true})
+                     @outputdir.to_s, verbose: true, preserve: true)
       end
 
       private
@@ -243,15 +247,17 @@ EOS
                     "\u0308" => "\u2025",
                     "\u2014" => "\u2015",
                     "\u2212" => "\uff0d",
-                    "\u301c" => "\uff5e" } 
+                    "\u301c" => "\uff5e" }
 
       def create_html_file(entry, manager, outputdir, db)
         html = manager.entry_screen(entry, {:database => db}).body
         e = entry.is_a?(Array) ? entry.sort.first : entry
         path = case e.type_id
                when :library, :class, :doc
-                 outputdir + e.type_id.to_s + (NameUtils.encodename_fs(e.name) + '.html')
+                # @type var e: LibraryEntry | ClassEntry | DocEntry
+                outputdir + e.type_id.to_s + (NameUtils.encodename_fs(e.name) + '.html')
                when :method
+                # @type var e: MethodEntry
                  outputdir + e.type_id.to_s + NameUtils.encodename_fs(e.klass.name) +
                    e.typechar + (NameUtils.encodename_fs(e.name) + '.html')
                else
@@ -261,7 +267,7 @@ EOS
 
         begin
           new_html = html.gsub(/charset=utf-8/i, 'charset=Windows-31J').
-                     encode('windows-31j', { :fallback => FIX_UNDEF })
+                     encode('windows-31j', fallback: FIX_UNDEF)
           mode = 'w:windows-31j'
         rescue
           new_html = html # write file as it is, utf-8
@@ -277,7 +283,7 @@ EOS
         $stderr.print("creating #{path} ...")
         str = ERB.new(skel).result(binding).
               gsub(/charset=utf-8/i, 'charset=Windows-31J').
-              encode('windows-31j', { :fallback => FIX_UNDEF } )
+              encode('windows-31j', fallback: FIX_UNDEF)
         path.open('w:windows-31j') do |f|
           f.write(str)
         end

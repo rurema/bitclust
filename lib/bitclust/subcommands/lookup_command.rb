@@ -51,19 +51,23 @@ module BitClust
 
       def exec(argv, options)
         super
-        entry = fetch_entry(@db, @type, @key)
-        puts fill_template(get_template(@type, @format), entry)
+        entry = fetch_entry(@db, @type, @key || raise)
+        puts fill_template(get_template(@type || raise, @format || raise), entry)
       end
 
       def fetch_entry(db, type, key)
         case type
         when :library
+          # @type var db: MethodDatabase
           db.fetch_library(key)
         when :class
+          # @type var db: MethodDatabase
           db.fetch_class(key)
         when :method
+          # @type var db: MethodDatabase
           db.fetch_method(MethodSpec.parse(key))
         when :function
+          # @type var db: FunctionDatabase
           db.fetch_function(key)
         else
           raise "must not happen: #{type.inspect}"

@@ -1,0 +1,29 @@
+module BitClust
+  class Server
+    @db: (MethodDatabase | FunctionDatabase)
+
+    def initialize: ((MethodDatabase | FunctionDatabase) db) -> void
+
+    def listen: (String url, ?bool foreground) -> Thread
+  end
+
+  class Database
+    include DRb::DRbUndumped
+  end
+
+  class Entry[DB < Database]
+    include DRb::DRbUndumped
+  end
+
+  class SearchResult
+    include DRb::DRbUndumped
+  end
+end
+
+class Object
+  def _remote_object?: () -> false
+end
+
+class DRb::DRbObject
+  def _remote_object?: () -> true
+end

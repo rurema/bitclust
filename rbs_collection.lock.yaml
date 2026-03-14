@@ -1,0 +1,120 @@
+---
+path: ".gem_rbs_collection"
+gems:
+- name: cgi
+  version: '0.5'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
+- name: date
+  version: '0'
+  source:
+    type: stdlib
+- name: dbm
+  version: '0'
+  source:
+    type: stdlib
+- name: digest
+  version: '0'
+  source:
+    type: stdlib
+- name: erb
+  version: '0'
+  source:
+    type: stdlib
+- name: fileutils
+  version: '0'
+  source:
+    type: stdlib
+- name: json
+  version: '0'
+  source:
+    type: stdlib
+- name: nkf
+  version: '0.2'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
+- name: openssl
+  version: '0'
+  source:
+    type: stdlib
+- name: optparse
+  version: '0'
+  source:
+    type: stdlib
+- name: pstore
+  version: '0'
+  source:
+    type: stdlib
+- name: psych
+  version: '0'
+  source:
+    type: stdlib
+- name: rack
+  version: '2.2'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
+- name: rake
+  version: '13.0'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9c796e74a7e9cf212b9a089ae90e23933ccfc50a
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
+- name: ripper
+  version: '0'
+  source:
+    type: stdlib
+- name: singleton
+  version: '0'
+  source:
+    type: stdlib
+- name: socket
+  version: '0'
+  source:
+    type: stdlib
+- name: stringio
+  version: '0'
+  source:
+    type: stdlib
+- name: strscan
+  version: '0'
+  source:
+    type: stdlib
+- name: tempfile
+  version: '0'
+  source:
+    type: stdlib
+- name: time
+  version: '0'
+  source:
+    type: stdlib
+- name: tmpdir
+  version: '0'
+  source:
+    type: stdlib
+- name: uri
+  version: '0'
+  source:
+    type: stdlib
+- name: webrick
+  version: 1.9.2
+  source:
+    type: rubygems
+- name: yaml
+  version: '0'
+  source:
+    type: stdlib
+gemfile_lock_path: Gemfile.lock

@@ -36,7 +36,9 @@ class LineInput
   end
 
   def path
-    @input.path if @input.respond_to?(:path)
+    # @type var input: IO
+    input = _ = @input
+    input.path if input.respond_to?(:path)
   end
 
   def name
@@ -101,7 +103,7 @@ class LineInput
       ungets line
       return nil
     end
-    return $~[index] if index
+    return $~&.[](index) if index
     line
   end
 
@@ -132,7 +134,7 @@ class LineInput
   end
 
   def getlines_while(re)
-    buf = []
+    buf = [] #: Array[String]
     while_match(re) do |line|
       buf.push line
     end
@@ -153,7 +155,7 @@ class LineInput
   end
 
   def getlines_until(re)
-    buf = []
+    buf = [] #: Array[String]
     until_match(re) do |line|
       buf.push line
     end
@@ -171,7 +173,7 @@ class LineInput
   end
 
   def getblock(term_re)
-    buf = []
+    buf = [] #: Array[String]
     until_terminator(term_re) do |line|
       buf.push line
     end

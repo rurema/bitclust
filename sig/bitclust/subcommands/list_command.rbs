@@ -1,0 +1,13 @@
+module BitClust
+  module Subcommands
+    class ListCommand < Subcommand
+      @mode: (nil | :library | :class | :method | :function)
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+    end
+  end
+end

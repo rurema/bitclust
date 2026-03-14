@@ -30,8 +30,6 @@ module BitClust
       @catalog = opt[:catalog]
       @hlevel = hlevel
       @type = nil
-      @library = nil
-      @class = nil
       @method = nil
       @option = opt.dup
       init_message_catalog(@catalog)
@@ -80,10 +78,10 @@ module BitClust
         when /\A---/
           entry_chunk
         when /\A=+/
-          headline @f.gets
+          headline @f.gets || raise
         when /\A(\s+)\*\s/, /\A(\s+)\(\d+\)\s/
           @item_stack = []
-          item_list($1.size)
+          item_list(($1 || raise).size)
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when %r<\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{>
           emlist
@@ -92,7 +90,7 @@ module BitClust
         when /\A\s+\S/
           list
         else
-          if @f.peek.strip.empty?
+          if @f.peek&.strip&.empty?
             @f.gets
           else
             paragraph
@@ -114,16 +112,16 @@ module BitClust
         method_signature(line, first)
         first = false
       end
-      props = {}
+      props = {} #: Hash[String?, String?]
       @f.while_match(/\A:/) do |line|
         k, v = line.sub(/\A:/, '').split(':', 2)
-        props[k.strip] = v.strip
+        props[k&.strip] = v&.strip
       end if @type == :method
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
       while @f.next?
         case @f.peek
         when /\A===+/
-          headline @f.gets
+          headline @f.gets || raise
         when /\A==?/
           if @option[:force]
             break
@@ -134,7 +132,7 @@ module BitClust
           break
         when /\A(\s+)\*\s/, /\A(\s+)\(\d+\)\s/
           @item_stack = []
-          item_list($1.size)
+          item_list(($1 || raise).size)
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when /\A:\s/
           dlist
@@ -149,7 +147,7 @@ module BitClust
         when /\A@[a-z]/
           entry_info
         else
-          if @f.peek.strip.empty?
+          if @f.peek&.strip&.empty?
             @f.gets
           else
             entry_paragraph
@@ -161,9 +159,9 @@ module BitClust
     end
 
     def headline(line)
-      level = @hlevel + (line.slice(/\A=+/).size - 3)
+      level = @hlevel + (line.slice(/\A=+/)&.size.to_i - 3)
       label = line.sub(/\A=+(\[a:(.*?)\])?/, '').strip
-      frag = $2 if $2 and not $2.empty?
+      frag = $2 if $2 and not ($2 || raise).empty?
       line h(level, escape_html(label), frag)
     end
 
@@ -197,11 +195,11 @@ module BitClust
             string compile_text(cont.strip)
           end
         end
-        if (m = ITEM_RE.match(@f.peek)) && level < m[1].size
-          item_list($1.size)
+        if (m = ITEM_RE.match(@f.peek)) && level < (m[1] || raise).size
+          item_list(($1 || raise).size)
           line @item_stack.pop # current level li
-          break if ITEM_RE =~ @f.peek and level > $1.size
-        elsif m && level > m[1].size
+          break if ITEM_RE =~ @f.peek and level > ($1 || raise).size
+        elsif m && level > (m[1] || raise).size
           line @item_stack.pop # current level li
           break
         else
@@ -268,6 +266,8 @@ module BitClust
     def emlist
       command = @f.gets
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)?\]\[(?<lang>\w+?)\]! =~ command
+        # @type var caption: String?
+        # @type var lang: String
         line "<pre class=\"highlight #{lang}\">"
         line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
         line "<code>"
@@ -277,7 +277,7 @@ module BitClust
         end
         if lang == "ruby"
           begin
-            filename = (caption&.size || 0) > 2 ? caption : @f.name
+            filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
             string BitClust::SyntaxHighlighter.new(src, filename).highlight
           rescue BitClust::SyntaxHighlighter::Error => ex
             $stderr.puts ex.message
@@ -302,7 +302,7 @@ module BitClust
 
     def list
       lines = unindent_block(canonicalize(@f.break(/\A\S/)))
-      while lines.last.empty?
+      while lines.last&.empty?
         lines.pop
       end
       line '<pre>'
@@ -327,7 +327,7 @@ module BitClust
     end
 
     def see
-      header = @f.gets
+      header = @f.gets or raise
       header.slice!(/\A\@\w+/)
       body = [header] + @f.span(/\A\s+\S/)
       line '<p>'
@@ -336,7 +336,7 @@ module BitClust
     end
 
     def todo
-      header = @f.gets
+      header = @f.gets or raise
       header.slice!(/\A\@\w+/)
       body = header
       line '<p class="todo">'
@@ -347,9 +347,9 @@ module BitClust
     def entry_info
       line '<dl>'
       while @f.next? and /\A\@(?!see)\w+|\A$/ =~ @f.peek
-        header = @f.gets
+        header = @f.gets or raise
         next if /\A$/ =~ header
-        cmd = header.slice!(/\A\@\w+/)
+        cmd = header.slice!(/\A\@\w+/) or raise
         @f.ungets(header)
         case cmd
         when '@param', '@arg'
@@ -395,7 +395,9 @@ module BitClust
         string rdoc_link(@method.id, @option[:database].properties["version"])
         if @option[:edit_base_url] && @method.source_location
           string ']['
-          string a_href(@urlmapper.edit_url(@method.source_location), 'edit')
+          # @type var urlmapper: ::BitClust::Subcommands::StatichtmlCommand::URLMapperEx
+          urlmapper = _ = @urlmapper
+          string a_href(urlmapper.edit_url(@method.source_location), 'edit')
         end
         string ']</span>'
       end
@@ -411,8 +413,9 @@ module BitClust
     def compile_text(str)
       escape_table = HTMLUtils::ESC
       str.gsub(/(#{NeedESC})|(#{BracketLink})/o) {
-        if    char = $1 then escape_table[char]
-        elsif tok  = $2 then bracket_link(tok[2..-3])
+        # @type var char: '&' | '"' | '<' | '>'
+        if    char = _ = $1 then escape_table[char]
+        elsif tok  = $2 then bracket_link(tok[2..-3] || raise)
         elsif tok  = $3 then seems_code(tok)
         else
           raise 'must not happen'
@@ -422,7 +425,7 @@ module BitClust
 
     def bracket_link(link, label = nil, frag = nil)
       type, _arg = link.split(':', 2)
-      arg = _arg.rstrip
+      arg = _arg&.rstrip or raise
       case type
       when 'lib'
         protect(link) {
@@ -478,7 +481,13 @@ module BitClust
     def reference_link(arg)
       case arg
       when /(\w+):(.*)\#(\w+)\z/
+        # @type var type: String
+        # @type var name: String
+        # @type var frag: String
         type, name, frag = $1, $2, $3
+        # @type var title: String
+        # @type var t: String
+        # @type var id: String
         case type
         when 'lib'
           title, t, id = name, LibraryEntry.type_id.to_s, name
@@ -496,7 +505,7 @@ module BitClust
         bracket_link("#{type}:#{name}", label, frag)
       when /\A(\w+)\z/
         e = @option[:entry]
-        frag = $1
+        frag = $1 || raise
         type = e.type_id.to_s
         label = @option[:database].refs[type, e.name, frag] || frag
         a_href('#' + frag, label)
@@ -545,7 +554,7 @@ module BitClust
 
     def man_link(spec)
       m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(spec)
-      url = man_url(m[2], escape_html(m[1])) or return escape_html(spec)
+      url = man_url(m[2], escape_html(m[1] || raise)) or return escape_html(spec)
       %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
     end
 
@@ -559,7 +568,7 @@ module BitClust
     def rdoc_url(method_id, version)
       cname, tmark, mname, _libname = methodid2specparts(method_id)
       tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
-      cname = cname.split(".").first
+      cname = cname.split(".").first || raise
       cname = cname.gsub('::', '/')
       id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
 

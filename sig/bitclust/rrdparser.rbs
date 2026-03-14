@@ -1,0 +1,169 @@
+module BitClust
+  class RRDParser
+    include NameUtils
+    include ParseUtils
+
+    def self.parse_stdlib_file: (String path, ?Database::database_properties params) -> LibraryEntry
+
+    def self.parse: (File | String s, String lib, ?Database::database_properties params) -> [LibraryEntry, MethodDatabase]
+
+    def self.split_doc: (String source) -> [String, String]
+
+    def self.libname: (String path) -> String
+
+    def initialize: (MethodDatabase db) -> void
+
+    attr_reader db: MethodDatabase
+
+    @context: Context
+
+    def parse_file: (String path, String libname, ?Database::database_properties params) -> LibraryEntry
+
+    def parse: (File | StringIO f, String libname, ?Database::database_properties params) -> LibraryEntry
+
+    private
+
+    def do_parse: (LineInput f) -> void
+
+    def read_classes: (LineInput f) -> void
+
+    def parse_level1_header: (String line) -> [String, String?, String?]
+
+    def isconst: (String? name, String line) -> String?
+
+    def read_class_body: (LineInput f) -> void
+
+    def read_reopen_body: (LineInput f) -> void
+
+    def read_object_body: (LineInput f) -> void
+
+    def read_aliases: (LineInput f) -> void
+
+    def read_includes: (LineInput f, ?bool reopen) -> void
+
+    def read_extends: (LineInput f, ?bool reopen) -> void
+
+    def tty_warn: (_ToS msg) -> void
+
+    def read_level2_blocks: (LineInput f) -> void
+
+    def read_entries: (LineInput f) -> void
+
+    def concat_aliases: (Array[Chunk] chunks) -> Array[Chunk]
+
+    def read_chunks: (LineInput f) -> Array[Chunk]
+
+    def read_chunk: (LineInput f) -> Chunk
+
+    def check_chunk_signatures: (Array[Signature] sigs, String line) -> Signature
+
+    SIGNATURE: ::Regexp
+
+    GVAR: ::Regexp
+
+    def method_signature: (String line) -> Signature
+
+    class Context
+      include NameUtils
+
+      def initialize: (MethodDatabase db, String libname) -> void
+
+      @db: MethodDatabase
+      @kind: (:defined| :added | :redefined)
+
+      attr_reader library: LibraryEntry
+
+      attr_reader klass: ClassEntry?
+
+      attr_accessor type: NameUtils::typename?
+
+      attr_accessor visibility: (:public | :private | :protected)?
+
+      def categorize: (String? category) -> void
+
+      def require: (String libname) -> void
+
+      def sublibrary: (String libname) -> void
+
+      def define_class: (String? name, String supername, ?location: Location?) -> void
+
+      def define_module: (String? name, ?location: Location?) -> void
+
+      def define_object: (String? name, String? singleton_object_class, ?location: Location?) -> void
+
+      private
+
+      def register_class: (Symbol type, String? name, ClassEntry? superclass, ?location: Location?) -> void
+
+      def clear_scope: () -> void
+
+      public
+
+      def reopen_class: (String? name) -> void
+
+      def redefine_class: (String? name) -> void
+
+      def include: (String name) -> void
+
+      def extend: (String name) -> void
+
+      def dynamic_include: (String name) -> void
+
+      def dynamic_extend: (String name) -> void
+
+      def alias: (String name) -> void
+
+      def module_function: () -> void
+
+      def constant: () -> void
+
+      def special_variable: () -> void
+
+      def signature: () -> Signature?
+
+      def define_method: (Chunk chunk) -> void
+
+      def method_id: (Chunk chunk) -> MethodID
+    end
+
+    class Chunk
+      def initialize: (Signature signature, Array[String] names, String source) -> void
+
+      attr_reader signature: Signature
+
+      attr_reader names: Array[String]
+
+      attr_reader source: String
+
+      def inspect: () -> String
+
+      def alias?: (Chunk other) -> bool
+
+      def unify: (Chunk other) -> void
+    end
+
+    class Signature
+      include NameUtils
+
+      def initialize: (String? c, NameUtils::typemark? t, String? m) -> void
+
+      attr_reader klass: String?
+
+      attr_reader type: NameUtils::typemark?
+
+      attr_reader name: String?
+
+      def inspect: () -> String
+
+      def to_s: () -> String
+
+      def typename: () -> NameUtils::typename
+
+      def same_type?: (Signature other) -> bool
+
+      def compatible?: (Signature other) -> bool
+
+      def fully_qualified?: () -> bool
+    end
+  end
+end

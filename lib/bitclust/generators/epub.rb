@@ -61,6 +61,7 @@ module BitClust
         ]
         argv << "--fs-casesensitive" if @fs_casesensitive
         argv << "--quiet" unless @verbose
+        # @type var options: Subcommand::options
         options = {
           :prefix => @prefix,
           :capi   => @capi,
@@ -71,7 +72,7 @@ module BitClust
       end
 
       def generate_contents_opf(epub_directory)
-        items = []
+        items = [] #: Array[{:id => String, :path => Pathname}]
         glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.xhtml").each do |path|
           items << {
             :id => decodename_package(path.basename(".*").to_s),
@@ -79,7 +80,13 @@ module BitClust
           }
         end
         items.sort_by!{|item| item[:path] }
-        contents = ERB.new(File.read(@templatedir + "contents"), nil, "-").result(binding)
+        template = (@templatedir + "contents").read
+        if ::ERB.instance_method(:initialize).parameters.last.first == :key
+          erb = ::ERB.new(template, trim_mode: '-')
+        else
+          erb = ::ERB.new(template, nil, "-") # steep:ignore UnexpectedPositionalArgument
+        end
+        contents = erb.result(binding)
         File.open(epub_directory + "contents.opf", "w") do |f|
           f.write contents
         end
@@ -94,7 +101,7 @@ module BitClust
       end
 
       def glob_relative_path(path, pattern)
-        relative_paths = []
+        relative_paths = [] #: Array[Pathname]
         absolute_path_to_search = Pathname.new(path).realpath
         Dir.glob(absolute_path_to_search + pattern) do |absolute_path|
           absolute_path = Pathname.new(absolute_path)

@@ -53,7 +53,7 @@ module BitClust
 
     def MessageCatalog.load_with_locales(prefix, locales)
       path, loc = find_catalog(prefix, locales)
-      path ? load_file(path, loc) : new({}, 'C')
+      path ? load_file(path, loc || raise) : new({}, 'C')
     end
 
     def MessageCatalog.env_locales
@@ -72,10 +72,10 @@ module BitClust
     private_class_method :find_catalog
 
     def MessageCatalog.load_file(path, locale)
-      h = {}
+      h = {} #: Hash[String, String]
       fopen(path, 'r:UTF-8') {|f|
         f.each do |key|
-          h[key.chomp] = f.gets.chomp
+          h[key.chomp] = (f.gets || raise).chomp
         end
       }
       new(h, locale)

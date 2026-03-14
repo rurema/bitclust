@@ -49,7 +49,8 @@ module BitClust
           prefix = "#{@config[:database_prefix]}-#{version}"
           FileUtils.rm_rf(prefix) if @cleanup
           init_argv = ["version=#{version}", "encoding=#{@config[:encoding]}"]
-          init_options = { :prefix => prefix }
+          # @type var init_options: Subcommand::options
+          init_options = { :prefix => prefix, :capi => false }
           InitCommand.new.exec(init_argv, init_options)
           update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
           update_argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
@@ -60,7 +61,7 @@ module BitClust
       private
 
       def purge
-        home_directory = Pathname(ENV["HOME"])
+        home_directory = Pathname(ENV.fetch("HOME"))
         config_dir = home_directory + ".bitclust"
         print "Remove all generated files..."
         FileUtils.rm_rf(config_dir.to_s)
@@ -69,7 +70,7 @@ module BitClust
       end
 
       def prepare
-        home_directory = Pathname(ENV["HOME"]).expand_path
+        home_directory = Pathname(ENV.fetch("HOME")).expand_path
         config_dir = home_directory + ".bitclust"
         config_dir.mkpath
         config_path = config_dir + "config"
@@ -89,7 +90,7 @@ module BitClust
           @config = YAML.load_file(config_path)
           unless @config[:versions].sort == @versions.sort
             print("overwrite config file? > [y/N]")
-            if /\Ay\z/i =~ $stdin.gets.chomp
+            if /\Ay\z/i =~ $stdin.gets&.chomp
               @config[:versions] = @versions
               @config[:default_version] = @versions.max
               generate_config(config_path, @config)
@@ -132,6 +133,7 @@ module BitClust
       end
 
       def update_method_database(prefix, argv)
+        # @type var options: Subcommand::options
         options = {
           :prefix => prefix,
           :capi => false,
@@ -142,6 +144,7 @@ module BitClust
       end
 
       def update_function_database(prefix, argv)
+        # @type var options: Subcommand::options
         options = {
           :prefix => prefix,
           :capi => true,

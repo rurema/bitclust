@@ -45,7 +45,7 @@ module BitClust
         end
 
         def method_url(spec)
-          cname, tmark, mname = *split_method_spec(spec)
+          cname, tmark, mname = split_method_spec(spec)
           filename = html_filename(encodename_package(mname), @suffix)
           @bitclust_html_base +
             "/method/#{encodename_package(cname)}/#{typemark2char(tmark)}/#{filename}"
@@ -173,7 +173,7 @@ module BitClust
         manager = ScreenManager.new(@manager_config)
 
         db.transaction do
-          methods = {}
+          methods = {} #: Hash[String, Array[MethodEntry]]
           db.methods.each_with_index do |entry, i|
             next if entry.undefined?
 

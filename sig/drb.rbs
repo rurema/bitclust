@@ -1,0 +1,14 @@
+module DRb
+  module DRbUndumped
+  end
+
+  def self.start_service: (String?, ?untyped?, ?untyped?) -> void
+
+  def self.thread: () -> Thread
+
+  class DRbObject
+    def self.new_with_uri: (String uri) -> instance
+  end
+end
+
+DRbObject: singleton(DRb::DRbObject)

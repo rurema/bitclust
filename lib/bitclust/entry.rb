@@ -189,11 +189,11 @@ module BitClust
     end
 
     def restore_library(id)
-      LibraryEntry.load(@db, id)
+      LibraryEntry.load(@db, id) # steep:ignore
     end
 
     def restore_class(id)
-      id.empty? ? nil : ClassEntry.load(@db, id)
+      id.empty? ? nil : ClassEntry.load(@db, id) # steep:ignore
     end
 
     def restore_libraries(str)
@@ -210,7 +210,7 @@ module BitClust
 
     def restore_entries(str, klass)
       return [] if str.nil?
-      str.split(',').map {|id| klass.load(@db, id) }
+      str.split(',').map {|id| klass.load(@db, id) }  # steep:ignore
     end
 
     def serialize_entry(x)
@@ -227,7 +227,7 @@ module BitClust
 
     def path_string(path)
       i = path.index(name())
-      (path[i..-1] + [name()]).join(' -> ')
+      ((path[i..-1] || raise) + [name()]).join(' -> ')
     end
     private :path_string
 

@@ -1,0 +1,47 @@
+module BitClust
+  # Main class of BitClust server application.
+  # Actual actions are implemented by RequestHandler.
+  #
+  # Supports Rack and WEBrick.
+  class App
+    type options_auto = {
+      # auto
+      :dbpath => Array[String],
+      :baseurl => String?,
+      :datadir => String?,
+      :templatedir => String?,
+      :theme => String?,
+      :encoding => String,
+      :capi => bool,
+    }
+    type options_noauto = {
+      :viewpath => String,
+      :dbpath => String?,
+      :baseurl => String?,
+      :datadir => String?,
+      :templatedir => String?,
+      :theme => String?,
+      :encoding => String,
+      :capi => bool,
+    }
+    type options = options_auto | options_noauto
+
+    @options: options
+
+    @index: String
+
+    def initialize: (options options) -> void
+
+    attr_reader interfaces: Hash[String, Interface]
+
+    attr_reader versions: Array[String]
+
+    def index: (Rack::Request | WEBrick::HTTPRequest req) -> String
+
+    def get_instance: (WEBrick::HTTPServer server, *untyped) -> self
+
+    def service: (WEBrick::HTTPRequest req, WEBrick::HTTPResponse res) -> void
+
+    def call: (Rack::env env) -> Rack::response
+  end
+end

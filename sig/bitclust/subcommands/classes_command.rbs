@@ -1,0 +1,19 @@
+module BitClust
+  module Subcommands
+    class ClassesCommand < Subcommand
+      @rejects: Array[String]
+
+      @verbose: bool
+
+      include CrossRubyUtils
+
+      def initialize: () -> void
+
+      def parse: (Array[String] argv) -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      def defined_classes: (String ruby, String lib, Array[String] rejects) -> Array[String]
+    end
+  end
+end

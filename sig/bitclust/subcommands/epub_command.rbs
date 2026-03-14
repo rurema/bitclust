@@ -1,0 +1,25 @@
+module BitClust
+  module Subcommands
+    class EPUBCommand < Subcommand
+      @verbose: bool
+
+      @catalogdir: Pathname?
+
+      @templatedir: Pathname
+
+      @themedir: Pathname
+
+      @filename: String
+
+      @keep: bool
+
+      @outputdir: Pathname
+
+      @fs_casesensitive: true?
+
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+    end
+  end
+end

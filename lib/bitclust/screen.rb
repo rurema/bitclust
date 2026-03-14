@@ -142,7 +142,7 @@ module BitClust
     end
 
     def method_url(spec)
-      cname, tmark, mname = *split_method_spec(spec)
+      cname, tmark, mname = split_method_spec(spec)
       "#{@cgi_url}/method/#{classname2id(cname)}/#{typemark2char(tmark)}/#{encodename_url(mname)}"
     end
 
@@ -189,7 +189,7 @@ module BitClust
     private
 
     def preproc(template)
-      template.gsub(/^\.include ([\w\-]+)/) { load($1) }
+      template.gsub(/^\.include ([\w\-]+)/) { load($1 || raise) }
     end
   end
 
@@ -227,7 +227,7 @@ module BitClust
 <body>
 <h1>Error</h1>
 <pre>#{escape_html(@error.message)} (#{escape_html(@error.class.name)})
-#{@error.backtrace.map {|s| escape_html(s) }.join("\n")}</pre>
+#{@error.backtrace&.map {|s| escape_html(s) }&.join("\n")}</pre>
 </body>
 </html>
       EndHTML
@@ -455,7 +455,7 @@ module BitClust
     end
 
     def rdcompiler
-      opt = {:catalog => message_catalog()}.merge(@conf)
+      opt = {:catalog => message_catalog()}.merge(@conf) #: RDCompiler::option
       RDCompiler.new(@urlmapper, @hlevel, opt)
     end
 
@@ -542,14 +542,16 @@ module BitClust
     def draw_tree(cs, &block)
       return if cs.empty?
       if cs.first.class?
-        tree = cs.group_by{|c| c.superclass }
+        tree = cs.group_by{|c| c.superclass } # steep:ignore
         tree.each {|key, list| list.sort_by!{|c| c ? c.name : "" } }
         roots = tree.keys.select{|c| !c || !cs.include?(c) }
-        roots.map!{|c| tree[c] }.flatten!
+        roots.map!{|c| tree[c] }.flatten! # steep:ignore
       else
         tree = {}
         roots = cs
       end
+      # @type var roots: Array[ClassEntry]
+      # @type var tree: Hash[ClassEntry, Array[ClassEntry]]
       draw_treed_entries(roots, tree, &block)
     end
 
@@ -684,7 +686,7 @@ module BitClust
     end
 
     def rdcompiler
-      h = {:force => true, :catalog => message_catalog() }.merge(@conf)
+      h = {:force => true, :catalog => message_catalog() }.merge(@conf) #: RDCompiler::option
       RDCompiler.new(@urlmapper, @hlevel, h)
     end
 

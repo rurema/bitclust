@@ -1,0 +1,64 @@
+module BitClust
+  module Generators
+    class EPUB
+      type options = {
+        :prefix => String?,
+        :capi => bool,
+        :outputdir => Pathname,
+        :filename => String,
+        :templatedir => Pathname,
+        :catalog => nil,
+        :themedir => Pathname,
+        :fs_casesensitive => true?,
+        :keep => bool,
+        :verbose => bool,
+      }
+
+      @options: options
+
+      @prefix: String?
+
+      @capi: bool
+
+      @outputdir: Pathname
+
+      @filename: String
+
+      @templatedir: Pathname
+
+      @catalog: nil
+
+      @themedir: Pathname
+
+      @fs_casesensitive: true?
+
+      @keep: bool
+
+      @verbose: bool
+
+      def initialize: (?options options) -> void
+
+      CONTENTS_DIR_NAME: "OEBPS"
+
+      def generate: () -> void
+
+      private
+
+      def make_epub_directory: () { (Pathname) -> void } -> void
+
+      def copy_static_files: (Pathname epub_directory) -> void
+
+      def generate_xhtml_files: (Pathname contents_directory) -> void
+
+      def generate_contents_opf: (Pathname epub_directory) -> void
+
+      def pack_epub: (Pathname epub_directory) -> void
+
+      def glob_relative_path: (Pathname path, String pattern) -> Array[Pathname]
+
+      def decodename_package: (String str) -> String
+
+      def last_modified: () -> String
+    end
+  end
+end

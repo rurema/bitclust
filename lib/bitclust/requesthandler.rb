@@ -59,22 +59,25 @@ module BitClust
     end
 
     def handle_library(req)
-      return library_index() unless req.library_name
-      lib = @db.fetch_library(req.library_name)
+      library_name = req.library_name
+      return library_index() unless library_name
+      lib = @db.fetch_library(library_name)
       @screenmanager.library_screen(lib, @conf).response
     end
 
     def handle_class(req)
-      return class_index() unless req.class_name
-      c =  @db.fetch_class(req.class_name)
-      h = @conf.dup
+      class_name = req.class_name
+      return class_index() unless class_name
+      c =  @db.fetch_class(class_name)
+      h = @conf.dup #: RequestHandler::conf_class
       h[:level] = req.ancestors_level
       @screenmanager.class_screen(c, h).response
     end
 
     def handle_method(req)
-      ms = @db.fetch_methods(req.method_spec)
-      raise MethodNotFound.new(req.method_spec.to_s) if ms.nil? || ms.empty?
+      method_spec = req.method_spec or raise RequestError, 'method request but method_spec is nil'
+      ms = @db.fetch_methods(method_spec)
+      raise MethodNotFound.new(method_spec.to_s) if ms.nil? || ms.empty?
       @screenmanager.method_screen(ms, @conf).response
     end
 
@@ -91,13 +94,12 @@ module BitClust
     end
 
     def handle_search(req)
-      ret = []
-      q0 = req.query['q'] || ''
-      q = URI.unescape(q0)
+      q0 = req.query['q'].to_s
+      q = URI.decode_www_form_component(q0)
       start = Time.now.to_i
       ret = SimpleSearcher.search_pattern(@db, q)
       elapsed_time = Time.now.to_f - start.to_f
-      c = @conf.dup
+      c = @conf.dup #: RequestHandler::conf_search
       c[:q] = q0
       c[:elapsed_time] = elapsed_time
       @screenmanager.search_screen(ret, c).response
@@ -107,10 +109,11 @@ module BitClust
       d = @db.fetch_doc(req.doc_name || 'index' )
       @screenmanager.doc_screen(d, @conf).response
     end
-    
+
     def handle_function(req)
-      return function_index() unless req.function_name
-      f = @cdb.fetch_function(req.function_name)
+      function_name = req.function_name
+      return function_index() unless function_name
+      f = @cdb.fetch_function(function_name)
       @screenmanager.function_screen(f, @conf).response
     end
 
@@ -151,7 +154,7 @@ module BitClust
     end
 
     def doc_name
-      name = path_info.sub(%r!\A/!, '')
+      name = (path_info || raise).sub(%r!\A/!, '')
       name unless name.empty?
     end
 
@@ -188,6 +191,7 @@ module BitClust
       unless typechar?(typechar)
         raise InvalidKey, "invalid method-type ID: #{typechar.inspect}"
       end
+      # @type var typechar: NameUtils::typechar
       cname = classid2name(cid)
       tmark = typechar2mark(typechar)
       mname = decodename_url(mencoded)
@@ -309,7 +313,8 @@ module BitClust
     end
 
     def update(webrick_res)
-      webrick_res.status = @screen.status if @screen.status
+      status = @screen.status
+      webrick_res.status = status if status
       webrick_res['Content-Type'] = @screen.content_type
       # webrick_res['Last-Modified'] = @screen.last_modified
       body = @screen.body
