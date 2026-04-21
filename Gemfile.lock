@@ -69,7 +69,7 @@ GEM
     prism (1.9.0)
     progressbar (1.13.0)
     racc (1.8.1)
-    rack (3.2.5)
+    rack (3.2.6)
     rainbow (3.1.1)
     rake (13.3.1)
     rb-fsevent (0.11.2)
@@ -174,7 +174,7 @@ CHECKSUMS
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   progressbar (1.13.0) sha256=18c921d1c527dbe7eba3c5a07a1e3bcdd5e42fc18276f5711187a7489448be78
   racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
-  rack (3.2.5) sha256=4cbd0974c0b79f7a139b4812004a62e4c60b145cba76422e288ee670601ed6d3
+  rack (3.2.6) sha256=5ed78e1f73b2e25679bec7d45ee2d4483cc4146eb1be0264fc4d94cb5ef212c2
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
   rb-fsevent (0.11.2) sha256=43900b972e7301d6570f64b850a5aa67833ee7d87b458ee92805d56b7318aefe
