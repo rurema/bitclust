@@ -10,6 +10,8 @@
         tempDiv.innerHTML = elem.innerHTML
         const caption = tempDiv.getElementsByClassName("caption")[0]
         if (caption) tempDiv.removeChild(caption)
+        const runButton = tempDiv.getElementsByClassName("highlight__run-button")[0]
+        if (runButton) tempDiv.removeChild(runButton)
 
         // textarea for preserving the copy text
         const copyText = document.createElement('textarea')
