@@ -19,6 +19,10 @@ jobs:
     strategy:
       matrix:
         ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
+    env:
+      # Released Bundler is broken on ruby-head due to ruby/ruby#16895.
+      # Use Ruby's bundled Bundler until rubygems/rubygems#9529 is released.
+      BUNDLER_VERSION: ${{ matrix.ruby == 'head' && '0' || '' }}
     steps:
     - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
