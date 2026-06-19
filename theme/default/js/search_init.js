@@ -1,5 +1,7 @@
 'use strict';
 /*
+ * Part of BitClust. Distributed under the Ruby License or the MIT License.
+ *
  * Wires up the client-side search box for statichtml output.
  *
  * The sibling files search_navigation.js, search_ranker.js and

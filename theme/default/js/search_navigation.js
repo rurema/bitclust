@@ -1,4 +1,9 @@
 /*
+ * Vendored from RDoc's Aliki theme (lib/rdoc/generator/template/aliki/js/), RDoc v7.2.0.
+ * Copyright (c) 2025 Stan Lo. Released under the MIT License.
+ * See https://github.com/ruby/rdoc/blob/v7.2.0/LEGAL.rdoc
+ */
+/*
  * SearchNavigation allows movement using the arrow keys through the search results.
  *
  * When using this library you will need to set scrollIntoView to the

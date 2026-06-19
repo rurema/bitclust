@@ -309,6 +309,9 @@ HERE
           FileUtils.cp(themedir + "js" + js, jsdir.to_s,
                        :verbose => @verbose, :preserve => true)
         end
+        # Ship the MIT notice for the vendored Aliki files alongside them.
+        FileUtils.cp(themedir + "js" + "NOTICE", jsdir.to_s,
+                     :verbose => @verbose, :preserve => true)
         FileUtils.cp(themedir + "search.css", outputdir.to_s,
                      :verbose => @verbose, :preserve => true)
       end

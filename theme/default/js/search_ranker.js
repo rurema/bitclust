@@ -1,3 +1,8 @@
+/*
+ * Vendored from RDoc's Aliki theme (lib/rdoc/generator/template/aliki/js/), RDoc v7.2.0.
+ * Copyright (c) 2025 Stan Lo. Released under the MIT License.
+ * See https://github.com/ruby/rdoc/blob/v7.2.0/LEGAL.rdoc
+ */
 /**
  * Aliki Search Implementation
  *
