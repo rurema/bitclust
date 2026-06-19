@@ -61,7 +61,7 @@ module BitClust
         f.name = h.name
         f.params = h.params
         f.source = body.join('')
-        f.source_location = body[0]&.location&.tap {|loc| break Location.new(@path, loc.line - 1) }
+        f.source_location = body[0]&.location && Location.new(@path, nil)
       }
     end
 
