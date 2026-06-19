@@ -1,0 +1,125 @@
+/* Client-side search box (statichtml output).
+   Styled to match rurema's theme (accent color #33a). */
+
+/* Full-width sticky top bar: manual-home link on the left, search on the right.
+   Negative margins break out of the body's 20px top / 2% side margins so the
+   bar spans the viewport; the matching padding keeps its content aligned with
+   the page body. */
+#rurema-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  margin: -20px -2% 1em;
+  padding: 6px 2%;
+  background: #f7f7fb;
+  border-bottom: 2px solid #33a;
+}
+
+#rurema-brand {
+  font-size: 0.95em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#search-section {
+  position: relative;
+  flex: 0 0 auto;
+  width: 26em;
+  max-width: 50%;
+}
+
+#search-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.35em 0.6em;
+  font-size: 0.95em;
+  border: 1px solid #99a;
+  border-radius: 4px;
+  background: #fff;
+}
+
+#search-field:focus {
+  outline: none;
+  border-color: #33a;
+  box-shadow: 0 0 0 2px rgba(51, 51, 170, 0.25);
+}
+
+.search-results {
+  list-style: none;
+  margin: 0.25em 0 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #33a;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  max-height: 75vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.search-results[aria-expanded="false"] {
+  display: none;
+}
+
+.search-results li {
+  padding: 0.35em 0.6em;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  line-height: 1.25;
+}
+
+.search-results li:last-child {
+  border-bottom: none;
+}
+
+.search-results li.search-selected {
+  background: #e8eaf6; /* light tint of #33a */
+}
+
+.search-results .search-match {
+  margin: 0;
+  font-weight: normal;
+}
+
+.search-results em {
+  font-style: normal;
+  background: #ff9;
+  border-radius: 2px;
+}
+
+.search-type {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0 0.4em;
+  font-size: 0.75em;
+  color: #fff;
+  background: #33a;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.search-snippet {
+  color: #555;
+  font-size: 0.85em;
+  margin-top: 0.15em;
+}
+
+@media only screen and (max-width: 768px) {
+  #rurema-topbar {
+    flex-wrap: wrap;
+    gap: 0.4em;
+  }
+  #search-section {
+    width: 100%;
+    max-width: none;
+  }
+}

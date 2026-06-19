@@ -1,0 +1,34 @@
+module BitClust
+  # Builds a client-side search index compatible with RDoc's Aliki theme.
+  class SearchIndexGenerator
+    @suffix: String
+
+    @fs_casesensitive: bool
+
+    include NameUtils
+
+    TYPENAME_TO_SEARCH_TYPE: Hash[Symbol, String]
+
+    type entry = Hash[Symbol, String]
+
+    def initialize: (?suffix: String, ?fs_casesensitive: bool) -> void
+
+    def build_index: (MethodDatabase db, ?FunctionDatabase? fdb) -> Array[entry]
+
+    def to_js: (MethodDatabase db, ?FunctionDatabase? fdb) -> String
+
+    private
+
+    def class_entries: (MethodDatabase db) -> Array[entry]
+
+    def method_entries: (MethodDatabase db) -> Array[entry]
+
+    def library_entries: (MethodDatabase db) -> Array[entry]
+
+    def document_entries: (MethodDatabase db) -> Array[entry]
+
+    def function_entries: (FunctionDatabase fdb) -> Array[entry]
+
+    def encode: (String str) -> String
+  end
+end

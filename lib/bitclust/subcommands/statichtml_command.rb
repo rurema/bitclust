@@ -12,6 +12,7 @@ require 'bitclust/nameutils'
 require 'bitclust/subcommand'
 require 'bitclust/progress_bar'
 require 'bitclust/silent_progress_bar'
+require 'bitclust/search_index_generator'
 
 module BitClust
   module Subcommands
@@ -203,6 +204,7 @@ module BitClust
                     manager.function_index_screen(fdb.functions.sort, { :database => fdb }).body,
                     :verbose => @verbose)
         create_index_html(@outputdir)
+        create_search_index(@outputdir, db, fdb)
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         FileUtils.cp(@manager_config[:themedir] + "syntax-highlight.css",
@@ -288,6 +290,30 @@ module BitClust
 <a href="doc/#{index_filename}">Go</a>
 HERE
         }
+      end
+
+      SEARCH_JS_FILES = %w[
+        search_navigation.js search_ranker.js search_controller.js search_init.js
+      ].freeze
+
+      def create_search_index(outputdir, db, fdb)
+        generator = SearchIndexGenerator.new(suffix: @suffix,
+                                             fs_casesensitive: @fs_casesensitive)
+        jsdir = outputdir + "js"
+        FileUtils.mkdir_p(jsdir) unless jsdir.directory?
+        create_file(jsdir + "search_data.js",
+                    generator.to_js(db, fdb),
+                    :verbose => @verbose)
+        themedir = @manager_config[:themedir]
+        SEARCH_JS_FILES.each do |js|
+          FileUtils.cp(themedir + "js" + js, jsdir.to_s,
+                       :verbose => @verbose, :preserve => true)
+        end
+        # Ship the MIT notice for the vendored Aliki files alongside them.
+        FileUtils.cp(themedir + "js" + "NOTICE", jsdir.to_s,
+                     :verbose => @verbose, :preserve => true)
+        FileUtils.cp(themedir + "search.css", outputdir.to_s,
+                     :verbose => @verbose, :preserve => true)
       end
 
       def create_html_file(entry, manager, outputdir, db)

@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="<%=h css_url() %>">
 <link rel="stylesheet" href="<%=h custom_css_url("syntax-highlight.css") %>">
+<link rel="stylesheet" href="<%=h custom_css_url("search.css") %>">
 <link rel="icon" type="image/png" href="<%=h favicon_url() %>">
 <% if @conf[:canonical_base_url] %>
 <link rel="canonical" href="<%= canonical_url() %>">
@@ -14,8 +15,23 @@
 <title><%=h @title %> (Ruby <%=h ruby_version %> リファレンスマニュアル)</title>
 <meta name="description" content="<%=h @description %>">
 <script src="<%=h custom_js_url('script.js') %>"></script>
+<script>var index_rel_prefix = "<%=h html_base() %>/";</script>
+<script src="<%=h custom_js_url('js/search_data.js') %>"></script>
+<script src="<%=h custom_js_url('js/search_navigation.js') %>"></script>
+<script src="<%=h custom_js_url('js/search_ranker.js') %>"></script>
+<script src="<%=h custom_js_url('js/search_controller.js') %>"></script>
+<script src="<%=h custom_js_url('js/search_init.js') %>"></script>
 </head>
 <body>
+<div id="rurema-topbar">
+  <div id="rurema-brand"><%= manual_home_link %></div>
+  <div id="search-section" role="search">
+    <input id="search-field" type="text" autocomplete="off" spellcheck="false"
+           placeholder="クラス・メソッドを検索 (/)"
+           aria-label="検索" aria-autocomplete="list" aria-controls="search-results">
+    <ul id="search-results" class="search-results" aria-expanded="false"></ul>
+  </div>
+</div>
 <%= yield %>
 <footer id="footer">
   <a rel="license" href="https://creativecommons.org/licenses/by/3.0/">
