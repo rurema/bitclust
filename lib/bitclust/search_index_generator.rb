@@ -109,11 +109,16 @@ module BitClust
 
     def document_entries(db)
       db.docs.map do |doc|
+        slug  = doc.name
+        title = doc.title
+        # Prose pages are identified by a Japanese title, so index the title
+        # (for human queries) together with the slug (for identifier queries).
+        label = (title && !title.empty? && title != slug) ? "#{title} (#{slug})" : slug
         {
-          name:      doc.name,
-          full_name: doc.name,
+          name:      label,
+          full_name: label,
           type:      'document',
-          path:      "doc/#{encode(doc.name)}#{@suffix}",
+          path:      "doc/#{encode(slug)}#{@suffix}",
         }
       end
     end

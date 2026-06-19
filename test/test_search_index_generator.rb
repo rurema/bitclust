@@ -9,7 +9,8 @@ require 'bitclust/search_index_generator'
 class TestSearchIndexGenerator < Test::Unit::TestCase
   def setup
     @prefix = 'db_si'
-    @root = 'src_si'
+    @base = 'tree_si'
+    @root = "#{@base}/refm/api/src"
     setup_files
     @db = BitClust::MethodDatabase.new(@prefix)
     @db.init
@@ -25,7 +26,7 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
   end
 
   def teardown
-    FileUtils.rm_r([@prefix, @root], :force => true)
+    FileUtils.rm_r([@prefix, @base], :force => true)
   end
 
   def find_entry(index, full_name)
@@ -88,6 +89,14 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     assert_equal paths.uniq.size, paths.size, 'index must not contain duplicate paths'
   end
 
+  def test_document_entry_uses_title_and_slug
+    index = @gen.build_index(@db)
+    e = index.find { |x| x[:type] == 'document' && x[:path] == 'doc/glossary.html' }
+    assert_not_nil e
+    assert_equal 'Ruby用語集 (glossary)', e[:full_name]
+    assert_equal 'Ruby用語集 (glossary)', e[:name]
+  end
+
   def test_to_js_format
     js = @gen.to_js(@db)
     assert_match(/\Avar search_data = \{/, js)
@@ -128,6 +137,15 @@ description
 aaa
 
 HERE
+    end
+
+    # Prose doc pages are loaded from <stdlibtree>/../../doc/**/*.rd
+    docdir = "#{@base}/refm/doc"
+    FileUtils.mkdir_p(docdir)
+    File.open("#{docdir}/glossary.rd", 'w+') do |file|
+      file.puts '= Ruby用語集'
+      file.puts
+      file.puts '用語の説明。'
     end
   end
 end
