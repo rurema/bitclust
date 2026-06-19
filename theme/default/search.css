@@ -1,0 +1,76 @@
+/* Client-side search box (statichtml output). */
+
+#search-section {
+  position: relative;
+  margin: 0.5em 0 1em;
+  max-width: 42em;
+}
+
+#search-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45em 0.7em;
+  font-size: 1em;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+.search-results {
+  list-style: none;
+  margin: 0.2em 0 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.search-results[aria-expanded="false"] {
+  display: none;
+}
+
+.search-results li {
+  padding: 0.35em 0.7em;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.search-results li:last-child {
+  border-bottom: none;
+}
+
+.search-results li.search-selected {
+  background: #e8f0fe;
+}
+
+.search-results .search-match {
+  margin: 0;
+}
+
+.search-results .search-match a {
+  text-decoration: none;
+}
+
+.search-results em {
+  font-style: normal;
+  font-weight: bold;
+  background: #fff2a8;
+}
+
+.search-type {
+  color: #888;
+  font-size: 0.8em;
+  margin-left: 0.5em;
+}
+
+.search-snippet {
+  color: #555;
+  font-size: 0.85em;
+  margin-top: 0.2em;
+}

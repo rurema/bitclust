@@ -292,6 +292,10 @@ HERE
         }
       end
 
+      SEARCH_JS_FILES = %w[
+        search_navigation.js search_ranker.js search_controller.js search_init.js
+      ].freeze
+
       def create_search_index(outputdir, db, fdb)
         generator = SearchIndexGenerator.new(suffix: @suffix,
                                              fs_casesensitive: @fs_casesensitive)
@@ -300,6 +304,13 @@ HERE
         create_file(jsdir + "search_data.js",
                     generator.to_js(db, fdb),
                     :verbose => @verbose)
+        themedir = @manager_config[:themedir]
+        SEARCH_JS_FILES.each do |js|
+          FileUtils.cp(themedir + "js" + js, jsdir.to_s,
+                       :verbose => @verbose, :preserve => true)
+        end
+        FileUtils.cp(themedir + "search.css", outputdir.to_s,
+                     :verbose => @verbose, :preserve => true)
       end
 
       def create_html_file(entry, manager, outputdir, db)

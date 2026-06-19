@@ -358,6 +358,12 @@ module BitClust
       @urlmapper.custom_js_url(js)
     end
 
+    # Relative path from the current page to the site root, used as the
+    # prefix for client-side search result links in statichtml output.
+    def html_base
+      @urlmapper.respond_to?(:bitclust_html_base) ? @urlmapper.bitclust_html_base : '.'
+    end
+
     def favicon_url
       @urlmapper.favicon_url
     end
