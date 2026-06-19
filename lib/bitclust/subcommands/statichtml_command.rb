@@ -90,7 +90,7 @@ module BitClust
         end
 
         def edit_url(location)
-          "#{@edit_base_url}/#{location.file}#L#{location.line}".sub(/([^:])\/\/+/, "\\1/")
+          "#{@edit_base_url}/#{location.file}".sub(/([^:])\/\/+/, "\\1/")
         end
 
         def encodename_package(str)
