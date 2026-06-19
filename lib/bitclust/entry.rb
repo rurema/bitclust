@@ -117,7 +117,7 @@ module BitClust
         when '[LibraryEntry]' then "restore_libraries(h['#{@name}'])"
         when '[ClassEntry]'   then "restore_classes(h['#{@name}'])"
         when '[MethodEntry]'  then "restore_methods(h['#{@name}'])"
-        when 'Location'       then "h['#{@name}']&.tap { |loc| break if loc.empty?; break Location.new(*loc.split(?:)) }"
+        when 'Location'       then "h['#{@name}']&.tap { |loc| break if loc.empty?; break Location.new(loc.split(?:).first, nil) }"
         else
           raise "must not happen: @type=#{@type.inspect}"
         end
@@ -135,7 +135,7 @@ module BitClust
         when '[LibraryEntry]' then "serialize_entries(@#{@name})"
         when '[ClassEntry]'   then "serialize_entries(@#{@name})"
         when '[MethodEntry]'  then "serialize_entries(@#{@name})"
-        when 'Location'       then "@#@name.to_s"
+        when 'Location'       then "(@#{@name} && @#{@name}.file).to_s"
         else
           raise "must not happen: @type=#{@type.inspect}"
         end

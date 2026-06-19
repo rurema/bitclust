@@ -48,4 +48,15 @@ HERE
       assert_equal data[:expected], result.collect(&:source)
     }
   end
+
+  # source_location points at the file only; the line number is no longer
+  # recorded (it would only churn the generated diffs).
+  def test_source_location_has_no_line_number
+    @db.transaction {
+      result = @parser.parse_file(@path, "test.c", {"version" => "2.6.0"})
+      location = result.first.source_location
+      assert_equal @path, location.file
+      assert_nil location.line
+    }
+  end
 end

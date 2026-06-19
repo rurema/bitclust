@@ -57,6 +57,22 @@ class TestMethodDatabase < Test::Unit::TestCase
                  @db.get_class("B").dynamically_included.map{|m| m.name})
   end
 
+  # source_location must be stored without a line number so that regenerating
+  # the database does not churn the persisted entries (and the generated HTML).
+  def test_source_location_serialized_without_line_number
+    entry = @db.search_methods(BitClust::MethodNamePattern.new(nil, nil, 'at_exit')).records.first.entry
+    entry.source_location = BitClust::Location.new('refm/api/src/_builtin/Kernel', 42)
+    assert_equal('refm/api/src/_builtin/Kernel', entry._get_properties['source_location'])
+  end
+
+  def test_source_location_roundtrip_drops_line_number
+    entry = @db.search_methods(BitClust::MethodNamePattern.new(nil, nil, 'at_exit')).records.first.entry
+    entry.source_location = BitClust::Location.new('refm/api/src/_builtin/Kernel', 42)
+    entry._set_properties(entry._get_properties)
+    assert_equal('refm/api/src/_builtin/Kernel', entry.source_location.file)
+    assert_nil(entry.source_location.line)
+  end
+
   private
   def setup_files
     FileUtils.mkdir_p("#{@root}/_builtin")
