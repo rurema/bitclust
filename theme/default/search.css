@@ -96,6 +96,20 @@
   border-radius: 2px;
 }
 
+/* On hover the global `a:hover` rule paints the whole anchor with the #33a
+   accent and white text. Round the anchor (and pad it slightly) so its
+   background follows the rounded highlight instead of poking square corners
+   out behind it, and recolor the highlighted match so the yellow background
+   stays legible against the white-on-blue hover text. */
+.search-results .search-match > a {
+  padding: 1px;
+  border-radius: 3px;
+}
+
+.search-results .search-match > a:hover > em {
+  color: #33a;
+}
+
 .search-type {
   display: inline-block;
   margin-left: 0.5em;
