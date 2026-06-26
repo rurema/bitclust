@@ -89,8 +89,16 @@ module BitClust
           next if seen[path]
 
           seen[path] = true
-          full_name = (tmark == '$' ? '' : cname) + tmark + mname
-          result << { name: mname, full_name: full_name, type: type, path: path }
+          if tmark == '$'
+            # A special variable has no owning class to qualify it; its "$"
+            # sigil is the only thing distinguishing it, so keep it in +name+
+            # too (not just +full_name+) or a "$;"-style query can't match it.
+            name = full_name = tmark + mname
+          else
+            name = mname
+            full_name = cname + tmark + mname
+          end
+          result << { name: name, full_name: full_name, type: type, path: path }
         end
       end
       result
