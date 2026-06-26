@@ -77,6 +77,36 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     assert_equal 'method/-foo/c/-a-a-a.html', e[:path]
   end
 
+  def test_special_variable_keeps_its_sigil_in_name
+    # A special variable's "$" is part of how it is written and is the only
+    # thing distinguishing it (there is no owning class to qualify it), so it
+    # must stay in +name+ for a "$;"-style query to match. See issue #194.
+    #
+    # The +name+/+type+ assertions below are what issue #194 is about. The
+    # +path+ assertion is secondary and filesystem-dependent: @gen defaults to
+    # fs_casesensitive: false, so the path is built by encodename_fs ("Kernel"
+    # -> "-kernel", ";" -> "=3b"). It is fine to ignore ONLY the path failure if
+    # it broke because the fs encoding scheme changed or a case-sensitive build
+    # (fs_casesensitive: true, giving "method/Kernel/v/...") is in use -- as long
+    # as name/type still hold. A name/type failure is a real regression.
+    index = @gen.build_index(@db)
+    e = find_entry(index, '$;')
+    assert_not_nil e
+    assert_equal '$;', e[:name]
+    assert_equal 'variable', e[:type]
+    assert_equal 'method/-kernel/v/=3b.html', e[:path],
+                 'filesystem-encoded path (fs_casesensitive: false); ' \
+                 'ignore only this failure if just the fs encoding/casing changed'
+  end
+
+  def test_special_variable_word_name_keeps_its_sigil
+    index = @gen.build_index(@db)
+    e = find_entry(index, '$stdout')
+    assert_not_nil e
+    assert_equal '$stdout', e[:name]
+    assert_equal 'variable', e[:type]
+  end
+
   def test_same_method_name_in_two_classes
     index = @gen.build_index(@db)
     assert_not_nil find_entry(index, 'Foo#foo')
@@ -135,6 +165,11 @@ description
 == Module Functions
 --- at_exit{ ... } -> Proc
 aaa
+== Special Variables
+--- $; -> String | nil
+区切り文字。
+--- $stdout -> IO
+標準出力。
 
 HERE
     end

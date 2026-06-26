@@ -13,6 +13,27 @@
  *                       set inline in the page <head> by the layout template.
  */
 (function() {
+  // BitClust extension (the vendored Aliki files above are kept verbatim).
+  //
+  // RDoc's parseQuery() rewrites "." to "::" (its class-method separator) and
+  // matches "::"/"."/"#" queries against full_name instead of name. Ruby's
+  // special variables are indexed with their "$" sigil in full_name, and one of
+  // them ($.) contains a literal "." — so a "$." query would become "$::" and
+  // never match. Wrap parseQuery so that any "$"-prefixed (special variable)
+  // query keeps its literal text and is matched against full_name.
+  // See https://github.com/rurema/bitclust/issues/194
+  if (typeof parseQuery === 'function') {
+    var alikiParseQuery = parseQuery;
+    parseQuery = function(query) {
+      var q = alikiParseQuery(query);
+      if (query.charAt(0) === '$') {
+        q.normalized = query.toLowerCase();  // undo the "." -> "::" rewrite
+        q.matchesFullName = true;            // the "$" sigil lives in full_name
+      }
+      return q;
+    };
+  }
+
   function createSearchInstance(input, result) {
     if (!input || !result) return null;
 
