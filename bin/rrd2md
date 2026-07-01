@@ -1,0 +1,126 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# RRD → Markdown バッチ変換スクリプト
+#
+# Usage:
+#   ruby bin/rrd2md <input_dir> <output_dir>
+#   ruby bin/rrd2md ../doctree/refm/api/src ../doctree/refm/api/md
+#
+# Options:
+#   --dry-run    変換せず対象ファイルのリストのみ表示
+#   --verbose    各ファイルの変換状況を表示
+#   --file FILE  単一ファイルのみ変換（出力は標準出力）
+
+require_relative '../lib/bitclust/rrd_to_markdown'
+
+class RRD2MDConverter
+  def initialize(argv)
+    @dry_run = argv.delete('--dry-run')
+    @verbose = argv.delete('--verbose')
+    @single_file = extract_option(argv, '--file')
+
+    if @single_file
+      @input_dir = nil
+      @output_dir = nil
+    elsif argv.size == 2
+      @input_dir = argv[0]
+      @output_dir = argv[1]
+    else
+      usage
+    end
+  end
+
+  def run
+    if @single_file
+      convert_single_file(@single_file)
+    else
+      convert_directory
+    end
+  end
+
+  private
+
+  def extract_option(argv, name)
+    idx = argv.index(name)
+    return nil unless idx
+    argv.delete_at(idx)
+    argv.delete_at(idx)
+  end
+
+  def usage
+    warn "Usage: #{$0} <input_dir> <output_dir>"
+    warn "       #{$0} --file <file>"
+    warn ""
+    warn "Options:"
+    warn "  --dry-run    Show target files without converting"
+    warn "  --verbose    Show each file being converted"
+    warn "  --file FILE  Convert a single file (output to stdout)"
+    exit 1
+  end
+
+  def convert_single_file(path)
+    rrd = File.read(path, encoding: 'UTF-8')
+    puts BitClust::RRDToMarkdown.convert(rrd)
+  end
+
+  def convert_directory
+    files = collect_files(@input_dir)
+
+    if @dry_run
+      files.each { |f| puts f }
+      warn "#{files.size} files would be converted"
+      return
+    end
+
+    converted = 0
+    errors = []
+
+    files.each do |rel_path|
+      input_path = File.join(@input_dir, rel_path)
+      output_path = File.join(@output_dir, to_md_path(rel_path))
+
+      begin
+        rrd = File.read(input_path, encoding: 'UTF-8')
+        md = BitClust::RRDToMarkdown.convert(rrd)
+
+        FileUtils.mkdir_p(File.dirname(output_path))
+        File.write(output_path, md, encoding: 'UTF-8')
+
+        converted += 1
+        warn "  #{rel_path} -> #{to_md_path(rel_path)}" if @verbose
+      rescue => e
+        errors << [rel_path, e]
+        warn "  ERROR: #{rel_path}: #{e.message}" if @verbose
+      end
+    end
+
+    warn "Converted: #{converted}/#{files.size} files"
+    unless errors.empty?
+      warn "Errors: #{errors.size}"
+      errors.each { |path, e| warn "  #{path}: #{e.message}" }
+    end
+  end
+
+  def collect_files(dir)
+    files = []
+    Dir.glob("#{dir}/**/*", File::FNM_DOTMATCH).sort.each do |path|
+      next unless File.file?(path)
+      next if File.basename(path).start_with?('.')
+      rel = path.sub("#{dir}/", '')
+      files << rel
+    end
+    files
+  end
+
+  def to_md_path(rel_path)
+    if rel_path.end_with?('.rd')
+      rel_path.sub(/\.rd\z/, '.md')
+    else
+      "#{rel_path}.md"
+    end
+  end
+end
+
+require 'fileutils'
+RRD2MDConverter.new(ARGV.dup).run
