@@ -31,40 +31,62 @@ module BitClust
     SAMPLECODE_RE = /\A\#@samplecode/
 
     def collect_library_metadata
-      # 先読みで #@ がメタデータ行の間に存在するか確認
-      has_directive_in_metadata = false
-      @lines[@index..].each do |l|
+      scan = @index
+      tokens = []       # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:blank]
+      nest = 0
+      saw_meta = false
+      while scan < @lines.length
+        l = @lines[scan]
         case l
-        when /\A(category|require|sublibrary)\s/, /\A\s*$/
-          next
-        when /\A\#@/
-          has_directive_in_metadata = true
-          break
-        else
-          break
-        end
-      end
-      # #@ が混在する場合は front matter 移動をスキップ
-      return if has_directive_in_metadata
-
-      while @index < @lines.length
-        line = current_line
-        case line
-        when /\Acategory\s+(.*)/
-          @front_matter['category'] = $1.strip
-          advance
-        when /\Arequire\s+(.*)/
-          (@front_matter['require'] ||= []) << $1.strip
-          advance
-        when /\Asublibrary\s+(.*)/
-          (@front_matter['sublibrary'] ||= []) << $1.strip
-          advance
+        when /\Acategory\s+(.*)$/
+          return if nest > 0            # 版条件つき scalar category → 据え置き（データ上0件）
+          tokens << [:cat, $1.strip]; scan += 1; saw_meta = true
+        when /\Arequire\s+(.*)$/
+          tokens << [:req, $1.strip]; scan += 1; saw_meta = true
+        when /\Asublibrary\s+(.*)$/
+          tokens << [:sub, $1.strip]; scan += 1; saw_meta = true
+        when /\A\#@(?:since|until|if)\b/
+          tokens << [:dir, l]; nest += 1; scan += 1
+        when /\A\#@else\b/
+          tokens << [:dir, l]; scan += 1
+        when /\A\#@end\b/
+          break if nest == 0
+          tokens << [:dir, l]; nest -= 1; scan += 1
         when /\A\s*$/
-          advance
+          tokens << [:blank]; scan += 1
+        when /\A\#@/
+          return                        # #@# コメント等が混在 → 据え置き
         else
-          break
+          break                         # body
         end
       end
+      return unless saw_meta
+      return if nest != 0               # Type B（ファイル全体の版ゲート）→ 据え置き（項目1へ）
+      return unless build_metadata_front_matter(tokens)
+      @index = scan                     # メタ領域（末尾空行含む）を消費
+    end
+
+    # 先頭メタデータ領域の tokens を front matter へ組み立てる。
+    # category は scalar、require/sublibrary は組み立て済みブロック行（#@ を挟める）。
+    # #@ ブロックは単一種のみ対応（データ上、混在・category 包みは存在しない）。
+    def build_metadata_front_matter(tokens)
+      toks = tokens.reject { |t| t[0] == :blank }
+      cats = toks.select { |t| t[0] == :cat }
+      return false if cats.size > 1
+      @front_matter['category'] = cats.first[1] if cats.first
+      list_toks = toks.reject { |t| t[0] == :cat }
+      if list_toks.none? { |t| t[0] == :dir }
+        { req: 'require', sub: 'sublibrary' }.each do |sym, key|
+          items = list_toks.select { |t| t[0] == sym }
+          @front_matter[key] = items.map { |t| "  - #{t[1]}\n" } unless items.empty?
+        end
+        return true
+      end
+      kinds = list_toks.select { |t| %i[req sub].include?(t[0]) }.map { |t| t[0] }.uniq
+      return false if kinds.size != 1
+      key = kinds.first == :req ? 'require' : 'sublibrary'
+      @front_matter[key] = list_toks.map { |t| t[0] == :dir ? t[1] : "  - #{t[1]}\n" }
+      true
     end
 
     def emit_front_matter
@@ -91,9 +113,9 @@ module BitClust
         lines << "category: #{v}\n"
       end
       %w[require sublibrary].each do |key|
-        if arr = @front_matter[key]
+        if block = @front_matter[key]
           lines << "#{key}:\n"
-          arr.each { |item| lines << "  - #{item}\n" }
+          block.each { |bl| lines << bl }  # 組み立て済み行（`  - item\n` / `#@...\n`）
         end
       end
       lines << "---\n"

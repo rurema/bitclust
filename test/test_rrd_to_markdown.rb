@@ -344,6 +344,20 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_match(/\A---\ncategory: Network\nrequire:\n  - socket\n---\n/, result)
   end
 
+  def test_versioned_require_to_front_matter
+    rrd = "category Network\n\n\#@since 1.9.1\nrequire cgi/core\nrequire cgi/cookie\n\#@end\n\n説明\n"
+    expected = "---\ncategory: Network\nrequire:\n\#@since 1.9.1\n  - cgi/core\n  - cgi/cookie\n\#@end\n---\n説明\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_file_spanning_version_gate_metadata_stays_in_body
+    # ファイル全体を包む #@（構造的ゲート）はメタを front matter にしない（項目1で対応）
+    rrd = "\#@since 1.9.1\n\ncategory Math\n\n説明\n\#@end\n"
+    result = convert(rrd)
+    refute_match(/\A---/, result)
+    assert_match(/\A\#@since 1.9.1\n/, result)
+  end
+
   def test_no_front_matter_when_no_metadata
     rrd = "= module Comparable\n\n説明\n"
     result = convert(rrd)

@@ -355,6 +355,12 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  def test_front_matter_versioned_require_to_body
+    md = "---\ncategory: Network\nrequire:\n\#@since 1.9.1\n  - cgi/core\n  - cgi/cookie\n\#@end\n---\n説明\n"
+    expected = "category Network\n\n\#@since 1.9.1\nrequire cgi/core\nrequire cgi/cookie\n\#@end\n\n説明\n"
+    assert_equal expected, convert(md)
+  end
+
   def test_front_matter_category
     md = "---\ncategory: Network\n---\nライブラリの説明\n"
     expected = "category Network\n\nライブラリの説明\n"
