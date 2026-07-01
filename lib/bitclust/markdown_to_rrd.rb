@@ -41,7 +41,7 @@ module BitClust
       parsed = YAML.safe_load(yaml_lines.join)
       @front_matter = parsed.is_a?(Hash) ? parsed : {}
       emit_library_metadata
-      prepare_class_metadata
+      parse_class_relations_raw(yaml_lines)
       # Skip blank lines after front matter
       advance while @index < @lines.length && current_line =~ /\A\s*\n?\z/
     end
@@ -60,13 +60,29 @@ module BitClust
       end
     end
 
-    def prepare_class_metadata
-      # front matter の include/extend/alias を body 行として H1 直後に復元する。
-      # RRD 文法順（read_class_body: alias → extend → include）で並べる。
+    # front matter の include/extend/alias を（#@ ディレクティブを保持したまま）
+    # body 行へ復元する。YAML.safe_load は #@ をコメントとして落とすため生行を走査する。
+    # RRD 文法順（read_class_body: alias → extend → include）で並べる。
+    def parse_class_relations_raw(yaml_lines)
+      blocks = {}   # kind => [[:item, val] | [:dir, line]]
+      kind = nil
+      yaml_lines.each do |l|
+        case l
+        when /\A(include|extend|alias):\s*$/
+          kind = $1; blocks[kind] = []
+        when /\A\s+- (.+?)\s*$/
+          blocks[kind] << [:item, $1] if kind
+        when /\A\#@/
+          blocks[kind] << [:dir, l] if kind
+        when /\A\S/
+          kind = nil   # 別のトップレベルキー（category: 等）でブロック終了
+        end
+      end
       @class_relations = []
-      %w[alias extend include].each do |key|
-        if arr = @front_matter[key]
-          Array(arr).each { |v| @class_relations << "#{key} #{v}\n" }
+      %w[alias extend include].each do |k|
+        next unless blocks[k]
+        blocks[k].each do |type, v|
+          @class_relations << (type == :dir ? v : "#{k} #{v}\n")
         end
       end
     end

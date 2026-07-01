@@ -348,6 +348,13 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  def test_front_matter_versioned_alias_to_body
+    # front matter 内の #@ を保持して body に復元する（YAML コメントで失わない）
+    md = "---\nalias:\n\#@until 3.2\n  - Fixnum\n  - Bignum\n\#@end\n---\n# class Integer < Numeric\n\n説明\n"
+    expected = "= class Integer < Numeric\n\#@until 3.2\nalias Fixnum\nalias Bignum\n\#@end\n\n説明\n"
+    assert_equal expected, convert(md)
+  end
+
   def test_front_matter_category
     md = "---\ncategory: Network\n---\nライブラリの説明\n"
     expected = "category Network\n\nライブラリの説明\n"

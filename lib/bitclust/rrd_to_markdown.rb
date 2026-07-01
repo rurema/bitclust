@@ -77,9 +77,9 @@ module BitClust
         end
       end
       %w[include extend alias].each do |key|
-        if arr = @front_matter[key]
+        if block = @front_matter[key]
           lines << "#{key}:\n"
-          arr.each { |item| lines << "  - #{item}\n" }
+          block.each { |bl| lines << bl }  # block は組み立て済みの行（`  - item\n` / `#@...\n`）
         end
       end
       %w[since until].each do |key|
@@ -431,31 +431,53 @@ module BitClust
     def collect_header_relations
       return unless @single_entity
       scan = @index
-      items = { 'include' => [], 'extend' => [], 'alias' => [] }
-      last_item_end = nil
-      blank_after_item = false
+      tokens = []       # [:blank] | [:rel, kind, val] | [:dir, line]
+      nest = 0
+      saw_rel = false
+      region_end = @index
       while scan < @lines.length
         l = @lines[scan]
         case l
-        when /\Ainclude\s+(.+)$/
-          items['include'] << $1.strip; scan += 1; last_item_end = scan; blank_after_item = false
-        when /\Aextend\s+(.+)$/
-          items['extend'] << $1.strip; scan += 1; last_item_end = scan; blank_after_item = false
-        when /\Aalias\s+(.+)$/
-          items['alias'] << $1.strip; scan += 1; last_item_end = scan; blank_after_item = false
+        when /\A(include|extend|alias)\s+(.+)$/
+          tokens << [:rel, $1, $2.strip]; scan += 1; saw_rel = true; region_end = scan
+        when /\A\#@(?:since|until|if)\b/
+          tokens << [:dir, l]; nest += 1; scan += 1
+        when /\A\#@else\b/
+          tokens << [:dir, l]; scan += 1
+        when /\A\#@end\b/
+          break if nest == 0
+          tokens << [:dir, l]; nest -= 1; scan += 1; region_end = scan
         when /\A\s*$/
-          scan += 1
-          blank_after_item = true if last_item_end
+          tokens << [:blank]; scan += 1
         when /\A\#@/
-          return if last_item_end && !blank_after_item  # 版条件つきヘッダ関係 → 据え置き
-          break
+          break if nest == 0            # level-0 の #@ コメント等は body 境界
+          tokens << [:dir, l]; scan += 1
         else
-          break
+          return if nest > 0            # #@ ブロック内の本文 → ヘッダ関係でない → 据え置き
+          break                         # level-0 の本文 → ヘッダ領域終端
         end
       end
-      return if last_item_end.nil?
-      items.each { |k, v| @front_matter[k] = v unless v.empty? }
-      @index = last_item_end
+      return unless saw_rel
+      return if nest != 0               # 不均衡 → 据え置き
+      return unless build_header_front_matter(tokens)
+      @index = region_end
+    end
+
+    # tokens を front matter のブロック行（`  - item\n` / `#@...\n`）へ組み立てる。
+    # 単純ケースは種別ごとの単純リスト。版条件（#@）つきは単一種ブロックのみ対応。
+    def build_header_front_matter(tokens)
+      toks = tokens.reject { |t| t[0] == :blank }
+      kinds = toks.select { |t| t[0] == :rel }.map { |t| t[1] }.uniq
+      if toks.none? { |t| t[0] == :dir }
+        kinds.each do |k|
+          @front_matter[k] = toks.select { |t| t[0] == :rel && t[1] == k }
+                                 .map { |t| "  - #{t[2]}\n" }
+        end
+        return true
+      end
+      return false if kinds.size != 1   # #@ ブロックの種別混在は非対応（データ上存在しない）
+      @front_matter[kinds.first] = toks.map { |t| t[0] == :dir ? t[1] : "  - #{t[2]}\n" }
+      true
     end
 
     def convert_h2(line)

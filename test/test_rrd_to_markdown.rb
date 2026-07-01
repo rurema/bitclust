@@ -299,13 +299,24 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_match(/# class ARGF\.class < Object\ninclude Enumerable/, result)
   end
 
-  def test_versioned_header_relation_stays_in_body_for_now
-    # 版条件（#@）で囲まれたヘッダ関係は当面 body 据え置き（front matter 化はスライス2）
+  def test_versioned_alias_to_front_matter
+    # 版条件（#@）で囲まれたヘッダ関係は front matter 内に #@ を挟んで表現する（§1.6）
     rrd = "= class Integer < Numeric\n\n\#@until 3.2\nalias Fixnum\nalias Bignum\n\#@end\n\n説明\n"
-    result = convert(rrd)
-    assert_match(/\A# class Integer < Numeric\n/, result)
-    assert_match(/\#@until 3.2\nalias Fixnum\nalias Bignum\n\#@end/, result)
-    refute_match(/\A---/, result)
+    expected = "---\nalias:\n\#@until 3.2\n  - Fixnum\n  - Bignum\n\#@end\n---\n# class Integer < Numeric\n\n説明\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_versioned_include_if_to_front_matter
+    rrd = "= class File < IO\n\#@if (version < \"1.8.0\")\ninclude File::Constants\n\#@end\n\n説明\n"
+    expected = "---\ninclude:\n\#@if (version < \"1.8.0\")\n  - File::Constants\n\#@end\n---\n# class File < IO\n\n説明\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_versioned_prose_not_treated_as_header_relation
+    # #@ が本文（関係でない）を包む場合はヘッダ関係扱いしない
+    rrd = "= module Foo\n\n\#@since 3.0\n本文\n\#@end\n"
+    expected = "# module Foo\n\n\#@since 3.0\n本文\n\#@end\n"
+    assert_equal expected, convert(rrd)
   end
 
   def test_front_matter_category
