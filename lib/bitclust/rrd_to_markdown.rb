@@ -16,6 +16,10 @@ module BitClust
       @index = 0
       @front_matter = {}
       @current_section = nil
+      # front matter はファイル単位。複数エンティティを含むファイルでは
+      # include/extend/alias の帰属が曖昧になるため、単一エンティティ時のみ front matter 化する
+      # （分割前の安全策。分割後は全ファイルが単一エンティティになる）。
+      @single_entity = @lines.count { |l| l =~ /\A= / } == 1
 
       collect_library_metadata
       process_body
@@ -66,6 +70,23 @@ module BitClust
     def emit_front_matter
       return '' if @front_matter.empty?
       lines = ["---\n"]
+      # 順序: type, library, include, extend, alias, since, until, category, require, sublibrary（MARKUP_SPEC §1.7）
+      %w[type library].each do |key|
+        if v = @front_matter[key]
+          lines << "#{key}: #{v}\n"
+        end
+      end
+      %w[include extend alias].each do |key|
+        if arr = @front_matter[key]
+          lines << "#{key}:\n"
+          arr.each { |item| lines << "  - #{item}\n" }
+        end
+      end
+      %w[since until].each do |key|
+        if v = @front_matter[key]
+          lines << "#{key}: #{v}\n"
+        end
+      end
       if v = @front_matter['category']
         lines << "category: #{v}\n"
       end
@@ -402,7 +423,39 @@ module BitClust
     def convert_h1(line)
       @out << line.sub(/\A= /, '# ')
       advance
-      # include/extend/alias はパススルー（front matter にしない）
+      collect_header_relations
+    end
+
+    # H1 直後の include/extend/alias を front matter へ集約する。
+    # #@ で囲まれた版条件つきのヘッダ関係は当面 body 据え置き（スライス2で対応）。
+    def collect_header_relations
+      return unless @single_entity
+      scan = @index
+      items = { 'include' => [], 'extend' => [], 'alias' => [] }
+      last_item_end = nil
+      blank_after_item = false
+      while scan < @lines.length
+        l = @lines[scan]
+        case l
+        when /\Ainclude\s+(.+)$/
+          items['include'] << $1.strip; scan += 1; last_item_end = scan; blank_after_item = false
+        when /\Aextend\s+(.+)$/
+          items['extend'] << $1.strip; scan += 1; last_item_end = scan; blank_after_item = false
+        when /\Aalias\s+(.+)$/
+          items['alias'] << $1.strip; scan += 1; last_item_end = scan; blank_after_item = false
+        when /\A\s*$/
+          scan += 1
+          blank_after_item = true if last_item_end
+        when /\A\#@/
+          return if last_item_end && !blank_after_item  # 版条件つきヘッダ関係 → 据え置き
+          break
+        else
+          break
+        end
+      end
+      return if last_item_end.nil?
+      items.each { |k, v| @front_matter[k] = v unless v.empty? }
+      @index = last_item_end
     end
 
     def convert_h2(line)

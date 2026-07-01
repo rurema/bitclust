@@ -317,6 +317,37 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  def test_front_matter_include_to_body
+    md = "---\ninclude:\n  - Enumerable\n---\n# class Array < Object\n\n説明\n"
+    expected = "= class Array < Object\ninclude Enumerable\n\n説明\n"
+    assert_equal expected, convert(md)
+  end
+
+  def test_front_matter_multiple_includes_to_body
+    md = "---\ninclude:\n  - Enumerable\n  - Comparable\n---\n# class Array < Object\n"
+    expected = "= class Array < Object\ninclude Enumerable\ninclude Comparable\n"
+    assert_equal expected, convert(md)
+  end
+
+  def test_front_matter_extend_to_body
+    md = "---\nextend:\n  - Forwardable\n---\n# class Foo < Object\n"
+    expected = "= class Foo < Object\nextend Forwardable\n"
+    assert_equal expected, convert(md)
+  end
+
+  def test_front_matter_alias_to_body
+    md = "---\nalias:\n  - Fixnum\n---\n# class Integer < Numeric\n"
+    expected = "= class Integer < Numeric\nalias Fixnum\n"
+    assert_equal expected, convert(md)
+  end
+
+  def test_front_matter_relations_grammar_order
+    # RRD 文法順（alias → extend → include）で body に復元する
+    md = "---\ninclude:\n  - I\nextend:\n  - E\nalias:\n  - A\n---\n# class Foo < Object\n"
+    expected = "= class Foo < Object\nalias A\nextend E\ninclude I\n"
+    assert_equal expected, convert(md)
+  end
+
   def test_front_matter_category
     md = "---\ncategory: Network\n---\nライブラリの説明\n"
     expected = "category Network\n\nライブラリの説明\n"

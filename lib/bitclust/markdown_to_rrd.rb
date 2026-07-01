@@ -61,7 +61,14 @@ module BitClust
     end
 
     def prepare_class_metadata
-      # include/extend/alias はパススルー（front matter にしない）
+      # front matter の include/extend/alias を body 行として H1 直後に復元する。
+      # RRD 文法順（read_class_body: alias → extend → include）で並べる。
+      @class_relations = []
+      %w[alias extend include].each do |key|
+        if arr = @front_matter[key]
+          Array(arr).each { |v| @class_relations << "#{key} #{v}\n" }
+        end
+      end
     end
 
     def process_body
@@ -422,6 +429,10 @@ module BitClust
     def convert_h1(line)
       @out << line.sub(/\A# /, '= ')
       advance
+      if @class_relations && !@class_relations.empty?
+        @out.concat(@class_relations)
+        @class_relations = []
+      end
     end
 
     def raw_passthrough(line)

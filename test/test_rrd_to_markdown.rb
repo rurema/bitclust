@@ -267,28 +267,45 @@ class TestRRDToMarkdown < Test::Unit::TestCase
 
   # Step 8: YAML front matter
 
-  def test_include_metadata_passthrough
+  def test_include_to_front_matter
     rrd = "= class Array < Object\ninclude Enumerable\n\n説明\n"
-    expected = "# class Array < Object\ninclude Enumerable\n\n説明\n"
+    expected = "---\ninclude:\n  - Enumerable\n---\n# class Array < Object\n\n説明\n"
     assert_equal expected, convert(rrd)
   end
 
-  def test_multiple_includes_passthrough
+  def test_multiple_includes_to_front_matter
     rrd = "= class Array < Object\ninclude Enumerable\ninclude Comparable\n\n説明\n"
-    result = convert(rrd)
-    assert_match(/include Enumerable\ninclude Comparable/, result)
+    expected = "---\ninclude:\n  - Enumerable\n  - Comparable\n---\n# class Array < Object\n\n説明\n"
+    assert_equal expected, convert(rrd)
   end
 
-  def test_extend_passthrough
+  def test_extend_to_front_matter
     rrd = "= class Foo < Object\nextend Forwardable\n"
-    result = convert(rrd)
-    assert_match(/extend Forwardable/, result)
+    expected = "---\nextend:\n  - Forwardable\n---\n# class Foo < Object\n"
+    assert_equal expected, convert(rrd)
   end
 
-  def test_alias_passthrough
+  def test_alias_to_front_matter
     rrd = "= class Integer < Numeric\nalias Fixnum\n"
+    expected = "---\nalias:\n  - Fixnum\n---\n# class Integer < Numeric\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_multi_entity_file_keeps_relations_in_body
+    # 複数エンティティを含むファイルは帰属が曖昧なため front matter 化しない（分割前の安全策）
+    rrd = "= object ARGF < ARGF.class\n\n説明1\n\n= class ARGF.class < Object\ninclude Enumerable\n\n説明2\n"
     result = convert(rrd)
-    assert_match(/alias Fixnum/, result)
+    refute_match(/\A---/, result)
+    assert_match(/# class ARGF\.class < Object\ninclude Enumerable/, result)
+  end
+
+  def test_versioned_header_relation_stays_in_body_for_now
+    # 版条件（#@）で囲まれたヘッダ関係は当面 body 据え置き（front matter 化はスライス2）
+    rrd = "= class Integer < Numeric\n\n\#@until 3.2\nalias Fixnum\nalias Bignum\n\#@end\n\n説明\n"
+    result = convert(rrd)
+    assert_match(/\A# class Integer < Numeric\n/, result)
+    assert_match(/\#@until 3.2\nalias Fixnum\nalias Bignum\n\#@end/, result)
+    refute_match(/\A---/, result)
   end
 
   def test_front_matter_category
@@ -323,9 +340,9 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     refute_match(/\A---/, result)
   end
 
-  def test_include_after_blank_line_passthrough
+  def test_include_after_blank_line_to_front_matter
     rrd = "= class String < Object\n\ninclude Comparable\n\n説明\n"
-    expected = "# class String < Object\n\ninclude Comparable\n\n説明\n"
+    expected = "---\ninclude:\n  - Comparable\n---\n# class String < Object\n\n説明\n"
     assert_equal expected, convert(rrd)
   end
 
