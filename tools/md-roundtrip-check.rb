@@ -42,39 +42,64 @@ if with_doc
   targets += Dir.glob('**/*.rd', base: doc_root).map { |f| [File.join(doc_root, f), "doc:#{f}"] }
 end
 
+# md 内のエンティティ H1 直後のヘッダ領域に関係行が残っていないか
+# （O3 の不変条件: 関係は front matter のみ）
+def body_relations?(md)
+  in_header = false
+  md.each_line do |line|
+    if line =~ /\A#(?!#)\s*(?:class|module|object|reopen|redefine)\b/
+      in_header = true
+    elsif in_header
+      case line
+      when /\A(?:include|extend|alias)\s+\S/ then return true
+      when /\A\#@/, /\A\s*\z/ then nil
+      else in_header = false
+      end
+    end
+  end
+  false
+end
+
 ok = 0
+units = 0
 failed = []
 leftover = []
+body_rels = []
 targets.sort_by(&:last).each do |full, label|
   rrd = File.read(full)
-  if orchestrator
-    rrd, front_matter = orchestrator.reduce(label, rrd)
-    md = BitClust::RRDToMarkdown.convert(rrd, extra_front_matter: front_matter)
-  else
-    md = BitClust::RRDToMarkdown.convert(rrd)
-  end
-  back = BitClust::MarkdownToRRD.convert(md)
-  if (sites = prune_sites[label])
-    remaining = md.lines.filter_map { |l| $1 if l =~ /\A\#@include\s*\((.*?)\)/ }
-    leftover << label unless (remaining & sites).empty?
-  end
-  if back == rrd
-    ok += 1
-    puts "OK   #{label}" if verbose
-  else
-    failed << label
-    puts "DIFF #{label}" if verbose || show_diff
-    if show_diff
-      rrd.lines.zip(back.lines).each_with_index do |(a, b), i|
-        next if a == b
-        puts "  line #{i + 1}: #{a.inspect} -> #{b.inspect}"
-        break
+  outs =
+    if orchestrator
+      orchestrator.units(label, rrd).map { |u| [u.path, u.rrd, orchestrator.convert_unit(u)] }
+    else
+      [[label, rrd, BitClust::RRDToMarkdown.convert(rrd)]]
+    end
+  outs.each do |path, reduced, md|
+    units += 1
+    ulabel = outs.size > 1 ? "#{label} -> #{path}" : label
+    if (sites = prune_sites[label])
+      remaining = md.lines.filter_map { |l| $1 if l =~ /\A\#@include\s*\((.*?)\)/ }
+      leftover << ulabel unless (remaining & sites).empty?
+    end
+    body_rels << ulabel if orchestrator && body_relations?(md)
+    back = BitClust::MarkdownToRRD.convert(md)
+    if back == reduced
+      ok += 1
+      puts "OK   #{ulabel}" if verbose
+    else
+      failed << ulabel
+      puts "DIFF #{ulabel}" if verbose || show_diff
+      if show_diff
+        reduced.lines.zip(back.lines).each_with_index do |(a, b), i|
+          next if a == b
+          puts "  line #{i + 1}: #{a.inspect} -> #{b.inspect}"
+          break
+        end
       end
     end
   end
 end
 
-puts "#{ok}/#{targets.size} byte-exact roundtrip#{inject ? ' (reduced base)' : ''}"
+puts "#{ok}/#{units} byte-exact roundtrip#{inject ? " (reduced base, #{targets.size} sources)" : ''}"
 unless failed.empty?
   puts "failed: #{failed.size}"
   failed.each { |f| puts "  #{f}" } unless verbose || show_diff
@@ -82,4 +107,8 @@ end
 unless leftover.empty?
   puts "grouping includes left unpruned: #{leftover.size}"
   leftover.each { |f| puts "  #{f}" }
+end
+unless body_rels.empty?
+  puts "header relations left in body: #{body_rels.size}"
+  body_rels.each { |f| puts "  #{f}" }
 end

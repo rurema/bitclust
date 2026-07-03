@@ -509,19 +509,42 @@ module BitClust
     end
 
     # tokens を front matter のブロック行（`  - item\n` / `#@...\n`）へ組み立てる。
-    # 単純ケースは種別ごとの単純リスト。版条件（#@）つきは単一種ブロックのみ対応。
+    # 素の関係行と、#@ ブロック（内部は単一種のみ）の並びを種別ごとに集約する。
+    # 1ブロック内の種別混在（データ上存在しない）は据え置き。
     def build_header_front_matter(tokens)
       toks = tokens.reject { |t| t[0] == :blank }
-      kinds = toks.select { |t| t[0] == :rel }.map { |t| t[1] }.uniq
-      if toks.none? { |t| t[0] == :dir }
-        kinds.each do |k|
-          @front_matter[k] = toks.select { |t| t[0] == :rel && t[1] == k }
-                                 .map { |t| "  - #{t[2]}\n" }
+      chunks = []   # [kind, 組み立て済み行の配列]
+      i = 0
+      while i < toks.length
+        t = toks[i]
+        if t[0] == :rel
+          chunks << [t[1], ["  - #{t[2]}\n"]]
+          i += 1
+          next
         end
-        return true
+        # #@ ブロック: 対応する #@end までを1チャンクに
+        depth = 0
+        lines = []
+        kinds = []
+        while i < toks.length
+          tt = toks[i]
+          if tt[0] == :dir
+            lines << tt[1]
+            depth += 1 if tt[1] =~ /\A\#@(?:since|until|if)\b/
+            depth -= 1 if tt[1] =~ /\A\#@end\b/
+          else
+            lines << "  - #{tt[2]}\n"
+            kinds << tt[1]
+          end
+          i += 1
+          break if depth.zero?
+        end
+        return false if depth != 0 || kinds.uniq.size != 1
+        chunks << [kinds.first, lines]
       end
-      return false if kinds.size != 1   # #@ ブロックの種別混在は非対応（データ上存在しない）
-      @front_matter[kinds.first] = toks.map { |t| t[0] == :dir ? t[1] : "  - #{t[2]}\n" }
+      chunks.group_by(&:first).each do |kind, group|
+        @front_matter[kind] = group.flat_map(&:last)
+      end
       true
     end
 

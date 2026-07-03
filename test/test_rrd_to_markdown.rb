@@ -390,6 +390,22 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
   end
 
+  def test_mixed_gated_alias_and_plain_include_to_front_matter
+    # net/Net__HTTPServerException（分割後）: 版条件つき alias と素の include の混在。
+    # #@ ブロックごとに単一種なら front matter 化できる
+    rrd = "= class A < B\n\#@since 2.6.0\nalias C\n\#@end\ninclude D\n\n説明\n"
+    expected = "---\ninclude:\n  - D\nalias:\n\#@since 2.6.0\n  - C\n\#@end\n---\n" \
+               "# class A < B\n\n説明\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_mixed_kinds_within_one_gate_block_stay_in_body
+    # 1つの #@ ブロック内に複数種はデータ上存在しないので据え置きのまま
+    rrd = "= class A < B\n\#@since 2.6.0\nalias C\ninclude D\n\#@end\n\n説明\n"
+    assert_equal "# class A < B\n\#@since 2.6.0\nalias C\ninclude D\n\#@end\n\n説明\n",
+      convert(rrd)
+  end
+
   def test_versioned_include_if_to_front_matter
     rrd = "= class File < IO\n\#@if (version < \"1.8.0\")\ninclude File::Constants\n\#@end\n\n説明\n"
     expected = "---\ninclude:\n\#@if (version < \"1.8.0\")\n  - File::Constants\n\#@end\n---\n# class File < IO\n\n説明\n"

@@ -53,6 +53,28 @@ module BitClust
         (lo.nil? || lo < @hi) && (hi.nil? || hi > @lo)
       end
 
+      # 条件がスコープ内の全バージョンで真か（:if・不正な版文字列は判定不能なので false）
+      def always?(cond)
+        case cond.kind
+        when :since then Gem::Version.new(cond.version) <= @lo
+        when :until then Gem::Version.new(cond.version) >= @hi
+        else false
+        end
+      rescue ArgumentError
+        false
+      end
+
+      # 条件がスコープ内の全バージョンで偽か（:if・不正な版文字列は判定不能なので false）
+      def never?(cond)
+        case cond.kind
+        when :since then Gem::Version.new(cond.version) >= @hi
+        when :until then Gem::Version.new(cond.version) <= @lo
+        else false
+        end
+      rescue ArgumentError
+        false
+      end
+
       # front matter に書く構造ゲート。スコープ内で効く境界のみ残す
       # （下限以下の since・上限以上の until は省略）。スコープ外なら nil。
       # バージョン文字列は原文の表記を保持する。

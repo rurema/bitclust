@@ -118,7 +118,31 @@ LIBRARIES → roots（各 <lib>.rd）
     828/828 変換成功、フルスイート green。_builtin.md は「type+category+散文」だけの理想形。
   - 残置（O4 スコープ）: 全体ゲート型ファイル（rss/fiber/set/thread 等）は `#@if`/`#@since`/`#@until` の
     ファイル全体ラップと body 内 category が残る。
-- **O3**: マルチエンティティ分割（必要な範囲のみ。Errno 等はまとめ据え置き）。
+- **O3（実装済み 2026-07-03、方針=案B）**: **関係を持つエンティティのみ**分割し、
+  「include/extend/alias の記述場所は front matter だけ」という不変条件を全ツリーで成立させる。
+  関係を持たない束ね（Errno 152件・エラークラス対等）は分割しない（ユーザー決定。
+  全件分割は Errno 爆発と版分岐 H1 の分割不能問題があり、無分割は front matter 一元化の
+  利点—汎用MD描画・YAML だけで関係取得・リント可能性—を恒久に薄めるため）。実装:
+  - `lib/bitclust/entity_splitter.rb` — ①`resolve_header_gates`: スコープ定数（常真/常偽、
+    `#@if(version >= "X")` の常真証明含む）の版ゲートのうち**エンティティ H1 を含むブロック**を
+    解決（活き枝のみ残す）。版改名 H1 ペア（thread/Mutex=`Thread::Mutex`⇔`Mutex`、
+    Net::HTTPURITooLong 等）がスコープ内の単一 H1 に収束（旧名は活き枝の alias として残る）。
+    digest.rd の `#@if` 構造ゲート・syslog.rd の散文+H1 内包ゲートも解決。
+    ②`segments`: 深さ0の H1（またはスコープ内ゲート付き H1 ブロック）で分割。
+    先頭のライブラリ概要部は name=nil のベースセグメント。③`header_relations?`。
+  - `MarkdownOrchestrator#units` — 分割判定=「名前付きセグメント≥2 かつ関係あり」
+    （lib+単一エンティティ兼用=pathname 型は分割しない）。member 分割は同ディレクトリ、
+    lib のインライン・エンティティ分割は `<libname>/` 配下（root 直下だと複数 lib の
+    reopen Kernel 等が衝突するため）＋`library`/版ゲート注入。概要部が無い lib は
+    front matter のみの概要ユニットを合成（発見からの消失防止）。
+  - reduce にヘッダ正規化を追加: 先頭空行除去・関係行の末尾空白除去・H1〜関係間の空行除去
+    （md→rd 再生成形へ正規化）。これで従来の benign 差分5件も解消。
+  - `build_header_front_matter` を「#@ブロックごとに単一種」へ一般化
+    （gated alias + 素 include の混在: Net::HTTPServerException）。
+  - 検証: **1185/1185 units（828ソース、63分割）で byte-exact 100%**、
+    出力パス衝突0、**body 関係行 0**（不変条件成立）、フルスイート green。
+  - MARKUP_SPEC §1.1/§1.2 改訂済み: 関係なしマルチエンティティ容認＋関係は front matter が
+    唯一の記述場所＋違反はビルド警告（リントは新パイプライン実装時）。
 - **O4（実装済み 2026-07-03）**: ファイル全体を包む版ゲートの解除 → front matter `since`/`until`。実装:
   - `lib/bitclust/whole_file_gate.rb` — 全体ゲート検出（先頭ゲート＋EOF 閉じ・`#@else` 無し・
     ネスト/samplecode 対応）と `unwrap_for_scope`（スコープ下で常に真 → 単純解除、in-scope の

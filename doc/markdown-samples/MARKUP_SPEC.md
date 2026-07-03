@@ -49,6 +49,14 @@ glob して各ファイルの front matter と H1 を読み取り、構成を組
 旧 RRD 世界の `LIBRARIES` マニフェストと、ライブラリ→クラスの grouping 用 `#@include` は
 **新パイプラインでは使用しない**（旧 `.rd` 世界はそのまま凍結して共存させる。移行手順は別途）。
 
+例外として、**ヘッダ関係（include/extend/alias）を持たないエンティティ**は
+1ファイルに複数束ねてもよい（マルチエンティティファイル。`Errno::EXXX` 152件や
+「本体クラス＋そのエラークラス」対のような自然な束ねを許す）。発見はファイル内の
+**全エンティティ H1** を読み、ファイルの front matter（`library`/`since`/`until`）は
+中の全エンティティに適用される。**関係を持つエンティティは必ず単独ファイルにする**
+（関係の記述場所を front matter に一元化するため。マルチエンティティファイルに
+関係キーや H1 直後の関係行があればビルド警告とし、その時点で分割する）。
+
 ファイルは内容によって次の3種に分類する。**拡張子はすべて `.md`** とし、種別は拡張子ではなく
 内容で判定する。
 
@@ -94,6 +102,7 @@ until: "4.0"
 
 - 種別（class/module/object/reopen/redefine）・名前・継承は **H1** が担い、front matter には重複させない。
 - `include`/`extend`/`alias` は本文ではなく front matter に置く（リスト形式。単一でも配列）。
+  これが**唯一の記述場所**である（関係を持つエンティティは単独ファイルなので曖昧にならない。§1.1）。
 - `reopen`/`redefine` の `include`/`extend` は dynamic include/extend に対応する。`reopen` に `alias` は無い。
 - `library` はスカラ。**所属はファイルの置き場所（ディレクトリ）ではなく front matter が決める**
   （例: `thread/ConditionVariable.md` は物理的に `thread/` 配下だが `library: _builtin`）。

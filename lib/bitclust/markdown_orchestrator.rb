@@ -3,6 +3,7 @@
 require 'bitclust/include_graph'
 require 'bitclust/include_pruner'
 require 'bitclust/whole_file_gate'
+require 'bitclust/entity_splitter'
 require 'bitclust/rrd_to_markdown'
 
 module BitClust
@@ -37,14 +38,64 @@ module BitClust
       relpath != 'LIBRARIES'
     end
 
-    # relpath の RRD を新パイプライン形の Markdown へ変換する
-    def convert(relpath, rrd)
+    # 1つの出力 .md ファイルに対応する単位。
+    # path = 出力相対パス、rrd = rd 側到達点（md→rd 検証の期待値）、
+    # front_matter = 注入する front matter
+    Unit = Struct.new(:path, :rrd, :front_matter)
+
+    # relpath の RRD を出力単位の列に還元する。
+    # ヘッダ関係（include/extend/alias）を持つマルチエンティティファイルは
+    # エンティティ単位に分割する（関係の front matter 一元化のため）。
+    # 関係を持たない束ね（Errno 族等）と lib+単一エンティティ兼用ファイルは
+    # 1 単位のまま。ライブラリファイルの分割ではエンティティを <libname>/ 配下に
+    # 置き、library と版ゲートを注入する
+    def units(relpath, rrd)
       reduced, front_matter = reduce(relpath, rrd)
-      RRDToMarkdown.convert(reduced, extra_front_matter: front_matter)
+      segments = split_segments(reduced)
+      return [Unit.new(md_path(relpath), reduced, front_matter)] unless segments
+
+      library = front_matter['type'] == 'library'
+      dir = library ? relpath.sub(/\.rd\z/, '') : File.dirname(relpath)
+      entity_fm =
+        if library
+          fm = { 'library' => relpath.sub(/\.rd\z/, '') }
+          %w[since until].each { |k| fm[k] = front_matter[k] if front_matter[k] }
+          fm
+        else
+          front_matter
+        end
+
+      units = segments.map do |name, text|
+        next Unit.new(md_path(relpath), text, front_matter) if name.nil?   # 概要部
+
+        fm = entity_fm.dup
+        if (unwrapped = WholeFileGate.unwrap_for_scope(text, @scope))
+          text = unwrapped[0]
+          merge_gate(fm, unwrapped[1])
+        end
+        filename = "#{EntitySplitter.entity_filename(name)}.md"
+        Unit.new(dir == '.' ? filename : File.join(dir, filename), text, fm)
+      end
+      if library && segments.none? { |name, _| name.nil? }
+        # 概要部が無くてもライブラリ自体が発見から消えないよう front matter のみ合成
+        units.unshift(Unit.new(md_path(relpath), '', front_matter))
+      end
+      units
     end
 
-    # 変換の rd 側到達点（prune + 全体ゲート解除後の RRD）と front matter。
-    # MarkdownToRRD.convert(convert(...)) はこの RRD と一致する（検証の期待値）
+    def convert_unit(unit)
+      RRDToMarkdown.convert(unit.rrd, extra_front_matter: unit.front_matter)
+    end
+
+    # relpath の RRD を新パイプライン形の Markdown へ変換する（分割なしファイル用）
+    def convert(relpath, rrd)
+      us = units(relpath, rrd)
+      raise ArgumentError, "#{relpath} splits into #{us.size} files, use units" if us.size > 1
+      convert_unit(us.first)
+    end
+
+    # 変換の rd 側到達点（prune + 全体ゲート解除 + 定数 H1 ゲート解決後の RRD）と
+    # front matter。MarkdownToRRD.convert(convert(...)) はこの RRD と一致する
     def reduce(relpath, rrd)
       front_matter = (@extra[relpath] || {}).dup
       rrd = IncludePruner.prune(rrd, @prune_sites[relpath] || [])
@@ -52,10 +103,63 @@ module BitClust
         rrd = unwrapped[0]
         merge_gate(front_matter, unwrapped[1])
       end
-      [normalize_entity_h1(rrd), front_matter]
+      rrd = EntitySplitter.resolve_header_gates(rrd, @scope)
+      rrd = normalize_entity_h1(rrd)
+      rrd = rrd.sub(/\A(?:[ \t]*\n)+/, '')   # 先頭空行（ゲート解決の残り）を除去
+      [normalize_header_regions(rrd), front_matter]
     end
 
     private
+
+    # 分割すべきならセグメント列を、そうでなければ nil を返す。
+    # 条件: エンティティ（名前付きセグメント）が2つ以上 + いずれかがヘッダ関係を持つ。
+    # lib+単一エンティティ兼用（pathname 型、仕様が認める形）は分割しない
+    def split_segments(reduced)
+      return nil unless EntitySplitter.header_relations?(reduced)
+      segments = EntitySplitter.segments(reduced)
+      return nil unless segments
+      segments.count { |name, _| name } >= 2 ? segments : nil
+    end
+
+    # 出力 .md の相対パス（.rd は差し替え、その他は付加）
+    def md_path(relpath)
+      relpath.end_with?('.rd') ? relpath.sub(/\.rd\z/, '.md') : "#{relpath}.md"
+    end
+
+    RELATION_RE = /\A(?:include|extend|alias)\s+\S/
+    HEADER_DIR_RE = /\A\#@(?:since|until|if|else|end)\b/
+    BLANK_LINE_RE = /\A\s*\z/
+
+    # H1 直後のヘッダ関係領域を md→rd の再生成形に正規化する:
+    # 最後の関係行までの空行を除き、関係行の末尾空白を落とす。
+    # 関係を持たない H1 の直後や本文の空行・散文ゲートは触らない
+    def normalize_header_regions(rrd)
+      lines = rrd.lines
+      out = []
+      i = 0
+      while i < lines.length
+        line = lines[i]
+        out << line
+        i += 1
+        next unless line =~ EntitySplitter::H1_RE
+        region = []
+        while i < lines.length &&
+              (lines[i] =~ RELATION_RE || lines[i] =~ HEADER_DIR_RE || lines[i] =~ BLANK_LINE_RE)
+          region << lines[i]
+          i += 1
+        end
+        last_rel = region.rindex { |l| l =~ RELATION_RE }
+        if last_rel
+          head = region[0..last_rel].reject { |l| l =~ BLANK_LINE_RE }
+                                    .map { |l| l =~ RELATION_RE ? "#{l.rstrip}\n" : l }
+          out.concat(head)
+          out.concat(region[(last_rel + 1)..])
+        else
+          out.concat(region)
+        end
+      end
+      out.join
+    end
 
     # 「=class Encoding」のようなスペース無し H1（RRDParser は受理）を
     # 正規形「= class」に直す。単一ファイル変換器は正規形のみ扱う

@@ -402,6 +402,25 @@ class TestIncludeGraph < Test::Unit::TestCase
     assert_equal({ since: "3.2.0" }, scope.gate(conditions([:since, "3.2.0"])))
   end
 
+  def test_scope_always_and_never
+    scope = BitClust::IncludeGraph::Scope.new("3.0", "4.2")
+    cond = ->(kind, v) { BitClust::IncludeGraph::Condition.new(kind, v) }
+    # since v: スコープ全体で真 ⇔ v <= 下限
+    assert_true  scope.always?(cond[:since, "2.3.0"])
+    assert_true  scope.always?(cond[:since, "3.0"])
+    assert_false scope.always?(cond[:since, "3.2"])
+    assert_false scope.never?(cond[:since, "3.2"])
+    assert_true  scope.never?(cond[:since, "4.2"])
+    # until v: スコープ全体で真 ⇔ v >= 上限
+    assert_true  scope.always?(cond[:until, "4.2"])
+    assert_false scope.always?(cond[:until, "3.1"])
+    assert_true  scope.never?(cond[:until, "3.0"])
+    assert_false scope.never?(cond[:until, "3.1"])
+    # if は判定不能（常に false）
+    assert_false scope.always?(cond[:if, "(version > \"1.8\")"])
+    assert_false scope.never?(cond[:if, "(version > \"1.8\")"])
+  end
+
   # ---- front_matter_map: メンバーへの注入値（スコープ適用済み）----
 
   def scope30_42

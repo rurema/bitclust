@@ -95,18 +95,25 @@ class RRD2MDConverter
 
     files.each do |rel_path|
       input_path = File.join(@input_dir, rel_path)
-      output_path = File.join(@output_dir, to_md_path(rel_path))
 
       begin
         rrd = File.read(input_path, encoding: 'UTF-8')
-        md = orchestrator ? orchestrator.convert(rel_path, rrd)
-                          : BitClust::RRDToMarkdown.convert(rrd)
+        outputs =
+          if orchestrator
+            orchestrator.units(rel_path, rrd)
+              .map { |u| [u.path, orchestrator.convert_unit(u)] }
+          else
+            [[to_md_path(rel_path), BitClust::RRDToMarkdown.convert(rrd)]]
+          end
 
-        FileUtils.mkdir_p(File.dirname(output_path))
-        File.write(output_path, md, encoding: 'UTF-8')
+        outputs.each do |out_rel, md|
+          output_path = File.join(@output_dir, out_rel)
+          FileUtils.mkdir_p(File.dirname(output_path))
+          File.write(output_path, md, encoding: 'UTF-8')
+          warn "  #{rel_path} -> #{out_rel}" if @verbose
+        end
 
         converted += 1
-        warn "  #{rel_path} -> #{to_md_path(rel_path)}" if @verbose
       rescue => e
         errors << [rel_path, e]
         warn "  ERROR: #{rel_path}: #{e.message}" if @verbose
