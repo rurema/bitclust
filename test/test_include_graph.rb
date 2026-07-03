@@ -469,4 +469,71 @@ class TestIncludeGraph < Test::Unit::TestCase
     )
     assert_equal({ "foo/Bar" => { "library" => "foo" } }, graph.front_matter_map(scope30_42))
   end
+
+  # ---- grouping_include_sites: prune 対象（ファイル => 記載どおりの target）----
+
+  def test_grouping_include_sites
+    graph = analyze(
+      "LIBRARIES" => "foo\n",
+      "foo.rd"    => "\#@include(foo/Bar)\n\#@include(foo/frag)\n",
+      "foo/Bar"   => "= class Bar < Object\n\#@include(Baz)\n\#@include(frag2)\n",
+      "foo/Baz"   => "= class Baz < Object\n",
+      "foo/frag"  => "断片。\n",
+      "foo/frag2" => "断片2。\n"
+    )
+    # fragment include（foo/frag, frag2）は含まれない。target は記載どおりの文字列
+    assert_equal({ "foo.rd" => ["foo/Bar"], "foo/Bar" => ["Baz"] },
+      graph.grouping_include_sites)
+  end
+
+  def test_grouping_include_sites_dedupes_multi_path_walks
+    # 同一ファイルが複数経路で走査されてもサイトは重複しない
+    graph = analyze(
+      "LIBRARIES" => "foo\nbar\n",
+      "foo.rd"    => "\#@include(shared/frag)\n",
+      "bar.rd"    => "\#@include(shared/frag)\n",
+      "shared/frag" => "断片。\n\#@include(Thing)\n",
+      "shared/Thing" => "= class Thing < Object\n"
+    )
+    assert_equal({ "shared/frag" => ["Thing"] }, graph.grouping_include_sites)
+  end
+
+  # ---- library_front_matter_map: ライブラリ概要ファイルへの注入値 ----
+
+  def test_library_front_matter_map_marks_roots
+    graph = analyze(
+      "LIBRARIES" => "foo\nbar/sub\n",
+      "foo.rd"    => "本文。\n",
+      "bar/sub.rd" => "本文。\n"
+    )
+    assert_equal(
+      { "foo.rd" => { "type" => "library" }, "bar/sub.rd" => { "type" => "library" } },
+      graph.library_front_matter_map(scope30_42)
+    )
+  end
+
+  def test_library_front_matter_map_applies_scoped_gate
+    # LIBRARIES の fiber: until 3.1 / set: until 3.2 に相当
+    graph = analyze(
+      "LIBRARIES" => "\#@until 3.1\nfoo\n\#@end\nbar\n",
+      "foo.rd"    => "本文。\n",
+      "bar.rd"    => "本文。\n"
+    )
+    assert_equal(
+      { "foo.rd" => { "type" => "library", "until" => "3.1" },
+        "bar.rd" => { "type" => "library" } },
+      graph.library_front_matter_map(scope30_42)
+    )
+  end
+
+  def test_library_front_matter_map_excludes_out_of_scope_libraries
+    # cmath/scanf/sync（until 2.7.0）は [3.0,4.2) の対象外
+    graph = analyze(
+      "LIBRARIES" => "\#@until 2.7.0\nfoo\n\#@end\nbar\n",
+      "foo.rd"    => "本文。\n",
+      "bar.rd"    => "本文。\n"
+    )
+    assert_equal({ "bar.rd" => { "type" => "library" } },
+      graph.library_front_matter_map(scope30_42))
+  end
 end

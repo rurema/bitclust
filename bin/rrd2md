@@ -12,12 +12,17 @@
 #   --verbose    各ファイルの変換状況を表示
 #   --file FILE  単一ファイルのみ変換（出力は標準出力）
 #   --graph      input_dir の LIBRARIES から #@include グラフを解析し、
-#                各メンバーへ library / 構造 since/until を front matter 注入する
+#                - 各メンバーへ library / 構造 since/until を front matter 注入
+#                - 各ライブラリ概要へ type: library（+ LIBRARIES 由来の since/until）を注入
+#                - grouping include（エンティティ取り込み）を除去（発見は front matter へ移行。
+#                  fragment include は温存）
+#                - LIBRARIES 自体は変換対象外（役目が front matter に置き換わる）
 #   --scope LO,HI  --graph の対象版範囲 [LO, HI)（デフォルト 3.0,4.2。
 #                  旧版サルベージ時は別範囲を指定して再実行できる）
 
 require_relative '../lib/bitclust/rrd_to_markdown'
 require_relative '../lib/bitclust/include_graph'
+require_relative '../lib/bitclust/include_pruner'
 
 class RRD2MDConverter
   def initialize(argv)
@@ -73,7 +78,12 @@ class RRD2MDConverter
 
   def convert_directory
     files = collect_files(@input_dir)
-    extra = @graph ? build_front_matter_map : {}
+    if @graph
+      extra, prune_sites = build_graph_maps
+      files -= ['LIBRARIES']   # 役目は front matter による発見に置き換わる
+    else
+      extra, prune_sites = {}, {}
+    end
 
     if @dry_run
       files.each { |f| puts f }
@@ -90,6 +100,7 @@ class RRD2MDConverter
 
       begin
         rrd = File.read(input_path, encoding: 'UTF-8')
+        rrd = BitClust::IncludePruner.prune(rrd, prune_sites[rel_path] || [])
         md = BitClust::RRDToMarkdown.convert(rrd, extra_front_matter: extra[rel_path] || {})
 
         FileUtils.mkdir_p(File.dirname(output_path))
@@ -110,12 +121,16 @@ class RRD2MDConverter
     end
   end
 
-  def build_front_matter_map
+  def build_graph_maps
     graph = BitClust::IncludeGraph.analyze(@input_dir)
-    map = graph.front_matter_map(BitClust::IncludeGraph::Scope.new(*@scope))
+    scope = BitClust::IncludeGraph::Scope.new(*@scope)
+    extra = graph.front_matter_map(scope)
+    graph.library_front_matter_map(scope).each { |path, fm| (extra[path] ||= {}).merge!(fm) }
+    prune_sites = graph.grouping_include_sites
     graph.warnings.each { |w| warn "  W: #{w}" }
-    warn "front matter injection: #{map.size} files (scope [#{@scope.join(', ')}))"
-    map
+    warn "front matter injection: #{extra.size} files, " \
+         "include pruning: #{prune_sites.size} files (scope [#{@scope.join(', ')}))"
+    [extra, prune_sites]
   end
 
   def collect_files(dir)

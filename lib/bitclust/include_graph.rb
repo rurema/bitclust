@@ -72,8 +72,10 @@ module BitClust
 
     def initialize(src_root)
       @src_root = src_root
-      @memberships = {}   # relpath => [Membership]
-      @kinds = {}         # relpath => :grouping | :fragment
+      @memberships = {}     # relpath => [Membership]
+      @kinds = {}           # relpath => :grouping | :fragment
+      @grouping_sites = {}  # relpath => [include target（記載どおりの文字列）]
+      @library_gates = {}   # library name => [Condition]（LIBRARIES 由来）
       @warnings = []
     end
 
@@ -84,6 +86,7 @@ module BitClust
           @warnings << "library root not found: #{root}"
           next
         end
+        @library_gates[name] = gate
         walk(root, name, gate, [root])
       end
       self
@@ -101,6 +104,31 @@ module BitClust
 
     def fragments
       @kinds.select { |_, kind| kind == :fragment }.keys.sort
+    end
+
+    # grouping include のサイト一覧（prune 対象）。
+    # { relpath => [#@include に記載どおりの target 文字列] }
+    # fragment include は含まない（transclusion として温存する）。
+    def grouping_include_sites
+      @grouping_sites
+    end
+
+    # 各ライブラリ概要ファイル（LIBRARIES のルート）へ注入する front matter。
+    # { relpath => { "type" => "library", "since" => v, "until" => v } }
+    # LIBRARIES 内の版ゲート（fiber: until 3.1 等）をスコープ適用して付与する。
+    # スコープ外のライブラリ（cmath/scanf/sync 等）は含まない。
+    def library_front_matter_map(scope)
+      result = {}
+      @library_gates.each do |name, gate|
+        root = "#{name}.rd"
+        scoped = scope.gate(gate)
+        next unless scoped
+        fm = { 'type' => 'library' }
+        fm['since'] = scoped[:since] if scoped[:since]
+        fm['until'] = scoped[:until] if scoped[:until]
+        result[root] = fm
+      end
+      result
     end
 
     # 各 grouping メンバーへ注入する front matter（スコープ適用済み）。
@@ -213,6 +241,8 @@ module BitClust
         m = Membership.new(library, conditions)
         list = (@memberships[relpath] ||= [])
         list << m unless list.include?(m)
+        sites = (@grouping_sites[from] ||= [])
+        sites << target unless sites.include?(target)
       end
 
       if path_stack.include?(relpath)

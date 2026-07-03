@@ -101,8 +101,23 @@ LIBRARIES → roots（各 <lib>.rd）
   - `tools/md-roundtrip-check.rb [--inject]` — ラウンドトリップ検証（都度 /tmp に再作成していたものを恒久化）
   - 検証: 全 828 ファイル中 823 byte-exact（残5は既知の空白差のみ・注入の有無で不変）、
     in-scope 349 メンバー注入、フルテストスイート green。
-- **O2**: 索引 → ライブラリ概要 .md（grouping include 除去・fragment include 温存・散文/メタ保持）。
-  新パイプラインでの二重取り込み回避に必要。
+- **O2（実装済み 2026-07-03）**: ライブラリ概要 .md（grouping include 除去・fragment include 温存・
+  散文/メタ保持・`type: library` 付与）。新パイプラインでの二重取り込み回避。実装:
+  - `lib/bitclust/include_pruner.rb` — rd→rd の純変換。target の `#@include` 行を除去し、
+    空になった版ゲートブロック（`#@else` 両枝空を含む）をブロックごと除去、除去痕の空行を整理。
+    末尾の空行は保持（md→rd のメタデータ再生成の空行仕様との整合。除去すると webrick/server.rd 型
+    「require 群+空行+include 群」でバイト一致が崩れる）。対応の取れないファイルは無変更。
+  - `IncludeGraph#grouping_include_sites` — prune 対象 {ファイル => 記載どおりの target}（64ファイル。
+    root 60 + member/fragment 経由 4。fragment include は含まない）
+  - `IncludeGraph#library_front_matter_map(scope)` — ライブラリ概要へ {type: library ＋
+    LIBRARIES 由来の since/until}。in-scope で効くのは **fiber=until 3.1, set=until 3.2** の2件。
+    スコープ外ライブラリ（cmath/scanf/sync/shell 等）は type を付けない（サルベージは別スコープで再実行）
+  - `bin/rrd2md --graph` は prune → 変換（member 注入 + library 注入）を行い、`LIBRARIES` 自体は
+    変換対象外（役目は front matter 発見に置き換わる）
+  - 検証: prune+注入後も **823/828 byte-exact（pruned 基準、既知5件のみ）**、残存 grouping include ゼロ、
+    828/828 変換成功、フルスイート green。_builtin.md は「type+category+散文」だけの理想形。
+  - 残置（O4 スコープ）: 全体ゲート型ファイル（rss/fiber/set/thread 等）は `#@if`/`#@since`/`#@until` の
+    ファイル全体ラップと body 内 category が残る。
 - **O3**: マルチエンティティ分割（必要な範囲のみ。Errno 等はまとめ据え置き）。
 - **O4**: Type B ファイル全体ゲート（cmath/set/rss/rubygems/profile(r)/rdoc.rd/irb.slex の8件）→
   ライブラリ `since`/`until`。
