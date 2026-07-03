@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'pathname'
+
 require 'bitclust/include_graph'
 require 'bitclust/include_pruner'
 require 'bitclust/whole_file_gate'
@@ -51,7 +53,9 @@ module BitClust
     # 置き、library と版ゲートを注入する
     def units(relpath, rrd)
       reduced, front_matter = reduce(relpath, rrd)
-      segments = split_segments(reduced)
+      # スコープ外ファイル（front matter 注入なし）は分割しない。
+      # サルベージは別スコープの再実行で扱う
+      segments = front_matter.empty? ? nil : split_segments(reduced)
       return [Unit.new(md_path(relpath), reduced, front_matter)] unless segments
 
       library = front_matter['type'] == 'library'
@@ -65,6 +69,7 @@ module BitClust
           front_matter
         end
 
+      source_dir = File.dirname(relpath)
       units = segments.map do |name, text|
         next Unit.new(md_path(relpath), text, front_matter) if name.nil?   # 概要部
 
@@ -73,6 +78,7 @@ module BitClust
           text = unwrapped[0]
           merge_gate(fm, unwrapped[1])
         end
+        text = rewrite_includes(text, source_dir, dir)
         filename = "#{EntitySplitter.entity_filename(name)}.md"
         Unit.new(dir == '.' ? filename : File.join(dir, filename), text, fm)
       end
@@ -119,6 +125,19 @@ module BitClust
       segments = EntitySplitter.segments(reduced)
       return nil unless segments
       segments.count { |name, _| name } >= 2 ? segments : nil
+    end
+
+    # セグメントの置き場所が元ファイルと異なるディレクトリになる場合
+    # （lib 分割 → <libname>/ 配下）、相対 #@include を新ディレクトリから
+    # 解決できるよう書き換える
+    def rewrite_includes(text, source_dir, new_dir)
+      return text if source_dir == new_dir || text !~ /\#@include/
+      base = File.expand_path(new_dir, '/')
+      text.gsub(/^(\#@include\s*\()(.*?)(\))/) do
+        pre, target, post = $1, $2, $3
+        abs = File.expand_path(source_dir == '.' ? target : File.join(source_dir, target), '/')
+        "#{pre}#{Pathname.new(abs).relative_path_from(base)}#{post}"
+      end
     end
 
     # 出力 .md の相対パス（.rd は差し替え、その他は付加）

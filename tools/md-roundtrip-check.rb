@@ -69,18 +69,21 @@ targets.sort_by(&:last).each do |full, label|
   rrd = File.read(full)
   outs =
     if orchestrator
-      orchestrator.units(label, rrd).map { |u| [u.path, u.rrd, orchestrator.convert_unit(u)] }
+      orchestrator.units(label, rrd)
+                  .map { |u| [u.path, u.rrd, orchestrator.convert_unit(u), u.front_matter] }
     else
-      [[label, rrd, BitClust::RRDToMarkdown.convert(rrd)]]
+      [[label, rrd, BitClust::RRDToMarkdown.convert(rrd), nil]]
     end
-  outs.each do |path, reduced, md|
+  outs.each do |path, reduced, md, front_matter|
     units += 1
     ulabel = outs.size > 1 ? "#{label} -> #{path}" : label
     if (sites = prune_sites[label])
       remaining = md.lines.filter_map { |l| $1 if l =~ /\A\#@include\s*\((.*?)\)/ }
       leftover << ulabel unless (remaining & sites).empty?
     end
-    body_rels << ulabel if orchestrator && body_relations?(md)
+    # body 関係の不変条件は in-scope（front matter 注入あり）のみ。
+    # スコープ外ファイルは凍結形のままなので対象外（サルベージで扱う）
+    body_rels << ulabel if front_matter && !front_matter.empty? && body_relations?(md)
     back = BitClust::MarkdownToRRD.convert(md)
     if back == reduced
       ok += 1

@@ -196,6 +196,17 @@ class TestMarkdownOrchestrator < Test::Unit::TestCase
     end
   end
 
+  def test_units_keep_out_of_scope_file_unsplit
+    # スコープ外ファイル（front matter 注入なし）は関係があっても分割しない。
+    # サルベージは別スコープの再実行で扱う（分割すると library なしの
+    # エンティティファイルが散乱する）
+    with_orchestrator do |orch|
+      rrd = "= class A < Object\ninclude Enumerable\n\nA。\n\n= class B < Object\nB。\n"
+      units = orch.units("unreachable/File", rrd)
+      assert_equal ["unreachable/File.md"], units.map(&:path)
+    end
+  end
+
   def test_units_resolve_renamed_h1_into_single_entity
     # thread/Mutex パターン: 常真ゲートの改名 H1 ペア → 分割ではなく単一エンティティ化。
     # alias が front matter に上がる
@@ -289,6 +300,18 @@ class TestMarkdownOrchestrator < Test::Unit::TestCase
       assert_equal ["foo.md"], units.map(&:path)
       md = orch.convert_unit(units[0])
       assert_match(/\Ainclude:\n  - Enumerable\n/, md[/include:.*?(?=---)/m])
+    end
+  end
+
+  def test_units_rewrite_relative_includes_in_relocated_segments
+    # cgi/core.rd の #@include(util.rd) 型: lib 分割でセグメントが <libname>/ 配下へ
+    # 移るため、相対 include は新ディレクトリから解決できるよう書き換える
+    with_orchestrator do |orch|
+      rrd = "概要。\n\n= class A < Object\ninclude Enumerable\n\n\#@include(frag)\n\n" \
+            "= class B < Object\nB。\n"
+      units = orch.units("foo.rd", rrd)
+      a = units.find { |u| u.path == "foo/A.md" }
+      assert_match(%r{\#@include\(\.\./frag\)}, a.rrd)
     end
   end
 
