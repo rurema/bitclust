@@ -5,7 +5,7 @@
 #
 # Usage:
 #   ruby bin/rrd2md <input_dir> <output_dir>
-#   ruby bin/rrd2md ../doctree/refm/api/src ../doctree/refm/api/md
+#   ruby bin/rrd2md --graph ../doctree/refm/api/src ../doctree/manual/api
 #
 # Options:
 #   --dry-run    変換せず対象ファイルのリストのみ表示

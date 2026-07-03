@@ -82,8 +82,14 @@ LIBRARIES → roots（各 <lib>.rd）
               索引    : ライブラリ概要 md（category/require + 散文、grouping include 除去）
               断片    : そのまま .md
    ▼
-出力ツリー  refm/api/md/**/*.md
+出力ツリー  manual/api/**/*.md
 ```
+
+**出力ツリーの配置（2026-07-03 決定）**: doctree のトップに **`manual/`** を新設し、
+`manual/api/**/*.md` に置く（将来 `capi/`・`doc/` も `manual/` 配下へ）。
+`refm` という省略名と `src`/`md` の階層は新ツリーでは使わない
+（`.md` 拡張子が形式を表すためパス中の `md/` は冗長）。公開 URL はエンティティ名
+由来なので影響せず、旧 `refm/` は凍結して共存する。
 
 注入は `RRDToMarkdown` に `extra_front_matter:`(library/since/until) を渡す口を足し、
 `emit_front_matter` の既存の順序スロット（library→include/extend/alias→since/until→category…）に

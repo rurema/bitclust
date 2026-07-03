@@ -3,7 +3,7 @@
 module BitClust
   # 新パイプラインのファイル発見（MARKUP_SPEC §1.1）。
   #
-  # md ツリー（refm/api/src/**/*.md 相当）を glob し、各ファイルの front matter と
+  # md ツリー（manual/api/**/*.md 相当）を glob し、各ファイルの front matter と
   # エンティティ H1 から次の3種に分類する。旧 LIBRARIES マニフェストと
   # grouping 用 #@include は使わない。
   # - エンティティ: エンティティ H1 を1つ以上持つ（front matter の library が所属）
