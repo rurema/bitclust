@@ -251,6 +251,46 @@ class TestIncludeGraph < Test::Unit::TestCase
     assert_equal [membership("foo")], graph.memberships("foo/Bar")
   end
 
+  def test_entity_h1_without_space_is_grouping
+    # RRDParser は /\A=[^=]/ で H1 を認識するため「=class Encoding」も有効
+    # （実データ: _builtin/Encoding, _builtin/Encoding__Converter）
+    graph = analyze(
+      "LIBRARIES" => "foo\n",
+      "foo.rd"    => "\#@include(foo/Bar)\n",
+      "foo/Bar"   => "=class Bar < Object\n"
+    )
+    assert_equal [membership("foo")], graph.memberships("foo/Bar")
+  end
+
+  def test_membership_propagates_through_fragment_chain
+    # fiddle.rd → fiddle/2.0/fiddle.rd（散文開始=fragment）→ Fiddle（grouping）の
+    # transclusion チェーン。fragment を経由しても所属と経路条件は伝播する
+    graph = analyze(
+      "LIBRARIES"    => "foo\n",
+      "foo.rd"       => "\#@until 2.0.0\n\#@include(foo/1.9/frag.rd)\n\#@else\n\#@include(foo/2.0/frag.rd)\n\#@end\n",
+      "foo/1.9/frag.rd" => "散文。\n\#@include(Bar)\n",
+      "foo/2.0/frag.rd" => "散文。\n\#@include(Bar)\n",
+      "foo/1.9/Bar"  => "= class Bar < Object\n",
+      "foo/2.0/Bar"  => "= class Bar < Object\n"
+    )
+    assert_equal [membership("foo", [[:until, "2.0.0"]])], graph.memberships("foo/1.9/Bar")
+    assert_equal [membership("foo", [[:since, "2.0.0"]])], graph.memberships("foo/2.0/Bar")
+    assert_equal ["foo/1.9/frag.rd", "foo/2.0/frag.rd"], graph.fragments
+  end
+
+  def test_include_with_dotdot_path_is_normalized
+    # rdoc/parsers/parse_c.rd の #@include(../RDoc__KNOWN_CLASSES) に対応。
+    # 正規化しないと同一ファイルが別キーで二重登録される
+    graph = analyze(
+      "LIBRARIES" => "foo\n",
+      "foo.rd"    => "\#@include(foo/sub/Baz)\n\#@include(foo/Bar)\n",
+      "foo/sub/Baz" => "= class Baz < Object\n\#@include(../Bar)\n",
+      "foo/Bar"   => "= class Bar < Object\n"
+    )
+    assert_equal ["foo/Bar", "foo/sub/Baz"], graph.groupings.keys
+    assert_equal [membership("foo")], graph.memberships("foo/Bar")
+  end
+
   def test_include_cycle_terminates_with_warning
     graph = analyze(
       "LIBRARIES" => "foo\n",

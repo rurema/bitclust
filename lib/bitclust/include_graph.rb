@@ -20,7 +20,9 @@ module BitClust
     # 条件スタックのスナップショット（faithful、スコープ未適用）。
     Membership = Struct.new(:library, :conditions)
 
-    ENTITY_H1_RE = /\A= (?:class|module|object|reopen|redefine)\b/
+    # RRDParser は /\A=[^=]/ で H1 行を認識し `=` 直後の空白は必須でない
+    # （実データ: _builtin/Encoding は「=class Encoding」）
+    ENTITY_H1_RE = /\A=(?!=)\s*(?:class|module|object|reopen|redefine)\b/
 
     def self.analyze(src_root)
       new(src_root).analyze
@@ -206,24 +208,29 @@ module BitClust
       end
       kind = classify(relpath)
       @kinds[relpath] ||= kind
-      return unless kind == :grouping
 
-      m = Membership.new(library, conditions)
-      list = (@memberships[relpath] ||= [])
-      list << m unless list.include?(m)
+      if kind == :grouping
+        m = Membership.new(library, conditions)
+        list = (@memberships[relpath] ||= [])
+        list << m unless list.include?(m)
+      end
 
       if path_stack.include?(relpath)
         @warnings << "include cycle: #{(path_stack + [relpath]).join(' -> ')}"
         return
       end
+      # fragment も走査する: fragment を経由して grouping へ至る transclusion
+      # チェーンがある（fiddle.rd → fiddle/2.0/fiddle.rd → Fiddle 等）
       walk(relpath, library, conditions, path_stack + [relpath])
     end
 
-    # include 元ディレクトリ相対で target → target.rd の順に解決
+    # include 元ディレクトリ相対で target → target.rd の順に解決。
+    # `../` を含む参照があるため正規化する（同一ファイルの二重登録防止）
     def resolve(from, target)
       base = File.dirname(from)
       [target, "#{target}.rd"].each do |cand|
         rel = base == '.' ? cand : File.join(base, cand)
+        rel = File.expand_path(rel, '/').delete_prefix('/')
         return rel if File.file?(File.join(@src_root, rel))
       end
       nil
