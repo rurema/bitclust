@@ -39,6 +39,8 @@ module BitClust
     # 対象版範囲 [lo, hi)。範囲はパラメータであり、[3.0, 4.2) 以外
     # （旧版サルベージ等）でも同じ解析結果に対して再利用できる。
     class Scope
+      attr_reader :lo, :hi
+
       def initialize(lo, hi)
         @lo = Gem::Version.new(lo)
         @hi = Gem::Version.new(hi)

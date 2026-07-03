@@ -44,17 +44,19 @@ module BitClust
       scan = @index
       tokens = []       # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:blank]
       nest = 0
-      saw_meta = false
+      checkpoint = nil  # 直近の「nest==0 の空行直後」= [scan, tokens.size]。
+                        # メタ確定をここまでで打ち切れる安全な切れ目
+                        # （md→rd の再生成がメタ群の後に空行を出すため、空行が必須）
       while scan < @lines.length
         l = @lines[scan]
         case l
         when /\Acategory\s+(.*)$/
           return if nest > 0            # 版条件つき scalar category → 据え置き（データ上0件）
-          tokens << [:cat, $1.strip]; scan += 1; saw_meta = true
+          tokens << [:cat, $1.strip]; scan += 1
         when /\Arequire\s+(.*)$/
-          tokens << [:req, $1.strip]; scan += 1; saw_meta = true
+          tokens << [:req, $1.strip]; scan += 1
         when /\Asublibrary\s+(.*)$/
-          tokens << [:sub, $1.strip]; scan += 1; saw_meta = true
+          tokens << [:sub, $1.strip]; scan += 1
         when /\A\#@(?:since|until|if)\b/
           tokens << [:dir, l]; nest += 1; scan += 1
         when /\A\#@else\b/
@@ -64,14 +66,25 @@ module BitClust
           tokens << [:dir, l]; nest -= 1; scan += 1
         when /\A\s*$/
           tokens << [:blank]; scan += 1
+          checkpoint = [scan, tokens.size] if nest == 0
         when /\A\#@/
-          return                        # #@# コメント等が混在 → 据え置き
+          # #@# コメント等（rss.rd の「#@# = rss」）→ チェックポイントまでで確定
+          return unless checkpoint
+          scan, tokens = checkpoint[0], tokens[0, checkpoint[1]]
+          nest = 0
+          break
         else
-          break                         # body
+          break if nest == 0            # body
+          # 版分岐の途中で body に到達（set.rd/thread.rd の版分岐つき散文）
+          # → チェックポイントまでで確定し、版分岐ごと body に渡す
+          return unless checkpoint
+          scan, tokens = checkpoint[0], tokens[0, checkpoint[1]]
+          nest = 0
+          break
         end
       end
-      return unless saw_meta
-      return if nest != 0               # Type B（ファイル全体の版ゲート）→ 据え置き（項目1へ）
+      return unless tokens.any? { |t| %i[cat req sub].include?(t[0]) }
+      return if nest != 0               # ファイル全体の版ゲート内で EOF → 据え置き
       return unless build_metadata_front_matter(tokens)
       @index = scan                     # メタ領域（末尾空行含む）を消費
     end

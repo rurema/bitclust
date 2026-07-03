@@ -119,8 +119,24 @@ LIBRARIES → roots（各 <lib>.rd）
   - 残置（O4 スコープ）: 全体ゲート型ファイル（rss/fiber/set/thread 等）は `#@if`/`#@since`/`#@until` の
     ファイル全体ラップと body 内 category が残る。
 - **O3**: マルチエンティティ分割（必要な範囲のみ。Errno 等はまとめ据え置き）。
-- **O4**: Type B ファイル全体ゲート（cmath/set/rss/rubygems/profile(r)/rdoc.rd/irb.slex の8件）→
-  ライブラリ `since`/`until`。
+- **O4（実装済み 2026-07-03）**: ファイル全体を包む版ゲートの解除 → front matter `since`/`until`。実装:
+  - `lib/bitclust/whole_file_gate.rb` — 全体ゲート検出（先頭ゲート＋EOF 閉じ・`#@else` 無し・
+    ネスト/samplecode 対応）と `unwrap_for_scope`（スコープ下で常に真 → 単純解除、in-scope の
+    since/until → 解除して gate 返却、スコープ外・else 付き・証明不能 `#@if` → 据え置き）。
+    実データ22件中17件を解除: 常真 since 14（cmath, _builtin/Encoding 等）+ until 2（fiber=3.1,
+    set=3.2、LIBRARIES ゲートと交差マージで単一 `until` に）+ 常真 `#@if` 1（rss、
+    `version >= "1.8.2"` 形のみ証明可）。据え置き5 = out-of-scope 4（profile 等）+ else 付き 1（fiddle.rd）。
+  - `lib/bitclust/markdown_orchestrator.rb` — **クロスファイル方針の集約点**。
+    per-file パイプライン = prune → 全体ゲート解除 → `=class` H1 正規化 → front matter 注入。
+    `reduce(relpath, rrd)` が md→rd 検証の期待値（rd 側到達点）を返す。
+    bin/rrd2md --graph と tools/md-roundtrip-check.rb --inject は本クラスの薄いラッパーに。
+  - `RRDToMarkdown` のメタデータ収集に**空行チェックポイントの部分コミット**を追加:
+    メタ後に版分岐つき散文（set.rd/thread.rd）や `#@#` コメント（rss.rd）が続く場合、
+    nest==0 の空行までをメタとして確定し残りを body へ。これで category が front matter に昇格
+    （スライス4の Type B/`#@#` 据え置きを解消。空行チェックポイントが無い場合は従来どおり据え置き）。
+  - 検証: 823/828 byte-exact（reduced 基準・既知5件のみ）、フルスイート green。
+    set.md = type+until+category 全て front matter、thread.md/rss.md = category 昇格、
+    _builtin/Encoding.md = 正規 H1 + library。
 
 ## スコープの決定（2026-07-03）
 

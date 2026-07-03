@@ -306,6 +306,33 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal expected, convert(rrd)
   end
 
+  # Step 8.4: メタデータ領域の部分コミット
+  # メタデータ（category/require/sublibrary）の後に版分岐つき散文や #@# コメントが
+  # 続く場合、nest==0 の空行チェックポイントまでをメタデータとして確定し、
+  # 残りは body に渡す（set.rd / thread.rd / rss.rd パターン）。
+
+  def test_category_lifts_before_versioned_prose
+    # set.rd: category Math + 空行 + 版分岐つき散文
+    rrd = "category Math\n\n\#@since 3.0\n新しい説明\n\#@else\n古い説明\n\#@end\n\n本文。\n"
+    expected = "---\ncategory: Math\n---\n" \
+               "\#@since 3.0\n新しい説明\n\#@else\n古い説明\n\#@end\n\n本文。\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_category_lifts_before_preprocessor_comment
+    # rss.rd: category FileFormat + 空行 + #@# コメント
+    rrd = "category FileFormat\n\n\#@# = rss\n\n説明。\n"
+    expected = "---\ncategory: FileFormat\n---\n\#@# = rss\n\n説明。\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_metadata_without_blank_checkpoint_stays_in_body
+    # 空行チェックポイントが無い（category 直後にゲート）場合は従来どおり据え置き
+    # （md→rd の再生成が category の後に空行を足すため、コミットすると一致しない）
+    rrd = "category Math\n\#@since 3.0\n説明\n\#@end\n"
+    assert_equal "category Math\n\#@since 3.0\n説明\n\#@end\n", convert(rrd)
+  end
+
   # Step 8.5: extra front matter 注入（クロスファイル・オーケストレータ用）
   # library 所属・構造 since/until はファイル単体からは分からないため、
   # include グラフを解析したオーケストレータが注入する。
