@@ -46,8 +46,10 @@ module BitClust
         @hi = Gem::Version.new(hi)
       end
 
-      # conditions の版区間がスコープと交差するか
+      # conditions の版区間がスコープと交差するか。
+      # 恒偽と証明できる :if 条件が含まれる場合も交差しない
       def cover?(conditions)
+        return false if conditions.any? { |c| c.kind == :if && never?(c) }
         lo, hi = IncludeGraph.interval(conditions)
         return false if lo && hi && lo >= hi   # 空区間
         (lo.nil? || lo < @hi) && (hi.nil? || hi > @lo)
@@ -64,12 +66,37 @@ module BitClust
         false
       end
 
-      # 条件がスコープ内の全バージョンで偽か（:if・不正な版文字列は判定不能なので false）
+      # 条件がスコープ内の全バージョンで偽か（不正な版文字列は判定不能なので false）。
+      # :if は連言子（and 区切り）のいずれかが恒偽と証明できる場合のみ true
+      # （LIBRARIES の #@if("1.9.1" <= version and version < "2.5.0") 等）
       def never?(cond)
         case cond.kind
         when :since then Gem::Version.new(cond.version) >= @hi
         when :until then Gem::Version.new(cond.version) <= @lo
+        when :if
+          cond.version.split(/\band\b/).any? { |c| never_conjunct?(c) }
         else false
+        end
+      rescue ArgumentError
+        false
+      end
+
+      # #@if の連言子が恒偽と証明できるか。
+      # 対応形: version < "X" / version <= "X" / version >= "X" /
+      # "X" <= version / version == "X"（判定できない形は false）
+      def never_conjunct?(conjunct)
+        case conjunct
+        when /version\s*<=?\s*"([\d.]+)"/
+          op_lt = !conjunct.include?('<=')
+          v = Gem::Version.new($1)
+          op_lt ? v <= @lo : v < @lo
+        when /version\s*>=\s*"([\d.]+)"/, /"([\d.]+)"\s*<=\s*version/
+          Gem::Version.new($1) >= @hi
+        when /version\s*==\s*"([\d.]+)"/
+          v = Gem::Version.new($1)
+          v < @lo || v >= @hi
+        else
+          false
         end
       rescue ArgumentError
         false

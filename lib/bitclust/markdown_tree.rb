@@ -55,7 +55,10 @@ module BitClust
       end
 
       infos.each do |path, info|
-        @libraries[path.sub(/\.md\z/, '')] = { path: path } if info[:library_file]
+        if info[:library_file]
+          @libraries[path.sub(/\.md\z/, '')] =
+            { path: path, since: info[:since], until: info[:until] }
+        end
         # include 参照され front matter を持たないファイルは、H1 を含んでいても
         # 断片（transclusion 用。fiddle の版分岐チェーン等）
         info[:fragment] = referenced[path] && !info[:library_file] && info[:library].nil?
@@ -63,7 +66,8 @@ module BitClust
           @fragments << path
         elsif !info[:kinds].empty?
           @entities[path] = { names: info[:kinds].map(&:last), kinds: info[:kinds],
-                              library: info[:library] }
+                              library: info[:library],
+                              since: info[:since], until: info[:until] }
         elsif !info[:library_file]
           @warnings << "orphan file (no entity H1, no type: library, not included): #{path}"
         end
@@ -107,6 +111,8 @@ module BitClust
           case lines[i]
           when /\Atype:\s*library\s*\z/ then info[:library_file] = true
           when /\Alibrary:\s*(\S+)/ then info[:library] = $1
+          when /\Asince:\s*"?([^"\s]+)"?/ then info[:since] = $1
+          when /\Auntil:\s*"?([^"\s]+)"?/ then info[:until] = $1
           when RELATION_KEY_RE then info[:front_matter_relations] = true
           end
           i += 1

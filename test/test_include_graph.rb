@@ -416,9 +416,28 @@ class TestIncludeGraph < Test::Unit::TestCase
     assert_false scope.always?(cond[:until, "3.1"])
     assert_true  scope.never?(cond[:until, "3.0"])
     assert_false scope.never?(cond[:until, "3.1"])
-    # if は判定不能（常に false）
+    # if は原則判定不能（常に false）
     assert_false scope.always?(cond[:if, "(version > \"1.8\")"])
     assert_false scope.never?(cond[:if, "(version > \"1.8\")"])
+  end
+
+  def test_scope_never_for_provable_if_conditions
+    # LIBRARIES の ubygems: #@if("1.9.1" <= version and version < "2.5.0")
+    scope = BitClust::IncludeGraph::Scope.new("3.0", "4.2")
+    cond = ->(v) { BitClust::IncludeGraph::Condition.new(:if, v) }
+    assert_true  scope.never?(cond['("1.9.1" <= version and version < "2.5.0")'])
+    assert_true  scope.never?(cond['(version < "1.8.2")'])
+    assert_true  scope.never?(cond['(version == "2.0.0")'])
+    assert_false scope.never?(cond['(version >= "1.8.2")'])
+    assert_false scope.never?(cond['(version == "3.1")'])
+    assert_false scope.never?(cond['(version < "4.0")'])   # スコープ内で真偽が変わる
+  end
+
+  def test_scope_cover_excludes_never_if_conditions
+    scope = BitClust::IncludeGraph::Scope.new("3.0", "4.2")
+    conds = [BitClust::IncludeGraph::Condition.new(:if, '("1.9.1" <= version and version < "2.5.0")')]
+    assert_false scope.cover?(conds)
+    assert_nil scope.gate(conds)
   end
 
   # ---- front_matter_map: メンバーへの注入値（スコープ適用済み）----
