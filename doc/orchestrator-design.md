@@ -162,6 +162,23 @@ LIBRARIES → roots（各 <lib>.rd）
     set.md = type+until+category 全て front matter、thread.md/rss.md = category 昇格、
     _builtin/Encoding.md = 正規 H1 + library。
 
+## ファイル発見（実装済み 2026-07-03、MARKUP_SPEC §1.1）
+
+`lib/bitclust/markdown_tree.rb` — 新パイプラインの発見: glob `**/*.md` + front matter +
+エンティティ H1（コードフェンス除外）で エンティティ/ライブラリ/断片 に分類。LIBRARIES 不使用。
+`#@include` 参照解決（`.rd` → `.md` 補完）。**include 参照され front matter を持たないファイルは
+H1 を含んでいても断片**（fiddle の版分岐チェーンは transclusion でエンティティを供給する）。
+警告: 孤児・library なし/未知 library のエンティティ・front matter 外の関係・include 先欠損。
+
+検証（`tools/md-tree-check.rb --src` でソースグラフと突き合わせ）:
+- **発見ライブラリ集合 = in-scope 371 と完全一致**
+- library なしエンティティ 46 = 全て期待バケット（スコープ外メンバー11・スコープ外ライブラリ13・
+  ソース孤児22=全行 `#@#` の nodoc ファイル等）、**想定外 0・要対応警告 0**
+- 定義重複 5 は全てソース由来の既存特性（Set=builtin 3.2↔set lib 3.2 の版相補、
+  webrick/compat の Errno シム×3、WEBrick::HTTPServerError の二重定義）
+- 発見で見つけて直したバグ: スコープ外ファイルの分割抑止（library なしエンティティ散乱防止）、
+  ディレクトリ移動セグメントの相対 `#@include` 書き換え（cgi/core の util.rd 参照切れ）
+
 ## スコープの決定（2026-07-03）
 
 **「旧版サルベージを見据えた設計」で確定**（ユーザー決定）。実装は次の分離で両立する:
