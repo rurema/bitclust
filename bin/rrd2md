@@ -11,13 +11,20 @@
 #   --dry-run    変換せず対象ファイルのリストのみ表示
 #   --verbose    各ファイルの変換状況を表示
 #   --file FILE  単一ファイルのみ変換（出力は標準出力）
+#   --graph      input_dir の LIBRARIES から #@include グラフを解析し、
+#                各メンバーへ library / 構造 since/until を front matter 注入する
+#   --scope LO,HI  --graph の対象版範囲 [LO, HI)（デフォルト 3.0,4.2。
+#                  旧版サルベージ時は別範囲を指定して再実行できる）
 
 require_relative '../lib/bitclust/rrd_to_markdown'
+require_relative '../lib/bitclust/include_graph'
 
 class RRD2MDConverter
   def initialize(argv)
     @dry_run = argv.delete('--dry-run')
     @verbose = argv.delete('--verbose')
+    @graph = argv.delete('--graph')
+    @scope = (extract_option(argv, '--scope') || '3.0,4.2').split(',')
     @single_file = extract_option(argv, '--file')
 
     if @single_file
@@ -66,6 +73,7 @@ class RRD2MDConverter
 
   def convert_directory
     files = collect_files(@input_dir)
+    extra = @graph ? build_front_matter_map : {}
 
     if @dry_run
       files.each { |f| puts f }
@@ -82,7 +90,7 @@ class RRD2MDConverter
 
       begin
         rrd = File.read(input_path, encoding: 'UTF-8')
-        md = BitClust::RRDToMarkdown.convert(rrd)
+        md = BitClust::RRDToMarkdown.convert(rrd, extra_front_matter: extra[rel_path] || {})
 
         FileUtils.mkdir_p(File.dirname(output_path))
         File.write(output_path, md, encoding: 'UTF-8')
@@ -100,6 +108,14 @@ class RRD2MDConverter
       warn "Errors: #{errors.size}"
       errors.each { |path, e| warn "  #{path}: #{e.message}" }
     end
+  end
+
+  def build_front_matter_map
+    graph = BitClust::IncludeGraph.analyze(@input_dir)
+    map = graph.front_matter_map(BitClust::IncludeGraph::Scope.new(*@scope))
+    graph.warnings.each { |w| warn "  W: #{w}" }
+    warn "front matter injection: #{map.size} files (scope [#{@scope.join(', ')}))"
+    map
   end
 
   def collect_files(dir)

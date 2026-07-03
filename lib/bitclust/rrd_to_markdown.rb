@@ -2,12 +2,21 @@
 
 module BitClust
   class RRDToMarkdown
-    def self.convert(rrd)
-      new(rrd).convert
+    def self.convert(rrd, extra_front_matter: {})
+      new(rrd, extra_front_matter: extra_front_matter).convert
     end
 
-    def initialize(rrd)
+    # ファイル単体からは決められない front matter（library 所属・構造 since/until）を
+    # 注入するための口。include グラフを解析したオーケストレータが値を計算して渡す。
+    EXTRA_FRONT_MATTER_KEYS = %w[type library since until].freeze
+
+    def initialize(rrd, extra_front_matter: {})
       @src = rrd
+      @extra_front_matter = extra_front_matter.transform_keys(&:to_s)
+      unknown = @extra_front_matter.keys - EXTRA_FRONT_MATTER_KEYS
+      unless unknown.empty?
+        raise ArgumentError, "unknown extra front matter keys: #{unknown.join(', ')}"
+      end
     end
 
     def convert
@@ -23,6 +32,7 @@ module BitClust
 
       collect_library_metadata
       process_body
+      @front_matter.merge!(@extra_front_matter)
       emit_front_matter + @out.join
     end
 
@@ -106,7 +116,7 @@ module BitClust
       end
       %w[since until].each do |key|
         if v = @front_matter[key]
-          lines << "#{key}: #{v}\n"
+          lines << "#{key}: \"#{v}\"\n"   # "3.10" が float 3.1 に化けないよう常にクォート（§1.2）
         end
       end
       if v = @front_matter['category']

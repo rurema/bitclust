@@ -306,6 +306,63 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal expected, convert(rrd)
   end
 
+  # Step 8.5: extra front matter 注入（クロスファイル・オーケストレータ用）
+  # library 所属・構造 since/until はファイル単体からは分からないため、
+  # include グラフを解析したオーケストレータが注入する。
+
+  def test_extra_front_matter_library
+    rrd = "= class Bar < Object\n\n説明\n"
+    expected = "---\nlibrary: foo\n---\n# class Bar < Object\n\n説明\n"
+    assert_equal expected,
+      BitClust::RRDToMarkdown.convert(rrd, extra_front_matter: { "library" => "foo" })
+  end
+
+  def test_extra_front_matter_ordering_with_collected_relations
+    # §1.7 の順序: library → include/extend/alias → since/until
+    rrd = "= class Bar < Object\ninclude Enumerable\n\n説明\n"
+    expected = "---\nlibrary: foo\ninclude:\n  - Enumerable\nsince: \"3.2\"\n---\n" \
+               "# class Bar < Object\n\n説明\n"
+    assert_equal expected,
+      BitClust::RRDToMarkdown.convert(rrd,
+        extra_front_matter: { "library" => "foo", "since" => "3.2" })
+  end
+
+  def test_extra_front_matter_accepts_symbol_keys
+    # IncludeGraph::Scope#gate は {since:, until:} のシンボルキーを返す
+    rrd = "= class Bar < Object\n"
+    expected = "---\nlibrary: foo\nuntil: \"4.0\"\n---\n# class Bar < Object\n"
+    assert_equal expected,
+      BitClust::RRDToMarkdown.convert(rrd,
+        extra_front_matter: { library: "foo", until: "4.0" })
+  end
+
+  def test_extra_front_matter_on_multi_entity_file
+    # library はファイル単位の情報なので、マルチエンティティでも曖昧なく注入できる
+    # （ファイル内の全エンティティは同一ライブラリ所属。ヘッダ関係は body 据え置きのまま）
+    rrd = "= object ARGF < ARGF.class\n\n説明1\n\n= class ARGF.class < Object\ninclude Enumerable\n\n説明2\n"
+    result = BitClust::RRDToMarkdown.convert(rrd,
+      extra_front_matter: { "library" => "_builtin" })
+    assert result.start_with?("---\nlibrary: _builtin\n---\n"), result[0, 60].inspect
+    assert_match(/include Enumerable/, result)
+  end
+
+  def test_extra_front_matter_rejects_unknown_keys
+    assert_raise(ArgumentError) do
+      BitClust::RRDToMarkdown.convert("= class Bar < Object\n",
+        extra_front_matter: { "libary" => "typo" })
+    end
+  end
+
+  def test_extra_front_matter_roundtrip_drops_injected_keys
+    # 注入キーはオーケストレータ由来の横断情報なので、md→rd では body に現れず
+    # 元の RRD がそのまま復元される
+    require 'bitclust/markdown_to_rrd'
+    rrd = "= class Bar < Object\ninclude Enumerable\n\n説明\n"
+    md = BitClust::RRDToMarkdown.convert(rrd,
+      extra_front_matter: { "library" => "foo", "since" => "3.2" })
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
   def test_versioned_include_if_to_front_matter
     rrd = "= class File < IO\n\#@if (version < \"1.8.0\")\ninclude File::Constants\n\#@end\n\n説明\n"
     expected = "---\ninclude:\n\#@if (version < \"1.8.0\")\n  - File::Constants\n\#@end\n---\n# class File < IO\n\n説明\n"
