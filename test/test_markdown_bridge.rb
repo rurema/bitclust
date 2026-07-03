@@ -18,7 +18,7 @@ require 'bitclust/markdown_bridge'
 # [x] dual ファイル（lib + インライン・エンティティ）はゲートラップしない（LIBRARIES 側で処理）
 class TestMarkdownBridge < Test::Unit::TestCase
   FILES = {
-    "foo.md" => "---\ntype: library\ncategory: Cat\n---\n概要。\n\n\#@include(frag.rd)\n",
+    "foo.md" => "---\ntype: library\ncategory: Cat\n---\n概要。\n\n\#@include(frag)\n",
     "foo/A.md" => "---\nlibrary: foo\nsince: \"3.2\"\n---\n# class A < Object\n\nA。\n",
     "foo/B.md" => "---\nlibrary: foo\n---\n# class B < Object\nB。\n",
     "frag.md" => "断片。\n",
@@ -54,20 +54,20 @@ class TestMarkdownBridge < Test::Unit::TestCase
 
   def test_library_rd_with_member_includes
     out = build
-    assert_equal "category Cat\n\n概要。\n\n\#@include(frag.rd)\n\n" \
-                 "\#@include(foo/A.rd)\n\#@include(foo/B.rd)\n", out["foo.rd"]
-    assert_equal "baz 概要。\n\n\#@include(C.rd)\n", out["bar/baz.rd"]
+    assert_equal "category Cat\n\n概要。\n\n\#@include(frag)\n\n" \
+                 "\#@include(foo/A)\n\#@include(foo/B)\n", out["foo.rd"]
+    assert_equal "baz 概要。\n\n\#@include(C)\n", out["bar/baz.rd"]
   end
 
   def test_member_rd_with_gate_wrapper
     out = build
-    assert_equal "\#@since 3.2\n= class A < Object\n\nA。\n\#@end\n", out["foo/A.rd"]
-    assert_equal "= class B < Object\nB。\n", out["foo/B.rd"]
+    assert_equal "\#@since 3.2\n= class A < Object\n\nA。\n\#@end\n", out["foo/A"]
+    assert_equal "= class B < Object\nB。\n", out["foo/B"]
   end
 
   def test_fragment_is_emitted_without_extension
     out = build
-    assert_equal "断片。\n", out["frag.rd"]
+    assert_equal "断片。\n", out["frag"]
   end
 
   def test_dual_file_keeps_inline_entities_without_wrapper
@@ -91,7 +91,7 @@ class TestMarkdownBridge < Test::Unit::TestCase
       end
       Dir.mktmpdir do |out|
         BitClust::MarkdownBridge.build(md, out)
-        assert_equal "j 概要。\n\n\#@include(j/Gen.rd)\n\#@include(j/Array.rd)\n",
+        assert_equal "j 概要。\n\n\#@include(j/Gen)\n\#@include(j/Array)\n",
           File.read(File.join(out, "j.rd"))
         return
       end

@@ -37,6 +37,10 @@ module BitClust
 
     def build
       files = Dir.glob('**/*.md', base: @md_root).sort
+      @dirs = files.flat_map { |f|
+        parts = File.dirname(f).split('/')
+        (1..parts.size).map { |n| parts.first(n).join('/') }
+      }.uniq - ['.']
       emitted = files.to_h { |f| [f, emit_name(f)] }
 
       files.each do |f|
@@ -56,11 +60,14 @@ module BitClust
 
     private
 
-    # 全ファイル一律「md 名の .md を .rd に差し替え」。
-    # 拡張子なしで emit すると同名ディレクトリと衝突し得る（scanf.md と scanf/）。
-    # include ターゲットは emit 名へ書き換えるので旧ツリーの命名を模す必要はない
+    # ライブラリは <name>.rd（update_by_stdlibtree の解決規約）。
+    # 非ライブラリは拡張子なし（doc ツリーが `../api/src/_builtin/pack-template` の
+    # ように元式の拡張子なし名で断片を transclude しているため）。
+    # ただし同名ディレクトリと衝突する場合は .rd を付ける（scanf.md と scanf/）
     def emit_name(f)
-      "#{f.sub(/\.md\z/, '')}.rd"
+      name = f.sub(/\.md\z/, '')
+      return "#{name}.rd" if @tree.libraries.key?(name) || @dirs.include?(name)
+      name
     end
 
     # LIBRARIES: 名前順。ライブラリの版ゲートは #@ で再具現化する
