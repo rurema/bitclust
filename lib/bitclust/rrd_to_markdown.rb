@@ -155,7 +155,7 @@ module BitClust
           convert_emlist(line)
         when /\A--- /
           convert_signature(line)
-        when /\A===+\[a:([^\]]+)\]\s+(.*)/
+        when /\A={1,4}\[a:([^\]]+)\]\s+(.*)/
           convert_anchored_heading(line, $1, $2)
         when /\A====\s+(.*)/
           convert_h4(line, $1)
@@ -338,18 +338,18 @@ module BitClust
     end
 
     def convert_anchored_heading(line, anchor, text)
-      prefix = line.start_with?('====') ? '####' : '###'
-      @out << "#{prefix} #{text.strip} {##{anchor}}\n"
+      prefix = '#' * line[/\A=+/].length
+      @out << "#{prefix} #{text} {##{anchor}}\n"
       advance
     end
 
     def convert_h3(line, text)
-      @out << "### #{text.strip}\n"
+      @out << "### #{text}\n"
       advance
     end
 
     def convert_h4(line, text)
-      @out << "#### #{text.strip}\n"
+      @out << "#### #{text}\n"
       advance
     end
 
@@ -572,6 +572,8 @@ module BitClust
     end
 
     def passthrough(line)
+      # 行頭 # のリテラル本文（旧 news 等）は MD 見出しと誤認されるためエスケープ
+      line = "\\#{line}" if line.start_with?('#')
       @out << add_code_spans(convert_inline_refs(line))
       advance
     end
@@ -594,21 +596,36 @@ module BitClust
     BRACKET_LINK = /\[\[[\w-]+?:[!-~]+?(?:\[\] )?\]\]/n
 
     def convert_inline_refs(text)
-      text.b.gsub(BRACKET_LINK) do |match|
-        inner = match[2..-3] # strip [[ and ]]
-        # RD の "[] " (末尾スペース) → メソッド名の [] として扱う
-        inner = inner.sub(/\[\] \z/, '[]')
-        # .# → ? (モジュール関数参照)
-        inner = inner.sub(/\.#/, '?.')
-        # メソッド名内の [ ] をバックスラッシュエスケープ
-        if inner =~ /\A([\w-]+:)(.*)/n
-          prefix = $1
-          target = $2
-          target = target.gsub('\\', '\\\\\\\\').gsub('[', '\\[').gsub(']', '\\]')
-          inner = prefix + target
-        end
-        "[#{inner}]"
-      end.force_encoding(text.encoding)
+      remain = text.b
+      result = +''.b
+      while (m = BRACKET_LINK.match(remain))
+        result << escape_ref_lookalikes(m.pre_match) << convert_one_ref(m[0])
+        remain = m.post_match
+      end
+      result << escape_ref_lookalikes(remain)
+      result.force_encoding(text.encoding)
+    end
+
+    def convert_one_ref(match)
+      inner = match[2..-3] # strip [[ and ]]
+      # RD の "[] " (末尾スペース) → メソッド名の [] として扱う
+      inner = inner.sub(/\[\] \z/, '[]')
+      # .# → ? (モジュール関数参照)
+      inner = inner.sub(/\.#/, '?.')
+      # メソッド名内の [ ] をバックスラッシュエスケープ
+      if inner =~ /\A([\w-]+:)(.*)/n
+        prefix = $1
+        target = $2
+        target = target.gsub('\\', '\\\\\\\\').gsub('[', '\\[').gsub(']', '\\]')
+        inner = prefix + target
+      end
+      "[#{inner}]"
+    end
+
+    # 参照に見えるリテラル本文 [ruby-talk:198440] 等（旧 news）をエスケープする。
+    # エスケープしないと md→rd の bare-ref 復元で [[...]] に誤変換される
+    def escape_ref_lookalikes(bin)
+      bin.gsub(/(?<!\[)\[([a-zA-Z][a-zA-Z-]*:[^\[\]]*)\](?!\])/n) { "\\[#{$1}]" }
     end
 
     def current_line

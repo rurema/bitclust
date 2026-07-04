@@ -26,6 +26,31 @@ module BitClust
       new(md_root, out_root).build
     end
 
+    # doc（散文ページ）の md ツリー → 旧形式の doc/*.rd。
+    # - クロスツリー include（api 断片の transclude）は旧レイアウト
+    #   （../api/src/）へ戻す（ブリッジの api ツリーは api/src に置かれるため）
+    # - doc 内ローカル include から参照される断片（spec/regexp19 等）は
+    #   拡張子なしで emit する（copy_doc は **/*.rd だけをページとして読む）
+    def self.build_doc(md_doc_root, out_doc_root)
+      require 'bitclust/markdown_to_rrd'
+      files = Dir.glob('**/*.md', base: md_doc_root).sort
+      referenced = files.flat_map { |f|
+        base = File.dirname(f)
+        File.read(File.join(md_doc_root, f)).scan(/^\#@include\((?!(?:\.\.\/)+api\/)(.*?)\)/)
+            .map { |t| File.expand_path(base == '.' ? t[0] : File.join(base, t[0]), '/')
+                           .delete_prefix('/') }
+      }.to_h { |t| [t, true] }
+
+      files.each do |f|
+        rrd = MarkdownToRRD.convert(File.read(File.join(md_doc_root, f)))
+        rrd = rrd.gsub(%r{^(\#@include\((?:\.\./)+api/)(?!src/)}, '\1src/')
+        name = f.sub(/\.md\z/, '')
+        full = File.join(out_doc_root, referenced[name] ? name : "#{name}.rd")
+        FileUtils.mkdir_p(File.dirname(full))
+        File.write(full, rrd)
+      end
+    end
+
     attr_reader :warnings
 
     def initialize(md_root, out_root)

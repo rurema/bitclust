@@ -134,6 +134,8 @@ module BitClust
           convert_indented_code(line)
         when /\A\#@/
           raw_passthrough(line)
+        when /\A\\#/
+          convert_escaped_hash_line(line)
         when /\A# /
           convert_h1(line)
         else
@@ -345,7 +347,10 @@ module BitClust
           if l =~ /\A\s+\S/
             @out << convert_inline_refs(l)
             advance
-          elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/ && @lines[@index + 1] !~ /\A- \*\*/
+          elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/ &&
+                @lines[@index + 1] !~ /\A- \*\*/ && @lines[@index + 1] !~ /\A\s+-\s/
+            # 空行の後のインデント付きリスト項目は説明の続きではなく
+            # ネストしたリスト（rd→md 側と対称に、リスト変換に任せる）
             @out << l
             advance
           else
@@ -443,7 +448,14 @@ module BitClust
       advance
     end
 
+    # rd→md がエスケープした行頭 # のリテラル本文を復元する
+    def convert_escaped_hash_line(line)
+      @out << convert_inline_refs(line.sub(/\A\\/, ''))
+      advance
+    end
+
     def convert_h1(line)
+      return convert_heading_with_anchor(line, '=') if line =~ /\{#[^}]+\}\s*$/
       @out << line.sub(/\A# /, '= ')
       advance
       if @class_relations && !@class_relations.empty?
@@ -477,6 +489,12 @@ module BitClust
       result = +""
       i = 0
       while i < line.length
+        if line[i] == '\\' && line[i + 1] == '['
+          # rd→md がエスケープしたリテラル [x:y]（参照ではない）→ そのまま復元
+          result << '['
+          i += 2
+          next
+        end
         if line[i] == '[' && (i == 0 || line[i-1] != '[') && (i + 1 >= line.length || line[i+1] != '[')
           # [ の開始を検出（[[ は除外）— エスケープを考慮して ] を探す
           j = find_closing_bracket(line, i + 1)

@@ -16,6 +16,7 @@ $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'bitclust/rrd_to_markdown'
 require 'bitclust/markdown_to_rrd'
 require 'bitclust/markdown_orchestrator'
+require 'bitclust/doc_converter'
 
 with_doc = ARGV.delete('--with-doc')
 inject = ARGV.delete('--inject')
@@ -71,6 +72,9 @@ targets.sort_by(&:last).each do |full, label|
     if orchestrator
       orchestrator.units(label, rrd)
                   .map { |u| [u.path, u.rrd, orchestrator.convert_unit(u), u.front_matter] }
+    elsif label.start_with?('doc:')
+      reduced = BitClust::DocConverter.reduce(rrd)
+      [[label, reduced, BitClust::DocConverter.convert(rrd), nil]]
     else
       [[label, rrd, BitClust::RRDToMarkdown.convert(rrd), nil]]
     end

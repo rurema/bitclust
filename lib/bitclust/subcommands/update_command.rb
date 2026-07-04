@@ -60,7 +60,8 @@ module BitClust
       # stdlibtree 更新機構にそのまま渡す。
       # doc（散文ページ）は stdlibtree/../../doc から読まれるため、
       # md ツリー側に doc/ が同居していればレイアウトを合わせる
-      # （manual/api を渡すと manual/doc を拾う）。
+      # （manual/api を渡すと manual/doc を拾う。md ならブリッジ変換、
+      # .rd のまま（移行中）なら symlink）。
       def prepare_markdowntree
         require 'tmpdir'
         require 'bitclust/markdown_bridge'
@@ -68,7 +69,13 @@ module BitClust
         root = File.join(@bridge_dir, 'api/src')
         MarkdownBridge.build(@markdowntree, root)
         doc = File.expand_path('../doc', @markdowntree)
-        FileUtils.ln_s(doc, File.join(@bridge_dir, 'doc')) if File.directory?(doc)
+        if File.directory?(doc)
+          if Dir.glob(File.join(doc, '**/*.md')).any?
+            MarkdownBridge.build_doc(doc, File.join(@bridge_dir, 'doc'))
+          else
+            FileUtils.ln_s(doc, File.join(@bridge_dir, 'doc'))
+          end
+        end
         @root ||= root
       end
 

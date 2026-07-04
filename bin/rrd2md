@@ -17,16 +17,20 @@
 #                  全体版ゲート解除・LIBRARIES 自体はスキップ）
 #   --scope LO,HI  --graph の対象版範囲 [LO, HI)（デフォルト 3.0,4.2。
 #                  旧版サルベージ時は別範囲を指定して再実行できる）
+#   --doc        散文ページ（refm/doc）モード: DocConverter で正規化つき変換
+#                （例: ruby bin/rrd2md --doc ../doctree/refm/doc ../doctree/manual/doc）
 
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'bitclust/rrd_to_markdown'
 require 'bitclust/markdown_orchestrator'
+require 'bitclust/doc_converter'
 
 class RRD2MDConverter
   def initialize(argv)
     @dry_run = argv.delete('--dry-run')
     @verbose = argv.delete('--verbose')
     @graph = argv.delete('--graph')
+    @doc = argv.delete('--doc')
     @scope = (extract_option(argv, '--scope') || '3.0,4.2').split(',')
     @single_file = extract_option(argv, '--file')
 
@@ -75,7 +79,7 @@ class RRD2MDConverter
   end
 
   def convert_directory
-    files = collect_files(@input_dir)
+    files = @doc ? BitClust::DocConverter.files(@input_dir) : collect_files(@input_dir)
     orchestrator = nil
     if @graph
       orchestrator = BitClust::MarkdownOrchestrator.new(@input_dir,
@@ -102,6 +106,8 @@ class RRD2MDConverter
           if orchestrator
             orchestrator.units(rel_path, rrd)
               .map { |u| [u.path, orchestrator.convert_unit(u)] }
+          elsif @doc
+            [[to_md_path(rel_path), BitClust::DocConverter.convert(rrd)]]
           else
             [[to_md_path(rel_path), BitClust::RRDToMarkdown.convert(rrd)]]
           end

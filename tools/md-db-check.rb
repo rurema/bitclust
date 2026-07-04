@@ -76,12 +76,25 @@ puts "entries compared: #{entry_count}, real source diffs: #{source_diffs.size},
      "trailing-whitespace-only: #{ws_only}"
 source_diffs.first(10).each { |s| puts "  SOURCE DIFF #{s}" }
 
-# doc（散文ページ）
+# doc（散文ページ）。md 経路は DocConverter.reduce の正規化（末尾スペース・
+# タブ・定義リスト空白等、意味を変えない表記ゆれ）を通るため、
+# 旧側も reduce に通した上での一致を「正規化後一致」として別集計する
+require 'bitclust/doc_converter'
 old_docs = old_db.docs.to_h { |d| [d.name, d] }
 new_docs = new_db.docs.to_h { |d| [d.name, d] }
 common_docs = compare_sets.call('doc', old_docs.keys.sort, new_docs.keys.sort)
-doc_diffs = common_docs.count { |k| old_docs[k].source != new_docs[k].source }
-puts "docs: #{common_docs.size} common, source diffs: #{doc_diffs}"
+doc_normalized = 0
+doc_diffs = common_docs.count do |k|
+  next false if old_docs[k].source == new_docs[k].source
+  if BitClust::DocConverter.reduce(old_docs[k].source) == new_docs[k].source
+    doc_normalized += 1
+    false
+  else
+    true
+  end
+end
+puts "docs: #{common_docs.size} common, real source diffs: #{doc_diffs}, " \
+     "normalized-only: #{doc_normalized}"
 
 if diffs.zero? && source_diffs.empty? && doc_diffs.zero?
   puts "DATABASES EQUIVALENT#{ws_only.positive? ? " (#{ws_only} trailing-whitespace-only diffs)" : ''}"

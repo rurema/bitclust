@@ -306,6 +306,40 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal expected, convert(rrd)
   end
 
+  # Step 8.3: doc ツリー由来のリテラルエスケープ（refm/doc 対応）
+  # 旧 news 等には「参照や見出しに見えるリテラル本文」があり、
+  # md 側でエスケープしないと md→rd の復元で誤変換される。
+
+  def test_literal_bare_ref_lookalike_is_escaped
+    # news/1_9_0: [ruby-talk:198440] はリテラル本文（参照ではない）
+    rrd = "= class A < Object\n\n無名モジュールの変更\n\\[ruby-talk:198440] を参照。\n"
+    md = convert("= class A < Object\n\n無名モジュールの変更\n[ruby-talk:198440] を参照。\n")
+    assert_match(/\\\[ruby-talk:198440\]/, md)
+  end
+
+  def test_real_refs_are_not_escaped
+    md = convert("= class A < Object\n\n[[m:Array#each]] と [[c:String]] を参照。\n")
+    assert_match(/\[m:Array#each\] と \[c:String\]/, md)
+    refute_match(/\\\[/, md)
+  end
+
+  def test_leading_hash_line_is_escaped
+    # news/1.6.0: 行頭 # のリテラル本文（コメントアウトされた変更履歴）
+    md = convert("= class A < Object\n\n\# : 2002-08-01 IO#read\n\#    本文。\n")
+    assert_match(/^\\# : 2002-08-01 IO#read$/, md)
+    assert_match(/^\\#    本文。$/, md)
+  end
+
+  def test_anchored_h1
+    # spec/rubycmd.rd: =[a:ruby] Rubyの起動
+    assert_equal "# Rubyの起動 {#ruby}\n", convert("=[a:ruby] Rubyの起動\n")
+  end
+
+  def test_heading_trailing_space_is_preserved
+    # news/1.8.2: 「=== 2004-12-06 」（末尾スペース）
+    assert_equal "### 2004-12-06 \n", convert("=== 2004-12-06 \n")
+  end
+
   # Step 8.4: メタデータ領域の部分コミット
   # メタデータ（category/require/sublibrary）の後に版分岐つき散文や #@# コメントが
   # 続く場合、nest==0 の空行チェックポイントまでをメタデータとして確定し、

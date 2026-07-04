@@ -593,4 +593,29 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  # ---- doc ツリー対応: リテラルエスケープの復元 ----
+
+  def test_escaped_bare_ref_is_unescaped_literally
+    # rd→md が「参照に見えるリテラル」を \[ でエスケープしたものを復元する
+    assert_equal "  [ruby-talk:198440] を参照。\n",
+      convert("  \\[ruby-talk:198440] を参照。\n")
+  end
+
+  def test_unescaped_bare_ref_is_still_restored
+    assert_equal "[[m:Array#each]] を参照。\n", convert("[m:Array#each] を参照。\n")
+  end
+
+  def test_escaped_leading_hash_is_unescaped
+    assert_equal "# : 2002-08-01 IO#read\n#    本文。\n",
+      convert("\\# : 2002-08-01 IO#read\n\\#    本文。\n")
+  end
+
+  def test_anchored_h1_restores
+    assert_equal "=[a:ruby] Rubyの起動\n", convert("# Rubyの起動 {#ruby}\n")
+  end
+
+  def test_heading_trailing_space_restores
+    assert_equal "=== 2004-12-06 \n", convert("### 2004-12-06 \n")
+  end
+
 end

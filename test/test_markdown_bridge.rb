@@ -75,6 +75,42 @@ class TestMarkdownBridge < Test::Unit::TestCase
     assert_equal "= class Dual < Object\nDual。\n", out["dual.rd"]
   end
 
+  def test_build_doc_emits_local_fragments_without_extension
+    # spec/regexp.rd → #@include(regexp19): doc 内ローカル断片は拡張子なしで emit
+    # （copy_doc は **/*.rd だけをページとして読むため、断片に .rd を付けると
+    # ページとして二重取り込みされる上、include の解決も切れる）
+    Dir.mktmpdir do |md|
+      FileUtils.mkdir_p(File.join(md, "spec"))
+      File.write(File.join(md, "spec/regexp.md"), "# 正規表現\n\n\#@include(regexp19)\n")
+      File.write(File.join(md, "spec/regexp19.md"), "断片。\n")
+      Dir.mktmpdir do |out|
+        BitClust::MarkdownBridge.build_doc(md, File.join(out, "doc"))
+        assert_equal "= 正規表現\n\n\#@include(regexp19)\n",
+          File.read(File.join(out, "doc/spec/regexp.rd"))
+        assert_equal "断片。\n", File.read(File.join(out, "doc/spec/regexp19"))
+        return
+      end
+    end
+  end
+
+  def test_build_doc_converts_and_rewrites_cross_tree_includes
+    # manual/doc の md → ブリッジの doc/*.rd。クロスツリー include は
+    # 旧レイアウト（../api/src/）へ戻す
+    Dir.mktmpdir do |md|
+      FileUtils.mkdir_p(File.join(md, "spec"))
+      File.write(File.join(md, "pack_template.md"),
+        "# pack テンプレート\n\n\#@include(../api/_builtin/pack-template)\n")
+      File.write(File.join(md, "spec/intro.md"), "# はじめに\n\n本文。\n")
+      Dir.mktmpdir do |out|
+        BitClust::MarkdownBridge.build_doc(md, File.join(out, "doc"))
+        assert_equal "= pack テンプレート\n\n\#@include(../api/src/_builtin/pack-template)\n",
+          File.read(File.join(out, "doc/pack_template.rd"))
+        assert_equal "= はじめに\n\n本文。\n", File.read(File.join(out, "doc/spec/intro.rd"))
+        return
+      end
+    end
+  end
+
   def test_reopen_members_are_included_last
     # json.rd/rake.rd: reopen が dynamic include する module は先に定義されている
     # 必要がある（RRDParser の検証）。reopen/redefine だけのファイルは後ろに並べる
