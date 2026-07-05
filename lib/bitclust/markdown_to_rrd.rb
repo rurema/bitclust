@@ -8,6 +8,13 @@ module BitClust
       new(markdown, capi: capi).convert
     end
 
+    # md テキスト断片のインライン記法を rd 形式へ復元する
+    # （[type:target] → [[type:target]]、\[ エスケープ解除）。
+    # MDCompiler がテキストノードの処理を共有するための公開 API
+    def self.restore_inline(text)
+      new('').send(:convert_bare_refs, text)
+    end
+
     # capi: C API リファレンスモード。### は見出しではなくシグネチャ
     # 「--- <C sig>」へ復元する（capi に本文見出しは無い）
     def initialize(markdown, capi: false)
@@ -260,10 +267,12 @@ module BitClust
         end
       end
       advance
-      collect_md_continuation_lines
+      collect_md_continuation_lines(greedy: true)
     end
 
-    def collect_md_continuation_lines
+    # greedy: rd 側の @param 系継続（RDCompiler の dd_without_p 相当）と対称。
+    # 空白のみの行も継続として保持し、完全な空行でのみ停止する
+    def collect_md_continuation_lines(greedy: false)
       nest = 0
       while @index < @lines.length
         line = current_line
@@ -277,6 +286,9 @@ module BitClust
           raw_passthrough(line)
         elsif line =~ /\A\s+\S/ && line !~ /\A- / && line !~ /\A\*\*/ && line !~ /\A```/
           @out << strip_code_spans(convert_inline_refs(line))
+          advance
+        elsif greedy && line =~ /\A[ \t]+$/
+          @out << line
           advance
         else
           break
@@ -355,9 +367,9 @@ module BitClust
             @out << convert_inline_refs(l)
             advance
           elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/ &&
-                @lines[@index + 1] !~ /\A- \*\*/ && @lines[@index + 1] !~ /\A\s+-\s/
-            # 空行の後のインデント付きリスト項目は説明の続きではなく
-            # ネストしたリスト（rd→md 側と対称に、リスト変換に任せる）
+                @lines[@index + 1] !~ /\A- \*\*/
+            # 空行の後にインデント行が続く限り説明（rd 側と対称、
+            # RDCompiler の dd_with_p の貪欲さに合わせる）
             @out << l
             advance
           else
@@ -394,14 +406,15 @@ module BitClust
       content_indent = (indent.empty? ? 1 : indent.length) + 1 + $1.length
       @out << convert_inline_refs(line.sub(/\A\s*-(\s+)/, "#{rrd_indent}*\\1"))
       advance
-      # 継続行を収集（content_indent 以上、空行・リスト項目・#@ で停止）
+      # 継続行を収集（空行・リスト項目・#@ で停止）。
+      # rd 側と対称: 継続はインデント深さ不問（RDCompiler の項目継続規則）
       while @index < @lines.length
         l = current_line
         if l =~ /\A\#@/
           raw_passthrough(l)
         elsif l =~ /\A\s*$/
           break
-        elsif l =~ /\A(\s+)\S/ && $1.length >= content_indent && l !~ /\A\s*-\s/ && l !~ /\A\s*\d+\.\s/
+        elsif l =~ /\A(\s+)\S/ && l !~ /\A\s*-\s/ && l !~ /\A\s*\d+\.\s/
           @out << convert_inline_refs(l)
           advance
         else

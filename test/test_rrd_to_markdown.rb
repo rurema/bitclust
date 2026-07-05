@@ -340,6 +340,46 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal "### 2004-12-06 \n", convert("=== 2004-12-06 \n")
   end
 
+  # Step 7.5: @param 継続の貪欲さ（RDCompiler の dd_without_p と同規則）
+  # 空白を含む行（"   \n" や字下げの例示ブロック）は @param 説明の継続。
+  # 完全な空行（"\n"）でのみ停止する（CGI::HtmlExtension#popup_menu 型）。
+
+  def test_param_continuation_spans_whitespace_only_lines
+    rrd = "= class A < Object\n== Instance Methods\n--- m(v) -> String\n\n" \
+          "@param v 説明。\n   \n        例：\n        code\n\n本文。\n"
+    md = convert(rrd)
+    assert_match(/-- 説明。\n   \n        例：\n        code\n\n本文。/, md)
+    refute_match(/```/, md)   # 例示ブロックはフェンス化せず継続のまま
+  end
+
+  # Step 7.6: RDCompiler の文脈解釈との整合（描画等価のための変換制約）
+  # RDCompiler は (a) dlist の説明を空行を跨いでインデントが続く限り dd とし
+  # （リスト風の行もテキスト）、(b) 段落中の「: 」行を段落の継続とし、
+  # (c) リスト項目直後のインデント行を深さ不問で項目の継続とする。
+  # 変換器はこの解釈を保存する（構造を変えると描画が変わるため）。
+
+  def test_dlist_description_spans_blank_lines_keeping_list_like_text
+    rrd = ": term\n  説明。\n\n      * 項目風テキスト1\n      * 項目風テキスト2\n\n本文。\n"
+    md = convert(rrd)
+    assert_match(/- \*\*`term`\*\*:\n  説明。\n\n      \* 項目風テキスト1\n      \* 項目風テキスト2\n\n本文。/, md)
+  end
+
+  def test_colon_line_inside_paragraph_stays_text
+    # news/1.8.5 型: テキスト行直後の「: 」行は RDCompiler では段落の継続
+    rrd = "以下のメソッドが追加されました。\n: TCPServer#accept_nonblock [new]\n\n本文。\n"
+    md = convert(rrd)
+    assert_match(/^: TCPServer#accept_nonblock \[new\]$/, md)
+    refute_match(/\*\*/, md)
+  end
+
+  def test_list_continuation_shallower_than_content_indent
+    # news/2_6_0 型: 項目より浅いインデントの行も RDCompiler では項目の継続
+    rrd = "  * 項目の一行目が長くて\n   折り返した継続行。\n\n本文。\n"
+    md = convert(rrd)
+    assert_match(/  - 項目の一行目が長くて\n   折り返した継続行。\n\n本文。/, md)
+    refute_match(/`/, md)
+  end
+
   # Step 8.35: メタデータ領域の #@# コメント（irb.rd 対応）
   # メタ行の間に挟まる #@# は front matter 内に保持する（YAML コメントになる）。
   # メタ領域の後・本文の前の #@#（rss.rd 型）は従来どおり body に残す。

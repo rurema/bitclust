@@ -205,7 +205,15 @@ module BitClust
         when /\A(\s+)\(\d+\)\s/
           convert_olist_item(line)
         when /\A:\s+(.*)/
-          convert_dlist_item(line, $1)
+          term = $1
+          # RDCompiler は段落中（テキスト行直後）の「: 」行を段落の継続とする。
+          # 直前の出力が段落テキストなら dlist 化せずそのまま流す（news/1.8.5 型）
+          if @out.last =~ /\A(?!- |#|`|@)\S/
+            @out << convert_inline_refs(line)
+            advance
+          else
+            convert_dlist_item(line, term)
+          end
         when /\A\#@/
           raw_passthrough(line)
         when /\A== /
@@ -322,7 +330,7 @@ module BitClust
         @out << "- **param**#{$1}`#{$2}` --\n"
       end
       advance
-      collect_continuation_lines
+      collect_continuation_lines(greedy: true)
     end
 
     def convert_raise(line)
@@ -333,7 +341,7 @@ module BitClust
         @out << "- **raise**#{$1}`#{$2}` --\n"
       end
       advance
-      collect_continuation_lines
+      collect_continuation_lines(greedy: true)
     end
 
     def convert_return(line)
@@ -341,7 +349,7 @@ module BitClust
       rest = line.sub(/\A@return/, '').chomp
       @out << "- **return** --#{convert_inline_refs(rest)}\n"
       advance
-      collect_continuation_lines
+      collect_continuation_lines(greedy: true)
     end
 
     def convert_see(line)
@@ -351,10 +359,13 @@ module BitClust
       converted = convert_inline_refs(rest)
       @out << "- **SEE**#{space}#{converted}\n"
       advance
-      collect_continuation_lines
+      collect_continuation_lines   # RDCompiler の see は空白のみ行で停止する（greedy 不可）
     end
 
-    def collect_continuation_lines
+    # greedy: RDCompiler の dd_without_p と同じ貪欲さ（@param 等のメタデータ用）。
+    # 空白を含む行（"   \n" や空白行を挟んだ例示ブロック）も継続し、
+    # 完全な空行（"\n"）でのみ停止する。@see は従来規則（空白のみ行で停止）
+    def collect_continuation_lines(greedy: false)
       nest = 0
       while @index < @lines.length
         line = current_line
@@ -368,6 +379,9 @@ module BitClust
           raw_passthrough(line)
         elsif line =~ /\A\s+\S/ && line !~ /\A@/ && line !~ /\A---/ && line !~ /\A=/ && line !~ SAMPLECODE_RE
           @out << convert_inline_refs(line)
+          advance
+        elsif greedy && line =~ /\A[ \t]+$/
+          @out << line
           advance
         else
           break
@@ -400,14 +414,15 @@ module BitClust
       content_indent = indent.length + 1 + space.length
       @out << "#{indent}-#{space}#{convert_inline_refs(text.chomp)}\n"
       advance
-      # 継続行を収集（content_indent 以上のインデント、空行・リスト項目で停止）
+      # 継続行を収集（空行・リスト項目で停止）。
+      # RDCompiler の項目継続はインデント深さ不問（項目より浅い折り返しも継続）
       while @index < @lines.length
         l = current_line
         if l =~ /\A\#@/
           raw_passthrough(l)
         elsif l =~ /\A\s*$/
           break  # 空行でリスト継続終了
-        elsif l =~ /\A(\s+)\S/ && $1.length >= content_indent && l !~ /\A\s+\*\s/ && l !~ /\A\s+\(\d+\)\s/
+        elsif l =~ /\A(\s+)\S/ && l !~ /\A\s+\*\s/ && l !~ /\A\s+\(\d+\)\s/
           @out << convert_inline_refs(l)
           advance
         else
@@ -442,15 +457,15 @@ module BitClust
     def convert_dlist_item(line, term)
       advance
       formatted = format_dlist_term(term)
-      # 説明行を収集（空行を挟む場合も含む）
+      # 説明行を収集。RDCompiler の dd_with_p と同じ貪欲さ:
+      # 空行を跨いでインデント行が続く限り説明（リスト風の行もテキストとして保持）
       desc_lines = []
       while @index < @lines.length
         l = current_line
         if l =~ /\A(\s+)\S/
           desc_lines << l
           advance
-        elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/ && @lines[@index + 1] !~ /\A\s+\*\s/
-          # 空行の後にインデント行が続く場合（別の定義リストやリストでない）
+        elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/
           desc_lines << l
           advance
         else
