@@ -4,12 +4,15 @@ require 'yaml'
 
 module BitClust
   class MarkdownToRRD
-    def self.convert(markdown)
-      new(markdown).convert
+    def self.convert(markdown, capi: false)
+      new(markdown, capi: capi).convert
     end
 
-    def initialize(markdown)
+    # capi: C API リファレンスモード。### は見出しではなくシグネチャ
+    # 「--- <C sig>」へ復元する（capi に本文見出しは無い）
+    def initialize(markdown, capi: false)
       @src = markdown
+      @capi = capi
     end
 
     def convert
@@ -103,7 +106,7 @@ module BitClust
         when /\A### gvar /
           convert_gvar_signature(line)
         when /\A### /
-          convert_h3_heading(line)
+          @capi ? convert_capi_signature(line) : convert_h3_heading(line)
         when /\A#### /
           convert_h4_heading(line)
         when /\A- \*\*(param|return|raise)\*\*/
@@ -445,6 +448,12 @@ module BitClust
 
     def convert_h2(line)
       @out << line.sub(/\A## /, '== ')
+      advance
+    end
+
+    # capi の C シグネチャ（キーワード無し ###）を復元する
+    def convert_capi_signature(line)
+      @out << line.sub(/\A### /, '--- ')
       advance
     end
 

@@ -2,16 +2,19 @@
 
 module BitClust
   class RRDToMarkdown
-    def self.convert(rrd, extra_front_matter: {})
-      new(rrd, extra_front_matter: extra_front_matter).convert
+    def self.convert(rrd, extra_front_matter: {}, capi: false)
+      new(rrd, extra_front_matter: extra_front_matter, capi: capi).convert
     end
 
     # ファイル単体からは決められない front matter（library 所属・構造 since/until）を
     # 注入するための口。include グラフを解析したオーケストレータが値を計算して渡す。
     EXTRA_FRONT_MATTER_KEYS = %w[type library since until].freeze
 
-    def initialize(rrd, extra_front_matter: {})
+    # capi: C API リファレンス（refm/capi）モード。シグネチャは C の
+    # 「--- <型付きシグネチャ>」で、def 等のキーワードを付けずに ### へ変換する
+    def initialize(rrd, extra_front_matter: {}, capi: false)
       @src = rrd
+      @capi = capi
       @extra_front_matter = extra_front_matter.transform_keys(&:to_s)
       unknown = @extra_front_matter.keys - EXTRA_FRONT_MATTER_KEYS
       unless unknown.empty?
@@ -263,6 +266,13 @@ module BitClust
     def convert_signature(line)
       sig = line.sub(/\A--- /, '').chomp
       # B1: 空白を保持（正規化しない）
+
+      if @capi
+        # C API: シグネチャは型から始まり自己記述的。キーワードは付けない
+        @out << "### #{sig}\n"
+        advance
+        return
+      end
 
       if @current_section == :module_function
         @out << "### module_function def #{sig}\n"

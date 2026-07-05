@@ -39,7 +39,10 @@ module BitClust
 
       def exec(argv, options)
         super
-        prepare_markdowntree if @markdowntree
+        if @markdowntree
+          argv = @db.is_a?(FunctionDatabase) ? prepare_capi_markdowntree
+                                             : (prepare_markdowntree; argv)
+        end
         @db.transaction {
           if @root
             db = @db
@@ -77,6 +80,23 @@ module BitClust
           end
         end
         @root ||= root
+      end
+
+      # C API の Markdown ツリー（manual/capi）を旧形式の .rd 群へ変換し、
+      # ファイル引数として返す（--capi update <files> の経路に載せる）
+      def prepare_capi_markdowntree
+        require 'tmpdir'
+        require 'bitclust/markdown_to_rrd'
+        @bridge_dir = Dir.mktmpdir('bitclust-capi-bridge')
+        # src/ 配下に置く: guess_library_name が src/ 以降を id とするため
+        # （関数の filename が旧経路と同じ「eval.c」等になる）
+        src = File.join(@bridge_dir, 'src')
+        FileUtils.mkdir_p(src)
+        Dir.glob(File.join(@markdowntree, '*.md')).sort.map do |f|
+          rd = File.join(src, "#{File.basename(f, '.md')}.rd")
+          File.write(rd, MarkdownToRRD.convert(File.read(f), capi: true))
+          rd
+        end
       end
 
       def guess_library_name(path)

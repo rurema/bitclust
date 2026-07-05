@@ -19,11 +19,14 @@
 #                  旧版サルベージ時は別範囲を指定して再実行できる）
 #   --doc        散文ページ（refm/doc）モード: DocConverter で正規化つき変換
 #                （例: ruby bin/rrd2md --doc ../doctree/refm/doc ../doctree/manual/doc）
+#   --capi       C API リファレンス（refm/capi/src）モード: CapiConverter で変換
+#                （例: ruby bin/rrd2md --capi ../doctree/refm/capi/src ../doctree/manual/capi）
 
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'bitclust/rrd_to_markdown'
 require 'bitclust/markdown_orchestrator'
 require 'bitclust/doc_converter'
+require 'bitclust/capi_converter'
 
 class RRD2MDConverter
   def initialize(argv)
@@ -31,6 +34,7 @@ class RRD2MDConverter
     @verbose = argv.delete('--verbose')
     @graph = argv.delete('--graph')
     @doc = argv.delete('--doc')
+    @capi = argv.delete('--capi')
     @scope = (extract_option(argv, '--scope') || '3.0,4.2').split(',')
     @single_file = extract_option(argv, '--file')
 
@@ -108,6 +112,8 @@ class RRD2MDConverter
               .map { |u| [u.path, orchestrator.convert_unit(u)] }
           elsif @doc
             [[to_md_path(rel_path), BitClust::DocConverter.convert(rrd)]]
+          elsif @capi
+            [[to_md_path(rel_path), BitClust::CapiConverter.convert(rrd)]]
           else
             [[to_md_path(rel_path), BitClust::RRDToMarkdown.convert(rrd)]]
           end

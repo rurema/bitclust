@@ -5,7 +5,8 @@
 # refm/api/src の全ファイルについて rd → md → rd がバイト一致するかを確認する。
 #
 # usage: ruby tools/md-roundtrip-check.rb [options] <doctree-root>
-#   --with-doc   refm/doc/**/*.rd も検証する（既知の失敗あり: 行頭 `# ` リテラル本文等）
+#   --with-doc   refm/doc/**/*.rd も検証する（DocConverter の reduce 基準）
+#   --with-capi  refm/capi/src/*.rd も検証する（CapiConverter）
 #   --inject     MarkdownOrchestrator の変換（prune・全体ゲート解除・front matter 注入）で
 #                検証する: md → rd が reduce 後の rd を復元すること、および
 #                md に grouping include が残っていないことを確認する
@@ -17,8 +18,10 @@ require 'bitclust/rrd_to_markdown'
 require 'bitclust/markdown_to_rrd'
 require 'bitclust/markdown_orchestrator'
 require 'bitclust/doc_converter'
+require 'bitclust/capi_converter'
 
 with_doc = ARGV.delete('--with-doc')
+with_capi = ARGV.delete('--with-capi')
 inject = ARGV.delete('--inject')
 show_diff = ARGV.delete('--diff')
 verbose = ARGV.delete('-v')
@@ -41,6 +44,10 @@ targets = files.map { |f| [File.join(src_root, f), f] }
 if with_doc
   doc_root = File.join(doctree, 'refm/doc')
   targets += Dir.glob('**/*.rd', base: doc_root).map { |f| [File.join(doc_root, f), "doc:#{f}"] }
+end
+if with_capi
+  capi_root = File.join(doctree, 'refm/capi/src')
+  targets += Dir.glob('*.rd', base: capi_root).map { |f| [File.join(capi_root, f), "capi:#{f}"] }
 end
 
 # md 内のエンティティ H1 直後のヘッダ領域に関係行が残っていないか
@@ -75,6 +82,8 @@ targets.sort_by(&:last).each do |full, label|
     elsif label.start_with?('doc:')
       reduced = BitClust::DocConverter.reduce(rrd)
       [[label, reduced, BitClust::DocConverter.convert(rrd), nil]]
+    elsif label.start_with?('capi:')
+      [[label, rrd, BitClust::CapiConverter.convert(rrd), nil]]
     else
       [[label, rrd, BitClust::RRDToMarkdown.convert(rrd), nil]]
     end
@@ -88,7 +97,7 @@ targets.sort_by(&:last).each do |full, label|
     # body 関係の不変条件は in-scope（front matter 注入あり）のみ。
     # スコープ外ファイルは凍結形のままなので対象外（サルベージで扱う）
     body_rels << ulabel if front_matter && !front_matter.empty? && body_relations?(md)
-    back = BitClust::MarkdownToRRD.convert(md)
+    back = BitClust::MarkdownToRRD.convert(md, capi: label.start_with?('capi:'))
     if back == reduced
       ok += 1
       puts "OK   #{ulabel}" if verbose

@@ -2,7 +2,7 @@
 
 単一ファイル変換器（`RRDToMarkdown` / `MarkdownToRRD`）では扱えない、
 ツリー横断の front matter（`library` 所属・構造的 `since`/`until`）を付与するための
-オーケストレータの設計。MARKUP_SPEC §14 の残タスクのうち「クロスファイル」に対応する。
+オーケストレータの設計。MARKUP_SPEC §15（旧§14）の残タスクのうち「クロスファイル」に対応する。
 
 ## 前提（完了済み）
 
