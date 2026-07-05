@@ -53,6 +53,7 @@ module BitClust
             @db.update_by_file path, @library || guess_library_name(path)
           end
         }
+        remap_source_locations if @markdowntree
       ensure
         FileUtils.remove_entry(@bridge_dir) if @bridge_dir
       end
@@ -70,14 +71,20 @@ module BitClust
         require 'bitclust/markdown_bridge'
         @bridge_dir = Dir.mktmpdir('bitclust-md-bridge')
         root = File.join(@bridge_dir, 'api/src')
-        MarkdownBridge.build(@markdowntree, root)
-        doc = File.expand_path('../doc', @markdowntree)
+        bridge = MarkdownBridge.build(@markdowntree, root)
+        @location_map = { root => [@markdowntree, bridge.source_map] }
+        # markdowntree と同じ渡され方（相対/絶対）を保った隣接 doc パス。
+        # copy_doc は stdlibtree 相対（../../doc/...）の location を記録する
+        doc = File.join(File.dirname(@markdowntree), 'doc')
         if File.directory?(doc)
           if Dir.glob(File.join(doc, '**/*.md')).any?
-            MarkdownBridge.build_doc(doc, File.join(@bridge_dir, 'doc'))
+            doc_map = MarkdownBridge.build_doc(doc, File.join(@bridge_dir, 'doc'))
           else
-            FileUtils.ln_s(doc, File.join(@bridge_dir, 'doc'))
+            FileUtils.ln_s(File.expand_path(doc), File.join(@bridge_dir, 'doc'))
+            doc_map = nil
           end
+          @location_map[File.join(@bridge_dir, 'doc')] = [doc, doc_map]
+          @location_map['../../doc'] = [doc, doc_map]
         end
         @root ||= root
       end
@@ -92,11 +99,48 @@ module BitClust
         # （関数の filename が旧経路と同じ「eval.c」等になる）
         src = File.join(@bridge_dir, 'src')
         FileUtils.mkdir_p(src)
-        Dir.glob(File.join(@markdowntree, '*.md')).sort.map do |f|
-          rd = File.join(src, "#{File.basename(f, '.md')}.rd")
+        capi_map = {}
+        files = Dir.glob(File.join(@markdowntree, '*.md')).sort.map do |f|
+          name = "#{File.basename(f, '.md')}.rd"
+          rd = File.join(src, name)
           File.write(rd, MarkdownToRRD.convert(File.read(f), capi: true))
+          capi_map[name] = "#{File.basename(f, '.md')}.md"
           rd
         end
+        @location_map = { src => [@markdowntree, capi_map] }
+        files
+      end
+
+      # source_location のブリッジ一時パスを manual/ の md パスへ再マップする。
+      # 編集リンク（statichtml --edit-base-url）が凍結 refm でなく編集対象の
+      # md を指すようにするため。行番号はブリッジ rd 基準の近似で、
+      # front matter 等の分だけ md とずれることがある
+      def remap_source_locations
+        entries =
+          if @db.is_a?(FunctionDatabase)
+            @db.functions
+          else
+            db = @db
+            db.is_a?(MethodDatabase) or raise
+            db.libraries + db.classes + db.methods + db.docs
+          end
+        entries.each do |entry|
+          loc = entry.source_location or next
+          remapped = remap_location(loc) or next
+          entry.source_location = remapped
+          entry.save
+        end
+      end
+
+      def remap_location(loc)
+        @location_map.each do |bridge_root, (md_root, map)|
+          prefix = "#{bridge_root}/"
+          next unless loc.file.start_with?(prefix)
+          rel = loc.file.delete_prefix(prefix)
+          rel = map[rel] || rel if map
+          return Location.new(File.join(md_root, rel), loc.line)
+        end
+        nil
       end
 
       def guess_library_name(path)

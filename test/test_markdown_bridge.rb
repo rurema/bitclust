@@ -52,6 +52,35 @@ class TestMarkdownBridge < Test::Unit::TestCase
     assert_equal "bar/baz\ndual\nfoo\n\#@until 3.1\ngated\n\#@end\n", out["LIBRARIES"]
   end
 
+  def test_source_map_maps_emitted_to_md
+    # source_location の md パスへの再マップ用（emit 相対 → md 相対）
+    Dir.mktmpdir do |md|
+      FILES.each do |path, content|
+        full = File.join(md, path)
+        FileUtils.mkdir_p(File.dirname(full))
+        File.write(full, content)
+      end
+      Dir.mktmpdir do |out|
+        bridge = BitClust::MarkdownBridge.build(md, out)
+        assert_equal "foo.md", bridge.source_map["foo.rd"]
+        assert_equal "foo/A.md", bridge.source_map["foo/A"]
+        assert_equal "frag.md", bridge.source_map["frag"]
+        return
+      end
+    end
+  end
+
+  def test_build_doc_returns_source_map
+    Dir.mktmpdir do |md|
+      File.write(File.join(md, "index.md"), "# はじめに\n\n本文。\n")
+      Dir.mktmpdir do |out|
+        map = BitClust::MarkdownBridge.build_doc(md, File.join(out, "doc"))
+        assert_equal({ "index.rd" => "index.md" }, map)
+        return
+      end
+    end
+  end
+
   def test_library_rd_with_member_includes
     out = build
     assert_equal "category Cat\n\n概要。\n\n\#@include(frag)\n\n" \

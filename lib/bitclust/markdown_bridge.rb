@@ -31,6 +31,7 @@ module BitClust
     #   （../api/src/）へ戻す（ブリッジの api ツリーは api/src に置かれるため）
     # - doc 内ローカル include から参照される断片（spec/regexp19 等）は
     #   拡張子なしで emit する（copy_doc は **/*.rd だけをページとして読む）
+    # 戻り値は source_map（出力相対パス => 入力 md 相対パス）
     def self.build_doc(md_doc_root, out_doc_root)
       require 'bitclust/markdown_to_rrd'
       files = Dir.glob('**/*.md', base: md_doc_root).sort
@@ -41,23 +42,30 @@ module BitClust
                            .delete_prefix('/') }
       }.to_h { |t| [t, true] }
 
-      files.each do |f|
+      files.to_h do |f|
         rrd = MarkdownToRRD.convert(File.read(File.join(md_doc_root, f)))
         rrd = rrd.gsub(%r{^(\#@include\((?:\.\./)+api/)(?!src/)}, '\1src/')
         name = f.sub(/\.md\z/, '')
-        full = File.join(out_doc_root, referenced[name] ? name : "#{name}.rd")
+        rel = referenced[name] ? name : "#{name}.rd"
+        full = File.join(out_doc_root, rel)
         FileUtils.mkdir_p(File.dirname(full))
         File.write(full, rrd)
+        [rel, f]
       end
     end
 
     attr_reader :warnings
+
+    # 出力相対パス（emit 名） => 入力 md 相対パス。
+    # source_location を manual/ の md へ再マップするために使う
+    attr_reader :source_map
 
     def initialize(md_root, out_root)
       @md_root = md_root
       @out_root = out_root
       @tree = MarkdownTree.scan(md_root)
       @warnings = @tree.warnings.dup
+      @source_map = {}
     end
 
     def build
@@ -67,6 +75,7 @@ module BitClust
         (1..parts.size).map { |n| parts.first(n).join('/') }
       }.uniq - ['.']
       emitted = files.to_h { |f| [f, emit_name(f)] }
+      @source_map = emitted.invert
 
       files.each do |f|
         rrd = MarkdownToRRD.convert(File.read(File.join(@md_root, f)))
