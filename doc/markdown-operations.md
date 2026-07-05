@@ -88,6 +88,14 @@ $ bitclust --database=/tmp/db-3.4 statichtml \
     --canonical-base-url=https://docs.ruby-lang.org/ja/latest/
 ```
 
+**実機確認済み（2026-07、version 3.4、api+doc+capi）**: 旧経路 DB と md 経路 DB から
+生成した HTML 13,540 ファイルを `diff -r` で比較し、差分は 1 ファイル・1 箇所のみ
+（`JSON::State#generate` の meta description 属性内の改行1個）。これは旧経路の
+アーティファクト由来: includer（json.rd）で最後の `#@include` の後にあった空行が、
+include 展開時に被 include ファイル末尾エントリの source へ漏れ込んでいた
+（DB 比較の「末尾空白のみ」25件と同根）。md 経路の方がクリーンで、HTML 属性内の
+空白は正規化されるため表示・意味とも等価。既知の無害差分として受容する。
+
 ## 5. doctree の Rakefile を切り替える場合の対応表
 
 | 従来（refm） | 移行後（manual） |
