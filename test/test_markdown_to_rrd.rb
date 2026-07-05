@@ -618,4 +618,16 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal "=== 2004-12-06 \n", convert("### 2004-12-06 \n")
   end
 
+  # ---- メタデータ領域の #@# コメントの復元（irb.rd 対応）----
+
+  def test_leading_comment_restores_before_category
+    md = "---\n\#@# Author: Keiju\ncategory: Development\n---\n本文。\n"
+    assert_equal "\#@# Author: Keiju\n\ncategory Development\n\n本文。\n", convert(md)
+  end
+
+  def test_comment_inside_require_block_restores
+    md = "---\ncategory: Development\nrequire:\n  - b\n\#@# note\n  - c\n---\n本文。\n"
+    assert_equal "category Development\n\nrequire b\n\#@# note\nrequire c\n\n本文。\n", convert(md)
+  end
+
 end

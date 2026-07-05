@@ -45,7 +45,7 @@ module BitClust
 
     def collect_library_metadata
       scan = @index
-      tokens = []       # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:blank]
+      tokens = []       # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:cmt, line] | [:blank]
       nest = 0
       checkpoint = nil  # 直近の「nest==0 の空行直後」= [scan, tokens.size]。
                         # メタ確定をここまでで打ち切れる安全な切れ目
@@ -70,8 +70,13 @@ module BitClust
         when /\A\s*$/
           tokens << [:blank]; scan += 1
           checkpoint = [scan, tokens.size] if nest == 0
+        when /\A\#@\#/
+          # #@# コメント（irb.rd の Author 行・require 群中の注記）→
+          # メタトークンとして保持。本文の前置き（rss.rd 型）だった場合は
+          # 確定時に末尾トリムで body へ戻す
+          tokens << [:cmt, l]; scan += 1
         when /\A\#@/
-          # #@# コメント等（rss.rd の「#@# = rss」）→ チェックポイントまでで確定
+          # #@todo 等 → チェックポイントまでで確定
           return unless checkpoint
           scan, tokens = checkpoint[0], tokens[0, checkpoint[1]]
           nest = 0
@@ -86,6 +91,15 @@ module BitClust
           break
         end
       end
+      # 末尾の cmt/blank 連鎖に #@# が含まれる場合、それはメタでなく本文の
+      # 前置きコメント（rss.rd の「#@# = rss」）→ 最初の cmt 以降を body へ戻す
+      # （連鎖先頭の空行はメタ領域の終端空行として残す）
+      chain_start = (tokens.rindex { |t| !%i[cmt blank].include?(t[0]) } || -1) + 1
+      if (first_cmt = tokens[chain_start..].index { |t| t[0] == :cmt })
+        drop = tokens.length - (chain_start + first_cmt)
+        scan -= drop
+        tokens = tokens[0...-drop]
+      end
       return unless tokens.any? { |t| %i[cat req sub].include?(t[0]) }
       return if nest != 0               # ファイル全体の版ゲート内で EOF → 据え置き
       return unless build_metadata_front_matter(tokens)
@@ -93,15 +107,26 @@ module BitClust
     end
 
     # 先頭メタデータ領域の tokens を front matter へ組み立てる。
-    # category は scalar、require/sublibrary は組み立て済みブロック行（#@ を挟める）。
+    # category は scalar、require/sublibrary は組み立て済みブロック行
+    # （#@ ディレクティブや #@# コメントを挟める）。
     # #@ ブロックは単一種のみ対応（データ上、混在・category 包みは存在しない）。
+    # 最初のメタ行より前の #@#（irb.rd の Author 行）は leading スロットへ。
     def build_metadata_front_matter(tokens)
+      # 先頭の #@# コメント群: 直後に空行が続くもの（irb.rd の Author 行）は
+      # leading スロットへ。メタ行が直続するもの（irb/workspace.rd の
+      # require 注記）はそのメタブロックの先頭行として list 側に流す
+      first_non_cmt = tokens.index { |t| t[0] != :cmt } || tokens.length
+      if first_non_cmt > 0 && tokens[first_non_cmt]&.first == :blank
+        @front_matter['leading'] = tokens[0...first_non_cmt].map { |t| t[1] }
+        tokens = tokens[first_non_cmt..]
+      end
       toks = tokens.reject { |t| t[0] == :blank }
+
       cats = toks.select { |t| t[0] == :cat }
       return false if cats.size > 1
       @front_matter['category'] = cats.first[1] if cats.first
       list_toks = toks.reject { |t| t[0] == :cat }
-      if list_toks.none? { |t| t[0] == :dir }
+      if list_toks.none? { |t| %i[dir cmt].include?(t[0]) }
         { req: 'require', sub: 'sublibrary' }.each do |sym, key|
           items = list_toks.select { |t| t[0] == sym }
           @front_matter[key] = items.map { |t| "  - #{t[1]}\n" } unless items.empty?
@@ -111,7 +136,7 @@ module BitClust
       kinds = list_toks.select { |t| %i[req sub].include?(t[0]) }.map { |t| t[0] }.uniq
       return false if kinds.size != 1
       key = kinds.first == :req ? 'require' : 'sublibrary'
-      @front_matter[key] = list_toks.map { |t| t[0] == :dir ? t[1] : "  - #{t[1]}\n" }
+      @front_matter[key] = list_toks.map { |t| %i[dir cmt].include?(t[0]) ? t[1] : "  - #{t[1]}\n" }
       true
     end
 
@@ -134,6 +159,9 @@ module BitClust
         if v = @front_matter[key]
           lines << "#{key}: \"#{v}\"\n"   # "3.10" が float 3.1 に化けないよう常にクォート（§1.2）
         end
+      end
+      if block = @front_matter['leading']
+        block.each { |bl| lines << bl }  # メタ領域先頭の #@# コメント行
       end
       if v = @front_matter['category']
         lines << "category: #{v}\n"

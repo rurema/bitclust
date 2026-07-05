@@ -58,6 +58,7 @@ module BitClust
     def parse_front_matter_raw(yaml_lines)
       blocks = {}   # list key => [[:item, val] | [:dir, line]]
       category = nil
+      leading = []  # メタ領域先頭の #@# コメント行（irb.rd の Author 行）
       key = nil
       yaml_lines.each do |l|
         case l
@@ -68,7 +69,7 @@ module BitClust
         when /\A\s+- (.+?)\s*$/
           blocks[key] << [:item, $1] if key
         when /\A\#@/
-          blocks[key] << [:dir, l] if key
+          key ? blocks[key] << [:dir, l] : leading << l
         when /\A\S/
           key = nil   # その他のトップレベルキー（type/since/until 等）
         end
@@ -81,6 +82,9 @@ module BitClust
       end
       # ライブラリメタ（H1 前）
       @library_metadata_body = []
+      unless leading.empty?
+        @library_metadata_body.concat(leading) << "\n"
+      end
       if category
         @library_metadata_body << "category #{category}\n" << "\n"
       end

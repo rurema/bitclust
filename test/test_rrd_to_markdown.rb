@@ -340,6 +340,41 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal "### 2004-12-06 \n", convert("=== 2004-12-06 \n")
   end
 
+  # Step 8.35: メタデータ領域の #@# コメント（irb.rd 対応）
+  # メタ行の間に挟まる #@# は front matter 内に保持する（YAML コメントになる）。
+  # メタ領域の後・本文の前の #@#（rss.rd 型）は従来どおり body に残す。
+
+  def test_leading_comment_in_metadata_to_front_matter
+    # irb.rd: ファイル先頭の #@# Author コメント → category の直前に保持
+    rrd = "\#@# Author: Keiju\n\ncategory Development\n\n本文。\n"
+    expected = "---\n\#@# Author: Keiju\ncategory: Development\n---\n本文。\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_comment_inside_require_block_to_front_matter
+    # irb.rd: require 群の途中の #@# 注記 → require ブロック行として保持
+    rrd = "category Development\n\n\#@until 2.7.0\nrequire a\n\#@end\nrequire b\n" \
+          "\#@# note\nrequire c\n\n本文。\n"
+    expected = "---\ncategory: Development\nrequire:\n\#@until 2.7.0\n  - a\n\#@end\n" \
+               "  - b\n\#@# note\n  - c\n---\n本文。\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_comment_directly_above_require_joins_the_block
+    # irb/workspace.rd: 先頭 #@# の直後に空行なしで require が続く
+    # （コメントはその require の説明）→ require ブロックの先頭行として保持
+    rrd = "\#@# CONTEXT_MODE 2 の場合のみ。\nrequire irb/ws-for-case-2\n\n本文。\n"
+    expected = "---\nrequire:\n\#@# CONTEXT_MODE 2 の場合のみ。\n  - irb/ws-for-case-2\n---\n本文。\n"
+    assert_equal expected, convert(rrd)
+  end
+
+  def test_trailing_comment_before_body_stays_in_body
+    # rss.rd 型: メタ確定後の #@# は本文の前置き → body 据え置き（既存動作の維持）
+    rrd = "category FileFormat\n\n\#@# = rss\n\n説明。\n"
+    expected = "---\ncategory: FileFormat\n---\n\#@# = rss\n\n説明。\n"
+    assert_equal expected, convert(rrd)
+  end
+
   # Step 8.4: メタデータ領域の部分コミット
   # メタデータ（category/require/sublibrary）の後に版分岐つき散文や #@# コメントが
   # 続く場合、nest==0 の空行チェックポイントまでをメタデータとして確定し、
