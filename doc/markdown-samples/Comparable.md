@@ -1,3 +1,6 @@
+---
+library: _builtin
+---
 # module Comparable
 
 比較演算を許すクラスのための Mix-in です。このモジュールをインクルー

@@ -26,9 +26,22 @@
 
 ### 現在の進捗
 
-- RRD ↔ Markdown **双方向変換器**を実装済み
-- doctree 全 **826 ファイル**でロスレスラウンドトリップを達成（RRD → MD → RRD で差分なし）
-- 変換器のテスト: MD→RRD 74テスト/90アサーション、RRD→MD 62テスト/64アサーション
+**実装・検証は完了し、doctree への適用ブランチまで用意済み**です。
+
+- RRD ↔ Markdown **双方向変換器**と、クロスファイル情報（ライブラリ所属・
+  include 関係・バージョンゲート）を YAML front matter へ集約する
+  **オーケストレータ**を実装済み
+- 対象は refm の**全3ツリー**（api / doc / capi）。変換結果は doctree の
+  `manual/{api,doc,capi}` ツリー（1245 ファイル）として生成済み
+- 等価性は4段階で検証済み:
+  1. **ラウンドトリップ**（バイト一致）: api 1161/1161、doc 70/70、capi 16/16 = 100%
+  2. **ファイル発見**: md ツリーだけで（LIBRARIES 無しで）旧構成を完全復元
+  3. **データベース**: 新旧両経路でフルビルドして全比較 — 368 ライブラリ・
+     1436 クラス・9281 メソッドエントリ・66 doc・814 C 関数が一致
+  4. **静的 HTML**: 13,540 ページ中、差分は属性内空白1箇所のみ（意味等価）
+- `bitclust update --markdowntree=manual/api` で**既存パイプラインが md ツリーから
+  そのままビルド可能**（doctree の Rakefile 切替ブランチあり）。編集リンクは
+  `manual/**.md` を指す
 
 ---
 
@@ -44,6 +57,26 @@
 ```
 
 `=` が `#`（h1）に変わるだけです。`class`/`module`/`object` のキーワードはそのまま維持します。
+
+mixin や所属ライブラリなどの**関係データは本文から YAML front matter へ移します**:
+
+```diff
+- = class Set < Object
+- include Enumerable
++ ---
++ library: _builtin
++ include:
++   - Enumerable
++ since: "3.2"
++ ---
++ # class Set < Object
+```
+
+`library`（所属ライブラリ）と `since`/`until`（クラス自体がバージョンで出入りする
+構造的ゲート）は、旧世界では `LIBRARIES` マニフェストとライブラリファイル側の
+`#@include` の囲みで表現されていた情報です。移行後は各ファイルの front matter が
+唯一の出典になり、**`LIBRARIES` と grouping 用 `#@include` は廃止**されます
+（ツリーを glob して front matter と H1 から構成を組み立てます）。
 
 ### メソッドカテゴリ
 
@@ -253,21 +286,52 @@ Markdown での表現:
 **判断理由**: `@param`/`@raise` と同様に `@` を除去。大文字ボールドで
 HTML 出力時の `[SEE_ALSO]` セクションとの対応を明確にする。
 
-### 6. YAML front matter
+### 6. YAML front matter（構造データの一元化）
 
-`category`/`require`/`sublibrary` の3つのメタデータのみ YAML front matter に移行する。
-`include`/`extend`/`alias` は現時点ではそのまま維持する（将来の1ファイル1クラス分割後に front matter 移行を検討）。
+タイトルに現れない構造・関係データは、すべて YAML front matter に集約する。
+
+エンティティ（クラス/モジュール等）ファイル:
 
 ```yaml
 ---
+library: _builtin      # 所属ライブラリ（LIBRARIES マニフェストの後継）
+include:
+  - Enumerable         # mixin（本文の include 行の後継）
+since: "3.2"           # クラス自体の構造的バージョンゲート
+---
+# class Set < Object
+```
+
+ライブラリ概要ファイル:
+
+```yaml
+---
+type: library
 category: Network
 require:
   - cgi/core
   - cgi/cookie
 sublibrary:
-  - rubygems/gem_runner
+  - cgi/session
 ---
 ```
+
+**判断理由と帰結**:
+
+- `include`/`extend`/`alias` の記述場所は front matter **のみ**とする。
+  YAML パーサだけで関係データを取得でき、GitHub プレビューでもメタデータ表として
+  表示され、リント（スキーマ検証）も可能になる。
+- そのため**1ファイル＝1エンティティ**を基本とし、関係を持つエンティティは
+  必ず単独ファイルにする。関係を持たない自然な束ね（`Errno::EXXX` 152 個、
+  「本体＋エラークラス」対など）は1ファイルに複数エンティティを許す。
+- バージョンで値が変わる場合は front matter **内**に `#@since` 等を書く
+  （`#` 始まりなので生の YAML ではコメント＝全バージョンの和集合として無害に表示される）。
+
+### 6.5 ファイル配置
+
+新ツリーは doctree トップの `manual/` 配下（`manual/api/**/*.md`、
+`manual/doc/`、`manual/capi/`）。旧 `refm/` は移行ウィンドウ中凍結して共存する。
+公開 URL はエンティティ名由来のため変わらない。
 
 ### 7. アンカー
 
@@ -307,37 +371,48 @@ params = CGI.parse("query_string")
 | 項目 | 理由 |
 |------|------|
 | `#@since`/`#@until`/`#@if` 等の指令 | Markdown パーサーと衝突しない。既存の前処理パイプラインをそのまま利用できる |
-| `#@include` | 段階的移行において RD/MD 混在を許容するため |
+| `#@include`（共有断片の展開） | pack-template 等の再利用断片の transclusion 手段として維持（エンティティの grouping 用途は front matter 発見に置き換え） |
 | `#@#` コメント | そのまま維持 |
-| `include`/`extend`/`alias` | 将来ファイル分割後に再検討 |
 | 処理順序（前処理→パース→HTML生成） | 既存の bitclust パイプラインと同じ |
+| 公開 URL | エンティティ名由来のため不変 |
 
 ---
 
-## 未解決の課題
+## 解決済みの論点と残る課題
 
-レビューの中で方針を決めたい項目です。
+前版で未解決としていた項目のうち、以下は方針が確定しました:
 
-1. **`#@include` での RD/MD 混在**: 段階的移行期に `.rd` と `.md` が混在する場合の扱い
-2. **コードブロック内の `#@` 指令**: 現行 RRD と同じくコードブロック内でも処理されるが、
+- **RD/MD 混在**: 混在はさせない。`.md` は `manual/` の別ツリーに置き、旧 `refm/` は
+  凍結して共存する（切替時点で更新停止）。旧 bitclust は `refm/` を読み続けるので
+  壊れない。
+- **旧バージョン（< 3.0）の扱い**: 現行ビルド対象の [3.0, 4.1] にスコープして変換
+  する。スコープ外の情報はソース（凍結 `refm/`）に残っており、同じ変換器を別スコープで
+  再実行して回収できる（サルベージは別トラック）。
+
+レビューの中で方針を決めたい項目:
+
+1. **コードブロック内の `#@` 指令**: 現行 RRD と同じくコードブロック内でも処理されるが、
    Markdown パーサーを利用して区別すべきか
-3. **RBS 形式シグネチャの実運用**: `### def each: () { (untyped) -> void } -> self`
+2. **RBS 形式シグネチャの実運用**: `### def each: () { (untyped) -> void } -> self`
    のような RBS 形式をどの程度活用するか
-4. **エディタ支援**: `#@` 指令用の VS Code TextMate grammar の作成
+3. **エディタ支援**: `#@` 指令用の VS Code TextMate grammar の作成
+4. **ネイティブ MD 描画への移行時期**: 現在は md→rd 変換レイヤー経由で既存 bitclust を
+   使う（フェーズ2）。GFM の全機能（表現の天井撤去）はネイティブ描画（フェーズ3）で解放される
 
 ---
 
 ## サンプルファイル
 
 実際の変換結果をサンプルとして用意しています（`doc/markdown-samples/`）。
-すべて `bin/rrd2md` による実際の RRD → Markdown 変換出力です。
+すべて `bin/rrd2md --graph` による実際の RRD → Markdown 変換出力
+（doctree の `manual/api` に入るものと同一）です。
 
 | ファイル | 元ファイル | 含まれる記法要素 |
 |---------|-----------|-----------------|
-| `Comparable.md` | `_builtin/Comparable` | module、`#@since`/`#@until`、param/raise、`title="..."` |
-| `Array.md` | `_builtin/Array` | class、include、クラス/インスタンスメソッド、複数シグネチャ、定数 |
+| `Comparable.md` | `_builtin/Comparable` | module、front matter（library）、`#@since`/`#@until`、param/raise、`title="..."` |
+| `Array.md` | `_builtin/Array` | class、front matter（library/include）、クラス/インスタンスメソッド、複数シグネチャ、定数 |
 | `String.md` | `_builtin/String` | 本文小見出し、アンカー `{#id}`、複雑なバージョン分岐、**SEE** |
-| `cgi_core.md` | `cgi/core.rd` | ライブラリファイル、定義リスト、定数テーブル、GFM テーブル |
+| `cgi_core.md` | `cgi/core.rd` | ライブラリファイル（`type: library`）、定義リスト、定数テーブル、GFM テーブル |
 
 ---
 
@@ -346,6 +421,9 @@ params = CGI.parse("query_string")
 | RRD | Markdown |
 |-----|----------|
 | `= class Foo < Bar` | `# class Foo < Bar` |
+| `include Enumerable`（ヘッダ直後） | front matter `include:` リスト |
+| `LIBRARIES` + grouping `#@include` | front matter `library:` + glob 発見 |
+| C API `--- VALUE rb_ary_new()` | `### VALUE rb_ary_new()`（キーワード無し） |
 | `== Instance Methods` | `## Instance Methods` |
 | `--- method(args) -> Type` | `### def method(args) -> Type` |
 | `--- ClassName.method(args)` | `### def ClassName.method(args)` |
@@ -372,7 +450,9 @@ params = CGI.parse("query_string")
 以下の観点でご意見をいただけると助かります:
 
 1. **記法の読みやすさ**: 提案する Markdown 記法は、RRD と比べて読みやすいか？書きやすいか？
-2. **設計判断**: 上記の主要な設計判断（特にキーワード、`@` 除去、定義リスト）に違和感はないか？
+2. **設計判断**: 上記の主要な設計判断（特にキーワード、`@` 除去、定義リスト、
+   front matter への関係集約と1ファイル1エンティティ原則）に違和感はないか？
 3. **互換性**: GitHub プレビュー、エディタでの表示、既存ツールとの統合で問題になりそうな点はあるか？
-4. **未解決課題**: 上記の未解決項目について、方針の提案があるか？
-5. **その他**: 見落としている記法パターンや、考慮すべきユースケースがあるか？
+4. **移行手順**: `manual/` 別ツリー＋`refm/` 凍結という共存方式、切替タイミングについて懸念はあるか？
+5. **未解決課題**: 上記の未解決項目について、方針の提案があるか？
+6. **その他**: 見落としている記法パターンや、考慮すべきユースケースがあるか？
