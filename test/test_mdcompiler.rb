@@ -236,6 +236,37 @@ class TestMDCompiler < Test::Unit::TestCase
       "md source:\n#{md_src}"
   end
 
+  def test_doc_see_renders_see_also
+    # findings#1: doc/lib ページの @see も SEE_ALSO として解釈する
+    # （従来は RDCompiler の library_file に分岐がなく段落テキストだった）
+    rd_src = "= 見出し\n\n説明。\n\n@see [[m:Array#each]]\n"
+    md_src = BitClust::RRDToMarkdown.convert(rd_src)
+    rd_html = @rd.compile(rd_src)
+    assert_match(/\[SEE_ALSO\]/, rd_html)
+    assert_equal rd_html, @md.compile(md_src), "md source:\n#{md_src}"
+  end
+
+  def test_entry_paragraph_with_midline_see_not_swallowed
+    # findings#3: 行頭アンカー無しの /@see/ dispatch が本文行を see() に
+    # 吸う潜在バグ。段落の先頭行に「@see」を含む文があっても段落のまま
+    rd_src = "--- m(v) -> String\n\n本文中で @see を説明する行。\n"
+    html = compile_method(@rd, rd_src)
+    assert_not_match(/SEE_ALSO/, html)
+    assert_match(/本文中で @see を説明する行。/, html)
+  end
+
+  def test_undef_renders_dedicated_message
+    # findings#2: @undef が内部用語 [UNKNOWN_META_INFO] で表示されていた。
+    # 専用の説明文を描画する（statichtml は undefined を skip するため
+    # 露出は server 等の動的経路のみ）
+    rd_src = "--- <(other) -> bool\n\n@undef\n"
+    md_src = BitClust::RRDToMarkdown.convert(rd_src)
+    rd_html = compile_method(@rd, rd_src)
+    assert_not_match(/UNKNOWN_META_INFO/, rd_html)
+    assert_match(/このメソッドは定義されていません/, rd_html)
+    assert_equal rd_html, compile_method(@md, md_src), "md source:\n#{md_src}"
+  end
+
   def test_signature_without_space
     # OpenSSL::X509::Extension 型: 「---name」（スペース無し）を RDCompiler は受理する
     assert_equivalent_method <<~RD

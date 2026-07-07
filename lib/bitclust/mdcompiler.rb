@@ -66,7 +66,8 @@ module BitClust
             headline @f.gets || raise
           end
         when SEE_RE
-          doc_see
+          # findings#1: doc/lib ページの @see も SEE_ALSO（rd 側と同期）
+          see
         when DLIST_RE
           dlist
         when MD_ITEM_RE
@@ -127,8 +128,11 @@ module BitClust
           code_fence
         when EMLIST_LEFTOVER_RE
           emlist
-        when /@todo/
+        when /\A@todo\b/
+          # findings#3: rd 側と同じく行頭アンカー付きで
           todo
+        when /\A@undef\b/
+          undef_message
         when RAW_META_RE
           entry_info
         when /\A\s*\|/
@@ -220,17 +224,6 @@ module BitClust
         dd_without_p
       end
       line '</dl>'
-    end
-
-    # doc/lib ページの @see: RDCompiler の library_file には @see の解釈が
-    # なく段落テキスト「@see ...」として描画される（pack_template 等）。
-    # md の - **SEE** を @see 行に戻して段落として流す
-    def doc_see
-      header = @f.gets or raise
-      body = ["@see#{header.sub(SEE_RE, '')}"] + @f.span(/\A\s+\S/)
-      line '<p>'
-      line compile_text(text_node_from_lines(body))
-      line '</p>'
     end
 
     # - **SEE** [m:X], [m:Y]（継続行あり）
