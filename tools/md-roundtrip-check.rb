@@ -43,7 +43,13 @@ end
 targets = files.map { |f| [File.join(src_root, f), f] }
 if with_doc
   doc_root = File.join(doctree, 'refm/doc')
-  targets += Dir.glob('**/*.rd', base: doc_root).map { |f| [File.join(doc_root, f), "doc:#{f}"] }
+  # *.rd と拡張子なし（spec/regexp18 等）。news/1.8.0.rd-2 系の
+  # 旧分割ファイルは未参照のため対象外
+  doc_files = Dir.glob('**/*', base: doc_root).select { |f|
+    File.file?(File.join(doc_root, f)) &&
+      (f.end_with?('.rd') || !File.basename(f).include?('.'))
+  }
+  targets += doc_files.map { |f| [File.join(doc_root, f), "doc:#{f}"] }
 end
 if with_capi
   capi_root = File.join(doctree, 'refm/capi/src')

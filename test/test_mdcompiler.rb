@@ -209,6 +209,33 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 
+  def test_adjacent_fences_with_blank_line_merge
+    # IO#sysseek 型: ゲート分断されたインデントブロックは版解決後に
+    # 空白のみ行を挟む隣接フェンスとして現れる。rd の pre は空白行を
+    # 跨ぐため、間の空白行ごと1つの <pre> にマージする
+    rd_src = "--- m(v) -> String\n\n説明。\n\n" \
+             "  line1\n  # => result\n  \n\n  line2\n"
+    md_src = "### def m(v) -> String\n\n説明。\n\n" \
+             "`````\nline1\n`````\n`````\n# => result\n`````\n  \n\n`````\nline2\n`````\n"
+    assert_equal compile_method(@rd, rd_src), compile_method(@md, md_src),
+      "md source:\n#{md_src}"
+  end
+
+  def test_leftover_emlist_in_doc
+    # news/2_5_0 型: リスト脈絡の #@samplecode は md に生のまま残り、
+    # 前処理で //emlist になる。RDCompiler と同じく独立ブロックとして描画する
+    rd_src = "  * 項目 [[m:Coverage.start]]\n//emlist[][ruby]{\nCoverage.start\n//}\n  * 次の項目\n"
+    md_src = "  - 項目 [m:Coverage.start]\n//emlist[][ruby]{\nCoverage.start\n//}\n  - 次の項目\n"
+    assert_equal @rd.compile(rd_src), @md.compile(md_src), "md source:\n#{md_src}"
+  end
+
+  def test_leftover_emlist_in_method_entry
+    rd_src = "--- m(v) -> String\n\n説明。\n//emlist[][ruby]{\np 1\n//}\n"
+    md_src = "### def m(v) -> String\n\n説明。\n//emlist[][ruby]{\np 1\n//}\n"
+    assert_equal compile_method(@rd, rd_src), compile_method(@md, md_src),
+      "md source:\n#{md_src}"
+  end
+
   def test_signature_without_space
     # OpenSSL::X509::Extension 型: 「---name」（スペース無し）を RDCompiler は受理する
     assert_equivalent_method <<~RD

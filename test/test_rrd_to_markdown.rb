@@ -113,6 +113,37 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
   end
 
+  def test_dlist_description_across_samplecode
+    # pack-template 型: dd 内の #@samplecode 後の字下げ行も dd 段落継続。
+    # 空行スキャンが #@samplecode を透過するとコード本体の行（カラム0）を見て
+    # dd を打ち切り、後続段落がトップレベル pre と誤分類される
+    rrd = ": w\n\n  説明。\n\n\#@samplecode\n[0].pack(\"w\")\n\#@end\n\n  なお、後続の説明。\n"
+    md = convert(rrd)
+    assert_equal "- **`w`**:\n\n  説明。\n\n```ruby\n[0].pack(\"w\")\n```\n\n  なお、後続の説明。\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_ulist_followed_by_samplecode
+    # news/2_5_0 型: リスト項目直後のカラム0 #@samplecode は項目の外
+    # （RDCompiler は ul を閉じて独立ブロックとして描画する）。
+    # 項目収集が生のまま素通しすると本体の #=> 行が \# エスケープされ、
+    # 版解決後の //emlist 内にエスケープが残って描画が壊れる
+    rrd = "  * 項目\n\#@samplecode\nCoverage.result\n#=> [1]\n\#@end\n  * 次の項目\n"
+    md = convert(rrd)
+    assert_equal "  - 項目\n```ruby\nCoverage.result\n#=> [1]\n```\n  - 次の項目\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_param_continuation_after_gate_end
+    # fileutils 型: ゲートで分岐した @param の継続行が #@end の直後に来る。
+    # nest 0 の #@end（dd より前に開いたゲートの閉じ）も透過しないと
+    # 継続行がコードフェンス化され、版解決後の描画が dd 継続にならない
+    rrd = "\#@since 2.4.0\n@param options :a が指定できます。\n\#@else\n@param options :b が指定できます。\n\#@end\n               [[ref:c:FileUtils#options]]\n"
+    md = convert(rrd)
+    assert_equal "\#@since 2.4.0\n- **param** `options` -- :a が指定できます。\n\#@else\n- **param** `options` -- :b が指定できます。\n\#@end\n               [ref:c:FileUtils#options]\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
   def test_gnu_quote_roundtrip
     rrd = "= module M\n\n`PERMUTE', `RETURN_IN_ORDER' という順序形式と ` の話。\n"
     md = convert(rrd)

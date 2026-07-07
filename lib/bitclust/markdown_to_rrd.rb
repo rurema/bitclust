@@ -15,17 +15,104 @@ module BitClust
       new('').send(:convert_bare_refs, text)
     end
 
-    # md テキストを旧経路と同じ表示形（rd のインライン形式）へ戻す:
+    # md テキストノードを旧経路と同じ表示形（rd のインライン形式）へ戻す:
     # `__X__` 自動スパン解除、`token` → `token'（GNU 風引用）、
-    # 行頭 **N.** → N.、\`/\[ の解除と [x:y] → [[x:y]]。
-    # MDCompiler の M1 等価描画と、entry#description（meta description 等の
-    # コンパイラ非経由テキスト）が共用する
+    # 行頭 **N.** → N.、[x:y] → [[x:y]]。
+    # MDCompiler の M1 等価描画（compile_text のテキストノード）用。
+    # 行頭構造は触らない（テキストノードの行頭 # や - は本文の一部）
     def self.restore_text(text)
       restore_inline(
         text.gsub(/`(__\w+__)`/, '\1')
             .gsub(/(?<!\\)`([^`'\s]+)`/) { "`#{$1}'" }
             .gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
       )
+    end
+
+    # entry#description（meta description 等のコンパイラ非経由テキスト）と
+    # RefsDatabase のラベル用: インラインに加えて行頭構造
+    # （見出し・@param 系・リスト記号・フェンス・エスケープ）も旧表示形へ戻す
+    def self.restore_description(text)
+      trailing_newline = text.end_with?("\n")
+      saved = [] #: Array[String]
+      text = restore_display_fences(text, saved) if text =~ /^`{3,}/
+      text = text.lines.map { |l| restore_display_line(l) }.join
+      text = text.chomp unless trailing_newline
+      # 行頭リスト記号の復元は **N.** 復元より先に行う（復元後の
+      # 「N. 」を olist と誤認して (N) 化しないため。DublinCoreModel）
+      restore_inline(
+        text.gsub(/`(__\w+__)`/, '\1')
+            .gsub(/(?<!\\)`([^`'\s]+)`/) { "`#{$1}'" }
+            .gsub(/^(\s*)- /, '\1* ')
+            .gsub(/^(\s*)(\d+)\. /, '\1(\2) ')
+            .gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
+            .gsub(/^\\#/, '#')
+            .gsub(/\\`/, '`')
+      ).gsub(/\x00(\w+)\x00/) { "[a:#{$1}]" }
+       .gsub(/\x01(\d+)\x01/) { saved[$1.to_i] }
+    end
+
+    # description（段落単位の切り出し）内のフェンスを旧経路の表示形へ戻す:
+    # 4+ フェンス（インデントコード由来）→ インデントブロック、
+    # ```lang → //emlist[caption][lang]{（前処理後の #@samplecode/emlist 形）。
+    # 段落分割で閉じフェンスが切れている形も受ける。
+    # フェンス内容はコードなので、後段の行復元・インライン復元から
+    # \x01<idx>\x01 プレースホルダで保護し最後に戻す
+    def self.restore_display_fences(text, saved)
+      protect = lambda do |line, ends_nl|
+        saved << line
+        "\x01#{saved.size - 1}\x01#{ends_nl ? "\n" : ''}"
+      end
+      out = +''
+      fence = nil #: [Integer, Integer | nil]?  len と indent（emlist 形は nil）
+      text.each_line do |l|
+        nl = l.end_with?("\n")
+        if fence
+          if l =~ /\A`{#{fence[0]}}\s*$/
+            out << protect.call('//}', nl) unless fence[1]
+            fence = nil
+          elsif l =~ /\A\s*$/
+            out << l
+          elsif fence[1]
+            out << protect.call((' ' * fence[1]) + l.chomp, nl)
+          else
+            out << protect.call(l.chomp, nl)
+          end
+        elsif l =~ /\A(`{4,})\s*$/
+          len = ($1 || raise).length
+          fence = [len, len - 3]
+        elsif l =~ /\A(`{3,})(\w+)?(?:\s+title="((?:[^"\\]|\\.)*)")?\s*$/
+          len = ($1 || raise).length
+          lang = $2
+          caption = $3&.gsub(/\\(["\\])/, '\1')
+          open = lang ? "//emlist[#{caption}][#{lang}]{" : '//emlist{'
+          out << protect.call(open, nl)
+          fence = [len, nil]
+        else
+          out << l
+        end
+      end
+      out
+    end
+
+    # 行頭構造（見出し・メタデータ行）の rd 表示形への復元。
+    # 全文変換（convert）の対応箇所と同じ規則の表示専用ミラー
+    def self.restore_display_line(l)
+      case l
+      when /\A(\#{1,6}) (.*?) \{#(\w+)\}([ \t]*\n?)\z/m
+        # アンカーは restore_inline の裸参照復元（[a:x]→[[a:x]]）を
+        # 避けるため \x00 で包み、最後に [a:x] へ戻す
+        "#{'=' * $1.length}\x00#{$3}\x00 #{$2}#{$4}"
+      when /\A(\#{1,6}) (.*)\z/m
+        "#{'=' * $1.length} #{$2}"
+      when /\A- \*\*(param|arg|raise)\*\*(\s+)`([^`]+)` --(.*)\z/m
+        "@#{$1}#{$2}#{$3}#{$4}"
+      when /\A- \*\*return\*\* --(.*)\z/m
+        "@return#{$1}"
+      when /\A- \*\*SEE\*\*(\s*)(.*)\z/m
+        "@see#{$1}#{$2}"
+      else
+        l
+      end
     end
 
     # capi: C API リファレンスモード。### は見出しではなくシグネチャ
@@ -296,8 +383,9 @@ module BitClust
           raw_passthrough(line)
         elsif line =~ /\A\#@else/
           raw_passthrough(line)
-        elsif line =~ /\A\#@end/ && nest > 0
-          nest -= 1
+        elsif line =~ /\A\#@end/
+          # rd 側と対称: nest 0 の #@end も透過（fileutils の @param 継続）
+          nest -= 1 if nest > 0
           raw_passthrough(line)
         elsif line =~ /\A\s+\S/ && line !~ /\A- / && line !~ /\A\*\*/ && line !~ /\A```/
           @out << convert_inline_refs(line)
@@ -404,9 +492,11 @@ module BitClust
             # rd 側と対称: #@ 指令行は dd の文脈に透明
             raw_passthrough(l)
           elsif l =~ /\A\s*$/
+            # rd 側と対称: 透明なのは版解決で消える指令のみ（#@include は停止要因）
             scan = @index + 1
             scan += 1 while scan < @lines.length &&
-                            (@lines[scan] =~ /\A\s*$/ || @lines[scan] =~ /\A\#@/)
+                            (@lines[scan] =~ /\A\s*$/ ||
+                             (@lines[scan] =~ /\A\#@/ && @lines[scan] !~ /\A\#@include/))
             nxt = scan < @lines.length ? @lines[scan] : nil
             if nxt && nxt !~ /\A- \*\*/ && (nxt =~ /\A\s+\S/ || nxt =~ /\A`{3,}/)
               @out << l

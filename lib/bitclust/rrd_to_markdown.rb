@@ -433,8 +433,10 @@ module BitClust
           raw_passthrough(line)
         elsif line =~ /\A\#@else/
           raw_passthrough(line)
-        elsif line =~ /\A\#@end/ && nest > 0
-          nest -= 1
+        elsif line =~ /\A\#@end/
+          # nest 0 の #@end（メタデータより前に開いたゲートの閉じ）も透過する。
+          # 版解決後は消えて継続行が dd に直結するため（fileutils の @param）
+          nest -= 1 if nest > 0
           raw_passthrough(line)
         elsif line =~ /\A\s+\S/ && line !~ /\A@/ && line !~ /\A---/ && line !~ /\A=/ && line !~ SAMPLECODE_RE
           @out << convert_inline_refs(line)
@@ -487,7 +489,9 @@ module BitClust
       # RDCompiler の項目継続はインデント深さ不問（項目より浅い折り返しも継続）
       while @index < @lines.length
         l = current_line
-        if l =~ /\A\#@/
+        if l =~ SAMPLECODE_RE
+          break  # カラム0 の samplecode は項目の外（トップレベルで変換。news/2_5_0）
+        elsif l =~ /\A\#@/
           raw_passthrough(l)
         elsif l =~ /\A\s*$/
           break  # 空行でリスト継続終了
@@ -511,7 +515,9 @@ module BitClust
       # 継続行を収集（ulist と同じ。RDCompiler の項目継続はインデント深さ不問）
       while @index < @lines.length
         l = current_line
-        if l =~ /\A\#@/
+        if l =~ SAMPLECODE_RE
+          break  # ulist と同じ: カラム0 の samplecode は項目の外
+        elsif l =~ /\A\#@/
           raw_passthrough(l)
         elsif l =~ /\A\s*$/
           break
@@ -560,9 +566,14 @@ module BitClust
           # ここで打ち切ると後続インデント行がコード扱いになる。pack-template）
           raw_passthrough(l)
         elsif l =~ /\A\s*$/
+          # 透明なのは版解決で消える指令のみ。#@samplecode/#@include は
+          # 中身がカラム0のため透過するとコード本体を見て dd を誤って打ち切る
           scan = @index + 1
           scan += 1 while scan < @lines.length &&
-                          (@lines[scan] =~ /\A\s*$/ || @lines[scan] =~ /\A\#@/)
+                          (@lines[scan] =~ /\A\s*$/ ||
+                           (@lines[scan] =~ /\A\#@/ &&
+                            @lines[scan] !~ SAMPLECODE_RE &&
+                            @lines[scan] !~ /\A\#@include/))
           nxt = scan < @lines.length ? @lines[scan] : nil
           if nxt && (nxt =~ /\A\s+\S/ || nxt =~ SAMPLECODE_RE || nxt =~ /\A\/\/emlist/)
             @out << l

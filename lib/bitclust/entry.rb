@@ -158,7 +158,7 @@ module BitClust
         # LibraryEntry#require（ライブラリ関係の登録）が Kernel#require を
         # 隠蔽するため、ファイルロードは Kernel を明示する
         Kernel.require 'bitclust/markdown_to_rrd'
-        ::BitClust::MarkdownToRRD.restore_text(text)
+        ::BitClust::MarkdownToRRD.restore_description(text)
       else
         text
       end

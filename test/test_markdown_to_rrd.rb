@@ -618,6 +618,69 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal "=== 2004-12-06 \n", convert("### 2004-12-06 \n")
   end
 
+  # ---- restore_description: entry description 用の rd 表示テキスト復元 ----
+
+  def test_restore_description_list_markers
+    # DublinCoreModel 型: description（先頭段落）がリストのとき、
+    # md の行頭マーカーを rd 表示（* / (N)）へ戻す
+    assert_equal "* [[url:http://example.org/]]",
+      BitClust::MarkdownToRRD.restore_description("- [url:http://example.org/]")
+    assert_equal "(1) 一つ目\n(2) 二つ目",
+      BitClust::MarkdownToRRD.restore_description("1. 一つ目\n2. 二つ目")
+    # **N.** の太字番号（rd では離散番号テキスト）は N. のまま戻し、
+    # olist 復元で (N) 化しない
+    assert_equal "1. 番号テキスト",
+      BitClust::MarkdownToRRD.restore_description("**1.** 番号テキスト")
+  end
+
+  def test_restore_description_heading
+    # doc/help 型: description（先頭段落）が見出しのとき md 記法を rd 表示へ
+    assert_equal "=== 記号の説明",
+      BitClust::MarkdownToRRD.restore_description("### 記号の説明")
+    assert_equal "===[a:str] 特別な文字列に対するマッチ",
+      BitClust::MarkdownToRRD.restore_description("### 特別な文字列に対するマッチ {#str}")
+  end
+
+  def test_restore_description_metadata
+    # CGI.escapeElement / ACL 型: @param・@see が先頭段落に来る
+    assert_equal "@param string 文字列を指定します。",
+      BitClust::MarkdownToRRD.restore_description("- **param** `string` -- 文字列を指定します。")
+    assert_equal "@see [[m:ACL.new]]",
+      BitClust::MarkdownToRRD.restore_description("- **SEE** [m:ACL.new]")
+    assert_equal "@param bool 真偽値。\n@see [[m:BasicSocket#do_not_reverse_lookup]]",
+      BitClust::MarkdownToRRD.restore_description(
+        "- **param** `bool` -- 真偽値。\n- **SEE** [m:BasicSocket#do_not_reverse_lookup]")
+    assert_equal "@raise TypeError 型が合わないとき。",
+      BitClust::MarkdownToRRD.restore_description("- **raise** `TypeError` -- 型が合わないとき。")
+    assert_equal "@return 結果。",
+      BitClust::MarkdownToRRD.restore_description("- **return** -- 結果。")
+  end
+
+  def test_restore_description_fences
+    # Addrinfo 型: 段落先頭がフェンス（閉じは次の段落へ切れている）
+    assert_equal "  require 'socket'",
+      BitClust::MarkdownToRRD.restore_description("`````\nrequire 'socket'")
+    # LL2NUM 型: 説明行にフェンスブロックが直結（閉じフェンスあり）
+    assert_equal "説明。\n   long long n = 42;\n   VALUE num = LL2NUM(n);",
+      BitClust::MarkdownToRRD.restore_description("説明。\n``````\nlong long n = 42;\nVALUE num = LL2NUM(n);\n``````")
+    # ENV.each 型: ```ruby は旧経路（前処理後）の //emlist 形へ。
+    # フェンス内容行は復元を受けない（# => が見出し復元で壊れない）
+    assert_equal "//emlist[][ruby]{\nENV['FOO'] = 'bar'\n# => ENV\n//}",
+      BitClust::MarkdownToRRD.restore_description("```ruby\nENV['FOO'] = 'bar'\n# => ENV\n```")
+    assert_equal "//emlist[例][ruby]{\np [c:String]\n//}",
+      BitClust::MarkdownToRRD.restore_description("```ruby title=\"例\"\np [c:String]\n```")
+    assert_equal "//emlist{\nplain - text\n//}",
+      BitClust::MarkdownToRRD.restore_description("```\nplain - text\n```")
+  end
+
+  def test_restore_description_escapes
+    # stat_col 型: 行頭 # のエスケープ、symref 型: \` のエスケープ
+    assert_equal "#ifdef HASH_LOG のときだけ定義される、開発者用関数。",
+      BitClust::MarkdownToRRD.restore_description("\\#ifdef HASH_LOG のときだけ定義される、開発者用関数。")
+    assert_equal "付記B: `未定義` の振る舞いの例",
+      BitClust::MarkdownToRRD.restore_description("付記B: \\`未定義\\` の振る舞いの例")
+  end
+
   # ---- メタデータ領域の #@# コメントの復元（irb.rd 対応）----
 
   def test_leading_comment_restores_before_category

@@ -51,6 +51,8 @@ module BitClust
     # @undef など変換器が生のまま渡す未知メタデータ
     # （RDCompiler の entry_info ループ条件 /\A@(?!see)\w+/ と同じ）
     RAW_META_RE = /\A@(?!see)\w+/
+    # 生のまま残った #@samplecode が前処理で //emlist になったもの
+    EMLIST_LEFTOVER_RE = %r<\A//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{>
 
     def library_file
       while @f.next?
@@ -73,6 +75,10 @@ module BitClust
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when FENCE_RE
           code_fence
+        when EMLIST_LEFTOVER_RE
+          # リスト脈絡などで生のまま残った #@samplecode は前処理で
+          # //emlist になる。RDCompiler と同じ独立ブロックとして描画する
+          emlist
         when /\A\s*\|/
           paragraph unless try_table
         else
@@ -119,6 +125,8 @@ module BitClust
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when FENCE_RE
           code_fence
+        when EMLIST_LEFTOVER_RE
+          emlist
         when /@todo/
           todo
         when RAW_META_RE
@@ -156,11 +164,11 @@ module BitClust
     end
 
     def read_paragraph(f)
-      f.span(%r{\A(?!\#|`{3}|- |\d+\. )\S|\A\\#})
+      f.span(%r{\A(?!\#|`{3}|- |\d+\. |//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{)\S|\A\\#})
     end
 
     def read_entry_paragraph(f)
-      f.span(%r{\A(?!\#|`{3}|- |\d+\. |@[a-z])\S|\A\\#})
+      f.span(%r{\A(?!\#|`{3}|- |\d+\. |@[a-z]|//emlist(?:\[(?:[^\[\]]+?)?\]\[\w+?\])?\{)\S|\A\\#})
     end
 
     def paragraph
@@ -376,9 +384,18 @@ module BitClust
         # 隣接フェンスとして現れるため、続けてマージする（rd では連続
         # インデント行として1つの <pre> になる。ArgumentError 等）
         segments = [[fence.size - 3, collect_fence_lines(terminator)]]
-        while @f.peek =~ /\A(`{4,})\s*$/
+        loop do
+          # rd の pre は空白行を跨ぐ（list は /\A\S/ まで継続）ため、
+          # フェンス間の空白のみ行も次が 4+ フェンスならブロックの一部
+          blanks = [] #: Array[String]
+          blanks << (@f.gets || raise) while @f.peek =~ /\A\s*$/
+          unless @f.peek =~ /\A(`{4,})\s*$/
+            blanks.reverse_each { |b| @f.ungets(b) }
+            break
+          end
           next_fence = ($1 || raise)
           @f.gets
+          segments.last[1].concat(blanks)
           segments << [next_fence.size - 3,
                        collect_fence_lines(/\A`{#{next_fence.size}}\s*$/)]
         end
