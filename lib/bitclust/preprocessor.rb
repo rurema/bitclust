@@ -96,7 +96,15 @@ module BitClust
           begin
             file = ($1 || raise).strip
             basedir = File.dirname(line.location.file || raise)
-            @buf.concat Preprocessor.process("#{basedir}/#{file}", @params)
+            path = "#{basedir}/#{file}"
+            # md ツリーのネイティブパース: 断片は .md 拡張子付きで保存されるが
+            # include ターゲットは元式の名前のまま（拡張子なしの pack-template、
+            # .rd 付きの fiddle/2.0/fiddle.rd 等）。md 側の実ファイル名を試す
+            unless File.exist?(path)
+              cand = ["#{path}.md", path.sub(/\.rd\z/, '.md')].find { |c| File.exist?(c) }
+              path = cand if cand
+            end
+            @buf.concat Preprocessor.process(path, @params)
           rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
           end

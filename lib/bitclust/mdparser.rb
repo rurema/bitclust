@@ -21,6 +21,15 @@ module BitClust
 
   class MDParser < RRDParser
 
+    # doc ページの md からタイトル（# 見出し、アンカー付き含む）と本文を分ける
+    # （RRDParser.split_doc の md 版）
+    def MDParser.split_doc(source)
+      if m = /^#( +(.*?))(?: \{#[^}]+\})?\r?\n/.match(source)
+        return ($2 || raise), m.post_match
+      end
+      return ["", source]
+    end
+
     # メソッド系シグネチャ（キーワード付き h3）
     SIG_RE = /\A### (?:module_function def |def |const |gvar )/
     # H1（エンティティ見出し）。エスケープされた行頭リテラル \# は除外
@@ -39,6 +48,40 @@ module BitClust
     end
 
     private
+
+    # BREAK_RE まで行を収集する（f.break のフェンス対応版）。
+    # コードフェンス内の行頭 `# コメント` 等が H1/H2 と衝突しないよう、
+    # フェンス内は無条件に本文として消費する
+    def md_break(f)
+      lines = []
+      fence_len = nil
+      while (line = f.peek)
+        if fence_len
+          lines.push(f.gets)
+          fence_len = nil if line =~ /\A`{#{fence_len}}\s*$/
+        elsif line =~ /\A(`{3,})/
+          fence_len = ($1 || raise).length
+          lines.push(f.gets)
+        elsif line =~ BREAK_RE
+          break
+        else
+          lines.push(f.gets)
+        end
+      end
+      lines
+    end
+
+    # 断片の front matter を @front_matter へマージ（リストは連結、
+    # スカラーは後勝ち）
+    def merge_front_matter(fm)
+      fm.each do |k, v|
+        if v.is_a?(Array) && @front_matter[k].is_a?(Array)
+          @front_matter[k] |= v
+        else
+          @front_matter[k] = v
+        end
+      end
+    end
 
     # front matter（--- ... ---）を読む。YAML のサブセット:
     # スカラー（type/library/category/since/until）とリスト
@@ -70,10 +113,21 @@ module BitClust
 
     def do_parse(f)
       f.skip_blank_lines
-      @context.categorize @front_matter['category'] if @front_matter['category']
+      # #@include 展開で断片の front matter がストリーム先頭に現れる
+      # （rdoc/parser/simple → parsers/parse_simple の require リスト等）。
+      # 連続するブロックを読んでメタデータをマージする
+      while f.peek && f.peek =~ /\A---\s*$/
+        merge_front_matter read_front_matter(f)
+        f.skip_blank_lines
+      end
+      # RRDParser と同じく未指定でも呼ぶ（category=nil を明示的に設定）
+      @context.categorize @front_matter['category'] if @front_matter['type'] == 'library'
       Array(@front_matter['require']).each { |r| @context.require r }
       Array(@front_matter['sublibrary']).each { |s| @context.sublibrary s }
-      @context.library.source = f.break(BREAK_RE).join('').rstrip
+      prose = md_break(f).join('').rstrip
+      # メンバーファイル（library: 参照のみ）のパースで lib 本文を
+      # 上書きしないよう、lib ファイル（type: library）のときだけ設定する
+      @context.library.source = prose if @front_matter['type'] == 'library'
       read_classes f
       if line = f.gets   # error
         case line
@@ -130,20 +184,32 @@ module BitClust
       return m[1], m[2], m[3]
     end
 
-    # 関係（include/extend/alias）は front matter が唯一の置き場（案B）。
-    # 本文からは読まない
+    # 関係（include/extend/alias）は front matter が置き場（案B）。
+    # ただし #@include 断片（rdoc/parsers/parse_rb 等）は rd 形式の
+    # 関係行を本文に保持しているため、RRDParser 同様ストリームからも読む
     def read_aliases(f)
       Array(@front_matter['alias']).each { |name| @context.alias name }
+      f.while_match(/\Aalias\s/) do |line|
+        @context.alias line.split[1]
+      end
     end
 
     def read_includes(f, reopen = false)
       Array(@front_matter['include']).each do |name|
         reopen ? @context.dynamic_include(name) : @context.include(name)
       end
+      f.while_match(/\Ainclude\s/) do |line|
+        name = line.split[1]
+        reopen ? @context.dynamic_include(name) : @context.include(name)
+      end
     end
 
     def read_extends(f, reopen = false)
       Array(@front_matter['extend']).each do |name|
+        reopen ? @context.dynamic_extend(name) : @context.extend(name)
+      end
+      f.while_match(/\Aextend\s/) do |line|
+        name = line.split[1]
         reopen ? @context.dynamic_extend(name) : @context.extend(name)
       end
     end
@@ -154,7 +220,7 @@ module BitClust
       read_extends f
       read_includes f
       f.skip_blank_lines
-      @context.klass&.source = f.break(BREAK_RE).join('').rstrip
+      @context.klass&.source = md_break(f).join('').rstrip
       read_level2_blocks f
     end
 
@@ -171,7 +237,7 @@ module BitClust
       read_aliases f
       read_extends f
       f.skip_blank_lines
-      @context.klass&.source = f.break(BREAK_RE).join('').rstrip
+      @context.klass&.source = md_break(f).join('').rstrip
       @context.visibility = :public
       @context.type = :singleton_method
       read_level2_blocks f
@@ -212,7 +278,7 @@ module BitClust
 
     def read_chunk(f)
       header = f.span(SIG_RE)
-      body = f.break(BREAK_RE)
+      body = md_break(f)
       src = (header + body).join('')
       src.location = header[0].location
       sigs = header.map {|line| method_signature(line) }

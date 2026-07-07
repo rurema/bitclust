@@ -2,6 +2,7 @@
 
 require 'test/unit'
 require 'stringio'
+require 'fileutils'
 require 'bitclust/mdparser'
 require 'bitclust/rrdparser'
 require 'bitclust/methoddatabase'
@@ -211,6 +212,73 @@ class TestMDParser < Test::Unit::TestCase
     MD
     _, lib = parse_md(md)
     assert_equal [["newmethod"]], lib.classes.first.entries.map(&:names)
+  end
+
+  def test_update_by_markdowntree
+    # MarkdownTree 駆動の組み立て: lib ファイル → メンバー（reopen 後置）、
+    # 版ゲート外のライブラリ/メンバーはスキップ
+    require 'tmpdir'
+    Dir.mktmpdir do |root|
+      write = ->(rel, s) {
+        path = File.join(root, rel)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, s)
+      }
+      write.call('mylib.md', <<~MD)
+        ---
+        type: library
+        category: Text
+        ---
+        mylib の説明。
+      MD
+      write.call('mylib/MyModule.md', <<~MD)
+        ---
+        library: mylib
+        ---
+        # module MyModule
+
+        モジュール。
+      MD
+      # 辞書順で module より先に来る reopen ファイル（後置されることを確認）
+      write.call('mylib/Kernel.md', <<~MD)
+        ---
+        library: mylib
+        include:
+          - MyModule
+        ---
+        # reopen Object
+      MD
+      write.call('mylib/Gone.md', <<~MD)
+        ---
+        library: mylib
+        until: "3.0"
+        ---
+        # class Gone < Object
+
+        3.0 で消えた。
+      MD
+      write.call('oldlib.md', <<~MD)
+        ---
+        type: library
+        until: "2.0"
+        ---
+        古いライブラリ。
+      MD
+
+      db = BitClust::MethodDatabase.dummy(PARAMS)
+      db.update_by_markdowntree(root)
+
+      assert_equal ["mylib"], db.libraries.map(&:name)
+      lib = db.fetch_library("mylib")
+      assert_equal "Text", lib.category
+      assert_equal "mylib の説明。", lib.source
+      # reopen はメソッド定義が無い限り lib.classes に載らない（rd と同じ）
+      assert_equal %w[MyModule], lib.classes.map(&:name).sort
+      assert_equal ["MyModule"], db.get_class("Object").dynamically_included.map(&:name)
+      # source_location は md の実パス
+      assert_equal "#{root}/mylib.md", lib.source_location.file
+      assert_equal "#{root}/mylib/MyModule.md", db.get_class("MyModule").source_location.file
+    end
   end
 
   def test_multi_entity_bundle_without_relations
