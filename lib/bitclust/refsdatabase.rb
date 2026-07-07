@@ -66,11 +66,17 @@ module BitClust
 
     def extract(entry)
       entry.source.each_line{|l|
-        if /\A={1,6}\[a:(\w+)\] *(.*)/ =~ l
-          entry.labels.each{|name|
-            self[entry.class.type_id, name, $1 || raise] = $2 || raise
-          }
-        end
+        anchor, label =
+          if /\A={1,6}\[a:(\w+)\] *(.*)/ =~ l
+            [$1, $2]
+          elsif /\A\#{1,6} +(.*?) *\{#(\w+)\}\s*\z/ =~ l
+            # md ソース: 「### 見出し {#anchor}」形式（M3 ネイティブパース）
+            [$2, $1]
+          end
+        next unless anchor
+        entry.labels.each{|name|
+          self[entry.class.type_id, name, anchor || raise] = label || raise
+        }
       }
     end
   end

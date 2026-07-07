@@ -369,15 +369,22 @@ module BitClust
         end
         line '</pre>'
       else
-        lines = [] #: Array[String]
-        @f.until_terminator(terminator) do |code_line|
-          lines << code_line
-        end
         # 変換器はベースインデント（= フェンス長 - 3）を除去して格納している。
         # RDCompiler の list は detab（タブをカラム位置で空白展開）を元の
-        # カラムで行うため、ベースインデントを戻してから同じ処理を通す
-        base = fence.size - 3
-        lines = lines.map { |l| l =~ /\A\s*\z/ ? l : (' ' * base) + l }
+        # カラムで行うため、ベースインデントを戻してから同じ処理を通す。
+        # #@since/#@else ゲートで分断されたインデントブロックは前処理後に
+        # 隣接フェンスとして現れるため、続けてマージする（rd では連続
+        # インデント行として1つの <pre> になる。ArgumentError 等）
+        segments = [[fence.size - 3, collect_fence_lines(terminator)]]
+        while @f.peek =~ /\A(`{4,})\s*$/
+          next_fence = ($1 || raise)
+          @f.gets
+          segments << [next_fence.size - 3,
+                       collect_fence_lines(/\A`{#{next_fence.size}}\s*$/)]
+        end
+        lines = segments.flat_map { |base, ls|
+          ls.map { |l| l =~ /\A\s*\z/ ? l : (' ' * base) + l }
+        }
         lines = unindent_block(canonicalize(lines))
         while lines.last&.empty?
           lines.pop
@@ -388,6 +395,14 @@ module BitClust
         end
         line '</pre>'
       end
+    end
+
+    def collect_fence_lines(terminator)
+      lines = [] #: Array[String]
+      @f.until_terminator(terminator) do |code_line|
+        lines << code_line
+      end
+      lines
     end
 
     # 箇条書き（- item / N. item、ネスト・継続行あり）
@@ -488,14 +503,8 @@ module BitClust
     end
 
     def restore_rd_text(str)
-      # M1 等価モード: md のコードスパンを rd の元表記へ戻して描画する。
-      # `__X__` → __X__、`token`（GNU 風引用由来）→ `token'、
-      # 行頭 **N.**（離散番号の太字化）→ N.（\` の解除は restore_inline 内）
-      MarkdownToRRD.restore_inline(
-        str.gsub(/`(__\w+__)`/, '\1')
-           .gsub(/(?<!\\)`([^`'\s]+)`/) { "`#{$1}'" }
-           .gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
-      )
+      # M1 等価モード: md のコードスパンを rd の元表記へ戻して描画する
+      MarkdownToRRD.restore_text(str)
     end
   end
 

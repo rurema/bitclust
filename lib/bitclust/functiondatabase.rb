@@ -58,6 +58,8 @@ module BitClust
     def update_by_markdowntree(md_root)
       check_transaction
       require 'bitclust/mdparser'
+      # 描画層（screen.rb）が MDCompiler を選択するためのマーカー
+      propset 'source_format', 'markdown'
       Dir.glob(File.join(md_root, '*.md')).sort.each do |path|
         MDFunctionParser.new(self).parse_file(path, File.basename(path, '.md'), properties())
       end

@@ -40,8 +40,18 @@ module BitClust
       def exec(argv, options)
         super
         if @markdowntree
-          argv = @db.is_a?(FunctionDatabase) ? prepare_capi_markdowntree
-                                             : (prepare_markdowntree; argv)
+          # ネイティブ md パース（M3）。source には md が入り、描画は
+          # MDCompiler（GFM）が選択される。ブリッジは検証用に温存
+          # （BITCLUST_MD_BRIDGE=1 で旧経路）
+          if ENV['BITCLUST_MD_BRIDGE'] == '1'
+            argv = @db.is_a?(FunctionDatabase) ? prepare_capi_markdowntree
+                                               : (prepare_markdowntree; argv)
+          else
+            @db.transaction {
+              @db.update_by_markdowntree(@markdowntree)
+            }
+            return
+          end
         end
         @db.transaction {
           if @root

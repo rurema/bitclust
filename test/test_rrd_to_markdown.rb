@@ -103,6 +103,16 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
   end
 
+  def test_dlist_description_across_directives
+    # pack-template 型: dd の説明は #@ 指令行を透過して続く
+    # （ゲート行で打ち切ると後続インデント行がコード扱いになり、
+    # 版解決後の描画が RDCompiler と食い違う）
+    rrd = ": term\n  説明。\n\#@since 2.0\n  追加説明。\n\#@end\n\n本文。\n"
+    md = convert(rrd)
+    assert_equal "- **`term`**:\n  説明。\n\#@since 2.0\n  追加説明。\n\#@end\n\n本文。\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
   def test_gnu_quote_roundtrip
     rrd = "= module M\n\n`PERMUTE', `RETURN_IN_ORDER' という順序形式と ` の話。\n"
     md = convert(rrd)

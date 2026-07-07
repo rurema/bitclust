@@ -555,9 +555,14 @@ module BitClust
           convert_samplecode(l)
         elsif l =~ /\A\/\/emlist/
           convert_emlist(l)
+        elsif l =~ /\A\#@/
+          # #@ 指令行は dd の文脈に透明（版解決後は消えて説明が連続する。
+          # ここで打ち切ると後続インデント行がコード扱いになる。pack-template）
+          raw_passthrough(l)
         elsif l =~ /\A\s*$/
           scan = @index + 1
-          scan += 1 while scan < @lines.length && @lines[scan] =~ /\A\s*$/
+          scan += 1 while scan < @lines.length &&
+                          (@lines[scan] =~ /\A\s*$/ || @lines[scan] =~ /\A\#@/)
           nxt = scan < @lines.length ? @lines[scan] : nil
           if nxt && (nxt =~ /\A\s+\S/ || nxt =~ SAMPLECODE_RE || nxt =~ /\A\/\/emlist/)
             @out << l

@@ -15,6 +15,19 @@ module BitClust
       new('').send(:convert_bare_refs, text)
     end
 
+    # md テキストを旧経路と同じ表示形（rd のインライン形式）へ戻す:
+    # `__X__` 自動スパン解除、`token` → `token'（GNU 風引用）、
+    # 行頭 **N.** → N.、\`/\[ の解除と [x:y] → [[x:y]]。
+    # MDCompiler の M1 等価描画と、entry#description（meta description 等の
+    # コンパイラ非経由テキスト）が共用する
+    def self.restore_text(text)
+      restore_inline(
+        text.gsub(/`(__\w+__)`/, '\1')
+            .gsub(/(?<!\\)`([^`'\s]+)`/) { "`#{$1}'" }
+            .gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
+      )
+    end
+
     # capi: C API リファレンスモード。### は見出しではなくシグネチャ
     # 「--- <C sig>」へ復元する（capi に本文見出しは無い）
     def initialize(markdown, capi: false)
@@ -387,9 +400,13 @@ module BitClust
             advance
           elsif l =~ /\A`{3,}/
             convert_code_block(l)
+          elsif l =~ /\A\#@/
+            # rd 側と対称: #@ 指令行は dd の文脈に透明
+            raw_passthrough(l)
           elsif l =~ /\A\s*$/
             scan = @index + 1
-            scan += 1 while scan < @lines.length && @lines[scan] =~ /\A\s*$/
+            scan += 1 while scan < @lines.length &&
+                            (@lines[scan] =~ /\A\s*$/ || @lines[scan] =~ /\A\#@/)
             nxt = scan < @lines.length ? @lines[scan] : nil
             if nxt && nxt !~ /\A- \*\*/ && (nxt =~ /\A\s+\S/ || nxt =~ /\A`{3,}/)
               @out << l

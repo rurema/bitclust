@@ -173,6 +173,8 @@ module BitClust
       require 'bitclust/markdown_tree'
       require 'bitclust/mdparser'
       @md_root = md_root
+      # 描画層（screen.rb）が MDCompiler を選択するためのマーカー
+      propset 'source_format', 'markdown'
       tree = MarkdownTree.scan(md_root)
       version = properties()["version"]
       tree.libraries.sort.each do |libname, lib|

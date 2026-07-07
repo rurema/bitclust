@@ -150,6 +150,21 @@ module BitClust
       @db = db
     end
 
+    # description 等、コンパイラを通さない表示テキスト。
+    # md ソースの DB では旧経路と同じ表示形（rd インライン形式）へ戻す
+    def display_text(text)
+      return text unless text
+      if @db.properties['source_format'] == 'markdown'
+        # LibraryEntry#require（ライブラリ関係の登録）が Kernel#require を
+        # 隠蔽するため、ファイルロードは Kernel を明示する
+        Kernel.require 'bitclust/markdown_to_rrd'
+        ::BitClust::MarkdownToRRD.restore_text(text)
+      else
+        text
+      end
+    end
+    private :display_text
+
     def type_id
       self.class.type_id
     end

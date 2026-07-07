@@ -425,7 +425,7 @@ module BitClust
     end
 
     def description
-      source.split(/\n\n+/, 2)[0].strip
+      display_text(source.split(/\n\n+/, 2)[0].strip)
     end
 
     def clear_cache

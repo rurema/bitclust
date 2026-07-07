@@ -216,7 +216,7 @@ module BitClust
     end
 
     def description
-      source.split(/\n\n+/, 3)[1]
+      display_text(source.split(/\n\n+/, 3)[1])
     end
   end
 end
