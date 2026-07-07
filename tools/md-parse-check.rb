@@ -7,6 +7,7 @@
 #   (2) native の entry.source（md）を md→rd 変換するとブリッジの source（rd）に一致
 #
 # usage: ruby tools/md-parse-check.rb <manual/api> <bridge-db> [--keep DIR]
+#        ruby tools/md-parse-check.rb --capi <manual/capi> <bridge-db>
 
 $stdout.sync = true
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
@@ -14,9 +15,54 @@ require 'bitclust'
 require 'bitclust/markdown_to_rrd'
 require 'tmpdir'
 
+capi = ARGV.delete('--capi')
 md_root = ARGV[0] or abort "usage: #{$0} <manual/api> <bridge-db>"
 bridge_path = ARGV[1] or abort "usage: #{$0} <manual/api> <bridge-db>"
 keep_dir = (i = ARGV.index('--keep')) ? ARGV[i + 1] : nil
+
+if capi
+  require 'bitclust/capi_converter'
+  bridge = BitClust::FunctionDatabase.new(bridge_path)
+  version = bridge.properties['version']
+  native_dir = Dir.mktmpdir('md-parse-check-capi')
+  # init は MethodDatabase 側にのみある（properties 作成のため一時利用）
+  seed = BitClust::MethodDatabase.new(native_dir)
+  seed.init
+  seed.transaction do
+    seed.propset 'version', version
+    seed.propset 'encoding', bridge.properties['encoding']
+  end
+  native = BitClust::FunctionDatabase.new(native_dir)
+  puts "native capi parse (version #{version})..."
+  native.transaction { native.update_by_markdowntree(md_root) }
+  native = BitClust::FunctionDatabase.new(native_dir)
+
+  bf = bridge.functions.to_h { |f| [f.name, f] }
+  nf = native.functions.to_h { |f| [f.name, f] }
+  diffs = 0
+  puts "DIFF function set: missing=#{(bf.keys - nf.keys).first(5)} extra=#{(nf.keys - bf.keys).first(5)}" or diffs += 1 if bf.keys.sort != nf.keys.sort
+  src_diffs = 0
+  (bf.keys & nf.keys).each do |name|
+    b, n = bf[name], nf[name]
+    %i[filename macro private type params].each do |attr|
+      if b.send(attr) != n.send(attr)
+        diffs += 1
+        puts "DIFF #{name}: #{attr} #{b.send(attr).inspect} vs #{n.send(attr).inspect}" if diffs <= 10
+      end
+    end
+    converted = BitClust::MarkdownToRRD.convert(n.source.to_s, capi: true)
+                  .gsub(/^\#@samplecode(?: (.*))?$/) { "//emlist[#{$1&.strip}][ruby]{" }
+                  .gsub(/^\#@end[ \t]*$/, '//}')
+    if converted.rstrip != b.source.to_s.rstrip
+      src_diffs += 1
+      puts "SRC-DIFF #{name}" if src_diffs <= 5
+    end
+  end
+  puts "functions: #{(bf.keys & nf.keys).size}, attribute diffs: #{diffs}, source diffs: #{src_diffs}"
+  puts diffs.zero? && src_diffs.zero? ? 'NATIVE CAPI PARSE EQUIVALENT' : 'NOT EQUIVALENT'
+  FileUtils.remove_entry(native_dir)
+  exit(diffs.zero? && src_diffs.zero? ? 0 : 1)
+end
 
 bridge = BitClust::MethodDatabase.new(bridge_path)
 version = bridge.properties['version']
@@ -108,7 +154,32 @@ src_diffs = 0
   end
 end
 
-puts "libraries: #{common_libs.size}, classes: #{(bc.keys & nc.keys).size}, entries: #{entry_count}"
-puts "attribute diffs: #{diffs}, source diffs (md→rd 変換後): #{src_diffs}"
-puts diffs.zero? && src_diffs.zero? ? 'NATIVE PARSE EQUIVALENT' : 'NOT EQUIVALENT'
+# (3) doc ページ
+bd = bridge.docs.to_h { |d| [d.name, d] }
+nd = native.docs.to_h { |d| [d.name, d] }
+report.call("doc set: missing=#{(bd.keys - nd.keys).first(5)} extra=#{(nd.keys - bd.keys).first(5)}") if bd.keys.sort != nd.keys.sort
+doc_src_diffs = 0
+(bd.keys & nd.keys).each do |name|
+  b, n = bd[name], nd[name]
+  report.call("doc #{name}: title #{b.title.inspect} vs #{n.title.inspect}") if b.title != n.title
+  if to_rd.call(n.source.to_s) != b.source.to_s.rstrip
+    doc_src_diffs += 1
+    if doc_src_diffs <= 3
+      puts "DOC-SRC-DIFF #{name}:"
+      a = b.source.to_s.rstrip.lines
+      c = to_rd.call(n.source.to_s).lines
+      a.zip(c).each_with_index do |(p, q), i|
+        next if p == q
+        puts "  line #{i + 1}: BRIDGE #{p.inspect}"
+        puts "            NATIVE #{q.inspect}"
+        break
+      end
+    end
+  end
+end
+
+puts "libraries: #{common_libs.size}, classes: #{(bc.keys & nc.keys).size}, " \
+     "entries: #{entry_count}, docs: #{(bd.keys & nd.keys).size}"
+puts "attribute diffs: #{diffs}, source diffs (md→rd 変換後): #{src_diffs}, doc source diffs: #{doc_src_diffs}"
+puts diffs.zero? && src_diffs.zero? && doc_src_diffs.zero? ? 'NATIVE PARSE EQUIVALENT' : 'NOT EQUIVALENT'
 FileUtils.remove_entry(native_dir) unless keep_dir

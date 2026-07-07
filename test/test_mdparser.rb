@@ -281,6 +281,37 @@ class TestMDParser < Test::Unit::TestCase
     end
   end
 
+  def test_function_parser
+    # capi: キーワード無しの ### 全行がシグネチャ。source は本文のみ（md のまま）
+    require 'bitclust/functiondatabase'
+    md = <<~MD
+      ### VALUE rb_ary_new()
+
+      空の Ruby の配列を作成し返します。
+
+      ```
+      VALUE ary = rb_ary_new();
+      ```
+
+      ### static int rb_ary_size(VALUE ary)
+
+      内部関数です。
+    MD
+    db = BitClust::FunctionDatabase.dummy(PARAMS)
+    io = StringIO.new(md)
+    def io.path = "array.c.md"
+    BitClust::MDFunctionParser.new(db).parse(io, "array.c", PARAMS)
+    funcs = db.functions.sort_by(&:name)
+    assert_equal %w[rb_ary_new rb_ary_size], funcs.map(&:name)
+    f = funcs.first
+    assert_equal "array.c", f.filename
+    assert_equal "VALUE", f.type
+    # body はヘッダ直後の空行込み（レガシー FunctionReferenceParser と同じ）
+    assert_equal "\n空の Ruby の配列を作成し返します。\n\n```\nVALUE ary = rb_ary_new();\n```\n\n",
+                 f.source
+    assert funcs.last.private
+  end
+
   def test_multi_entity_bundle_without_relations
     md = <<~MD
       ---

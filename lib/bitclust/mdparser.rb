@@ -16,8 +16,24 @@
 #   （front matter 内の `#@` 行も先に版解決される）
 
 require 'bitclust/rrdparser'
+require 'bitclust/functionreferenceparser'
 
 module BitClust
+
+  # C API リファレンス（manual/capi）の md を直接パースする。
+  # capi の md は本文見出しを持たず、### 全行がシグネチャ
+  # （--- <C sig> 相当、キーワード無し）。source は本文の md がそのまま入る
+  class MDFunctionParser < FunctionReferenceParser
+    private
+
+    def file_entries(f)
+      f.skip_blank_lines
+      f.while_match(/\A### /) do |header|
+        entry header.sub(/\A###/, '').strip, f.break(/\A### /)
+        f.skip_blank_lines
+      end
+    end
+  end
 
   class MDParser < RRDParser
 
