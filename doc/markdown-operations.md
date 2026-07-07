@@ -70,6 +70,10 @@ $ ruby tools/md-compile-check.rb /tmp/db-old --only functions
 source はファイルレベルの reduce 正規化を経ていないため、断片単体の再変換では
 正規化分の差が出る（HTML 等価が本ゲート）。
 
+`--gfm` を付けると M2 GFM モードの整合も同時に検証する（GFM 出力と M1 出力の
+差が `<code>`/`<strong>`/GNU 引用の正規化で消えること）。期待値:
+`gfm: consistent: <全件>, diffs: 0`。
+
 ## 3. データベース構築（manual/ ツリーから）
 
 `--markdowntree` が md ツリーを一時的に旧形式へブリッジし、既存のビルド機構に渡す。

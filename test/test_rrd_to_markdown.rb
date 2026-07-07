@@ -3,10 +3,111 @@
 require 'test/unit'
 
 require 'bitclust/rrd_to_markdown'
+require 'bitclust/markdown_to_rrd'
 
 class TestRRDToMarkdown < Test::Unit::TestCase
   def convert(rrd)
     BitClust::RRDToMarkdown.convert(rrd)
+  end
+
+  # M2: 本文バッククォートの GFM 忠実化。
+  # GNU 風引用 `token'（rd に適切なマークアップがなかった代替記法）は
+  # インラインコードスパン `token` に変換し、それ以外の生バッククォートは
+  # \` にエスケープする（GFM で偶発スパンにならないように）
+
+  def test_gnu_quote_becomes_code_span
+    assert_equal "長いオプションは `-` の代わりに `--` で始まります。\n",
+      convert("長いオプションは `-' の代わりに `--' で始まります。\n")
+  end
+
+  def test_gnu_quote_with_symbols
+    assert_equal "`{}` や `**/` は使用できません。\n",
+      convert("`{}' や `**/' は使用できません。\n")
+  end
+
+  def test_lone_backtick_is_escaped
+    # 対にならない・GNU 引用でもない生バッククォートはエスケープ
+    assert_equal "コード中の \\` は特別です。\n",
+      convert("コード中の ` は特別です。\n")
+  end
+
+  def test_backtick_pair_with_space_is_escaped
+    # 空白を含む `...' は GNU 引用とみなさない（誤検出防止）
+    assert_equal "\\`wget url' のように書きます。\n",
+      convert("`wget url' のように書きます。\n")
+  end
+
+  def test_no_escape_inside_emlist
+    rrd = "//emlist{\nout = `wget url`\n//}\n"
+    assert_equal "```\nout = `wget url`\n```\n", convert(rrd)
+  end
+
+  def test_auto_code_span_not_escaped
+    # __WORD__ の自動コードスパンのバッククォートはエスケープしない
+    assert_equal "`__FILE__` を返します。\n",
+      convert("__FILE__ を返します。\n")
+  end
+
+  def test_no_auto_span_inside_md_ref
+    # Delegator 型: 参照ターゲット内の __WORD__ はスパン化しない
+    # （保護対象は変換後の一重括弧 [m:...]。二重括弧ではない）
+    assert_equal "`__FILE__` と [m:Delegator#__getobj__] を参照。\n",
+      convert("__FILE__ と [[m:Delegator#__getobj__]] を参照。\n")
+  end
+
+  def test_backtick_adjacent_to_auto_span
+    # 生バッククォートが __WORD__ に隣接しても双方向で壊れない
+    rrd = "`__FILE__ を参照。\n"
+    md = convert(rrd)
+    assert_equal "\\``__FILE__` を参照。\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_backtick_in_anchored_heading
+    # spec/pattern_matching 型: 見出し内の対バッククォートはエスケープして温存
+    rrd = "===[a:x] 付記B: `未定義` の振る舞いの例\n"
+    md = convert(rrd)
+    assert_equal "### 付記B: \\`未定義\\` の振る舞いの例 {#x}\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_lone_backtick_heading
+    # symref 型: 見出しがバッククォート1文字
+    rrd = "===[a:ac] `\n"
+    md = convert(rrd)
+    assert_equal "### \\` {#ac}\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_gnu_quote_with_backslash_not_spanned
+    # DOSISH 型: `\' をスパン化すると `\` が \` エスケープと曖昧になるため除外
+    rrd = "2 byte 目が 0x5c(`\\') である文字。\n"
+    md = convert(rrd)
+    assert_equal "2 byte 目が 0x5c(\\`\\') である文字。\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_dlist_term_with_backslash_not_spanned
+    # symref 型: バックスラッシュを含む term はコードスパン化しない
+    rrd = ": xxx \\\n  説明。\n"
+    md = convert(rrd)
+    assert_equal "- **xxx \\**:\n  説明。\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_tex_double_quote_not_spanned
+    # rdoc.rd 型: TeX 風二重引用 ``text'' はスパン化せずエスケープで温存
+    rrd = "二重引用符: \"text\" もしくは ``text''\n"
+    md = convert(rrd)
+    assert_equal "二重引用符: \"text\" もしくは \\`\\`text''\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
+  end
+
+  def test_gnu_quote_roundtrip
+    rrd = "= module M\n\n`PERMUTE', `RETURN_IN_ORDER' という順序形式と ` の話。\n"
+    md = convert(rrd)
+    assert_equal "# module M\n\n`PERMUTE`, `RETURN_IN_ORDER` という順序形式と \\` の話。\n", md
+    assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
   end
 
   # Step 1: H1 ヘッダとパススルー

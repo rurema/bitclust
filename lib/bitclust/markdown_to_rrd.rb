@@ -287,7 +287,7 @@ module BitClust
           nest -= 1
           raw_passthrough(line)
         elsif line =~ /\A\s+\S/ && line !~ /\A- / && line !~ /\A\*\*/ && line !~ /\A```/
-          @out << strip_code_spans(convert_inline_refs(line))
+          @out << convert_inline_refs(line)
           advance
         elsif greedy && line =~ /\A[ \t]+$/
           @out << line
@@ -335,12 +335,18 @@ module BitClust
       if line =~ /\{#([^}]+)\}\s*$/
         anchor = $1
         text = line.sub(/\A#+\s+/, '').sub(/\s*\{#[^}]+\}\s*$/, '')
-        @out << "#{prefix}[a:#{anchor}] #{text}\n"
+        @out << "#{prefix}[a:#{anchor}] #{restore_heading_backticks(text)}\n"
       else
         text = line.sub(/\A#+\s+/, '').chomp
-        @out << "#{prefix} #{text}\n"
+        @out << "#{prefix} #{restore_heading_backticks(text)}\n"
       end
       advance
+    end
+
+    # 見出しテキストのバッククォート復元。参照変換（convert_bare_refs）は
+    # 通さない（rd→md も見出しでは参照エスケープをしないため対称に）
+    def restore_heading_backticks(text)
+      strip_code_spans(text).gsub(/\\`/, '`')
     end
 
     def convert_h3_heading(line)
@@ -365,10 +371,11 @@ module BitClust
       # - **`term`**: description → : term\n  description
       # - **term**:\n  line1\n  line2 → : term\n  line1\n  line2
       if line =~ /\A- \*\*(.+?)\*\*: (.+)$/
-        @out << ": #{strip_code_span(convert_inline_refs($1))}\n  #{convert_inline_refs($2)}\n"
+        # 構造の `term` は GNU 引用復元より先に unwrap する
+        @out << ": #{convert_inline_refs(strip_code_span($1))}\n  #{convert_inline_refs($2)}\n"
         advance
       elsif line =~ /\A- \*\*(.+?)\*\*:\s*$/
-        @out << ": #{strip_code_span(convert_inline_refs($1))}\n"
+        @out << ": #{convert_inline_refs(strip_code_span($1))}\n"
         advance
         # 継続行を収集（空行を挟む場合も含む）。rd 側と対称:
         # RDCompiler の dd_with_p はインデント段落とコードブロックを
@@ -528,19 +535,24 @@ module BitClust
     end
 
     def passthrough(line)
-      @out << strip_code_spans(convert_inline_refs(line))
+      @out << convert_inline_refs(line)
       advance
     end
 
-    # テキスト行の `__WORD__` をコードスパンから解除
+    # テキスト行のコードスパンを rd の元表記へ復元する:
+    # - `__WORD__`（自動スパン）→ __WORD__
+    # - `token`（GNU 風引用由来）→ `token'
+    # エスケープ済み \` はスパン開始とみなさない（convert_bare_refs が後で復元）
     def strip_code_spans(text)
       text.gsub(/`(__\w+__)`/, '\\1')
+          .gsub(/(?<!\\)`([^`'\s]+)`/) { "`#{$1}'" }
     end
 
     # Markdown のブラケットリンク: エスケープされた \[ \] を含むパターン
     def convert_inline_refs(line)
-      # bare [type:target] → [[type:target]] (手動パースで \[\] 対応)
-      convert_bare_refs(line)
+      # コードスパンの復元（`__X__`・GNU 風引用）は \` の解除より先。
+      # 続けて bare [type:target] → [[type:target]] (手動パースで \[\] 対応)
+      convert_bare_refs(strip_code_spans(line))
     end
 
     def convert_bare_refs(line)
@@ -550,6 +562,12 @@ module BitClust
         if line[i] == '\\' && line[i + 1] == '['
           # rd→md がエスケープしたリテラル [x:y]（参照ではない）→ そのまま復元
           result << '['
+          i += 2
+          next
+        end
+        if line[i] == '\\' && line[i + 1] == '`'
+          # rd→md がエスケープした生バッククォート → そのまま復元
+          result << '`'
           i += 2
           next
         end

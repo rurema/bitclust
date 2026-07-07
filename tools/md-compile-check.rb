@@ -8,10 +8,14 @@
 # が一致することを確認する。fragment の md→rd ラウンドトリップも同時に検証。
 #
 # usage: ruby tools/md-compile-check.rb <db-path> [--limit N] [-v]
-#          [--only methods|docs|libs|functions] [--shard K/N]
+#          [--only methods|docs|libs|functions] [--shard K/N] [--gfm]
 #
 # メモリの少ないマシンでは 1 プロセスで全件を回さず、--only/--shard で
 # 分割して直列に実行する（例: --only methods --shard 0/4 ... 3/4）。
+#
+# --gfm: M2 GFM モードの整合も検証する。GFM 出力と M1 出力の差が
+# <code>/<strong>/GNU 引用（`x'）の正規化で消えることを確認する
+# （= GFM モードが追加するのは表現マークアップだけで内容は同一）。
 
 $stdout.sync = true
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
@@ -27,6 +31,7 @@ verbose = false
 only = nil
 shard_k = nil
 shard_n = nil
+gfm_mode = false
 paths = []
 args = ARGV.dup
 until args.empty?
@@ -35,6 +40,7 @@ until args.empty?
   when '--only' then only = args.shift
   when '--shard'
     shard_k, shard_n = (args.shift || '').split('/').map(&:to_i)
+  when '--gfm' then gfm_mode = true
   when '-v' then verbose = true
   else paths << a
   end
@@ -48,9 +54,17 @@ db = BitClust::MethodDatabase.new(db_path)
 urlmapper = BitClust::URLMapper.new(Hash.new { 'dummy' })
 rd = BitClust::RDCompiler.new(urlmapper, 1, { database: db })
 md = BitClust::MDCompiler.new(urlmapper, 1, { database: db })
+mdg = BitClust::MDCompiler.new(urlmapper, 1, { database: db, gfm: true })
 
 stats = Hash.new(0)
 diffs = []
+
+# GFM が追加する表現マークアップを落として M1 と比較するための正規化
+normalize_gfm = lambda do |html|
+  html.gsub(%r{</?code>|</?strong>|<(th|td) align="[a-z]+">}, '')
+      .gsub(%r{</?(?:table|thead|tbody|tr|th|td)>}, '')
+      .gsub(/`([^`'\s]+)'/) { $1 }
+end
 
 check = lambda do |label, kind, rd_src, ref_html|
   md_src = kind == :function ? BitClust::CapiConverter.convert(rd_src)
@@ -82,6 +96,37 @@ check = lambda do |label, kind, rd_src, ref_html|
     else
       md.compile(md_src)
     end
+  if gfm_mode
+    gfm_html =
+      case kind
+      when :method, :function
+        entry = stats[:current_entry]
+        original = entry.source
+        begin
+          entry.source = md_src
+          kind == :method ? mdg.compile_method(entry, nil) : mdg.compile_function(entry, nil)
+        ensure
+          entry.source = original
+        end
+      else
+        mdg.compile(md_src)
+      end
+    if normalize_gfm.call(gfm_html) == normalize_gfm.call(html)
+      stats[:gfm_ok] += 1
+    else
+      stats[:gfm_diff] += 1
+      if stats[:gfm_diff] <= 10
+        puts "GFM-DIFF #{label}"
+        normalize_gfm.call(html).lines.zip(normalize_gfm.call(gfm_html).lines).each_with_index do |(a, b), i|
+          next if a == b
+          puts "  line #{i + 1}: M1 =#{a.inspect}"
+          puts "            GFM=#{b.inspect}"
+          break
+        end
+      end
+    end
+  end
+
   if html == ref_html
     stats[:ok] += 1
     puts "OK   #{label}" if verbose
@@ -166,5 +211,7 @@ end
 puts "compared: #{stats[:ok] + stats[:diff]}, identical: #{stats[:ok]}, " \
      "diffs: #{stats[:diff]}, errors: #{stats[:error]}, " \
      "ref-errors(skipped): #{stats[:ref_error]}, fragment-roundtrip diffs: #{stats[:rt_diff]}"
+puts "gfm: consistent: #{stats[:gfm_ok]}, diffs: #{stats[:gfm_diff]}" if gfm_mode
 diffs.first(30).each { |d| puts "  DIFF #{d}" } if stats[:diff] > 10
-puts stats[:diff].zero? && stats[:error].zero? ? 'HTML EQUIVALENT' : 'NOT EQUIVALENT'
+ok = stats[:diff].zero? && stats[:error].zero? && stats[:gfm_diff].zero?
+puts ok ? 'HTML EQUIVALENT' : 'NOT EQUIVALENT'

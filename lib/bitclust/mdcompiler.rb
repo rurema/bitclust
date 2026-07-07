@@ -8,10 +8,15 @@
 # （MARKUP_SPEC）に差し替える。HTML の出力部品（見出し・リスト・dl・
 # シンタックスハイライト・リンク解決）はすべて RDCompiler から継承する。
 #
-# M1（等価モード）: 変換器が生成する md に対して、対応する rd を
+# M1（等価モード、既定）: 変換器が生成する md に対して、対応する rd を
 # RDCompiler にかけた場合と同一の HTML を出力する（tools/md-compile-check.rb
-# が全実データで検証する）。GFM 拡張（テーブル、コードスパンの <code> 化等）は
-# M2 で解禁する。
+# が全実データで検証する）。
+#
+# M2（GFM モード、option :gfm => true）: GFM の表現を描画する —
+# インラインコードスパン `x` → <code>、行頭 **N.** → <strong>、
+# GFM テーブル（ヘッダ + 区切り行必須）→ <table>。
+# M1 との差は <code>/<strong>/<table> 系マークアップのみ
+# （tools/md-compile-check.rb --gfm が全実データで検証する）。
 
 require 'bitclust/rdcompiler'
 require 'bitclust/markdown_to_rrd'
@@ -21,6 +26,14 @@ module BitClust
   class MDCompiler < RDCompiler
 
     private
+
+    # RDCompiler のテキストコンパイル（エスケープ・参照解決）を
+    # GFM モードのセグメント処理から呼ぶための別名
+    alias rd_compile_text compile_text
+
+    def gfm?
+      @option[:gfm]
+    end
 
     # メソッド系シグネチャ（キーワード付き h3）。capi（@type == :function）は
     # キーワード無しの ### 全部がシグネチャ（capi に本文見出しは無い）
@@ -60,6 +73,8 @@ module BitClust
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when FENCE_RE
           code_fence
+        when /\A\s*\|/
+          paragraph unless try_table
         else
           if @f.peek&.strip&.empty?
             @f.gets
@@ -108,6 +123,8 @@ module BitClust
           todo
         when RAW_META_RE
           entry_info
+        when /\A\s*\|/
+          entry_paragraph unless try_table
         else
           if @f.peek&.strip&.empty?
             @f.gets
@@ -178,10 +195,10 @@ module BitClust
         end
         case header
         when /\A- \*\*(param|arg)\*\*\s+`([^`]+)`( --(?:.*))?$/m
-          line "<dt class='#{@type.to_s}-param'>[PARAM] #{escape_html($2)}:</dt>"
+          line "<dt class='#{@type.to_s}-param'>[PARAM] #{name_html($2)}:</dt>"
           rest = $3 ? ($3 || raise).sub(/\A --/, '') : +"\n"
         when /\A- \*\*raise\*\*\s+`([^`]+)`( --(?:.*))?$/m
-          line "<dt>[EXCEPTION] #{escape_html($1)}:</dt>"
+          line "<dt>[EXCEPTION] #{name_html($1)}:</dt>"
           rest = $2 ? ($2 || raise).sub(/\A --/, '') : +"\n"
         when /\A- \*\*return\*\*( --(?:.*))?$/m
           line "<dt>[RETURN]</dt>"
@@ -224,11 +241,19 @@ module BitClust
       while @f.next? and DLIST_RE =~ @f.peek
         @f.while_match(DLIST_RE) do |l|
           l =~ DLIST_RE or raise
-          # rd の dt は term を strip する（term 末尾スペースは dt に含めない）
-          term = strip_code_span(($1 || raise)).strip
+          # rd の dt は term を strip する（term 末尾スペースは dt に含めない）。
+          # GFM モード: `term` のコードスパンは <code> として描画し、
+          # 中身の参照はその中で解決する（<code><a>...</a></code>。spec/eval）
+          term = ($1 || raise)
+          if gfm? && term =~ /\A`(.+)`\z/
+            inner = ($1 || raise).strip
+            line dt("<code>#{rd_compile_text(MarkdownToRRD.restore_inline(inner))}</code>")
+          else
+            term = strip_code_span(term).strip
+            line dt(compile_text(term))
+          end
           inline = l.sub(DLIST_RE, '').strip
           @f.ungets("  #{inline}\n") unless inline.empty?
-          line dt(compile_text(term))
         end
         dd_with_p
       end
@@ -237,6 +262,65 @@ module BitClust
 
     def strip_code_span(text)
       text.sub(/\A`(.+)`\z/, '\1')
+    end
+
+    # param 名・raise 例外名: GFM モードでは <code> で包む
+    def name_html(name)
+      gfm? ? "<code>#{escape_html(name)}</code>" : escape_html(name)
+    end
+
+    # GFM テーブルの区切り行（|---|:--:|... 。少なくとも1つの - が必要）
+    TABLE_DELIM_RE = /\A\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/
+
+    # GFM テーブル。厳格判定: ヘッダ行の直後に区切り行がある場合のみ
+    # テーブルとして描画する（本文が | で始まる散文と誤認しない。FalseClass）。
+    # テーブルでなければ何も消費せず false を返す
+    def try_table
+      return false unless gfm?
+      header = @f.gets or return false
+      unless @f.peek && TABLE_DELIM_RE =~ @f.peek
+        @f.ungets(header)
+        return false
+      end
+      aligns = parse_table_aligns(@f.gets || raise)
+      line '<table>'
+      line '<thead>'
+      table_row(header, 'th', aligns)
+      line '</thead>'
+      line '<tbody>'
+      while @f.peek =~ /\A\s*\|/
+        table_row(@f.gets || raise, 'td', aligns)
+      end
+      line '</tbody>'
+      line '</table>'
+      true
+    end
+
+    def parse_table_aligns(delim)
+      split_table_row(delim).map { |cell|
+        case cell
+        when /\A:-+:\z/ then 'center'
+        when /\A:-+\z/  then 'left'
+        when /\A-+:\z/  then 'right'
+        end
+      }
+    end
+
+    def table_row(row, tag, aligns)
+      cells = split_table_row(row)
+      string '<tr>'
+      cells.each_with_index do |cell, i|
+        align = aligns[i] ? %Q( align="#{aligns[i]}") : ''
+        string "<#{tag}#{align}>#{compile_text(cell)}</#{tag}>"
+      end
+      line '</tr>'
+    end
+
+    # 行をセルに分割（先頭/末尾の | を除去、\| はリテラルの |）
+    def split_table_row(row)
+      row.strip.sub(/\A\|/, '').sub(/\|\z/, '')
+         .gsub('\\|', "\x03").split('|', -1)
+         .map { |c| c.gsub("\x03", '|').strip }
     end
 
     # フェンスドコードブロック:
@@ -382,13 +466,35 @@ module BitClust
     # コンパイル（エスケープ・リンク解決）を継承する。
     # M1 等価モード: 変換器が付けた __X__ の自動コードスパンは剥がす
     def compile_text(str)
+      return compile_gfm_text(str) if gfm?
       super(restore_rd_text(str))
     end
 
+    # GFM モードのテキストコンパイル:
+    # コードスパン `x` → <code>（中身は参照解決しない・HTML エスケープのみ）、
+    # 行頭 **N.** → <strong>。エスケープ済み \` はリテラルのバッククォート
+    def compile_gfm_text(str)
+      hidden = str.gsub(/\\`/, "\x00")
+      hidden.split(/(`[^`\n]+`)/, -1).map { |seg|
+        if seg =~ /\A`([^`\n]+)`\z/
+          "<code>#{escape_html(($1 || raise).gsub("\x00", '`'))}</code>"
+        else
+          seg = seg.gsub(/^\*\*(\d+\.)\*\* /, "\x01\\1\x02 ")
+          rd_compile_text(MarkdownToRRD.restore_inline(seg))
+            .gsub("\x01", '<strong>').gsub("\x02", '</strong>')
+            .gsub("\x00", '`')
+        end
+      }.join
+    end
+
     def restore_rd_text(str)
-      # 行頭の **N.**（離散番号の太字化）は rd の素のテキスト「N.」に戻す
+      # M1 等価モード: md のコードスパンを rd の元表記へ戻して描画する。
+      # `__X__` → __X__、`token`（GNU 風引用由来）→ `token'、
+      # 行頭 **N.**（離散番号の太字化）→ N.（\` の解除は restore_inline 内）
       MarkdownToRRD.restore_inline(
-        str.gsub(/`(__\w+__)`/, '\1').gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
+        str.gsub(/`(__\w+__)`/, '\1')
+           .gsub(/(?<!\\)`([^`'\s]+)`/) { "`#{$1}'" }
+           .gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
       )
     end
   end

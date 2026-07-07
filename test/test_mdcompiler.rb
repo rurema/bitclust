@@ -405,6 +405,117 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 
+  # ---- M2: GFM モード（:gfm オプション） ----
+  # M1 等価モード（既定）と違い、RDCompiler と同一 HTML ではなく
+  # GFM の表現（<code>/<strong>/<table>）を描画する
+
+  def gfm_compiler
+    BitClust::MDCompiler.new(@u, 1, { :database => @db, :gfm => true })
+  end
+
+  def test_gfm_code_span_in_paragraph
+    html = gfm_compiler.compile("# タイトル\n\nこの `code` はスパンです。\n")
+    assert_include html, "この <code>code</code> はスパンです。"
+  end
+
+  def test_gfm_escaped_backtick_stays_literal
+    html = gfm_compiler.compile("# タイトル\n\n\\`--version' と \\`-' の話。\n")
+    assert_include html, "`--version' と `-' の話。"
+    assert_not_include html, "<code>"
+  end
+
+  def test_gfm_auto_span_becomes_code
+    html = gfm_compiler.compile("# タイトル\n\n`__FILE__` を返します。\n")
+    assert_include html, "<code>__FILE__</code> を返します。"
+  end
+
+  def test_gfm_code_span_escapes_html
+    html = gfm_compiler.compile("# タイトル\n\n`a<b>` です。\n")
+    assert_include html, "<code>a&lt;b&gt;</code> です。"
+  end
+
+  def test_gfm_ref_and_span_coexist
+    html = gfm_compiler.compile("# タイトル\n\n[c:String] と `x` を参照。\n")
+    assert_include html, "</a> と <code>x</code> を参照。"
+  end
+
+  def test_gfm_strong_number
+    html = gfm_compiler.compile("# タイトル\n\n**1.** 最初の説明。\n")
+    assert_include html, "<strong>1.</strong> 最初の説明。"
+  end
+
+  def test_gfm_param_name_code
+    md = "### def m(v) -> String\n\n説明。\n\n- **param** `v` -- 値。\n"
+    html = compile_method(gfm_compiler, md)
+    assert_include html, "[PARAM] <code>v</code>:"
+  end
+
+  def test_gfm_raise_name_code
+    md = "### def m(v) -> String\n\n説明。\n\n- **raise** `TypeError` -- 型エラー。\n"
+    html = compile_method(gfm_compiler, md)
+    assert_include html, "[EXCEPTION] <code>TypeError</code>:"
+  end
+
+  def test_gfm_dlist_code_term
+    html = gfm_compiler.compile("# タイトル\n\n- **`type`**: Content-Type ヘッダ。\n")
+    assert_include html, "<dt><code>type</code></dt>"
+  end
+
+  def test_gfm_dlist_ref_term_resolves_inside_code
+    # spec/eval 型: ref のコード term は <code> 内でリンク解決する
+    html = gfm_compiler.compile("# T\n\n- **`[c:String]`**: 文字列クラス。\n")
+    assert_include html, "<dt><code><a href="
+    assert_include html, "</a></code></dt>"
+  end
+
+  def test_gfm_dlist_term_inner_stripped
+    # news/1.8.2 型: スパン内の末尾スペースは dt に含めない（rd の strip と同じ）
+    html = gfm_compiler.compile("# T\n\n- **`CSV.open, and generate `**: 説明。\n")
+    assert_include html, "<dt><code>CSV.open, and generate</code></dt>"
+  end
+
+  def test_gfm_dlist_plain_term_stays_plain
+    html = gfm_compiler.compile("# タイトル\n\n- **用語**: 説明文。\n")
+    assert_include html, "<dt>用語</dt>"
+  end
+
+  def test_gfm_table_basic
+    md = <<~MD
+      # タイトル
+
+      | 文字列 | ステータス |
+      |--------|-----------|
+      | `"OK"` | 200 |
+    MD
+    html = gfm_compiler.compile(md)
+    assert_include html, "<table>"
+    assert_include html, "<th>文字列</th>"
+    assert_include html, "<td><code>&quot;OK&quot;</code></td>"
+    assert_include html, "<td>200</td>"
+  end
+
+  def test_gfm_table_alignment
+    md = "# T\n\n| a | b | c |\n|:--|:-:|--:|\n| 1 | 2 | 3 |\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, '<th align="left">a</th>'
+    assert_include html, '<th align="center">b</th>'
+    assert_include html, '<th align="right">c</th>'
+    assert_include html, '<td align="right">3</td>'
+  end
+
+  def test_gfm_pipe_line_without_delimiter_is_paragraph
+    # FalseClass 型: | 演算子の散文はテーブルにしない（区切り行必須）
+    md = "# T\n\n| は再定義可能な演算子です。通常は false | other の形で使われます。\n"
+    html = gfm_compiler.compile(md)
+    assert_not_include html, "<table>"
+    assert_include html, "| は再定義可能な演算子です。"
+  end
+
+  def test_gfm_off_by_default
+    html = @md.compile("# タイトル\n\nこの `code' はどうか。\n")
+    assert_not_include html, "<code>code"
+  end
+
   # ---- doc / ライブラリページ ----
 
   def test_doc_headline_and_paragraph

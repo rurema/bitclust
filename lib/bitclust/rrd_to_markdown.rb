@@ -454,7 +454,7 @@ module BitClust
 
     def convert_anchored_heading(line, anchor, text)
       prefix = '#' * line[/\A=+/].length
-      @out << "#{prefix} #{text} {##{anchor}}\n"
+      @out << "#{prefix} #{escape_backticks(text)} {##{anchor}}\n"
       advance
     end
 
@@ -525,7 +525,9 @@ module BitClust
     end
 
     def code_like_term?(term)
-      term.length < 40 && term !~ /\p{Hiragana}|\p{Katakana}|\p{Han}/
+      # バッククォート/バックスラッシュを含む term はスパン化しない
+      # （`term` の境界が \` エスケープと曖昧になるため。symref 等）
+      term.length < 40 && term !~ /\p{Hiragana}|\p{Katakana}|\p{Han}|[`\\]/
     end
 
     def format_dlist_term(term)
@@ -724,13 +726,14 @@ module BitClust
       advance
     end
 
-    # テキスト行の __WORD__ パターンをコードスパンに変換
-    # ブラケットリンク [[type:...]] 内は除外
+    # テキスト行の __WORD__ パターンをコードスパンに変換。
+    # ブラケットリンク内は除外（convert_inline_refs 後に呼ばれるため、
+    # 保護対象は md の一重括弧 [type:...]。[m:Delegator#__getobj__] 等）
     def add_code_spans(text)
       # クロスリファレンス部分を保護して変換
-      parts = text.split(/(\[\[[a-zA-Z][\w-]*:[^\]]*\]\])/)
+      parts = text.split(/(\[[a-zA-Z][\w-]*:[^\]]*\])/)
       parts.map { |part|
-        if part.start_with?('[[') && part.end_with?(']]')
+        if part.start_with?('[') && part.end_with?(']')
           part
         else
           part.gsub(/(__\w+__)/, '`\\1`')
@@ -770,8 +773,28 @@ module BitClust
 
     # 参照に見えるリテラル本文 [ruby-talk:198440] 等（旧 news）をエスケープする。
     # エスケープしないと md→rd の bare-ref 復元で [[...]] に誤変換される
+    # 本文バッククォートの GFM 忠実化（M2）:
+    # - GNU 風引用 `token'（rd に code マークアップがなかった代替記法。
+    #   getoptlong の `--version' 等）→ インラインコードスパン `token`
+    # - それ以外の生バッククォート → \` エスケープ（偶発スパン防止）
+    # md→rd が両方とも復元する。__WORD__ の自動スパンはこの後の
+    # add_code_spans が付けるため対象外
     def escape_ref_lookalikes(bin)
-      bin.gsub(/(?<!\[)\[([a-zA-Z][a-zA-Z-]*:[^\[\]]*)\](?!\])/n) { "\\[#{$1}]" }
+      escape_backticks(
+        bin.gsub(/(?<!\[)\[([a-zA-Z][a-zA-Z-]*:[^\[\]]*)\](?!\])/n) { "\\[#{$1}]" }
+      )
+    end
+
+    # GNU 風引用 `token' → コードスパン、残りの生バッククォート → \` 。
+    # 除外（エスケープで温存）:
+    # - 開き ` の直前が \（rd の正規表現特殊変数 \` 等）
+    # - 中身にバックスラッシュ（DOSISH の `\' 等。閉じ ` が \` と曖昧になる）
+    # - TeX 風二重引用 ``text''（rdoc.rd。開き直前の ` と閉じ直後の ' で判定）
+    # 見出しなど参照変換を通さないパスからも使う
+    def escape_backticks(bin)
+      bin.gsub(/(?<![\\`])`([^`'\s\\]+)'(?!')/) { "\x00#{$1}\x00" }
+         .gsub('`', '\\\\`')
+         .gsub("\x00", '`')
     end
 
     def current_line
