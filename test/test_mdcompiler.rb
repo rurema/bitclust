@@ -130,6 +130,11 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 
+  def test_indented_code_with_tabs
+    # Kernel#mkmf 型: タブは元のカラム位置で展開される（detab はデデント前）
+    assert_equivalent_method "--- mkmf -> ()\n\n説明。\n\n  -d ARGS\trun dir_config\n  -h ARGS\trun have_header\n"
+  end
+
   def test_item_list
     assert_equivalent_method <<~RD
       --- index(val) -> Integer
@@ -187,6 +192,101 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 
+  def test_param_description_with_emlist
+    # Array#pack 型: @param の説明に //emlist が続く（rd では dd の一部）
+    assert_equivalent_method <<~RD
+      --- m(v) -> String
+
+      説明。
+
+      @param v 値。
+
+      //emlist[例][ruby]{
+      p 1
+      //}
+
+      @return 結果。
+    RD
+  end
+
+  def test_signature_without_space
+    # OpenSSL::X509::Extension 型: 「---name」（スペース無し）を RDCompiler は受理する
+    assert_equivalent_method <<~RD
+      ---critical=(bool)
+      重要度を設定します。
+
+      @param bool 真偽値
+    RD
+  end
+
+  def test_raise_without_description_trailing_space
+    # Gem::RemoteFetcher#download 型: 「@raise Ex 」（説明なし・末尾スペース）
+    # RDCompiler は dd 内に空白テキスト行を出す
+    assert_equivalent_method "--- m(v) -> String\n\n説明。\n\n@raise SomeError \n"
+  end
+
+  def test_indented_code_across_double_blank
+    # Process#exec 型: 空行2つを挟むインデントコードは1つの <pre> に融合する
+    assert_equivalent_method <<~RD
+      --- m(v) -> String
+
+      例:
+
+         exec "echo *"
+         # never get here
+
+
+         exec "echo", "*"
+         # never get here
+
+      @param v 値。
+    RD
+  end
+
+  def test_undef_metadata
+    # Complex#< 型: @undef は [UNKNOWN_META_INFO] として dl に描画される
+    # （md でも生のまま渡る。MDCompiler が受けないと無限ループになる）
+    assert_equivalent_method <<~RD
+      --- <(other)    -> bool
+
+      @undef
+    RD
+  end
+
+  def test_unknown_metadata_after_param
+    # @param に続く未知メタデータは同じ <dl> 内に UNKNOWN_META_INFO で入る
+    assert_equivalent_method <<~RD
+      --- m(v) -> bool
+
+      説明。
+
+      @param v 値。
+      @undef
+    RD
+  end
+
+  def test_dlist_description_with_interleaved_emlist
+    # String#% 型: dd は「インデント段落 + emlist」を交互に何個でも受ける
+    assert_equivalent_method <<~RD
+      --- m(v) -> String
+
+      : #
+       プレフィックスを付けます。
+
+      //emlist[][ruby]{
+      p 1
+      //}
+
+       浮動小数点数に対しては必ず付けます。
+
+      //emlist[][ruby]{
+      p 2
+      //}
+
+      続き。
+    RD
+  end
+
   def test_dlist_with_list_like_text_in_description
     # news/1.8.0 型: dd 内のリスト風テキストは RDCompiler ではただのテキスト
     assert_equivalent_doc <<~RD
@@ -221,6 +321,87 @@ class TestMDCompiler < Test::Unit::TestCase
          折り返した継続行。
 
       本文。
+    RD
+  end
+
+  def test_h5_heading
+    # spec/safelevel 型: ===== は h3（hlevel 1 + (5-3)）として描画される
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+      ==== レベル 0
+
+      ===== 汚染されるオブジェクト
+
+      本文。
+    RD
+  end
+
+  def test_olist_item_continuation
+    # spec/terminate 型: (N) 項目の折り返し行は項目の継続
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+       (1) すべてのスレッドを kill
+       (2) ハンドラが登録されていればそれを実
+           行する。
+       (3) 後始末。
+
+      本文。
+    RD
+  end
+
+  def test_see_in_doc_is_plain_text
+    # pack_template 型: doc/lib ページの @see は RDCompiler では段落テキスト
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+      本文。
+
+      @see [[c:String]]
+    RD
+  end
+
+  def test_dlist_colon_term_without_space
+    # spec/operator 型: dlist 継続の「:term」（スペース無し）も dt
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+      : 再定義できる演算子
+        いろいろ。
+
+      :再定義できない演算子
+        これらは再定義できません。
+
+      本文。
+    RD
+  end
+
+  def test_colon_no_space_in_paragraph_stays_text
+    # openssl/ASN1 型: 段落継続の「:SYMBOL」行は dlist 化しない
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+      タグクラスを返します。
+      :IMPLICIT、:EXPLICIT、nil のいずれかを返します。
+
+      本文。
+    RD
+  end
+
+  def test_discrete_numbered_text
+    # lib:logger 型: 離散した「N. テキスト」は RD では段落テキスト
+    # （md では **N.** 太字。M1 では元のテキストに戻して描画する）
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+      ログの出力先について。
+
+      1. STDERR/STDOUTに出力するように指定
+
+      本文が続きます。
+
+      2. ファイルに出力するように指定
     RD
   end
 

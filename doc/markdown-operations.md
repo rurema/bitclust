@@ -46,6 +46,10 @@ $ ruby tools/md-bridge-check.rb <doctree>/refm/api/src <doctree>/manual/api --ve
 
 # (4) DB 全内容: 新旧 DB をエントリ単位で比較（§3 で両方をビルドしてから）
 $ ruby tools/md-db-check.rb /tmp/db-old /tmp/db-new
+
+# (5) ネイティブ描画（MDCompiler）: 全エントリで RDCompiler と HTML 比較
+#     （md source → MDCompiler と rd source → RDCompiler の出力一致）
+$ ruby tools/md-compile-check.rb /tmp/db-old
 ```
 
 期待値: (1) api 1161/1161・doc 70/70・capi 16/16 byte-exact、

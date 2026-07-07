@@ -3,6 +3,7 @@
 require 'pathname'
 
 require 'bitclust/include_graph'
+require 'bitclust/rrd_to_markdown'
 require 'bitclust/include_pruner'
 require 'bitclust/whole_file_gate'
 require 'bitclust/entity_splitter'
@@ -111,6 +112,8 @@ module BitClust
       end
       rrd = EntitySplitter.resolve_header_gates(rrd, @scope)
       rrd = normalize_entity_h1(rrd)
+      rrd = normalize_signature_spacing(rrd)
+      rrd = RRDToMarkdown.normalize_dlist_colon_spacing(rrd)
       rrd = rrd.sub(/\A(?:[ \t]*\n)+/, '')   # 先頭空行（ゲート解決の残り）を除去
       [normalize_header_regions(rrd), front_matter]
     end
@@ -185,6 +188,13 @@ module BitClust
     def normalize_entity_h1(rrd)
       return rrd unless rrd =~ /^=(?:class|module|object|reopen|redefine)\b/
       rrd.gsub(/^=((?:class|module|object|reopen|redefine)\b)/, '= \1')
+    end
+
+    # 「---critical=(bool)」のようなスペース無しシグネチャ（RDCompiler は
+    # /\A---/ で受理）を正規形「--- name」に直す。コードブロック内に
+    # 行頭 --- は現れない前提（roundtrip 検証が破れを検出する）
+    def normalize_signature_spacing(rrd)
+      rrd.gsub(/^---(?=[^\s-])/, '--- ')
     end
 
     # ファイル全体ゲートと注入済みゲート（include サイト / LIBRARIES 由来）の交差を取る

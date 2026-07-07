@@ -16,7 +16,7 @@ module BitClust
     module_function
 
     def reduce(rrd)
-      rrd.lines.map { |line|
+      RRDToMarkdown.normalize_dlist_colon_spacing(rrd.lines.map { |line|
         case line
         when /\A\#@samplecode[ \t]+\n\z/
           "\#@samplecode\n"                      # ラベル無しの末尾スペース
@@ -35,7 +35,7 @@ module BitClust
         else
           line
         end
-      }.join
+      }.join)
     end
 
     def convert(rrd)

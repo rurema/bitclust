@@ -35,6 +35,9 @@ module BitClust
     DLIST_RE = /\A- \*\*(.+?)\*\*:(?:\s|$)/
     INFO_RE = /\A- \*\*(?:param|arg|return|raise)\*\*/
     SEE_RE = /\A- \*\*SEE\*\*/
+    # @undef など変換器が生のまま渡す未知メタデータ
+    # （RDCompiler の entry_info ループ条件 /\A@(?!see)\w+/ と同じ）
+    RAW_META_RE = /\A@(?!see)\w+/
 
     def library_file
       while @f.next?
@@ -48,7 +51,7 @@ module BitClust
             headline @f.gets || raise
           end
         when SEE_RE
-          see
+          doc_see
         when DLIST_RE
           dlist
         when MD_ITEM_RE
@@ -103,6 +106,8 @@ module BitClust
           code_fence
         when /@todo/
           todo
+        when RAW_META_RE
+          entry_info
         else
           if @f.peek&.strip&.empty?
             @f.gets
@@ -158,29 +163,49 @@ module BitClust
     end
 
     # - **param** `name` -- desc / - **return** -- desc / - **raise** `Ex` -- desc
+    # および生の @xxx（未知メタデータ、RDCompiler と同じく UNKNOWN_META_INFO）
     def entry_info
       line '<dl>'
-      while @f.next? and INFO_RE =~ @f.peek || /\A$/ =~ @f.peek
+      while @f.next? and INFO_RE =~ @f.peek || RAW_META_RE =~ @f.peek || /\A$/ =~ @f.peek
         header = @f.gets or raise
         next if /\A$/ =~ header
+        if RAW_META_RE =~ header
+          cmd = header.slice!(/\A@\w+/) or raise
+          @f.ungets(header)
+          line "<dt>[UNKNOWN_META_INFO] #{escape_html(cmd)}:</dt>"
+          dd_without_p
+          next
+        end
         case header
         when /\A- \*\*(param|arg)\*\*\s+`([^`]+)`( --(?:.*))?$/m
           line "<dt class='#{@type.to_s}-param'>[PARAM] #{escape_html($2)}:</dt>"
-          rest = $3 ? ($3 || raise).sub(/\A --/, '') : "\n"
+          rest = $3 ? ($3 || raise).sub(/\A --/, '') : +"\n"
         when /\A- \*\*raise\*\*\s+`([^`]+)`( --(?:.*))?$/m
           line "<dt>[EXCEPTION] #{escape_html($1)}:</dt>"
-          rest = $2 ? ($2 || raise).sub(/\A --/, '') : "\n"
+          rest = $2 ? ($2 || raise).sub(/\A --/, '') : +"\n"
         when /\A- \*\*return\*\*( --(?:.*))?$/m
           line "<dt>[RETURN]</dt>"
-          rest = $1 ? ($1 || raise).sub(/\A --/, '') : "\n"
+          rest = $1 ? ($1 || raise).sub(/\A --/, '') : +"\n"
         else
           raise "must not happen: #{header.inspect}"
         end
-        rest = +"\n" if rest.strip.empty?   # LineInput#gets が破壊的に触るため凍結不可
+        # 「@raise Ex 」（説明なし・末尾スペース）は rd では dd 内の空白テキスト行に
+        # なるため、rest の空白は潰さずそのまま戻す（+"\n" は凍結回避）
         @f.ungets(rest)
         dd_without_p
       end
       line '</dl>'
+    end
+
+    # doc/lib ページの @see: RDCompiler の library_file には @see の解釈が
+    # なく段落テキスト「@see ...」として描画される（pack_template 等）。
+    # md の - **SEE** を @see 行に戻して段落として流す
+    def doc_see
+      header = @f.gets or raise
+      body = ["@see#{header.sub(SEE_RE, '')}"] + @f.span(/\A\s+\S/)
+      line '<p>'
+      line compile_text(text_node_from_lines(body))
+      line '</p>'
     end
 
     # - **SEE** [m:X], [m:Y]（継続行あり）
@@ -264,7 +289,12 @@ module BitClust
         @f.until_terminator(terminator) do |code_line|
           lines << code_line
         end
-        lines = canonicalize(lines)
+        # 変換器はベースインデント（= フェンス長 - 3）を除去して格納している。
+        # RDCompiler の list は detab（タブをカラム位置で空白展開）を元の
+        # カラムで行うため、ベースインデントを戻してから同じ処理を通す
+        base = fence.size - 3
+        lines = lines.map { |l| l =~ /\A\s*\z/ ? l : (' ' * base) + l }
+        lines = unindent_block(canonicalize(lines))
         while lines.last&.empty?
           lines.pop
         end
@@ -314,6 +344,40 @@ module BitClust
       line @item_stack.pop unless @item_stack.empty?
     end
 
+    # RDCompiler の dd_with_p / dd_without_p の md 版:
+    # コードブロック（rd では //emlist）の判定をフェンスに差し替える
+    def dd_with_p
+      line '<dd>'
+      while /\A(?:\s|\z)/ =~ @f.peek or FENCE_RE =~ @f.peek
+        case @f.peek
+        when /\A$/
+          @f.gets
+        when /\A[ \t]/
+          line '<p>'
+          line compile_text(text_node_from_lines(@f.span(/\A[ \t]/)))
+          line '</p>'
+        when FENCE_RE
+          code_fence
+        else
+          raise 'must not happen'
+        end
+      end
+      line '</dd>'
+    end
+
+    def dd_without_p
+      line '<dd>'
+      while /\A[ \t]/ =~ @f.peek or FENCE_RE =~ @f.peek
+        case @f.peek
+        when /\A[ \t]/
+          line compile_text(text_node_from_lines(@f.span(/\A[ \t]/)))
+        when FENCE_RE
+          code_fence
+        end
+      end
+      line '</dd>'
+    end
+
     # テキストノード: インライン記法を rd 形式へ復元してから既存の
     # コンパイル（エスケープ・リンク解決）を継承する。
     # M1 等価モード: 変換器が付けた __X__ の自動コードスパンは剥がす
@@ -322,7 +386,10 @@ module BitClust
     end
 
     def restore_rd_text(str)
-      MarkdownToRRD.restore_inline(str.gsub(/`(__\w+__)`/, '\1'))
+      # 行頭の **N.**（離散番号の太字化）は rd の素のテキスト「N.」に戻す
+      MarkdownToRRD.restore_inline(
+        str.gsub(/`(__\w+__)`/, '\1').gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
+      )
     end
   end
 

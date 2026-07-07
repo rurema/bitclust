@@ -8,7 +8,12 @@
 # が一致することを確認する。fragment の md→rd ラウンドトリップも同時に検証。
 #
 # usage: ruby tools/md-compile-check.rb <db-path> [--limit N] [-v]
+#          [--only methods|docs|libs|functions] [--shard K/N]
+#
+# メモリの少ないマシンでは 1 プロセスで全件を回さず、--only/--shard で
+# 分割して直列に実行する（例: --only methods --shard 0/4 ... 3/4）。
 
+$stdout.sync = true
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'bitclust'
 require 'bitclust/rdcompiler'
@@ -19,16 +24,25 @@ require 'bitclust/capi_converter'
 
 limit = nil
 verbose = false
+only = nil
+shard_k = nil
+shard_n = nil
 paths = []
 args = ARGV.dup
 until args.empty?
   case (a = args.shift)
   when '--limit' then limit = args.shift.to_i
+  when '--only' then only = args.shift
+  when '--shard'
+    shard_k, shard_n = (args.shift || '').split('/').map(&:to_i)
   when '-v' then verbose = true
   else paths << a
   end
 end
 db_path = paths.shift or abort "usage: #{$0} <db-path> [--limit N]"
+
+run = ->(kind) { only.nil? || only == kind }
+in_shard = ->(i) { shard_n.nil? || i % shard_n == shard_k }
 
 db = BitClust::MethodDatabase.new(db_path)
 urlmapper = BitClust::URLMapper.new(Hash.new { 'dummy' })
@@ -91,7 +105,9 @@ rescue StandardError => e
 end
 
 count = 0
-db.classes.sort_by(&:name).each do |c|
+db.classes.sort_by(&:name).each_with_index do |c, ci|
+  break unless run.call('methods')
+  next unless in_shard.call(ci)
   c.entries.sort_by { |e| e.names.join }.each do |m|
     break if limit && count >= limit
     count += 1
@@ -108,6 +124,7 @@ db.classes.sort_by(&:name).each do |c|
 end
 
 db.docs.sort_by(&:name).each do |d|
+  break unless run.call('docs')
   ref = begin
     rd.compile(d.source)
   rescue StandardError
@@ -118,6 +135,7 @@ db.docs.sort_by(&:name).each do |d|
 end
 
 db.libraries.sort_by(&:name).each do |l|
+  break unless run.call('libs')
   next if l.source.strip.empty?
   ref = begin
     rd.compile(l.source)
@@ -129,8 +147,9 @@ db.libraries.sort_by(&:name).each do |l|
 end
 
 begin
-  fdb = BitClust::FunctionDatabase.new(db_path)
-  fdb.functions.sort_by(&:name).each do |f|
+  fdb = BitClust::FunctionDatabase.new(db_path) if run.call('functions')
+  fdb ||= nil
+  (fdb ? fdb.functions.sort_by(&:name) : []).each do |f|
     ref = begin
       rd.compile_function(f, nil)
     rescue StandardError

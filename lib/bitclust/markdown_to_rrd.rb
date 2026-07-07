@@ -118,6 +118,8 @@ module BitClust
           convert_gvar_signature(line)
         when /\A### /
           @capi ? convert_capi_signature(line) : convert_h3_heading(line)
+        when /\A##### /
+          convert_h5_heading(line)
         when /\A#### /
           convert_h4_heading(line)
         when /\A- \*\*(param|return|raise)\*\*/
@@ -290,6 +292,8 @@ module BitClust
         elsif greedy && line =~ /\A[ \t]+$/
           @out << line
           advance
+        elsif greedy && line =~ /\A`{3,}/
+          convert_code_block(line)   # rd 側と対称: 直結するコードブロックは説明の一部
         else
           break
         end
@@ -347,6 +351,12 @@ module BitClust
       convert_heading_with_anchor(line, '====')
     end
 
+    def convert_h5_heading(line)
+      # プレフィックス置換のみ（rd 側と対称、空白を保持）
+      @out << line.sub(/\A##### /, '===== ')
+      advance
+    end
+
     def strip_code_span(text)
       text.sub(/\A`(.+)`\z/, '\\1')
     end
@@ -360,18 +370,26 @@ module BitClust
       elsif line =~ /\A- \*\*(.+?)\*\*:\s*$/
         @out << ": #{strip_code_span(convert_inline_refs($1))}\n"
         advance
-        # 継続行を収集（空行を挟む場合も含む）
+        # 継続行を収集（空行を挟む場合も含む）。rd 側と対称:
+        # RDCompiler の dd_with_p はインデント段落とコードブロックを
+        # 交互に何個でも説明として受ける（String#% 型）
         while @index < @lines.length
           l = current_line
           if l =~ /\A\s+\S/
             @out << convert_inline_refs(l)
             advance
-          elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/ &&
-                @lines[@index + 1] !~ /\A- \*\*/
-            # 空行の後にインデント行が続く限り説明（rd 側と対称、
-            # RDCompiler の dd_with_p の貪欲さに合わせる）
-            @out << l
-            advance
+          elsif l =~ /\A`{3,}/
+            convert_code_block(l)
+          elsif l =~ /\A\s*$/
+            scan = @index + 1
+            scan += 1 while scan < @lines.length && @lines[scan] =~ /\A\s*$/
+            nxt = scan < @lines.length ? @lines[scan] : nil
+            if nxt && nxt !~ /\A- \*\*/ && (nxt =~ /\A\s+\S/ || nxt =~ /\A`{3,}/)
+              @out << l
+              advance
+            else
+              break
+            end
           else
             break
           end
@@ -398,6 +416,20 @@ module BitClust
       rrd_indent = indent.empty? ? ' ' : indent
       @out << convert_inline_refs(line.sub(/\A\s*\d+\. /, "#{rrd_indent}(#{num}) "))
       advance
+      # 継続行を収集（convert_list_item と同じ、rd 側と対称）
+      while @index < @lines.length
+        l = current_line
+        if l =~ /\A\#@/
+          raw_passthrough(l)
+        elsif l =~ /\A\s*$/
+          break
+        elsif l =~ /\A(\s+)\S/ && l !~ /\A\s*-\s/ && l !~ /\A\s*\d+\.\s/
+          @out << convert_inline_refs(l)
+          advance
+        else
+          break
+        end
+      end
     end
 
     def convert_list_item(line, indent)

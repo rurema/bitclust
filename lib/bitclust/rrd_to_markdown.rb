@@ -3,7 +3,57 @@
 module BitClust
   class RRDToMarkdown
     def self.convert(rrd, extra_front_matter: {}, capi: false)
+      rrd = normalize_dlist_colon_spacing(rrd)
       new(rrd, extra_front_matter: extra_front_matter, capi: capi).convert
+    end
+
+    # RDCompiler の dlist 継続は /\A:/（スペース不要）で dt になる
+    # （spec/operator の「:再定義できない演算子」）。dlist 文脈にある
+    # 「:term」だけを正規形「: term」に直す。段落継続の「:SYMBOL」行
+    # （openssl/ASN1 等）は RDCompiler では段落テキストなので触らない。
+    # 文脈判定は RDCompiler のディスパッチを行単位で再現する
+    def self.normalize_dlist_colon_spacing(rrd)
+      state = :none      # :none | :para | :dlist
+      in_code = nil      # コードブロックの終端パターン
+      rrd.lines.map { |l|
+        if in_code
+          in_code = nil if l =~ in_code
+          next l
+        end
+        case l
+        when /\A\#@samplecode/
+          in_code = /\A\#@end/
+          l
+        when /\A\/\/emlist.*\{/
+          in_code = %r<\A//\}>
+          state = :none unless state == :dlist   # dd 内の emlist は dlist 継続
+          l
+        when /\A\#@/
+          l                                      # ディレクティブは文脈に透明
+        when /\A:\s/
+          state = :dlist unless state == :para   # 段落継続中の「: 」行は段落
+          l
+        when /\A:(?=\S)/
+          if state == :dlist
+            ": #{l[1..]}"
+          else
+            state = :para                        # 段落（開始または継続）
+            l
+          end
+        when /\A[ \t]*\n?\z/
+          state = :none unless state == :dlist   # 空行: dd は空行を跨ぐ
+          l
+        when /\A[ \t]/
+          state = :none unless state == :dlist   # dd 説明は継続、段落は終了
+          l
+        when /\A(?:---|=)/
+          state = :none
+          l
+        else
+          state = :para
+          l
+        end
+      }.join
     end
 
     # ファイル単体からは決められない front matter（library 所属・構造 since/until）を
@@ -44,6 +94,9 @@ module BitClust
     SAMPLECODE_RE = /\A\#@samplecode/
 
     def collect_library_metadata
+      # capi には require/category 等の library メタデータは存在しない。
+      # 本文が「require の C 版です。」のように require で始まる場合の誤認を防ぐ
+      return if @capi
       scan = @index
       tokens = []       # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:cmt, line] | [:blank]
       nest = 0
@@ -184,10 +237,14 @@ module BitClust
           convert_samplecode(line)
         when /\A\/\/emlist/
           convert_emlist(line)
-        when /\A--- /
+        when /\A---(?=[^\s-])/, /\A--- /
+          # RDCompiler は /\A---/ で受理するため「---name」（スペース無し）も
+          # シグネチャ（正規形「--- name」に直して変換する）
           convert_signature(line)
         when /\A={1,4}\[a:([^\]]+)\]\s+(.*)/
           convert_anchored_heading(line, $1, $2)
+        when /\A===== /
+          convert_h5(line)
         when /\A====\s+(.*)/
           convert_h4(line, $1)
         when /\A===\s+(.*)/
@@ -300,7 +357,9 @@ module BitClust
     end
 
     def convert_signature(line)
-      sig = line.sub(/\A--- /, '').chomp
+      # 「--- 」または「---name」（スペース無し形）のプレフィックスだけ除去。
+      # 2つ目以降の空白はシグネチャの一部として保持する（B1）
+      sig = line.sub(/\A---(?: |(?=[^\s-]))/, '').chomp
       # B1: 空白を保持（正規化しない）
 
       if @capi
@@ -383,6 +442,10 @@ module BitClust
         elsif greedy && line =~ /\A[ \t]+$/
           @out << line
           advance
+        elsif greedy && line =~ SAMPLECODE_RE
+          convert_samplecode(line)   # RDCompiler の dd はコードブロックも説明の一部
+        elsif greedy && line =~ /\A\/\/emlist/
+          convert_emlist(line)
         else
           break
         end
@@ -402,6 +465,12 @@ module BitClust
 
     def convert_h4(line, text)
       @out << "#### #{text}\n"
+      advance
+    end
+
+    def convert_h5(line)
+      # プレフィックス置換のみ（余分な空白・末尾空白を保持。psych.rd）
+      @out << line.sub(/\A===== /, '##### ')
       advance
     end
 
@@ -439,6 +508,20 @@ module BitClust
       text = $3
       @out << "#{indent}#{num}. #{convert_inline_refs(text.chomp)}\n"
       advance
+      # 継続行を収集（ulist と同じ。RDCompiler の項目継続はインデント深さ不問）
+      while @index < @lines.length
+        l = current_line
+        if l =~ /\A\#@/
+          raw_passthrough(l)
+        elsif l =~ /\A\s*$/
+          break
+        elsif l =~ /\A(\s+)\S/ && l !~ /\A\s+\*\s/ && l !~ /\A\s+\(\d+\)\s/
+          @out << convert_inline_refs(l)
+          advance
+        else
+          break
+        end
+      end
     end
 
     def code_like_term?(term)
@@ -457,26 +540,32 @@ module BitClust
     def convert_dlist_item(line, term)
       advance
       formatted = format_dlist_term(term)
-      # 説明行を収集。RDCompiler の dd_with_p と同じ貪欲さ:
-      # 空行を跨いでインデント行が続く限り説明（リスト風の行もテキストとして保持）
-      desc_lines = []
+      @out << "- #{formatted}:\n"
+      # 説明を収集。RDCompiler の dd_with_p と同じ貪欲さ:
+      # 空行（何行でも）を跨いでインデント行か emlist が続く限り説明の一部
+      # （インデント段落と emlist を交互に何個でも受ける。String#% 型）
       while @index < @lines.length
         l = current_line
         if l =~ /\A(\s+)\S/
-          desc_lines << l
+          @out << convert_inline_refs(l)
           advance
-        elsif l =~ /\A\s*$/ && @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/
-          desc_lines << l
-          advance
+        elsif l =~ SAMPLECODE_RE
+          convert_samplecode(l)
+        elsif l =~ /\A\/\/emlist/
+          convert_emlist(l)
+        elsif l =~ /\A\s*$/
+          scan = @index + 1
+          scan += 1 while scan < @lines.length && @lines[scan] =~ /\A\s*$/
+          nxt = scan < @lines.length ? @lines[scan] : nil
+          if nxt && (nxt =~ /\A\s+\S/ || nxt =~ SAMPLECODE_RE || nxt =~ /\A\/\/emlist/)
+            @out << l
+            advance
+          else
+            break
+          end
         else
           break
         end
-      end
-      if desc_lines.empty?
-        @out << "- #{formatted}:\n"
-      else
-        @out << "- #{formatted}:\n"
-        desc_lines.each { |l| @out << convert_inline_refs(l) }
       end
     end
 
@@ -489,7 +578,11 @@ module BitClust
           code_lines << line
           advance
         elsif line =~ /\A\s*$/
-          if @index + 1 < @lines.length && @lines[@index + 1] =~ /\A\s+\S/
+          # RDCompiler の list は /\A\S/ まで継続する（空行は何行でも跨ぐ）。
+          # 空行列の先に再びインデント行が来るなら同じブロックの一部
+          scan = @index + 1
+          scan += 1 while scan < @lines.length && @lines[scan] =~ /\A\s*$/
+          if scan < @lines.length && @lines[scan] =~ /\A\s+\S/
             code_lines << line
             advance
           else

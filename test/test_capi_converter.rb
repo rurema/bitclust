@@ -78,4 +78,14 @@ class TestCapiConverter < Test::Unit::TestCase
     RRD
     assert_equal rrd, roundtrip(rrd)
   end
+
+  def test_body_text_starting_with_require_is_not_metadata
+    # eval.c.rd の rb_require 型: 「require の C 版です。」のような本文が
+    # フラグメント先頭に来ても library メタデータと誤認しない
+    # （capi には require/category ヘッダは存在しない）
+    rrd = "\nrequire の C 版です。feature「fname」をロードします。\n"
+    md = BitClust::CapiConverter.convert(rrd)
+    assert_equal rrd, md
+    assert_equal rrd, roundtrip(rrd)
+  end
 end
