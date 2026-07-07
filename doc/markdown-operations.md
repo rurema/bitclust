@@ -54,7 +54,21 @@ $ ruby tools/md-compile-check.rb /tmp/db-old
 
 期待値: (1) api 1161/1161・doc 70/70・capi 16/16 byte-exact、
 (2) ライブラリ集合一致・要対応警告 0、(3) 全ライブラリ structurally identical、
-(4) `DATABASES EQUIVALENT`（末尾空白のみの差分は許容として別掲される）。
+(4) `DATABASES EQUIVALENT`（末尾空白のみ・シグネチャスペースのみの差分は
+許容として別掲される）、(5) `HTML EQUIVALENT`（method/doc/lib/function 全件）。
+
+(5) はメモリの少ないマシンでは 1 プロセスで回さず分割する:
+
+```console
+$ ruby tools/md-compile-check.rb /tmp/db-old --only methods --shard 0/4  # 1/4 2/4 3/4 も
+$ ruby tools/md-compile-check.rb /tmp/db-old --only docs
+$ ruby tools/md-compile-check.rb /tmp/db-old --only libs
+$ ruby tools/md-compile-check.rb /tmp/db-old --only functions
+```
+
+なお (5) が報告する fragment-roundtrip diffs（〜2250）は情報値。DB 内のエントリ
+source はファイルレベルの reduce 正規化を経ていないため、断片単体の再変換では
+正規化分の差が出る（HTML 等価が本ゲート）。
 
 ## 3. データベース構築（manual/ ツリーから）
 

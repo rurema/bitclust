@@ -52,7 +52,11 @@ puts "classes: #{common.size} common"
 
 entry_count = 0
 ws_only = 0
+sig_spacing_only = 0
 source_diffs = []
+# 「---name」（スペース無しシグネチャ）は正規形「--- name」へ寄せる
+# （RRDParser/RDCompiler はどちらも受理。openssl の8箇所）
+normalize_sig = ->(src) { src.gsub(/^---(?=[^\s-])/, '--- ') }
 common.each do |name|
   o, n = old_classes[name], new_classes[name]
   report.call("class #{name}: type #{o.type} vs #{n.type}") if o.type != n.type
@@ -67,13 +71,15 @@ common.each do |name|
     next if o_entries[key].source == n_entries[key].source
     if o_entries[key].source.rstrip == n_entries[key].source.rstrip
       ws_only += 1   # 末尾空白のみ（描画に影響しない）
+    elsif normalize_sig.call(o_entries[key].source) == n_entries[key].source
+      sig_spacing_only += 1
     else
       source_diffs << "#{name}##{key}"
     end
   end
 end
 puts "entries compared: #{entry_count}, real source diffs: #{source_diffs.size}, " \
-     "trailing-whitespace-only: #{ws_only}"
+     "trailing-whitespace-only: #{ws_only}, signature-spacing-only: #{sig_spacing_only}"
 source_diffs.first(10).each { |s| puts "  SOURCE DIFF #{s}" }
 
 # doc（散文ページ）。md 経路は DocConverter.reduce の正規化（末尾スペース・
@@ -97,7 +103,10 @@ puts "docs: #{common_docs.size} common, real source diffs: #{doc_diffs}, " \
      "normalized-only: #{doc_normalized}"
 
 if diffs.zero? && source_diffs.empty? && doc_diffs.zero?
-  puts "DATABASES EQUIVALENT#{ws_only.positive? ? " (#{ws_only} trailing-whitespace-only diffs)" : ''}"
+  notes = []
+  notes << "#{ws_only} trailing-whitespace-only" if ws_only.positive?
+  notes << "#{sig_spacing_only} signature-spacing-only" if sig_spacing_only.positive?
+  puts "DATABASES EQUIVALENT#{notes.empty? ? '' : " (#{notes.join(', ')} diffs)"}"
 else
   puts "TOTAL STRUCTURAL DIFFS: #{diffs + source_diffs.size + doc_diffs}"
 end
