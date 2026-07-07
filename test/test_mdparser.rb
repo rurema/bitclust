@@ -281,6 +281,59 @@ class TestMDParser < Test::Unit::TestCase
     end
   end
 
+  def test_copy_doc_md_keeps_relative_location
+    # Windows CI 対応: doc エントリの source_location は md_root と同じ形
+    # （相対で渡せば相対 manual/doc/...）で格納する。絶対パス化すると
+    # Windows のドライブレター（D:）のコロンで Location の
+    # デシリアライズ（file:line 分割）が壊れる
+    require 'tmpdir'
+    Dir.mktmpdir do |root|
+      write = ->(rel, s) {
+        path = File.join(root, rel)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, s)
+      }
+      write.call('manual/api/mylib.md', <<~MD)
+        ---
+        type: library
+        category: Text
+        ---
+        mylib の説明。
+      MD
+      write.call('manual/doc/help.md', "= ヘルプ\n\n本文。\n")
+      write.call('manual/doc/parts.md', "\#@include(included)\n")
+      write.call('manual/doc/included.md', "= 部品\n\n部品本文。\n")
+
+      db = BitClust::MethodDatabase.new(File.join(root, 'db'))
+      db.init
+      db.transaction {
+        db.propset 'version', '3.4'
+        db.propset 'encoding', 'utf-8'
+      }
+      Dir.chdir(root) do
+        db.transaction {
+          db.update_by_markdowntree('manual/api')
+        }
+      end
+      doc_ids = db.docs.map(&:name).sort
+      assert_equal %w[help parts], doc_ids  # include 参照先はページにしない
+      assert_equal 'manual/doc/help.md',
+        db.docs.find { |d| d.name == 'help' }.source_location.file.to_s
+    end
+  end
+
+  def test_location_deserialize_with_drive_letter
+    # Windows の絶対パス（D:/...）が混ざっても file:line の分割は
+    # 最後のコロンで行う（rpartition）
+    db = BitClust::MethodDatabase.dummy(PARAMS)
+    e = BitClust::DocEntry.new(db, 'x')
+    e.__send__(:_set_properties,
+               { 'source_location' => 'D:/a/doctree/manual/doc/help.md:12' })
+    loc = e.instance_variable_get(:@source_location)
+    assert_equal 'D:/a/doctree/manual/doc/help.md', loc.file
+    assert_equal '12', loc.line
+  end
+
   def test_function_parser
     # capi: キーワード無しの ### 全行がシグネチャ。source は本文のみ（md のまま）
     require 'bitclust/functiondatabase'

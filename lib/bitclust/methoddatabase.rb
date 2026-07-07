@@ -244,7 +244,11 @@ module BitClust
     # source には md がそのまま入り、source_location は md の実パスを指す
     def copy_doc_md
       require 'bitclust/mdparser'
-      doc_root = File.expand_path(File.join(@md_root, '..', 'doc'))
+      # source_location は md_root と同じ形で格納する（api 側と同じ慣例。
+      # Rakefile の相対 manual/api なら manual/doc/... になる）。絶対化すると
+      # Windows のドライブレターのコロンで file:line 分割が壊れ、
+      # 編集リンクも実行環境のパス依存になる
+      doc_root = Pathname.new(File.join(@md_root, '..', 'doc')).cleanpath.to_s
       return unless File.directory?(doc_root)
       files = Dir.glob("#{doc_root}/**/*.md").sort
       referenced = files.flat_map { |f|
@@ -255,7 +259,7 @@ module BitClust
         }.flatten
       }.to_set
       files.each do |f|
-        next if referenced.include?(f)
+        next if referenced.include?(File.expand_path(f))
         id = libname2id(f.delete_prefix("#{doc_root}/").sub(/\.md\z/, ''))
         se = DocEntry.new(self, id)
         s = Preprocessor.read(f, properties)

@@ -117,7 +117,8 @@ module BitClust
         when '[LibraryEntry]' then "restore_libraries(h['#{@name}'])"
         when '[ClassEntry]'   then "restore_classes(h['#{@name}'])"
         when '[MethodEntry]'  then "restore_methods(h['#{@name}'])"
-        when 'Location'       then "h['#{@name}']&.tap { |loc| break if loc.empty?; break Location.new(*loc.split(?:)) }"
+        # file:line の分割は最後のコロンで行う（Windows の D:/... 対応）
+        when 'Location'       then "h['#{@name}']&.tap { |loc| break if loc.empty?; break Location.new(*loc.rpartition(?:).values_at(0, 2)) }"
         else
           raise "must not happen: @type=#{@type.inspect}"
         end
