@@ -641,6 +641,16 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
   end
 
+  def test_extra_front_matter_name_emitted_after_type
+    # ファイル名の大文字小文字衝突回避で改名されたライブラリファイル
+    # （rdoc/rdoc.lib.md）の名前保持用。順序は type → name（§1.7）
+    rrd = "x/x の説明。\n"
+    expected = "---\ntype: library\nname: x/x\n---\nx/x の説明。\n"
+    assert_equal expected,
+      BitClust::RRDToMarkdown.convert(rrd,
+        extra_front_matter: { "type" => "library", "name" => "x/x" })
+  end
+
   def test_mixed_gated_alias_and_plain_include_to_front_matter
     # net/Net__HTTPServerException（分割後）: 版条件つき alias と素の include の混在。
     # #@ ブロックごとに単一種なら front matter 化できる

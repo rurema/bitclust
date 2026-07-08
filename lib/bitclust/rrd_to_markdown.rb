@@ -58,7 +58,8 @@ module BitClust
 
     # ファイル単体からは決められない front matter（library 所属・構造 since/until）を
     # 注入するための口。include グラフを解析したオーケストレータが値を計算して渡す。
-    EXTRA_FRONT_MATTER_KEYS = %w[type library since until].freeze
+    # name はファイル名の大文字小文字衝突回避で改名されたライブラリファイルの名前保持用
+    EXTRA_FRONT_MATTER_KEYS = %w[type name library since until].freeze
 
     # capi: C API リファレンス（refm/capi）モード。シグネチャは C の
     # 「--- <型付きシグネチャ>」で、def 等のキーワードを付けずに ### へ変換する
@@ -196,8 +197,8 @@ module BitClust
     def emit_front_matter
       return '' if @front_matter.empty?
       lines = ["---\n"]
-      # 順序: type, library, include, extend, alias, since, until, category, require, sublibrary（MARKUP_SPEC §1.7）
-      %w[type library].each do |key|
+      # 順序: type, name, library, include, extend, alias, since, until, category, require, sublibrary（MARKUP_SPEC §1.7）
+      %w[type name library].each do |key|
         if v = @front_matter[key]
           lines << "#{key}: #{v}\n"
         end

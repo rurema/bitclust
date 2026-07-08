@@ -100,6 +100,7 @@ class RRD2MDConverter
 
     converted = 0
     errors = []
+    emitted = []
 
     files.each do |rel_path|
       input_path = File.join(@input_dir, rel_path)
@@ -122,6 +123,7 @@ class RRD2MDConverter
           output_path = File.join(@output_dir, out_rel)
           FileUtils.mkdir_p(File.dirname(output_path))
           File.write(output_path, md, encoding: 'UTF-8')
+          emitted << out_rel
           warn "  #{rel_path} -> #{out_rel}" if @verbose
         end
 
@@ -136,6 +138,19 @@ class RRD2MDConverter
     unless errors.empty?
       warn "Errors: #{errors.size}"
       errors.each { |path, e| warn "  #{path}: #{e.message}" }
+    end
+
+    # 大文字小文字のみが異なる出力名は macOS/Windows の case-insensitive FS で
+    # チェックアウト不能になるため、バッチ全体で検証して失敗させる
+    # （途中のディレクトリ名も見る。解消は orchestrator の .lib 回避か
+    # ソース側のリネームで行う）
+    collisions = emitted.flat_map { |p|
+      parts = p.split('/')
+      (1..parts.size).map { |n| parts.first(n).join('/') }
+    }.uniq.group_by(&:downcase).each_value.select { |names| names.size > 1 }
+    unless collisions.empty?
+      collisions.each { |names| warn "  CASE COLLISION: #{names.sort.join(', ')}" }
+      abort "case-insensitive filename collisions: #{collisions.size}"
     end
   end
 

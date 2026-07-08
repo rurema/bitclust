@@ -26,6 +26,10 @@ class TestMarkdownBridge < Test::Unit::TestCase
     "bar/baz.md" => "---\ntype: library\n---\nbaz 概要。\n",
     "bar/C.md" => "---\nlibrary: bar/baz\n---\n# class C < Object\nC。\n",
     "dual.md" => "---\ntype: library\n---\n# class Dual < Object\nDual。\n",
+    # 大文字小文字衝突回避で改名されたサブライブラリ（rdoc/rdoc.lib.md 型）。
+    # 名前は front matter の name: が正
+    "sub/Sub.md" => "---\nlibrary: sub/sub\n---\n# class Sub < Object\nSub。\n",
+    "sub/sub.lib.md" => "---\ntype: library\nname: sub/sub\n---\nsub 概要。\n",
   }.freeze
 
   def build
@@ -49,7 +53,15 @@ class TestMarkdownBridge < Test::Unit::TestCase
 
   def test_libraries_manifest
     out = build
-    assert_equal "bar/baz\ndual\nfoo\n\#@until 3.1\ngated\n\#@end\n", out["LIBRARIES"]
+    assert_equal "bar/baz\ndual\nfoo\n\#@until 3.1\ngated\n\#@end\nsub/sub\n", out["LIBRARIES"]
+  end
+
+  def test_renamed_library_file_emits_by_front_matter_name
+    # sub/sub.lib.md（大文字小文字衝突回避の改名）は name: のライブラリ名で
+    # <name>.rd に emit され、メンバー include も付く
+    out = build
+    assert_equal "sub 概要。\n\n\#@include(Sub)\n", out["sub/sub.rd"]
+    assert_nil out["sub/sub.lib"]
   end
 
   def test_source_map_maps_emitted_to_md

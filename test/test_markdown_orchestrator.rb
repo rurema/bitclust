@@ -21,11 +21,14 @@ require 'bitclust/markdown_to_rrd'
 # [x] LIBRARIES 自体は変換対象外
 class TestMarkdownOrchestrator < Test::Unit::TestCase
   FILES = {
-    "LIBRARIES"  => "foo\n\#@until 3.1\ngated\n\#@end\n",
+    "LIBRARIES"  => "foo\n\#@until 3.1\ngated\n\#@end\nx\nx/x\n",
     "foo.rd"     => "category Cat\n\n説明。\n\n\#@include(foo/Bar)\n\n\#@include(foo/frag)\n",
     "foo/Bar"    => "\#@since 1.9.1\n= class Bar < Object\n\nBar の説明。\n\#@end\n",
     "foo/frag"   => "断片。\n",
     "gated.rd"   => "\#@until 3.1\ngated ライブラリの説明。\n\#@end\n",
+    "x.rd"       => "x の説明。\n\n\#@include(x/X)\n",
+    "x/X"        => "= class X < Object\n\nX の説明。\n",
+    "x/x.rd"     => "x/x の説明。\n",
   }.freeze
 
   def with_orchestrator
@@ -325,6 +328,36 @@ class TestMarkdownOrchestrator < Test::Unit::TestCase
       assert_equal ["gated.md", "gated/G.md", "gated/G__E.md"], units.map(&:path)
       assert_equal "---\ntype: library\nuntil: \"3.1\"\n---\n", orch.convert_unit(units[0])
       assert_equal({ "library" => "gated", "until" => "3.1" }, units[1].front_matter)
+    end
+  end
+
+  def test_sublibrary_case_collision_renamed_with_name_front_matter
+    # x/x.rd の出力 x/x.md はメンバー出力 x/X.md と大文字小文字のみで衝突し、
+    # macOS 等の case-insensitive FS でチェックアウト不能になる。
+    # basename に .lib を挟んで回避し、ライブラリ名は name: で保つ（rdoc/rdoc 型）
+    with_orchestrator do |orch|
+      units = orch.units("x/x.rd", FILES["x/x.rd"])
+      assert_equal ["x/x.lib.md"], units.map(&:path)
+      md = orch.convert_unit(units.first)
+      assert md.start_with?("---\ntype: library\nname: x/x\n---\n"), md[0, 80].inspect
+    end
+  end
+
+  def test_non_colliding_library_is_not_renamed
+    with_orchestrator do |orch|
+      units = orch.units("x.rd", FILES["x.rd"])
+      assert_equal ["x.md"], units.map(&:path)
+      assert_nil units.first.front_matter["name"]
+    end
+  end
+
+  def test_renamed_library_roundtrip_restores_rd
+    # name: は md 側だけの情報（ファイル名衝突回避）。md→rd では消え、
+    # reduce の rd 到達点がそのまま復元される
+    with_orchestrator do |orch|
+      unit = orch.units("x/x.rd", FILES["x/x.rd"]).first
+      md = orch.convert_unit(unit)
+      assert_equal unit.rrd, BitClust::MarkdownToRRD.convert(md)
     end
   end
 end

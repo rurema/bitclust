@@ -66,6 +66,9 @@ module BitClust
       @tree = MarkdownTree.scan(md_root)
       @warnings = @tree.warnings.dup
       @source_map = {}
+      # 名前はパス由来とは限らない（ファイル名衝突回避で改名された
+      # rdoc/rdoc.lib.md は front matter の name: が正）ので、パスから引く
+      @lib_by_path = @tree.libraries.to_h { |name, lib| [lib[:path], name] }
     end
 
     def build
@@ -80,8 +83,7 @@ module BitClust
       files.each do |f|
         rrd = MarkdownToRRD.convert(File.read(File.join(@md_root, f)))
         rrd = rewrite_includes(rrd, f, emitted)
-        libname = f.sub(/\.md\z/, '')
-        if @tree.libraries.key?(libname)
+        if (libname = @lib_by_path[f])
           rrd << member_includes(libname, emitted)
         elsif (entity = @tree.entities[f])
           rrd = wrap_gate(rrd, entity)
@@ -99,8 +101,9 @@ module BitClust
     # ように元式の拡張子なし名で断片を transclude しているため）。
     # ただし同名ディレクトリと衝突する場合は .rd を付ける（scanf.md と scanf/）
     def emit_name(f)
+      return "#{@lib_by_path[f]}.rd" if @lib_by_path[f]
       name = f.sub(/\.md\z/, '')
-      return "#{name}.rd" if @tree.libraries.key?(name) || @dirs.include?(name)
+      return "#{name}.rd" if @dirs.include?(name)
       name
     end
 

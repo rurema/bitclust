@@ -301,7 +301,7 @@ module BitClust
         return
       end
       # fragment も走査する: fragment を経由して grouping へ至る transclusion
-      # チェーンがある（fiddle.rd → fiddle/2.0/fiddle.rd → Fiddle 等）
+      # チェーンがある（fiddle.rd → fiddle/2.0/fiddle.lib.rd → Fiddle 等）
       walk(relpath, library, conditions, path_stack + [relpath])
     end
 

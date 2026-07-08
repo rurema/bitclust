@@ -164,4 +164,29 @@ class TestMarkdownTree < Test::Unit::TestCase
     assert tree.warnings.any? { |w| w.include?("include target not found") },
       tree.warnings.inspect
   end
+
+  def test_library_name_front_matter_override
+    # 出力名の大文字小文字衝突回避で改名されたライブラリファイル
+    # （rdoc/rdoc → rdoc/rdoc.lib.md）は front matter の name: が名前になる
+    tree = scan(
+      "rdoc.md" => LIB,
+      "rdoc/rdoc.lib.md" => "---\ntype: library\nname: rdoc/rdoc\n---\n概要。\n"
+    )
+    assert tree.libraries.key?("rdoc/rdoc"), tree.libraries.keys.inspect
+    assert_equal "rdoc/rdoc.lib.md", tree.libraries["rdoc/rdoc"][:path]
+    assert_false tree.libraries.key?("rdoc/rdoc.lib")
+  end
+
+  def test_case_insensitive_filename_collision_warns
+    # 大文字小文字のみが異なる名前は macOS/Windows の case-insensitive FS で
+    # チェックアウト不能になるため、同一ディレクトリ内の衝突を警告する
+    tree = scan(
+      "x.md" => LIB,
+      "x/Foo.md" => "---\nlibrary: x\n---\n# class Foo < Object\nFoo。\n",
+      "x/foo.md" => "---\ntype: library\n---\n概要。\n"
+    )
+    assert tree.warnings.any? { |w|
+      w.include?("case-insensitive") && w.include?("x/Foo.md") && w.include?("x/foo.md")
+    }, tree.warnings.inspect
+  end
 end

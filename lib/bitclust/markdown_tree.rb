@@ -41,6 +41,7 @@ module BitClust
 
     def scan
       files = Dir.glob('**/*.md', base: @root).sort
+      warn_case_collisions(files)
       infos = files.to_h { |f| [f, parse_file(f)] }
 
       referenced = {}
@@ -56,7 +57,9 @@ module BitClust
 
       infos.each do |path, info|
         if info[:library_file]
-          @libraries[path.sub(/\.md\z/, '')] =
+          # 名前は原則パス由来。ファイル名衝突回避で改名されたファイル
+          # （rdoc/rdoc.lib.md）は front matter の name: が正
+          @libraries[info[:name] || path.sub(/\.md\z/, '')] =
             { path: path, since: info[:since], until: info[:until] }
         end
         # include 参照され front matter を持たないファイルは、H1 を含んでいても
@@ -110,6 +113,7 @@ module BitClust
         while i < lines.length && lines[i] !~ /\A---\s*\z/
           case lines[i]
           when /\Atype:\s*library\s*\z/ then info[:library_file] = true
+          when /\Aname:\s*(\S+)/ then info[:name] = $1
           when /\Alibrary:\s*(\S+)/ then info[:library] = $1
           when /\Asince:\s*"?([^"\s]+)"?/ then info[:since] = $1
           when /\Auntil:\s*"?([^"\s]+)"?/ then info[:until] = $1
@@ -145,6 +149,19 @@ module BitClust
         end
       end
       info
+    end
+
+    # 大文字小文字のみが異なる名前は macOS/Windows の case-insensitive FS で
+    # チェックアウト不能になるため、衝突を警告する（途中のディレクトリ名も見る）
+    def warn_case_collisions(files)
+      entries = files.flat_map { |f|
+        parts = f.split('/')
+        (1..parts.size).map { |n| parts.first(n).join('/') }
+      }.uniq
+      entries.group_by(&:downcase).each_value do |names|
+        next if names.size < 2
+        @warnings << "case-insensitive filename collision: #{names.sort.join(', ')}"
+      end
     end
 
     # include 元ディレクトリ相対で target → target.md → （.rd を .md に）の順に解決

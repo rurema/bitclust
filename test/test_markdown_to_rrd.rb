@@ -379,6 +379,13 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  def test_front_matter_name_is_dropped
+    # name: は md 側のファイル名衝突回避（rdoc/rdoc.lib.md）でライブラリ名を
+    # 保持するための md 専用キー。rd には現れない
+    md = "---\ntype: library\nname: rdoc/rdoc\n---\nライブラリの説明\n"
+    assert_equal "ライブラリの説明\n", convert(md)
+  end
+
   def test_front_matter_category_and_require
     md = "---\ncategory: Network\nrequire:\n  - socket\n---\nライブラリの説明\n"
     expected = "category Network\n\nrequire socket\n\nライブラリの説明\n"

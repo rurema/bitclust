@@ -263,7 +263,7 @@ class TestIncludeGraph < Test::Unit::TestCase
   end
 
   def test_membership_propagates_through_fragment_chain
-    # fiddle.rd → fiddle/2.0/fiddle.rd（散文開始=fragment）→ Fiddle（grouping）の
+    # fiddle.rd → fiddle/2.0/fiddle.lib.rd（散文開始=fragment）→ Fiddle（grouping）の
     # transclusion チェーン。fragment を経由しても所属と経路条件は伝播する
     graph = analyze(
       "LIBRARIES"    => "foo\n",

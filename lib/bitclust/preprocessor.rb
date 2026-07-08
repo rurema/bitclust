@@ -99,7 +99,7 @@ module BitClust
             path = "#{basedir}/#{file}"
             # md ツリーのネイティブパース: 断片は .md 拡張子付きで保存されるが
             # include ターゲットは元式の名前のまま（拡張子なしの pack-template、
-            # .rd 付きの fiddle/2.0/fiddle.rd 等）。md 側の実ファイル名を試す
+            # .rd 付きの fiddle/2.0/fiddle.lib.rd 等）。md 側の実ファイル名を試す
             unless File.exist?(path)
               cand = ["#{path}.md", path.sub(/\.rd\z/, '.md')].find { |c| File.exist?(c) }
               path = cand if cand

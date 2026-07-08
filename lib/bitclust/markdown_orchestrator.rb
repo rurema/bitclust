@@ -57,7 +57,7 @@ module BitClust
       # スコープ外ファイル（front matter 注入なし）は分割しない。
       # サルベージは別スコープの再実行で扱う
       segments = front_matter.empty? ? nil : split_segments(reduced)
-      return [Unit.new(md_path(relpath), reduced, front_matter)] unless segments
+      return [Unit.new(output_path(relpath, front_matter), reduced, front_matter)] unless segments
 
       library = front_matter['type'] == 'library'
       dir = library ? relpath.sub(/\.rd\z/, '') : File.dirname(relpath)
@@ -72,7 +72,7 @@ module BitClust
 
       source_dir = File.dirname(relpath)
       units = segments.map do |name, text|
-        next Unit.new(md_path(relpath), text, front_matter) if name.nil?   # 概要部
+        next Unit.new(output_path(relpath, front_matter), text, front_matter) if name.nil?   # 概要部
 
         fm = entity_fm.dup
         if (unwrapped = WholeFileGate.unwrap_for_scope(text, @scope))
@@ -85,7 +85,7 @@ module BitClust
       end
       if library && segments.none? { |name, _| name.nil? }
         # 概要部が無くてもライブラリ自体が発見から消えないよう front matter のみ合成
-        units.unshift(Unit.new(md_path(relpath), '', front_matter))
+        units.unshift(Unit.new(output_path(relpath, front_matter), '', front_matter))
       end
       units
     end
@@ -146,6 +146,23 @@ module BitClust
     # 出力 .md の相対パス（.rd は差し替え、その他は付加）
     def md_path(relpath)
       relpath.end_with?('.rd') ? relpath.sub(/\.rd\z/, '.md') : "#{relpath}.md"
+    end
+
+    # ライブラリファイルの出力パス。他ファイルの出力と大文字小文字のみで
+    # 衝突する場合（rdoc/rdoc.md と rdoc/RDoc.md）は basename に .lib を挟んで
+    # 回避する（macOS/Windows の case-insensitive FS でチェックアウト不能に
+    # なるため）。名前がパスから導出できなくなるので front matter の name: で保持する
+    def output_path(relpath, front_matter)
+      path = md_path(relpath)
+      return path unless front_matter['type'] == 'library'
+      collides = @extra.keys.any? { |other|
+        next false if other == relpath
+        op = md_path(other)
+        op != path && op.casecmp?(path)
+      }
+      return path unless collides
+      front_matter['name'] = relpath.sub(/\.rd\z/, '')
+      path.sub(/\.md\z/, '.lib.md')
     end
 
     RELATION_RE = /\A(?:include|extend|alias)\s+\S/
