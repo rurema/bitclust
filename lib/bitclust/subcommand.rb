@@ -24,6 +24,12 @@ module BitClust
       @parser.parse! argv
     end
 
+    # グローバル --database（options[:prefix]）を必要とするか。
+    # DB パスを自前の引数で受けるサブコマンド（searchpage）は false を返す
+    def needs_database?
+      true
+    end
+
     def help
       @parser.help
     end

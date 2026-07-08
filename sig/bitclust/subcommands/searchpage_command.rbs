@@ -1,0 +1,30 @@
+module BitClust
+  module Subcommands
+    # 複数バージョンの DB から /ja/search/ 置換用の静的検索ページを生成する
+    class SearchpageCommand < Subcommand
+      VENDORED_JS_FILES: Array[String]
+
+      @outputdir: Pathname?
+
+      @themedir: Pathname
+
+      @templatedir: Pathname
+
+      @suffix: String
+
+      @fs_casesensitive: bool
+
+      @verbose: bool
+
+      def initialize: () -> void
+
+      def needs_database?: () -> bool
+
+      def exec: (argv argv, options options) -> void
+
+      private
+
+      def render_page: (Array[String] versions) -> String
+    end
+  end
+end

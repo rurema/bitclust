@@ -138,6 +138,55 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     assert(data['index'].any? { |e| e['full_name'] == 'Foo#foo' })
   end
 
+  # 全バージョン対応の検索ページ用: 版ごとの index を versions タグ付きで統合する
+
+  def entry(over = {})
+    { name: 'Foo', full_name: 'Foo', type: 'class', path: 'class/-foo.html' }.merge(over)
+  end
+
+  def test_merge_dedupes_identical_entries_across_versions
+    merged = BitClust::SearchIndexGenerator.merge(
+      [['3.4', [entry]], ['3.0', [entry]]])
+    assert_equal 1, merged.size
+    assert_equal %w[3.0 3.4], merged[0][:versions]
+    assert_equal 'Foo', merged[0][:full_name]
+  end
+
+  def test_merge_sorts_versions_numerically
+    # "3.10" は文字列比較だと "3.4" より前に来てしまう
+    merged = BitClust::SearchIndexGenerator.merge(
+      [['4.1', [entry]], ['3.10', [entry]], ['3.4', [entry]]])
+    assert_equal %w[3.4 3.10 4.1], merged[0][:versions]
+  end
+
+  def test_merge_keeps_entries_with_different_paths_separate
+    a = entry(full_name: 'X#x', name: 'x', type: 'instance_method',
+              path: 'method/-x/i/x.html')
+    b = a.merge(path: 'method/=x/i/x.html')
+    merged = BitClust::SearchIndexGenerator.merge([['3.4', [a]], ['4.1', [b]]])
+    assert_equal 2, merged.size
+    assert_equal [['3.4'], ['4.1']], merged.map { |e| e[:versions] }
+  end
+
+  def test_merge_orders_entries_by_first_appearance_in_version_order
+    # 入力順に依らず「昇順の版を走査して最初に現れた順」で安定させる
+    # （generated-documents にコミットされる出力の diff を安定させるため）
+    a = entry(full_name: 'A', name: 'A', path: 'class/-a.html')
+    b = entry(full_name: 'B', name: 'B', path: 'class/-b.html')
+    merged = BitClust::SearchIndexGenerator.merge(
+      [['3.4', [a, b]], ['3.0', [b]]])
+    assert_equal %w[B A], merged.map { |e| e[:full_name] }
+  end
+
+  def test_merged_js_format
+    js = BitClust::SearchIndexGenerator.merged_js([['3.4', [entry]]])
+    assert_match(/\Avar search_data = \{/, js)
+    assert(js.end_with?(';'))
+    data = JSON.parse(js.sub(/\Avar search_data = /, '').sub(/;\z/, ''))
+    assert_equal ['3.4'], data['index'][0]['versions']
+    assert_equal 'Foo', data['index'][0]['full_name']
+  end
+
   private
 
   def setup_files

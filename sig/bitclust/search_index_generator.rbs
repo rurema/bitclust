@@ -17,6 +17,12 @@ module BitClust
 
     def to_js: (MethodDatabase db, ?FunctionDatabase? fdb) -> String
 
+    type merged_entry = Hash[Symbol, String | Array[String]]
+
+    def self.merge: (Array[[String, Array[entry]]] version_indexes) -> Array[merged_entry]
+
+    def self.merged_js: (Array[[String, Array[entry]]] version_indexes) -> String
+
     private
 
     def class_entries: (MethodDatabase db) -> Array[entry]

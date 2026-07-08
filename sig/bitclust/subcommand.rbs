@@ -9,11 +9,13 @@ module BitClust
 
     type argv = Array[String]
     type options = {
-      :prefix => String,
+      :prefix => String?,
       :capi => bool,
     }
 
     def parse: (argv argv) -> void
+
+    def needs_database?: () -> bool
 
     def help: () -> String
 
