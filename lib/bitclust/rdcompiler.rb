@@ -89,6 +89,10 @@ module BitClust
           dlist
         when /\A\s+\S/
           list
+        when /\A@see\b/
+          # findings#1: doc/lib ページの @see もメソッドエントリと同じく
+          # SEE_ALSO として解釈する（従来は段落テキストだった）
+          see
         else
           if @f.peek&.strip&.empty?
             @f.gets
@@ -140,10 +144,14 @@ module BitClust
           emlist
         when /\A\s+\S/
           list
-        when /@see/
+        when /\A@see\b/
+          # findings#3: 無アンカーの /@see/ は行の途中に @see を含む
+          # 本文行を吸ってしまう（@todo も同様）
           see
-        when /@todo/
+        when /\A@todo\b/
           todo
+        when /\A@undef\b/
+          undef_message
         when /\A@[a-z]/
           entry_info
         else
@@ -341,6 +349,16 @@ module BitClust
       body = header
       line '<p class="todo">'
       line '[TODO]' + body
+      line '</p>'
+    end
+
+    # findings#2: @undef の専用描画。entry_info の else 枝に落として
+    # 内部用語 [UNKNOWN_META_INFO] を出さない（Complex の比較演算子等。
+    # statichtml は undefined エントリを skip するので server 等の動的経路用）
+    def undef_message
+      @f.gets
+      line '<p>'
+      line 'このメソッドは定義されていません。'
       line '</p>'
     end
 

@@ -53,6 +53,18 @@ module BitClust
       @dirty_functions.clear
     end
 
+    # C API の Markdown ツリー（manual/capi）を直接パースして更新する（M3）。
+    # filename は旧経路と同じ「eval.c」等（basename から .md を除いた形）
+    def update_by_markdowntree(md_root)
+      check_transaction
+      require 'bitclust/mdparser'
+      # 描画層（screen.rb）が MDCompiler を選択するためのマーカー
+      propset 'source_format', 'markdown'
+      Dir.glob(File.join(md_root, '*.md')).sort.each do |path|
+        MDFunctionParser.new(self).parse_file(path, File.basename(path, '.md'), properties())
+      end
+    end
+
     def update_by_file(path, filename)
       check_transaction
       FunctionReferenceParser.new(self).parse_file(path, filename, properties())

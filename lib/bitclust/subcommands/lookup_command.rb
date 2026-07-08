@@ -171,8 +171,13 @@ module BitClust
       def compile_rd(src)
         umap = URLMapper.new(:base_url => 'http://example.com',
                              :cgi_url  => 'http://example.com/view')
-        compiler = RDCompiler.new(umap, 2)
-        compiler.compile(src)
+        if @db.properties['source_format'] == 'markdown'
+          # md ソースの DB は screen.rb と同じく MDCompiler（GFM）で描画する
+          Kernel.require 'bitclust/mdcompiler'
+          MDCompiler.new(umap, 2, { :gfm => true, :database => @db }).compile(src)
+        else
+          RDCompiler.new(umap, 2).compile(src)
+        end
       end
     end
   end

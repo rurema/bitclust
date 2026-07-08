@@ -163,6 +163,50 @@ module BitClust
       RRDParser.new(self).parse_file(path, libname, properties())
     end
 
+    # Markdown ツリー（manual/api）を直接パースして DB を更新する（M3）。
+    # front matter の library: が所属を表すため、ライブラリごとに
+    # lib ファイル → メンバーファイル（reopen/redefine のみのファイルは後置。
+    # dynamic include の対象 module が先に定義されている必要があるため）の
+    # 順でパースする。版ゲート（since/until）外のライブラリ/メンバーはスキップ。
+    # エントリの source には md 断片が入り、source_location は md の実パスを指す
+    def update_by_markdowntree(md_root)
+      require 'bitclust/markdown_tree'
+      require 'bitclust/mdparser'
+      @md_root = md_root
+      # 描画層（screen.rb）が MDCompiler を選択するためのマーカー
+      propset 'source_format', 'markdown'
+      tree = MarkdownTree.scan(md_root)
+      version = properties()["version"]
+      tree.libraries.sort.each do |libname, lib|
+        next unless md_version_covers?(version, lib[:since], lib[:until])
+        lib_entry = MDParser.new(self).parse_file(File.join(md_root, lib[:path]), libname, properties())
+        lib_location = lib_entry.source_location
+        members = tree.entities.select { |_, e| e[:library] == libname }
+        sorted = members.keys.sort_by { |path|
+          reopen_only = members[path][:kinds].all? { |kind, _| %w[reopen redefine].include?(kind) }
+          [reopen_only ? 1 : 0, path]
+        }
+        sorted.each do |path|
+          entity = members[path]
+          next unless md_version_covers?(version, entity[:since], entity[:until])
+          MDParser.new(self).parse_file(File.join(md_root, path), libname, properties())
+        end
+        # parse_file は毎回 library の source_location を上書きするため
+        # lib ファイルの値へ戻す
+        lib_entry.source_location = lib_location
+      end
+    end
+
+    # since は「その版以降」、until は「その版未満」（ブリッジの
+    # #@since/#@until ラッパーと同じ意味論）
+    def md_version_covers?(version, since_version, until_version)
+      v = Gem::Version.new(version)
+      return false if since_version && v < Gem::Version.new(since_version)
+      return false if until_version && v >= Gem::Version.new(until_version)
+      true
+    end
+    private :md_version_covers?
+
     def refs
       @refs ||= RefsDatabase.load(realpath('refs'))
     end
@@ -177,6 +221,8 @@ module BitClust
     end
 
     def copy_doc
+      return copy_doc_md if @md_root
+      return unless @root
       root_path = Pathname.new(@root).expand_path
       Dir.glob("#{@root}/../../doc/**/*.rd").each do |f|
         if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f
@@ -192,6 +238,39 @@ module BitClust
         end
       end
     end
+
+    # ネイティブ md ツリーの doc ページ登録（manual/api の隣の manual/doc）。
+    # ページ = 他の doc ファイルから #@include 参照されていない .md。
+    # source には md がそのまま入り、source_location は md の実パスを指す
+    def copy_doc_md
+      require 'bitclust/mdparser'
+      # source_location は md_root と同じ形で格納する（api 側と同じ慣例。
+      # Rakefile の相対 manual/api なら manual/doc/... になる）。絶対化すると
+      # Windows のドライブレターのコロンで file:line 分割が壊れ、
+      # 編集リンクも実行環境のパス依存になる
+      doc_root = Pathname.new(File.join(@md_root, '..', 'doc')).cleanpath.to_s
+      return unless File.directory?(doc_root)
+      files = Dir.glob("#{doc_root}/**/*.md").sort
+      referenced = files.flat_map { |f|
+        base = File.dirname(f)
+        File.read(f).scan(/^\#@include\((.*?)\)/).map { |t|
+          p = File.expand_path(t[0], base)
+          [p, "#{p}.md", p.sub(/\.rd\z/, '.md')]
+        }.flatten
+      }.to_set
+      files.each do |f|
+        next if referenced.include?(File.expand_path(f))
+        id = libname2id(f.delete_prefix("#{doc_root}/").sub(/\.md\z/, ''))
+        se = DocEntry.new(self, id)
+        s = Preprocessor.read(f, properties)
+        title, source = MDParser.split_doc(s)
+        se.title = title
+        se.source = source
+        se.source_location = Location.new(f, 1)
+        se.save
+      end
+    end
+    private :copy_doc_md
 
     #
     # Doc Entry
