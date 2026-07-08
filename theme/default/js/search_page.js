@@ -40,6 +40,33 @@
     return search_version_base + version + '/' + path;
   }
 
+  function compareVersions(a, b) {
+    var as = a.split('.');
+    var bs = b.split('.');
+    for (var i = 0; i < Math.max(as.length, bs.length); i++) {
+      var d = parseInt(as[i] || '0', 10) - parseInt(bs[i] || '0', 10);
+      if (d) return d;
+    }
+    return 0;
+  }
+
+  // ranker の formatResult は {title, path, type} だけを結果に残し、統合 index の
+  // versions を落とす（vendored ファイルは verbatim 維持）。path から versions を
+  // 引けるよう対応表を作る。同じ path が複数エントリに現れる稀なケース
+  // （版によって type 等が違う）は、ページとしては存在する版の和集合が正しい
+  function buildVersionsByPath() {
+    var map = {};
+    for (var i = 0; i < search_data.index.length; i++) {
+      var e = search_data.index[i];
+      var list = map[e.path] || (map[e.path] = []);
+      var vs = e.versions || [];
+      for (var j = 0; j < vs.length; j++) {
+        if (list.indexOf(vs[j]) < 0) list.push(vs[j]);
+      }
+    }
+    return map;
+  }
+
   // rurema-search compatibility: accept ?q=, its ?query= parameter, and its
   // /query:<word>/ path form (the latter only reaches this page when the
   // server rewrites unknown /ja/search/* paths here).
@@ -68,10 +95,12 @@
     if (!input || !result) return;
 
     var search = new SearchController(search_data, input, result);
+    var versionsByPath = buildVersionsByPath();
 
     search.renderItem = function(r) {
       var li = document.createElement('li');
-      var versions = (r.versions || []).slice().reverse();  // newest first
+      var versions = (versionsByPath[r.path] || [])
+        .slice().sort(compareVersions).reverse();  // newest first
       var newest = versions[0] || '';
       var html = '<p class="search-match"><a href="' +
         this.escapeHTML(versionHref(newest, r.path)) + '">' +
