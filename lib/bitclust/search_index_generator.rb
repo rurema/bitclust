@@ -59,6 +59,31 @@ module BitClust
       "var search_data = #{JSON.generate(index: build_index(db, fdb))};"
     end
 
+    # Merges per-version indexes (an array of [version, index] pairs) into a
+    # single index whose entries carry a +versions+ array, for the standalone
+    # cross-version search page. Entries are considered the same when all of
+    # name/full_name/type/path match. Versions are sorted numerically ("3.10"
+    # sorts after "3.4"), and entry order is the first appearance while
+    # scanning versions in ascending order — independent of the caller's
+    # argument order, so the generated file diffs stay stable.
+    def self.merge(version_indexes)
+      merged = {}
+      sorted = version_indexes.sort_by { |version, _| Gem::Version.new(version) }
+      sorted.each do |version, index|
+        index.each do |e|
+          key = e.values_at(:name, :full_name, :type, :path)
+          entry = (merged[key] ||= e.merge(versions: []))
+          entry[:versions] << version
+        end
+      end
+      merged.values
+    end
+
+    # Serializes a merged multi-version index as a +search_data.js+ body.
+    def self.merged_js(version_indexes)
+      "var search_data = #{JSON.generate(index: merge(version_indexes))};"
+    end
+
     private
 
     def class_entries(db)
