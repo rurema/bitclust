@@ -18,6 +18,7 @@ require 'bitclust/refsdatabase'
 require 'bitclust/rrdparser'
 require 'bitclust/exception'
 require 'fileutils'
+require 'pathname'
 
 module BitClust
 

@@ -165,6 +165,9 @@ module BitClust
     def parse_front_matter_raw(yaml_lines)
       blocks = {}   # list key => [[:item, val] | [:dir, line]]
       category = nil
+      category_block = nil  # ゲート付き category（rd 行の組み立て済み列）
+      cat_depth = 0
+      pending = []  # category ゲート候補のトップレベル #@ 行
       leading = []  # メタ領域先頭の #@# コメント行（irb.rd の Author 行）
       key = nil
       yaml_lines.each do |l|
@@ -174,15 +177,35 @@ module BitClust
           # 破棄する（ブロック内の #@ 行が leading に漏れないように）
           key = $1; blocks[key] = []
         when /\Acategory:\s*(.*)$/
-          category = $1.strip; key = nil
+          if pending.any?
+            # ゲート付き category（cmath 型）: #@ 行ごと復元する
+            category_block = pending.dup << "category #{$1.strip}\n"
+            cat_depth = pending.count { |p| p =~ /\A\#@(?:since|until|if)\b/ } -
+                        pending.count { |p| p =~ /\A\#@end\b/ }
+            pending = []
+          else
+            category = $1.strip
+          end
+          key = nil
         when /\A\s+- (.+?)\s*$/
           blocks[key] << [:item, $1] if key
-        when /\A\#@/
+        when /\A\#@\#/
           key ? blocks[key] << [:dir, l] : leading << l
+        when /\A\#@/
+          if key
+            blocks[key] << [:dir, l]
+          elsif category_block && cat_depth > 0
+            category_block << l
+            cat_depth += 1 if l =~ /\A\#@(?:since|until|if)\b/
+            cat_depth -= 1 if l =~ /\A\#@end\b/
+          else
+            pending << l
+          end
         when /\A\S/
           key = nil   # その他のトップレベルキー（type/since/until 等）
         end
       end
+      leading.concat(pending)   # category に消費されなかった #@ 行（通常は無い）
       # クラス関係（H1 直後、RRD 文法順 alias → extend → include）
       @class_relations = []
       %w[alias extend include].each do |k|
@@ -194,7 +217,9 @@ module BitClust
       unless leading.empty?
         @library_metadata_body.concat(leading) << "\n"
       end
-      if category
+      if category_block
+        @library_metadata_body.concat(category_block) << "\n"
+      elsif category
         @library_metadata_body << "category #{category}\n" << "\n"
       end
       %w[require sublibrary].each do |k|

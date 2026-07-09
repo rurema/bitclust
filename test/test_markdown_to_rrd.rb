@@ -392,6 +392,28 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  def test_front_matter_gated_category_is_restored
+    # cmath 型の据え置きゲート: ゲート付き category は #@ 行ごと復元する
+    md = "---\n\#@since 1.9.1\ncategory: Math\n\#@end\n---\n" \
+         "\#@since 1.9.1\n本文。\n\#@end\n"
+    expected = "\#@since 1.9.1\ncategory Math\n\#@end\n\n" \
+               "\#@since 1.9.1\n本文。\n\#@end\n"
+    assert_equal expected, convert(md)
+  end
+
+  def test_front_matter_gated_metadata_blocks_are_restored
+    # regate_metadata 形: require と sublibrary が別々のゲートブロック
+    md = "---\n" \
+         "require:\n\#@since 1.9.1\n  - a\n  - b\n\#@end\n" \
+         "sublibrary:\n\#@since 1.9.1\n  - s\n\#@end\n" \
+         "---\n" \
+         "\#@since 1.9.1\n本文。\n\#@end\n"
+    expected = "\#@since 1.9.1\nrequire a\nrequire b\n\#@end\n\n" \
+               "\#@since 1.9.1\nsublibrary s\n\#@end\n\n" \
+               "\#@since 1.9.1\n本文。\n\#@end\n"
+    assert_equal expected, convert(md)
+  end
+
   def test_front_matter_gated_library_list_is_dropped
     # 多重所属のゲート付き library リスト（注入キー）は md→rd で完全に捨てる。
     # ブロック内の #@ 行が leading コメント扱いで本文へ漏れないこと

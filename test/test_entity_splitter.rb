@@ -161,6 +161,25 @@ class TestEntitySplitter < Test::Unit::TestCase
     assert_equal "\#@since 3.2\n= class New < Object\n説明。\n\#@end\n", segs[1][1]
   end
 
+  def test_segments_partial_gate_around_h1_is_not_a_boundary
+    # syslog の旧構造: H1 と見出しだけがゲートされ、定数群はゲートの外にある。
+    # 単独ファイル化するとゲートが偽の版で自立パースできない
+    # （旧世界では直前エンティティに付く）ので分割境界にしない
+    src = "= class A < Object\n\n" \
+          "\#@since 2.0.0\n= module B\n説明。\n== Constants\n\#@end\n" \
+          "--- CONST -> Integer\n"
+    segs = segments(src)
+    assert_equal ["A"], segs.map(&:first)
+    assert_equal src, segs[0][1]
+  end
+
+  def test_segments_gated_boundary_allows_trailing_blanks
+    src = "= class A < Object\n\n" \
+          "\#@since 3.2\n= class New < Object\n説明。\n\#@end\n\n"
+    segs = segments(src)
+    assert_equal ["A", "New"], segs.map(&:first)
+  end
+
   def test_segments_ignores_h1_like_lines_in_samplecode
     src = "= class A < Object\n\#@samplecode\n= class B < Object\n\#@end\n"
     segs = segments(src)

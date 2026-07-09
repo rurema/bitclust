@@ -31,6 +31,54 @@ module BitClust
       cond if close_idx
     end
 
+    # 据え置きゲート（unwrap できない library ルート等）のメタデータ領域
+    # （require/sublibrary/category）を、本文と分けてそれぞれ同じゲートで包んだ
+    # 意味等価な正規形に書き換える。native パースはメタデータを front matter から
+    # しか読まないため、ゲート内に埋もれた rd 形式のメタ行を、既存のゲート対応
+    # メタデータ収集器が front matter 化できる位置（ファイル先頭のブロック）へ出す。
+    # 全体ゲートでない・メタデータが無い・本文が無い場合は nil
+    def regate_metadata(src)
+      lines = src.lines
+      open_idx, close_idx, cond, has_else = parse(lines)
+      return nil if open_idx.nil? || close_idx.nil? || has_else || cond.nil?
+      content = lines[(open_idx + 1)...close_idx]
+      i = 0
+      i += 1 while content[i] && content[i] =~ BLANK_RE
+      meta_start = i
+      meta_end = nil
+      j = meta_start
+      while content[j]
+        case content[j]
+        when /\A(?:require|sublibrary|category)\s+\S/ then meta_end = j + 1
+        when BLANK_RE then nil
+        else break
+        end
+        j += 1
+      end
+      return nil unless meta_end
+      rest = content[meta_end..]
+      rest.shift while rest.first && rest.first =~ BLANK_RE
+      return nil if rest.empty?
+      gate_line = lines[open_idx]
+      # 種別（category/require/sublibrary）ごとに独立ブロックへ分ける
+      # （メタデータ収集器の「#@ ブロックは単一種のみ」の制約に合わせる）
+      runs = []
+      content[meta_start...meta_end].each do |l|
+        next if l =~ BLANK_RE
+        kind = l[/\A(category|require|sublibrary)/, 1]
+        if runs.last && runs.last[0] == kind
+          runs.last[1] << l
+        else
+          runs << [kind, [l]]
+        end
+      end
+      meta_blocks = runs.flat_map { |_, ls| [gate_line] + ls + ["\#@end\n", "\n"] }
+      (lines[0...open_idx] +
+        meta_blocks +
+        [gate_line] + rest + ["\#@end\n"] +
+        lines[(close_idx + 1)..]).join
+    end
+
     # スコープの下で解除できる全体ゲートなら [解除後の src, front matter に
     # 書く gate（{} は不要の意）] を返す。据え置きなら nil
     def unwrap_for_scope(src, scope)

@@ -21,7 +21,7 @@ require 'bitclust/markdown_to_rrd'
 # [x] LIBRARIES 自体は変換対象外
 class TestMarkdownOrchestrator < Test::Unit::TestCase
   FILES = {
-    "LIBRARIES"  => "foo\n\#@until 3.1\ngated\n\#@end\nx\nx/x\ncml\n",
+    "LIBRARIES"  => "foo\n\#@until 3.1\ngated\n\#@end\nx\nx/x\ncml\ngml\n",
     "foo.rd"     => "category Cat\n\n説明。\n\n\#@include(foo/Bar)\n\n\#@include(foo/frag)\n",
     "foo/Bar"    => "\#@since 1.9.1\n= class Bar < Object\n\nBar の説明。\n\#@end\n",
     "foo/frag"   => "断片。\n",
@@ -31,6 +31,8 @@ class TestMarkdownOrchestrator < Test::Unit::TestCase
     "x/x.rd"     => "x/x の説明。\n",
     # cmath 型: LIBRARIES にゲートは無いがファイル全体が #@since で包まれている
     "cml.rd"     => "\#@since 1.9.1\ncml の説明。\n\#@end\n",
+    # rubygems 型: 据え置きゲートの中にライブラリメタデータがある
+    "gml.rd"     => "\#@since 1.9.1\nrequire foo\n\ngml の説明。\n\#@end\n",
   }.freeze
 
   def with_orchestrator(scope: nil)
@@ -62,6 +64,60 @@ class TestMarkdownOrchestrator < Test::Unit::TestCase
         # class Bar < Object
 
         Bar の説明。
+      MD
+      assert_equal expected, md
+    end
+  end
+
+  def test_fragment_whole_file_gate_is_kept_in_body
+    # 断片（#@include 展開用、front matter を持てない）の全体ゲートは
+    # 常真でない限り据え置く。front matter を付けると include 展開の途中に
+    # `---` が現れてパースが壊れる（_builtin/Fiber.current の #@since 1.9.0）
+    files = {
+      "LIBRARIES" => "foo\n",
+      "foo.rd"    => "説明。\n\n\#@include(foo/gfrag)\n",
+      "foo/gfrag" => "\#@since 1.9.1\n断片。\n\#@end\n",
+    }
+    with_files(files, scope: wide_scope) do |orch|
+      md = orch.convert("foo/gfrag", files["foo/gfrag"])
+      assert_equal "\#@since 1.9.1\n断片。\n\#@end\n", md
+    end
+    # デフォルトスコープでは常真 → 従来どおり解除される
+    with_files(files) do |orch|
+      md = orch.convert("foo/gfrag", files["foo/gfrag"])
+      assert_equal "断片。\n", md
+    end
+  end
+
+  def with_files(files, scope: nil)
+    Dir.mktmpdir do |dir|
+      files.each do |path, content|
+        full = File.join(dir, path)
+        FileUtils.mkdir_p(File.dirname(full))
+        File.write(full, content)
+      end
+      opts = scope ? { scope: scope } : {}
+      yield BitClust::MarkdownOrchestrator.new(dir, **opts)
+    end
+  end
+
+  def test_kept_gate_library_metadata_moves_to_front_matter_with_gate
+    # rubygems 型: 据え置きゲートの中の require 等は、独立ゲートに分離した上で
+    # front matter 化する（native パースはメタデータを front matter からしか
+    # 読まないため）。本文はゲートのまま残る
+    with_orchestrator(scope: wide_scope) do |orch|
+      md = orch.convert("gml.rd", FILES["gml.rd"])
+      expected = <<~'MD'
+        ---
+        type: library
+        require:
+        #@since 1.9.1
+          - foo
+        #@end
+        ---
+        #@since 1.9.1
+        gml の説明。
+        #@end
       MD
       assert_equal expected, md
     end

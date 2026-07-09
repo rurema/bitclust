@@ -107,10 +107,16 @@ module BitClust
     def reduce(relpath, rrd)
       front_matter = (@extra[relpath] || {}).dup
       rrd = IncludePruner.prune(rrd, @prune_sites[relpath] || [])
-      if (unwrapped = WholeFileGate.unwrap_for_scope(rrd, @scope)) &&
-         (front_matter['type'] != 'library' || gate_subsumed?(front_matter, unwrapped[1]))
-        rrd = unwrapped[0]
-        merge_gate(front_matter, unwrapped[1])
+      if (unwrapped = WholeFileGate.unwrap_for_scope(rrd, @scope))
+        if unwrap_allowed?(front_matter, unwrapped[1])
+          rrd = unwrapped[0]
+          merge_gate(front_matter, unwrapped[1])
+        elsif front_matter['type'] == 'library' &&
+              (regated = WholeFileGate.regate_metadata(rrd))
+          # 据え置きゲートの library ルート: メタデータ領域を独立ゲートに分離して
+          # front matter 化できるようにする（本文はゲートのまま）
+          rrd = regated
+        end
       end
       rrd = EntitySplitter.resolve_header_gates(rrd, @scope)
       rrd = normalize_entity_h1(rrd)
@@ -216,13 +222,23 @@ module BitClust
       rrd.gsub(/^---(?=[^\s-])/, '--- ')
     end
 
-    # ライブラリルートのファイル全体ゲートを front matter へ解除してよいか。
-    # ライブラリの存在は LIBRARIES マニフェストが正なので、ゲートが LIBRARIES 由来の
-    # 既存境界に包含される場合のみ解除する。包含されないゲート
-    # （cmath: LIBRARIES は until のみ + ファイルは #@since 1.9.1）をマージすると
-    # 「ライブラリの存在」まで狭めてしまう（旧世界ではスコープ下限の版にも存在して
-    # 内容が空）ので、据え置いて本文ゲートのまま残す。
-    # メンバーの全体ゲートはエンティティ自身の存在ゲートなのでこの制約を受けない
+    # ファイル全体ゲートを front matter へ解除してよいか。
+    # - 常真ゲート（gate == {}）: 常に解除（従来どおり）
+    # - 断片・スコープ外（front matter なし）: 据え置き。front matter を付けると
+    #   #@include 展開の途中に `---` が現れてパースが壊れる（_builtin/Fiber.current）
+    # - type: library ルート: LIBRARIES 由来境界に包含される場合のみ（下記）
+    # - メンバー: エンティティ自身の存在ゲートなので常に解除
+    def unwrap_allowed?(front_matter, gate)
+      return true if gate.empty?
+      return false if front_matter.empty?
+      return true unless front_matter['type'] == 'library'
+      gate_subsumed?(front_matter, gate)
+    end
+
+    # ライブラリルートのファイル全体ゲートが LIBRARIES 由来の既存境界に
+    # 包含されるか。包含されないゲート（cmath: LIBRARIES は until のみ +
+    # ファイルは #@since 1.9.1）をマージすると「ライブラリの存在」まで
+    # 狭めてしまう（旧世界ではスコープ下限の版にも存在して内容が空）
     def gate_subsumed?(front_matter, gate)
       gate.all? { |kind, v|
         cur = front_matter[kind.to_s]
