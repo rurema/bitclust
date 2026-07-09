@@ -464,7 +464,7 @@ RRD の `[[type:target]]` から角括弧を1段減らし `[type:target]` とす
 | ML | `[ruby-list:number]` | `[ruby-list:35911]` |
 | bugs.ruby-lang.org | `[feature:number]` | `[feature:12345]` |
 
-モジュール関数の `?` は RBS の `self?` に由来し、RRD の `.#` typemark に対応する。
+モジュール関数の `?.` は RRD の `.#` typemark に対応する（`?` は RBS の `self?` に由来）。
 
 ### 7.2 メソッド名のエスケープ
 
@@ -736,7 +736,7 @@ h3 行の種別判定（キーワードベース）:
 | `sublibrary lib` | front matter `sublibrary: [lib]` | YAML |
 | `[[c:String]]` | `[c:String]` | 角括弧1段減 |
 | `[[m:Array#each]]` | `[m:Array#each]` | 角括弧1段減 |
-| `[[m:Kernel.#open]]` | `[m:Kernel?.open]` | `.#` → `?` |
+| `[[m:Kernel.#open]]` | `[m:Kernel?.open]` | `.#` → `?.` |
 | `[[m:Hash#[] ]]` | `[m:Hash#\[\]]` | `\` エスケープ |
 | `[[ref:name]]` | `[テキスト](#name)` | 標準 Markdown リンク |
 | `@param name 説明` | `` - **param** `name` -- 説明 `` | リスト形式 |
