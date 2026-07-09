@@ -76,6 +76,7 @@ module BitClust
 
         fm = entity_fm.dup
         if (unwrapped = WholeFileGate.unwrap_for_scope(text, @scope))
+          # エンティティセグメントのゲートは自身の存在ゲート → 常に front matter へ
           text = unwrapped[0]
           merge_gate(fm, unwrapped[1])
         end
@@ -106,7 +107,8 @@ module BitClust
     def reduce(relpath, rrd)
       front_matter = (@extra[relpath] || {}).dup
       rrd = IncludePruner.prune(rrd, @prune_sites[relpath] || [])
-      if (unwrapped = WholeFileGate.unwrap_for_scope(rrd, @scope))
+      if (unwrapped = WholeFileGate.unwrap_for_scope(rrd, @scope)) &&
+         (front_matter['type'] != 'library' || gate_subsumed?(front_matter, unwrapped[1]))
         rrd = unwrapped[0]
         merge_gate(front_matter, unwrapped[1])
       end
@@ -212,6 +214,25 @@ module BitClust
     # 行頭 --- は現れない前提（roundtrip 検証が破れを検出する）
     def normalize_signature_spacing(rrd)
       rrd.gsub(/^---(?=[^\s-])/, '--- ')
+    end
+
+    # ライブラリルートのファイル全体ゲートを front matter へ解除してよいか。
+    # ライブラリの存在は LIBRARIES マニフェストが正なので、ゲートが LIBRARIES 由来の
+    # 既存境界に包含される場合のみ解除する。包含されないゲート
+    # （cmath: LIBRARIES は until のみ + ファイルは #@since 1.9.1）をマージすると
+    # 「ライブラリの存在」まで狭めてしまう（旧世界ではスコープ下限の版にも存在して
+    # 内容が空）ので、据え置いて本文ゲートのまま残す。
+    # メンバーの全体ゲートはエンティティ自身の存在ゲートなのでこの制約を受けない
+    def gate_subsumed?(front_matter, gate)
+      gate.all? { |kind, v|
+        cur = front_matter[kind.to_s]
+        next false unless cur
+        if kind == :since
+          Gem::Version.new(cur) >= Gem::Version.new(v)
+        else
+          Gem::Version.new(cur) <= Gem::Version.new(v)
+        end
+      }
     end
 
     # ファイル全体ゲートと注入済みゲート（include サイト / LIBRARIES 由来）の交差を取る

@@ -440,6 +440,28 @@ class TestIncludeGraph < Test::Unit::TestCase
     assert_nil scope.gate(conds)
   end
 
+  def test_scope_gate_decomposes_conjunctive_if_into_bounds
+    # 旧版サルベージ: ubygems の #@if("1.9.1" <= version and version < "2.5.0") は
+    # ワイドスコープでは in-scope になり、since/until に分解して front matter へ
+    scope = BitClust::IncludeGraph::Scope.new("1.8.7", "4.2")
+    conds = [BitClust::IncludeGraph::Condition.new(:if, '("1.9.1" <= version and version < "2.5.0")')]
+    assert_true scope.cover?(conds)
+    assert_equal({ since: "1.9.1", until: "2.5.0" }, scope.gate(conds))
+  end
+
+  def test_scope_gate_decomposes_simple_if_forms
+    scope = BitClust::IncludeGraph::Scope.new("1.8.7", "4.2")
+    cond = ->(v) { [BitClust::IncludeGraph::Condition.new(:if, v)] }
+    # version >= "X" 形（rss）。X がスコープ下限以下なら無条件
+    assert_equal({}, scope.gate(cond['(version >= "1.8.2")']))
+    assert_equal({ since: "2.0.0" }, scope.gate(cond['(version >= "2.0.0")']))
+    # version < "X" 形は until X
+    assert_equal({ until: "2.0.0" }, scope.gate(cond['(version < "2.0.0")']))
+    # 分解できない形（<= / 否定）は境界に寄与しない（従来どおり無条件扱い）
+    assert_equal({}, scope.gate(cond['(version <= "2.0.0")']))
+    assert_equal({}, scope.gate(cond['!((version < "2.0.0"))']))
+  end
+
   # ---- front_matter_map: メンバーへの注入値（スコープ適用済み）----
 
   def scope30_42
@@ -474,16 +496,57 @@ class TestIncludeGraph < Test::Unit::TestCase
     assert_equal({}, graph.front_matter_map(scope30_42))
   end
 
-  def test_front_matter_map_skips_multi_library_membership_with_warning
+  def test_front_matter_map_multi_library_membership_becomes_list
+    # 同時多重所属（旧 rdoc の code_objects+個別ファイル等）は
+    # ゲート付きリスト形式で表現する（旧挙動の警告スキップを置換）
     graph = analyze(
       "LIBRARIES" => "foo\nbar\n",
       "foo.rd"    => "\#@include(shared/Thing)\n",
       "bar.rd"    => "\#@include(shared/Thing)\n",
       "shared/Thing" => "= class Thing < Object\n"
     )
-    assert_equal({}, graph.front_matter_map(scope30_42))
-    assert graph.warnings.any? { |w| w.include?("multi-membership") },
-      "expected multi-membership warning, got: #{graph.warnings.inspect}"
+    assert_equal(
+      { "shared/Thing" => { "library" => [
+          { "name" => "bar" }, { "name" => "foo" }
+        ] } },
+      graph.front_matter_map(scope30_42))
+    assert graph.warnings.none? { |w| w.include?("multi-membership") },
+      "multi-membership should be supported now, got: #{graph.warnings.inspect}"
+  end
+
+  def test_front_matter_map_multi_membership_orders_modern_side_first
+    # Mutex 型: 片方は無条件、片方は until 付き →
+    # 「現在まで存在する側」（until なし）を先頭に置く
+    graph = analyze(
+      "LIBRARIES" => "thread\nbuiltin\n",
+      "builtin.rd" => "\#@include(shared/Mutex)\n",
+      "thread.rd"  => "\#@until 3.1\n\#@include(shared/Mutex)\n\#@end\n",
+      "shared/Mutex" => "= class Mutex < Object\n"
+    )
+    assert_equal(
+      { "shared/Mutex" => { "library" => [
+          { "name" => "builtin" },
+          { "name" => "thread", "until" => "3.1" }
+        ] } },
+      graph.front_matter_map(scope30_42))
+  end
+
+  def test_front_matter_map_multi_membership_partition_has_no_entity_gate
+    # ConditionVariable 型: since X / until X の相補分割。
+    # エンティティ自体はスコープ全域に存在するので since/until キーは付かない
+    graph = analyze(
+      "LIBRARIES" => "thread\nbuiltin\n",
+      "builtin.rd" => "\#@since 3.2\n\#@include(shared/CV)\n\#@end\n",
+      "thread.rd"  => "\#@until 3.2\n\#@include(shared/CV)\n\#@end\n",
+      "shared/CV" => "= class ConditionVariable < Object\n"
+    )
+    fm = graph.front_matter_map(scope30_42)
+    assert_equal(
+      [{ "name" => "builtin", "since" => "3.2" },
+       { "name" => "thread", "until" => "3.2" }],
+      fm["shared/CV"]["library"])
+    assert_nil fm["shared/CV"]["since"]
+    assert_nil fm["shared/CV"]["until"]
   end
 
   def test_front_matter_map_takes_interval_hull_within_same_library

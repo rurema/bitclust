@@ -392,6 +392,20 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal expected, convert(md)
   end
 
+  def test_front_matter_gated_library_list_is_dropped
+    # 多重所属のゲート付き library リスト（注入キー）は md→rd で完全に捨てる。
+    # ブロック内の #@ 行が leading コメント扱いで本文へ漏れないこと
+    md = "---\n" \
+         "library:\n" \
+         "  - _builtin\n" \
+         "\#@until 1.9.1\n" \
+         "  - thread\n" \
+         "\#@end\n" \
+         "---\n" \
+         "# class Mutex < Object\n\n説明\n"
+    assert_equal "= class Mutex < Object\n\n説明\n", convert(md)
+  end
+
   # Step 11: リスト変換
 
   def test_list_items

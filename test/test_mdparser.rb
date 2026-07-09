@@ -281,6 +281,43 @@ class TestMDParser < Test::Unit::TestCase
     end
   end
 
+  def test_update_by_markdowntree_gated_memberships
+    # 多重所属（ゲート付き library リスト）: 版によって所属ライブラリが変わる。
+    # 3.4 では builtin のみ、3.0 では builtin と oldlib の両方に属する
+    require 'tmpdir'
+    Dir.mktmpdir do |root|
+      write = ->(rel, s) {
+        path = File.join(root, rel)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, s)
+      }
+      write.call('builtin.md', "---\ntype: library\n---\nbuiltin。\n")
+      write.call('oldlib.md', "---\ntype: library\n---\noldlib。\n")
+      write.call('oldlib/Shared.md', <<~'MD')
+        ---
+        library:
+          - builtin
+        #@until 3.2
+          - oldlib
+        #@end
+        ---
+        # class Shared < Object
+
+        共有クラス。
+      MD
+
+      db34 = BitClust::MethodDatabase.dummy("version" => "3.4")
+      db34.update_by_markdowntree(root)
+      assert_equal %w[Shared], db34.fetch_library("builtin").classes.map(&:name)
+      assert_equal [], db34.fetch_library("oldlib").classes.map(&:name)
+
+      db30 = BitClust::MethodDatabase.dummy("version" => "3.0")
+      db30.update_by_markdowntree(root)
+      assert_equal %w[Shared], db30.fetch_library("builtin").classes.map(&:name)
+      assert_equal %w[Shared], db30.fetch_library("oldlib").classes.map(&:name)
+    end
+  end
+
   def test_copy_doc_md_keeps_relative_location
     # Windows CI 対応: doc エントリの source_location は md_root と同じ形
     # （相対で渡せば相対 manual/doc/...）で格納する。絶対パス化すると

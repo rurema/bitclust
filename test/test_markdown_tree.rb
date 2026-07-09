@@ -61,6 +61,118 @@ class TestMarkdownTree < Test::Unit::TestCase
     assert_equal [], tree.warnings
   end
 
+  def test_scalar_library_is_normalized_to_memberships
+    tree = scan(
+      "foo.md" => LIB,
+      "foo/Bar.md" => "---\nlibrary: foo\n---\n# class Bar < Object\n"
+    )
+    assert_equal [{ library: "foo" }], tree.entities["foo/Bar.md"][:memberships]
+  end
+
+  def test_gated_library_list_memberships
+    # 多重所属（MARKUP_SPEC §1.2）: ゲート付きリスト形式の library を
+    # memberships として読む。先頭が主所属（:library は後方互換の別名）
+    tree = scan(
+      "builtin.md" => LIB,
+      "thread.md" => LIB,
+      "thread/Mutex.md" =>
+        "---\n" \
+        "library:\n" \
+        "  - builtin\n" \
+        "\#@until 1.9.1\n" \
+        "  - thread\n" \
+        "\#@end\n" \
+        "---\n" \
+        "# class Mutex < Object\n\n説明。\n"
+    )
+    e = tree.entities["thread/Mutex.md"]
+    assert_equal "builtin", e[:library]
+    assert_equal [
+      { library: "builtin" },
+      { library: "thread", until: "1.9.1" },
+    ], e[:memberships]
+    assert_equal [], tree.warnings
+  end
+
+  def test_gated_library_list_with_both_bounds
+    tree = scan(
+      "builtin.md" => LIB,
+      "thread.md" => LIB,
+      "thread/CV.md" =>
+        "---\n" \
+        "library:\n" \
+        "\#@since 2.3.0\n" \
+        "  - builtin\n" \
+        "\#@end\n" \
+        "\#@since 1.9.1\n" \
+        "\#@until 2.3.0\n" \
+        "  - thread\n" \
+        "\#@end\n" \
+        "\#@end\n" \
+        "---\n" \
+        "# class ConditionVariable < Object\n"
+    )
+    assert_equal [
+      { library: "builtin", since: "2.3.0" },
+      { library: "thread", since: "1.9.1", until: "2.3.0" },
+    ], tree.entities["thread/CV.md"][:memberships]
+    assert_equal [], tree.warnings
+  end
+
+  def test_version_gated_body_relations_do_not_lint
+    # H1 自体が版分岐するファイル（rbconfig の Config⇔RbConfig 等）や
+    # ゲート付きヘッダ関係は body 残置が正しい（#@ ブロック内は
+    # ヘッダ関係扱いしない）。lint はゲート外の関係行だけを警告する
+    tree = scan(
+      "foo.md" => LIB,
+      "foo/Bar.md" =>
+        "---\nlibrary: foo\n---\n" \
+        "\#@since 1.9.1\n" \
+        "# module Bar\n" \
+        "\#@until 2.2.0\n" \
+        "alias Config\n" \
+        "\#@end\n" \
+        "説明。\n" \
+        "\#@else\n" \
+        "# module Config\n" \
+        "alias Bar\n" \
+        "\#@end\n"
+    )
+    assert tree.warnings.none? { |w| w.include?("relations in body") },
+      tree.warnings.inspect
+  end
+
+  def test_relation_after_gated_h1_block_does_not_lint
+    # 版分岐 H1 ペアの直後（ゲートの外）に両ブランチ共通の関係行が続く形
+    # （net/Net__HTTPURITooLong の alias）。H1 がゲート内にある間は
+    # ヘッダ領域全体を lint 対象から外す
+    tree = scan(
+      "foo.md" => LIB,
+      "foo/Bar.md" =>
+        "---\nlibrary: foo\n---\n" \
+        "\#@since 2.6.0\n" \
+        "# class Bar < Object\n" \
+        "alias NewName\n" \
+        "\#@else\n" \
+        "# class OldBar < Object\n" \
+        "\#@end\n" \
+        "alias CommonName\n" \
+        "説明。\n"
+    )
+    assert tree.warnings.none? { |w| w.include?("relations in body") },
+      tree.warnings.inspect
+  end
+
+  def test_gated_library_list_unknown_library_warns
+    tree = scan(
+      "foo.md" => LIB,
+      "foo/Bar.md" =>
+        "---\nlibrary:\n  - foo\n\#@until 2.0.0\n  - ghost\n\#@end\n---\n# class Bar < Object\n"
+    )
+    assert tree.warnings.any? { |w| w.include?("unknown library ghost") },
+      tree.warnings.inspect
+  end
+
   def test_dual_library_entity_file
     tree = scan("foo.md" => "---\ntype: library\n---\n# class Foo < Object\n説明。\n")
     assert_equal ["foo"], tree.libraries.keys

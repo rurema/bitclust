@@ -51,6 +51,46 @@ class TestMarkdownBridge < Test::Unit::TestCase
     end
   end
 
+  def build_from(files)
+    Dir.mktmpdir do |md|
+      files.each do |path, content|
+        full = File.join(md, path)
+        FileUtils.mkdir_p(File.dirname(full))
+        File.write(full, content)
+      end
+      Dir.mktmpdir do |out|
+        BitClust::MarkdownBridge.build(md, out)
+        result = {}
+        Dir.glob('**/*', base: out).each do |f|
+          full = File.join(out, f)
+          result[f] = File.read(full) if File.file?(full)
+        end
+        return result
+      end
+    end
+  end
+
+  def test_gated_membership_wraps_include_sites
+    # 多重所属（ゲート付き library リスト）: 各ライブラリの .rd に、その
+    # membership のゲートで #@include サイトをラップして再具現化する
+    out = build_from(
+      "builtin.md" => "---\ntype: library\n---\nbuiltin 概要。\n",
+      "thread.md" => "---\ntype: library\n---\nthread 概要。\n",
+      "thread/Mutex.md" =>
+        "---\n" \
+        "library:\n" \
+        "  - builtin\n" \
+        "\#@until 1.9.1\n" \
+        "  - thread\n" \
+        "\#@end\n" \
+        "---\n" \
+        "# class Mutex < Object\nM。\n"
+    )
+    assert_equal "builtin 概要。\n\n\#@include(thread/Mutex)\n", out["builtin.rd"]
+    assert_equal "thread 概要。\n\n\#@until 1.9.1\n\#@include(thread/Mutex)\n\#@end\n",
+      out["thread.rd"]
+  end
+
   def test_libraries_manifest
     out = build
     assert_equal "bar/baz\ndual\nfoo\n\#@until 3.1\ngated\n\#@end\nsub/sub\n", out["LIBRARIES"]

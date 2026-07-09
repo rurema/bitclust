@@ -18,16 +18,19 @@ require 'bitclust/include_graph'
 
 md_root = nil
 src_root = nil
+scope_arg = nil
 args = ARGV.dup
 until args.empty?
   a = args.shift
   if a == '--src'
     src_root = args.shift
+  elsif a == '--scope'
+    scope_arg = args.shift
   else
     md_root = a
   end
 end
-abort "usage: #{$0} <md-tree-root> [--src <doctree-src-root>]" unless md_root
+abort "usage: #{$0} <md-tree-root> [--src <doctree-src-root>] [--scope LO,HI]" unless md_root
 
 tree = BitClust::MarkdownTree.scan(md_root)
 entity_count = tree.entities.values.sum { |e| e[:names].size }
@@ -39,7 +42,7 @@ puts "entities without library: #{no_lib.size}"
 
 if src_root
   graph = BitClust::IncludeGraph.analyze(src_root)
-  scope = BitClust::IncludeGraph::Scope.new('3.0', '4.2')
+  scope = BitClust::IncludeGraph::Scope.new(*(scope_arg || '3.0,4.2').split(','))
   fm = graph.front_matter_map(scope)
   lib_fm = graph.library_front_matter_map(scope)
 

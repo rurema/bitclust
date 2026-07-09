@@ -199,7 +199,19 @@ module BitClust
       lines = ["---\n"]
       # 順序: type, name, library, include, extend, alias, since, until, category, require, sublibrary（MARKUP_SPEC §1.7）
       %w[type name library].each do |key|
-        if v = @front_matter[key]
+        next unless v = @front_matter[key]
+        if v.is_a?(Array)
+          # 多重所属のゲート付きリスト（MARKUP_SPEC §1.2）。
+          # #@ 行は生 YAML ではコメント = 和集合リストとして無害に表示される
+          lines << "#{key}:\n"
+          v.each do |m|
+            lines << "\#@since #{m['since']}\n" if m['since']
+            lines << "\#@until #{m['until']}\n" if m['until']
+            lines << "  - #{m['name']}\n"
+            lines << "\#@end\n" if m['until']
+            lines << "\#@end\n" if m['since']
+          end
+        else
           lines << "#{key}: #{v}\n"
         end
       end

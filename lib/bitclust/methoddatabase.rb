@@ -181,7 +181,13 @@ module BitClust
         next unless md_version_covers?(version, lib[:since], lib[:until])
         lib_entry = MDParser.new(self).parse_file(File.join(md_root, lib[:path]), libname, properties())
         lib_location = lib_entry.source_location
-        members = tree.entities.select { |_, e| e[:library] == libname }
+        # 多重所属（ゲート付き library リスト）は、この版でゲートが生きている
+        # membership を持つライブラリだけがメンバーとして取り込む
+        members = tree.entities.select { |_, e|
+          e[:memberships].any? { |m|
+            m[:library] == libname && md_version_covers?(version, m[:since], m[:until])
+          }
+        }
         sorted = members.keys.sort_by { |path|
           reopen_only = members[path][:kinds].all? { |kind, _| %w[reopen redefine].include?(kind) }
           [reopen_only ? 1 : 0, path]

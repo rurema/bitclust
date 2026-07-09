@@ -169,7 +169,9 @@ module BitClust
       key = nil
       yaml_lines.each do |l|
         case l
-        when /\A(include|extend|alias|require|sublibrary):\s*$/
+        when /\A(include|extend|alias|require|sublibrary|library):\s*$/
+          # library のゲート付きリスト（多重所属・注入キー）は収集だけして
+          # 破棄する（ブロック内の #@ 行が leading に漏れないように）
           key = $1; blocks[key] = []
         when /\Acategory:\s*(.*)$/
           category = $1.strip; key = nil
