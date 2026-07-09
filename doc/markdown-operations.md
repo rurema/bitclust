@@ -24,7 +24,15 @@ $ ruby bin/rrd2md --capi <doctree>/refm/capi/src <doctree>/manual/capi
 ```
 
 - `--graph` のスコープ（対象版範囲）は `--scope LO,HI` で変更できる（既定 `3.0,4.2`）。
-  旧版サルベージ時は同じコマンドを別スコープで再実行する。
+- **2026-07 の旧版サルベージ以降、`manual/api` は全ビルド対象版をカバーする
+  `--scope 1.8.7,4.2` で生成したツリー**。再生成時は必ず同じスコープを指定する
+  （`tools/md-roundtrip-check.rb --inject` と `tools/md-tree-check.rb` にも
+  同じ `--scope` を渡す）。
+- 旧版ビルドの既知エッジ（サルベージ時に確認・データ由来）:
+  - 1.8.7 は refm 由来の cgi/util.rd の破損（bare method entry）で
+    旧経路・ブリッジ・ネイティブのいずれも同一エラーで失敗する（既存事象の保存）
+  - 2.7 未満の版では spec/pattern_matching の doc 描画に1行の差
+    （コードフェンスが版ゲートに対して安全でないため。ソース側の修正課題）
 - 単一ファイルの変換を確認したいときは `ruby bin/rrd2md --file <path>`（標準出力へ）。
 
 ## 2. 検証
