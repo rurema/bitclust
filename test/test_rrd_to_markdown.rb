@@ -614,6 +614,84 @@ class TestRRDToMarkdown < Test::Unit::TestCase
         extra_front_matter: { library: "foo", until: "4.0" })
   end
 
+  def test_extra_front_matter_gated_library_list
+    # 多重所属（IncludeGraph#front_matter_map のリスト形式）は
+    # ゲート付きリストとして emit する（MARKUP_SPEC §1.2/§1.6）
+    rrd = "= class Mutex < Object\n\n説明\n"
+    expected = "---\n" \
+               "library:\n" \
+               "  - _builtin\n" \
+               "\#@until 1.9.1\n" \
+               "  - thread\n" \
+               "\#@end\n" \
+               "---\n" \
+               "# class Mutex < Object\n\n説明\n"
+    assert_equal expected,
+      BitClust::RRDToMarkdown.convert(rrd, extra_front_matter: {
+        "library" => [
+          { "name" => "_builtin" },
+          { "name" => "thread", "until" => "1.9.1" }
+        ] })
+  end
+
+  def test_extra_front_matter_gated_library_list_with_since_and_both_bounds
+    rrd = "= class Foo < Object\n"
+    expected = "---\n" \
+               "library:\n" \
+               "\#@since 2.3.0\n" \
+               "  - _builtin\n" \
+               "\#@end\n" \
+               "\#@since 1.9.1\n" \
+               "\#@until 2.3.0\n" \
+               "  - thread\n" \
+               "\#@end\n" \
+               "\#@end\n" \
+               "---\n" \
+               "# class Foo < Object\n"
+    assert_equal expected,
+      BitClust::RRDToMarkdown.convert(rrd, extra_front_matter: {
+        "library" => [
+          { "name" => "_builtin", "since" => "2.3.0" },
+          { "name" => "thread", "since" => "1.9.1", "until" => "2.3.0" }
+        ] })
+  end
+
+  def test_gated_metadata_blocks_of_different_kinds
+    # regate_metadata の出力形: require と sublibrary が別々の単一種ゲート
+    # ブロックに分かれている（rubygems.rd の据え置きゲート）。
+    # それぞれの front matter キーへゲートごと振り分ける
+    rrd = "\#@since 1.9.1\nrequire a\nrequire b\n\#@end\n\n" \
+          "\#@since 1.9.1\nsublibrary s\n\#@end\n\n" \
+          "\#@since 1.9.1\n本文。\n\#@end\n"
+    expected = "---\n" \
+               "require:\n" \
+               "\#@since 1.9.1\n" \
+               "  - a\n" \
+               "  - b\n" \
+               "\#@end\n" \
+               "sublibrary:\n" \
+               "\#@since 1.9.1\n" \
+               "  - s\n" \
+               "\#@end\n" \
+               "---\n" \
+               "\#@since 1.9.1\n本文。\n\#@end\n"
+    assert_equal expected, BitClust::RRDToMarkdown.convert(rrd)
+  end
+
+  def test_gated_category_becomes_gated_scalar
+    # cmath.rd の据え置きゲート: category はスカラのままゲート行で挟む
+    # （値の差し替えではなく単一値の存在ゲートなので生 YAML でも重複キーにならない）
+    rrd = "\#@since 1.9.1\ncategory Math\n\#@end\n\n" \
+          "\#@since 1.9.1\n本文。\n\#@end\n"
+    expected = "---\n" \
+               "\#@since 1.9.1\n" \
+               "category: Math\n" \
+               "\#@end\n" \
+               "---\n" \
+               "\#@since 1.9.1\n本文。\n\#@end\n"
+    assert_equal expected, BitClust::RRDToMarkdown.convert(rrd)
+  end
+
   def test_extra_front_matter_on_multi_entity_file
     # library はファイル単位の情報なので、マルチエンティティでも曖昧なく注入できる
     # （ファイル内の全エンティティは同一ライブラリ所属。ヘッダ関係は body 据え置きのまま）

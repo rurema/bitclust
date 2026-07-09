@@ -108,7 +108,8 @@ module BitClust
         l = @lines[scan]
         case l
         when /\Acategory\s+(.*)$/
-          return if nest > 0            # 版条件つき scalar category → 据え置き（データ上0件）
+          # 版条件つき category は「単一値の存在ゲート」のみ対応（値の差し替えは
+          # 据え置き）。判定は build_metadata_front_matter のグループ検査で行う
           tokens << [:cat, $1.strip]; scan += 1
         when /\Arequire\s+(.*)$/
           tokens << [:req, $1.strip]; scan += 1
@@ -161,9 +162,11 @@ module BitClust
     end
 
     # 先頭メタデータ領域の tokens を front matter へ組み立てる。
-    # category は scalar、require/sublibrary は組み立て済みブロック行
+    # category は scalar（単一値の存在ゲートならゲート行ごとブロック化）、
+    # require/sublibrary は組み立て済みブロック行
     # （#@ ディレクティブや #@# コメントを挟める）。
-    # #@ ブロックは単一種のみ対応（データ上、混在・category 包みは存在しない）。
+    # #@ ブロックは「単一種の完結ブロック」のみ対応。種の混在ブロックや
+    # category の値差し替えは据え置き（false = 収集全体を bail）。
     # 最初のメタ行より前の #@#（irb.rd の Author 行）は leading スロットへ。
     def build_metadata_front_matter(tokens)
       # 先頭の #@# コメント群: 直後に空行が続くもの（irb.rd の Author 行）は
@@ -176,21 +179,65 @@ module BitClust
       end
       toks = tokens.reject { |t| t[0] == :blank }
 
-      cats = toks.select { |t| t[0] == :cat }
-      return false if cats.size > 1
-      @front_matter['category'] = cats.first[1] if cats.first
-      list_toks = toks.reject { |t| t[0] == :cat }
-      if list_toks.none? { |t| %i[dir cmt].include?(t[0]) }
-        { req: 'require', sub: 'sublibrary' }.each do |sym, key|
-          items = list_toks.select { |t| t[0] == sym }
-          @front_matter[key] = items.map { |t| "  - #{t[1]}\n" } unless items.empty?
+      category = nil   # [:scalar, val] | [:block, md行列]
+      blocks = {}      # 'require' / 'sublibrary' => 組み立て済み md 行
+      i = 0
+      while i < toks.length
+        kind, val = toks[i]
+        case kind
+        when :cat
+          return false if category
+          category = [:scalar, val]
+          i += 1
+        when :req, :sub
+          (blocks[kind == :req ? 'require' : 'sublibrary'] ||= []) << "  - #{val}\n"
+          i += 1
+        when :cmt
+          # コメントは同じブロック内の位置を保って流す: 直後のメタトークンの
+          # 種のブロックへ（irb/workspace.rd の require 注記）
+          nxt = toks[i + 1]
+          return false unless nxt && %i[req sub].include?(nxt[0])
+          (blocks[nxt[0] == :req ? 'require' : 'sublibrary'] ||= []) << val
+          i += 1
+        when :dir
+          # 完結した単一種のゲートブロックを読む
+          depth = 0
+          group = []
+          gkinds = []
+          j = i
+          loop do
+            return false unless toks[j]
+            k2, v2 = toks[j]
+            group << toks[j]
+            if k2 == :dir
+              if v2 =~ /\A\#@end/
+                depth -= 1
+              elsif v2 !~ /\A\#@else/
+                depth += 1
+              end
+            elsif k2 != :cmt
+              gkinds << k2
+            end
+            j += 1
+            break if depth == 0
+          end
+          gkinds.uniq!
+          return false if gkinds.size != 1
+          case gkinds.first
+          when :cat
+            return false if category || group.count { |t| t[0] == :cat } > 1
+            category = [:block, group.map { |t| t[0] == :cat ? "category: #{t[1]}\n" : t[1] }]
+          else
+            key = gkinds.first == :req ? 'require' : 'sublibrary'
+            (blocks[key] ||= []).concat(
+              group.map { |t| %i[dir cmt].include?(t[0]) ? t[1] : "  - #{t[1]}\n" })
+          end
+          i = j
         end
-        return true
       end
-      kinds = list_toks.select { |t| %i[req sub].include?(t[0]) }.map { |t| t[0] }.uniq
-      return false if kinds.size != 1
-      key = kinds.first == :req ? 'require' : 'sublibrary'
-      @front_matter[key] = list_toks.map { |t| %i[dir cmt].include?(t[0]) ? t[1] : "  - #{t[1]}\n" }
+      return false if category.nil? && blocks.empty?
+      @front_matter['category'] = category[0] == :scalar ? category[1] : category[1] if category
+      blocks.each { |k, v| @front_matter[k] = v }
       true
     end
 
@@ -199,7 +246,19 @@ module BitClust
       lines = ["---\n"]
       # 順序: type, name, library, include, extend, alias, since, until, category, require, sublibrary（MARKUP_SPEC §1.7）
       %w[type name library].each do |key|
-        if v = @front_matter[key]
+        next unless v = @front_matter[key]
+        if v.is_a?(Array)
+          # 多重所属のゲート付きリスト（MARKUP_SPEC §1.2）。
+          # #@ 行は生 YAML ではコメント = 和集合リストとして無害に表示される
+          lines << "#{key}:\n"
+          v.each do |m|
+            lines << "\#@since #{m['since']}\n" if m['since']
+            lines << "\#@until #{m['until']}\n" if m['until']
+            lines << "  - #{m['name']}\n"
+            lines << "\#@end\n" if m['until']
+            lines << "\#@end\n" if m['since']
+          end
+        else
           lines << "#{key}: #{v}\n"
         end
       end
@@ -218,7 +277,11 @@ module BitClust
         block.each { |bl| lines << bl }  # メタ領域先頭の #@# コメント行
       end
       if v = @front_matter['category']
-        lines << "category: #{v}\n"
+        if v.is_a?(Array)
+          lines.concat(v)   # ゲート付き category（#@ 行 + `category: 値` の組み立て済み行）
+        else
+          lines << "category: #{v}\n"
+        end
       end
       %w[require sublibrary].each do |key|
         if block = @front_matter[key]

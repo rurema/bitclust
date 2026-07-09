@@ -29,11 +29,45 @@ module BitClust
     end
 
     # conditions が表す版区間 [lo, hi)。lo/hi は Gem::Version、制約なしは nil。
-    # :since は max、:until は min を取る。:if は版制約に寄与しない。
+    # :since は max、:until は min を取る。
     def self.interval(conditions)
-      lo = conditions.select { |c| c.kind == :since }.map { |c| Gem::Version.new(c.version) }.max
-      hi = conditions.select { |c| c.kind == :until }.map { |c| Gem::Version.new(c.version) }.min
-      [lo, hi]
+      lo, hi = bounds(conditions)
+      [lo&.first, hi&.first]
+    end
+
+    # conditions から下限・上限を [Gem::Version, 原文字列] の組で集める。
+    # :if の連言（ubygems の "1.9.1" <= version and version < "2.5.0" 等）も
+    # 分解して境界に寄与させる。分解できない連言子は寄与しない（保守的に広く扱う。
+    # 恒偽の証明は Scope#never? が連言子単位で別途行う）
+    def self.bounds(conditions)
+      sinces = []
+      untils = []
+      conditions.each do |c|
+        case c.kind
+        when :since then sinces << [Gem::Version.new(c.version), c.version]
+        when :until then untils << [Gem::Version.new(c.version), c.version]
+        when :if
+          if_bounds(c.version).each do |kind, v|
+            (kind == :since ? sinces : untils) << [Gem::Version.new(v), v]
+          end
+        end
+      end
+      [sinces.max_by(&:first), untils.min_by(&:first)]
+    end
+
+    # 連言（and 区切り）の #@if 条件式を since/until 境界に分解する。
+    # 対応形: "X" <= version / version >= "X" → since X、version < "X" → until X。
+    # <= や否定（#@else 反転）は正確に表現できないので分解しない
+    def self.if_bounds(expr)
+      return [] if expr.lstrip.start_with?('!')
+      bounds = []
+      expr.split(/\band\b/).each do |c|
+        case c
+        when /version\s*<\s*"([\d.]+)"/ then bounds << [:until, $1]
+        when /version\s*>=\s*"([\d.]+)"/, /"([\d.]+)"\s*<=\s*version/ then bounds << [:since, $1]
+        end
+      end
+      bounds
     end
 
     # 対象版範囲 [lo, hi)。範囲はパラメータであり、[3.0, 4.2) 以外
@@ -107,14 +141,10 @@ module BitClust
       # バージョン文字列は原文の表記を保持する。
       def gate(conditions)
         return nil unless cover?(conditions)
-        lo, hi = IncludeGraph.interval(conditions)
+        lo, hi = IncludeGraph.bounds(conditions)
         gate = {}
-        if lo && lo > @lo
-          gate[:since] = conditions.find { |c| c.kind == :since && Gem::Version.new(c.version) == lo }.version
-        end
-        if hi && hi < @hi
-          gate[:until] = conditions.find { |c| c.kind == :until && Gem::Version.new(c.version) == hi }.version
-        end
+        gate[:since] = lo[1] if lo && lo[0] > @lo
+        gate[:until] = hi[1] if hi && hi[0] < @hi
         gate
       end
     end
@@ -183,12 +213,17 @@ module BitClust
     end
 
     # 各 grouping メンバーへ注入する front matter（スコープ適用済み）。
-    # { relpath => { "library" => name, "since" => v, "until" => v } }
+    # 単一所属:   { relpath => { "library" => name, "since" => v, "until" => v } }
+    # 複数所属:   { relpath => { "library" => [{ "name" => n, "since" => v,
+    #                                            "until" => v }, ...], ... } }
     # RRDToMarkdown の extra_front_matter: にそのまま渡せる形。
     #
     # - スコープ外のメンバーは含まない（旧版サルベージは別スコープで再実行）
-    # - スコープ内で複数ライブラリに所属するメンバーは警告してスキップ
-    #   （現データでは 0 件。発生したら front matter スキーマ側の対応が必要）
+    # - 複数ライブラリへの所属（旧 rdoc の同時所属、thread 系の版切替所属）は
+    #   ゲート付きリストで表現する（MARKUP_SPEC §1.2）。並び順は
+    #   「現在まで存在する側（until なし）→ 名前順」で決定的にする。
+    #   このときトップレベルの since/until はライブラリ横断の hull
+    #   （エンティティ自体の存在ゲート）
     # - 同一ライブラリ内の複数 include サイトは、いずれかが有効なら
     #   エンティティが存在するため、ゲートは区間の hull（弱い方）を取る
     def front_matter_map(scope)
@@ -197,12 +232,23 @@ module BitClust
         covered = ms.select { |m| scope.cover?(m.conditions) }
         next if covered.empty?
         libraries = covered.map(&:library).uniq
-        if libraries.size > 1
-          @warnings << "in-scope multi-membership: #{path} -> #{libraries.inspect}"
-          next
+        per_lib = libraries.to_h { |lib|
+          [lib, hull(covered.select { |m| m.library == lib }
+                            .map { |m| scope.gate(m.conditions) })]
+        }
+        if libraries.size == 1
+          fm = { 'library' => libraries.first }
+          gate = per_lib.values.first
+        else
+          entries = per_lib.map { |lib, g|
+            e = { 'name' => lib }
+            e['since'] = g[:since] if g[:since]
+            e['until'] = g[:until] if g[:until]
+            e
+          }.sort_by { |e| [e['until'] ? 1 : 0, e['name']] }
+          fm = { 'library' => entries }
+          gate = hull(per_lib.values)
         end
-        fm = { 'library' => libraries.first }
-        gate = hull(covered.map { |m| scope.gate(m.conditions) })
         fm['since'] = gate[:since] if gate[:since]
         fm['until'] = gate[:until] if gate[:until]
         result[path] = fm

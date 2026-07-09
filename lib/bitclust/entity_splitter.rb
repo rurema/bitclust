@@ -87,22 +87,31 @@ module BitClust
     # ベースセグメントとして返す。連結すると入力に一致する。
     def segments(src)
       lines = src.lines
-      boundaries = []   # [行index, エンティティ名]
+      boundaries = []   # [行index, エンティティ名, ゲート付きか]
       depth = 0
       lines.each_with_index do |line, i|
         case line
         when BLOCK_OPEN_RE
           if depth.zero? && line =~ /\A\#@(?:since|until|if)\b/ &&
              (name = first_h1_name(lines, i + 1))
-            boundaries << [i, name]
+            boundaries << [i, name, true]
           end
           depth += 1
         when /\A\#@end\b/
           depth -= 1
         when H1_RE
-          boundaries << [i, $1] if depth.zero?
+          boundaries << [i, $1, false] if depth.zero?
         end
       end
+      # ゲート付き H1 境界は、ゲートがセグメント全体を包む場合のみ分割境界にする。
+      # H1 と見出しだけがゲートされ内容がゲートの外にある形（syslog の旧構造）を
+      # 単独ファイル化すると、ゲートが偽の版で自立パースできない
+      # （旧世界では直前エンティティの内容として付く）ため、直前セグメントに残す
+      boundaries = boundaries.each_with_index.select { |(start, _, gated), idx|
+        next true unless gated
+        stop = idx + 1 < boundaries.length ? boundaries[idx + 1][0] : lines.length
+        gate_wraps_segment?(lines, start, stop)
+      }.map { |(start, name, _), _| [start, name] }
       return nil if boundaries.empty?
       if lines[0...boundaries.first[0]].all? { |l| l =~ BLANK_RE }
         boundaries[0] = [0, boundaries[0][1]]   # 先頭の空行は最初のセグメントへ
@@ -114,6 +123,26 @@ module BitClust
         stop = idx + 1 < boundaries.length ? boundaries[idx + 1][0] : lines.length
         [name, lines[start...stop].join]
       end
+    end
+
+    # start のゲート開き行に対応する #@end がセグメント終端（末尾の空行は許容）に
+    # あるか。ゲートがセグメント全体を包むときのみ真
+    def gate_wraps_segment?(lines, start, stop)
+      depth = 0
+      close = nil
+      (start...stop).each do |i|
+        case lines[i]
+        when BLOCK_OPEN_RE then depth += 1
+        when /\A\#@end\b/
+          depth -= 1
+          if depth.zero?
+            close = i
+            break
+          end
+        end
+      end
+      return false unless close
+      lines[(close + 1)...stop].all? { |l| l =~ BLANK_RE }
     end
 
     # エンティティ名 → 出力ファイル名（拡張子なし）。既存の命名規約に合わせ :: → __

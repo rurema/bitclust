@@ -117,4 +117,59 @@ class TestWholeFileGate < Test::Unit::TestCase
   def test_unwrap_for_scope_returns_nil_without_whole_file_gate
     assert_nil unwrap_for_scope("category Math\n\n本文。\n")
   end
+
+  # ---- regate_metadata: 据え置きゲートのメタデータ領域を独立ゲートに分離 ----
+  # 旧版サルベージで据え置かれた library ルートの全体ゲート（rubygems.rd の
+  # #@since 1.9.1 等）は、メタデータが本文に埋もれると native パースが
+  # front matter から読めない。意味等価な正規形（メタデータブロック + 本文ブロック、
+  # それぞれ同じゲートで包む）に書き換えることで、既存のゲート対応
+  # メタデータ収集器がそのまま front matter 化できる
+
+  def regate(src)
+    BitClust::WholeFileGate.regate_metadata(src)
+  end
+
+  def test_regate_metadata_splits_metadata_and_body
+    # 種別（category/require/sublibrary）ごとに独立のゲートブロックへ分ける
+    # （メタデータ収集器の「#@ ブロックは単一種のみ」の制約に合わせる）
+    src = "\#@since 1.9.1\n" \
+          "require rubygems/defaults\n" \
+          "require rubygems/version\n" \
+          "\n" \
+          "sublibrary rubygems/gem_runner\n" \
+          "\n" \
+          "本文。\n" \
+          "\#@end\n"
+    expected = "\#@since 1.9.1\n" \
+               "require rubygems/defaults\n" \
+               "require rubygems/version\n" \
+               "\#@end\n" \
+               "\n" \
+               "\#@since 1.9.1\n" \
+               "sublibrary rubygems/gem_runner\n" \
+               "\#@end\n" \
+               "\n" \
+               "\#@since 1.9.1\n" \
+               "本文。\n" \
+               "\#@end\n"
+    assert_equal expected, regate(src)
+  end
+
+  def test_regate_metadata_skips_leading_blank_in_gate
+    src = "\#@since 1.9.1\n\ncategory Math\n\n本文。\n\#@end\n"
+    expected = "\#@since 1.9.1\ncategory Math\n\#@end\n\n\#@since 1.9.1\n本文。\n\#@end\n"
+    assert_equal expected, regate(src)
+  end
+
+  def test_regate_metadata_returns_nil_without_metadata
+    assert_nil regate("\#@since 1.9.1\n本文。\n\#@end\n")
+  end
+
+  def test_regate_metadata_returns_nil_without_body
+    assert_nil regate("\#@since 1.9.1\nrequire foo\n\#@end\n")
+  end
+
+  def test_regate_metadata_returns_nil_without_whole_file_gate
+    assert_nil regate("require foo\n\n本文。\n")
+  end
 end

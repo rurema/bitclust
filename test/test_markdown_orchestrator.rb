@@ -21,7 +21,7 @@ require 'bitclust/markdown_to_rrd'
 # [x] LIBRARIES 自体は変換対象外
 class TestMarkdownOrchestrator < Test::Unit::TestCase
   FILES = {
-    "LIBRARIES"  => "foo\n\#@until 3.1\ngated\n\#@end\nx\nx/x\n",
+    "LIBRARIES"  => "foo\n\#@until 3.1\ngated\n\#@end\nx\nx/x\ncml\ngml\n",
     "foo.rd"     => "category Cat\n\n説明。\n\n\#@include(foo/Bar)\n\n\#@include(foo/frag)\n",
     "foo/Bar"    => "\#@since 1.9.1\n= class Bar < Object\n\nBar の説明。\n\#@end\n",
     "foo/frag"   => "断片。\n",
@@ -29,16 +29,131 @@ class TestMarkdownOrchestrator < Test::Unit::TestCase
     "x.rd"       => "x の説明。\n\n\#@include(x/X)\n",
     "x/X"        => "= class X < Object\n\nX の説明。\n",
     "x/x.rd"     => "x/x の説明。\n",
+    # cmath 型: LIBRARIES にゲートは無いがファイル全体が #@since で包まれている
+    "cml.rd"     => "\#@since 1.9.1\ncml の説明。\n\#@end\n",
+    # rubygems 型: 据え置きゲートの中にライブラリメタデータがある
+    "gml.rd"     => "\#@since 1.9.1\nrequire foo\n\ngml の説明。\n\#@end\n",
   }.freeze
 
-  def with_orchestrator
+  def with_orchestrator(scope: nil)
     Dir.mktmpdir do |dir|
       FILES.each do |path, content|
         full = File.join(dir, path)
         FileUtils.mkdir_p(File.dirname(full))
         File.write(full, content)
       end
-      yield BitClust::MarkdownOrchestrator.new(dir)
+      opts = scope ? { scope: scope } : {}
+      yield BitClust::MarkdownOrchestrator.new(dir, **opts)
+    end
+  end
+
+  def wide_scope
+    BitClust::IncludeGraph::Scope.new("1.8.7", "4.2")
+  end
+
+  def test_member_whole_file_gate_unwraps_to_entity_since_under_wide_scope
+    # メンバーの全体ゲートはエンティティ自身の存在ゲートなので front matter へ
+    # （旧世界でも include 先が空にプリプロセスされる＝エンティティ不存在で等価）
+    with_orchestrator(scope: wide_scope) do |orch|
+      md = orch.convert("foo/Bar", FILES["foo/Bar"])
+      expected = <<~'MD'
+        ---
+        library: foo
+        since: "1.9.1"
+        ---
+        # class Bar < Object
+
+        Bar の説明。
+      MD
+      assert_equal expected, md
+    end
+  end
+
+  def test_fragment_whole_file_gate_is_kept_in_body
+    # 断片（#@include 展開用、front matter を持てない）の全体ゲートは
+    # 常真でない限り据え置く。front matter を付けると include 展開の途中に
+    # `---` が現れてパースが壊れる（_builtin/Fiber.current の #@since 1.9.0）
+    files = {
+      "LIBRARIES" => "foo\n",
+      "foo.rd"    => "説明。\n\n\#@include(foo/gfrag)\n",
+      "foo/gfrag" => "\#@since 1.9.1\n断片。\n\#@end\n",
+    }
+    with_files(files, scope: wide_scope) do |orch|
+      md = orch.convert("foo/gfrag", files["foo/gfrag"])
+      assert_equal "\#@since 1.9.1\n断片。\n\#@end\n", md
+    end
+    # デフォルトスコープでは常真 → 従来どおり解除される
+    with_files(files) do |orch|
+      md = orch.convert("foo/gfrag", files["foo/gfrag"])
+      assert_equal "断片。\n", md
+    end
+  end
+
+  def with_files(files, scope: nil)
+    Dir.mktmpdir do |dir|
+      files.each do |path, content|
+        full = File.join(dir, path)
+        FileUtils.mkdir_p(File.dirname(full))
+        File.write(full, content)
+      end
+      opts = scope ? { scope: scope } : {}
+      yield BitClust::MarkdownOrchestrator.new(dir, **opts)
+    end
+  end
+
+  def test_kept_gate_library_metadata_moves_to_front_matter_with_gate
+    # rubygems 型: 据え置きゲートの中の require 等は、独立ゲートに分離した上で
+    # front matter 化する（native パースはメタデータを front matter からしか
+    # 読まないため）。本文はゲートのまま残る
+    with_orchestrator(scope: wide_scope) do |orch|
+      md = orch.convert("gml.rd", FILES["gml.rd"])
+      expected = <<~'MD'
+        ---
+        type: library
+        require:
+        #@since 1.9.1
+          - foo
+        #@end
+        ---
+        #@since 1.9.1
+        gml の説明。
+        #@end
+      MD
+      assert_equal expected, md
+    end
+  end
+
+  def test_narrowing_whole_file_gate_on_library_root_is_kept_in_body
+    # cmath 型: ライブラリの存在は LIBRARIES が正（1.8.7 にも存在して内容が空）。
+    # LIBRARIES 由来ゲートより狭いファイル全体ゲートを front matter に解除すると
+    # 「ライブラリの存在」まで狭めてしまうので、据え置いて本文ゲートのまま残す
+    with_orchestrator(scope: wide_scope) do |orch|
+      md = orch.convert("cml.rd", FILES["cml.rd"])
+      expected = <<~'MD'
+        ---
+        type: library
+        ---
+        #@since 1.9.1
+        cml の説明。
+        #@end
+      MD
+      assert_equal expected, md
+    end
+  end
+
+  def test_matching_whole_file_gate_still_unwraps_under_wide_scope
+    # LIBRARIES 由来のゲート（until 3.1）とファイル全体ゲートが一致する場合は
+    # 従来どおり解除して front matter に一本化する（fiber/set 型）
+    with_orchestrator(scope: wide_scope) do |orch|
+      md = orch.convert("gated.rd", FILES["gated.rd"])
+      expected = <<~'MD'
+        ---
+        type: library
+        until: "3.1"
+        ---
+        gated ライブラリの説明。
+      MD
+      assert_equal expected, md
     end
   end
 

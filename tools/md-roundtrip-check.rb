@@ -25,7 +25,12 @@ with_capi = ARGV.delete('--with-capi')
 inject = ARGV.delete('--inject')
 show_diff = ARGV.delete('--diff')
 verbose = ARGV.delete('-v')
-doctree = ARGV.shift or abort "usage: #{$0} [--with-doc] [--inject] [--diff] [-v] <doctree-root>"
+scope_arg = nil
+if (i = ARGV.index('--scope'))
+  ARGV.delete_at(i)
+  scope_arg = ARGV.delete_at(i) or abort '--scope requires LO,HI'
+end
+doctree = ARGV.shift or abort "usage: #{$0} [--with-doc] [--inject] [--scope LO,HI] [--diff] [-v] <doctree-root>"
 
 src_root = File.join(doctree, 'refm/api/src')
 files = Dir.glob('**/*', base: src_root).select { |f| File.file?(File.join(src_root, f)) }
@@ -34,7 +39,11 @@ files -= ['LIBRARIES']
 orchestrator = nil
 prune_sites = {}
 if inject
-  orchestrator = BitClust::MarkdownOrchestrator.new(src_root)
+  opts = {}
+  if scope_arg
+    opts[:scope] = BitClust::IncludeGraph::Scope.new(*scope_arg.split(','))
+  end
+  orchestrator = BitClust::MarkdownOrchestrator.new(src_root, **opts)
   orchestrator.warnings.each { |w| warn "W: #{w}" }
   prune_sites = orchestrator.graph.grouping_include_sites
   puts "prune: #{prune_sites.size} files"

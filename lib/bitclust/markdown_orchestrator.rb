@@ -76,6 +76,7 @@ module BitClust
 
         fm = entity_fm.dup
         if (unwrapped = WholeFileGate.unwrap_for_scope(text, @scope))
+          # エンティティセグメントのゲートは自身の存在ゲート → 常に front matter へ
           text = unwrapped[0]
           merge_gate(fm, unwrapped[1])
         end
@@ -107,8 +108,15 @@ module BitClust
       front_matter = (@extra[relpath] || {}).dup
       rrd = IncludePruner.prune(rrd, @prune_sites[relpath] || [])
       if (unwrapped = WholeFileGate.unwrap_for_scope(rrd, @scope))
-        rrd = unwrapped[0]
-        merge_gate(front_matter, unwrapped[1])
+        if unwrap_allowed?(front_matter, unwrapped[1])
+          rrd = unwrapped[0]
+          merge_gate(front_matter, unwrapped[1])
+        elsif front_matter['type'] == 'library' &&
+              (regated = WholeFileGate.regate_metadata(rrd))
+          # 据え置きゲートの library ルート: メタデータ領域を独立ゲートに分離して
+          # front matter 化できるようにする（本文はゲートのまま）
+          rrd = regated
+        end
       end
       rrd = EntitySplitter.resolve_header_gates(rrd, @scope)
       rrd = normalize_entity_h1(rrd)
@@ -212,6 +220,35 @@ module BitClust
     # 行頭 --- は現れない前提（roundtrip 検証が破れを検出する）
     def normalize_signature_spacing(rrd)
       rrd.gsub(/^---(?=[^\s-])/, '--- ')
+    end
+
+    # ファイル全体ゲートを front matter へ解除してよいか。
+    # - 常真ゲート（gate == {}）: 常に解除（従来どおり）
+    # - 断片・スコープ外（front matter なし）: 据え置き。front matter を付けると
+    #   #@include 展開の途中に `---` が現れてパースが壊れる（_builtin/Fiber.current）
+    # - type: library ルート: LIBRARIES 由来境界に包含される場合のみ（下記）
+    # - メンバー: エンティティ自身の存在ゲートなので常に解除
+    def unwrap_allowed?(front_matter, gate)
+      return true if gate.empty?
+      return false if front_matter.empty?
+      return true unless front_matter['type'] == 'library'
+      gate_subsumed?(front_matter, gate)
+    end
+
+    # ライブラリルートのファイル全体ゲートが LIBRARIES 由来の既存境界に
+    # 包含されるか。包含されないゲート（cmath: LIBRARIES は until のみ +
+    # ファイルは #@since 1.9.1）をマージすると「ライブラリの存在」まで
+    # 狭めてしまう（旧世界ではスコープ下限の版にも存在して内容が空）
+    def gate_subsumed?(front_matter, gate)
+      gate.all? { |kind, v|
+        cur = front_matter[kind.to_s]
+        next false unless cur
+        if kind == :since
+          Gem::Version.new(cur) >= Gem::Version.new(v)
+        else
+          Gem::Version.new(cur) <= Gem::Version.new(v)
+        end
+      }
     end
 
     # ファイル全体ゲートと注入済みゲート（include サイト / LIBRARIES 由来）の交差を取る

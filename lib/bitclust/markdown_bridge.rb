@@ -117,20 +117,30 @@ module BitClust
       }.join
     end
 
-    # ライブラリのメンバー（library: がこのライブラリを指すエンティティ）への
+    # ライブラリのメンバー（membership がこのライブラリを指すエンティティ）への
     # #@include をライブラリ .rd のディレクトリ相対で再生成する。
     # reopen/redefine だけのファイルは後ろに並べる（reopen が dynamic include する
-    # module は同ライブラリ内で先に定義されている必要がある: json/rake）
+    # module は同ライブラリ内で先に定義されている必要がある: json/rake）。
+    # 多重所属（ゲート付き library リスト）は membership のゲートで
+    # include サイトをラップする（旧 LIBRARIES 世界のゲート付き include と同義）
     def member_includes(libname, emitted)
       base = File.dirname("#{libname}.rd")
-      members = @tree.entities.select { |path, e| e[:library] == libname }
+      members = @tree.entities.select { |path, e|
+        e[:memberships].any? { |m| m[:library] == libname }
+      }
       return '' if members.empty?
 
       sorted = members.keys.sort_by do |path|
         reopen_only = members[path][:kinds].all? { |kind, _| %w[reopen redefine].include?(kind) }
         [reopen_only ? 1 : 0, path]
       end
-      "\n" + sorted.map { |path| "\#@include(#{relative(emitted[path], base)})\n" }.join
+      "\n" + sorted.map { |path|
+        m = members[path][:memberships].find { |mm| mm[:library] == libname }
+        inc = "\#@include(#{relative(emitted[path], base)})\n"
+        inc = "\#@since #{m[:since]}\n#{inc}\#@end\n" if m[:since]
+        inc = "\#@until #{m[:until]}\n#{inc}\#@end\n" if m[:until]
+        inc
+      }.join
     end
 
     # front matter の構造ゲート（since/until）を #@ ラッパーとして再具現化する
