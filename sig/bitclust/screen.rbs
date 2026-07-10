@@ -245,6 +245,8 @@ module BitClust
 
     def meta_description: () -> String
 
+    def eol_warning?: () -> bool
+
     private
 
     def default_encoding: () -> String

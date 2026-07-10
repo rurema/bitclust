@@ -62,6 +62,8 @@ Library
 ライブラリ
 Library Index
 ライブラリ一覧
+Latest version
+最新版のマニュアルへ
 Math
 数学
 Method
@@ -104,6 +106,8 @@ Text
 テキスト
 Thread
 スレッド
+This reference manual is for a version of Ruby that is no longer maintained.
+このマニュアルは既にメンテナンスが終了したバージョンの Ruby を対象としています。
 ancestors
 クラス・モジュールの継承リスト
 class %s

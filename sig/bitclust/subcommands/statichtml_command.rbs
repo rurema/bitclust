@@ -23,6 +23,8 @@ module BitClust
 
       @stop_on_syntax_error: bool
 
+      @eol_warning: bool
+
       @outputdir: Pathname
 
       type manager_config = {
