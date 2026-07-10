@@ -113,6 +113,23 @@ function setupBlock(pre, run) {
     return output
   }
 
+  // After the first run the sample becomes editable (like a scratchpad);
+  // Ctrl+Enter (or Cmd+Enter) re-runs the edited code. Editing gradually
+  // loses the syntax-highlight spans; the COPY button keeps copying the
+  // original text.
+  const enableEditing = () => {
+    if (code.isContentEditable) return
+    code.contentEditable = 'true'
+    code.spellcheck = false
+    pre.dataset.editing = 'true'
+    pre.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault()
+        execute()
+      }
+    })
+  }
+
   const execute = async () => {
     if (button.disabled) return
     button.disabled = true
@@ -131,6 +148,7 @@ function setupBlock(pre, run) {
           ? (result.output === '' ? result.error : result.output + '\n' + result.error)
           : result.output
         if (result.error) out.classList.add('highlight__run-output--error')
+        enableEditing()
       }
     } catch (e) {
       out.classList.add('highlight__run-output--error')

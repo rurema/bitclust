@@ -173,6 +173,16 @@ pre.highlight {
 .highlight__run-output--error {
   color: #a00;
 }
+pre.highlight.ruby[data-editing="true"]:focus-within {
+  outline: auto;
+}
+pre.highlight.ruby[data-editing="true"] > code {
+  display: inline-block;
+  width: 100%;
+}
+pre.highlight.ruby[data-editing="true"] > code:focus {
+  outline: none;
+}
 
 /* for COPY */
 .highlight__copy-button {
