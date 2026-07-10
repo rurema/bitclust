@@ -879,9 +879,16 @@ capi ファイルに本文見出しは存在しないため、`###` の解釈が
   bitclust の Markdown ネイティブ対応で運用できており、記法とビルドは分離済みの
   ため、将来必要になれば記法に影響なくツールを置き換えられる）
 
+- [x] エディタ支援: `#@` 指令用の VS Code TextMate grammar 作成（2026-07 実装済み。
+  doctree の `tools/vscode/rurema-markdown/` — Markdown ハイライトへの injection
+  grammar として `#@since`/`#@until`/`#@if`/`#@else`/`#@end`/`#@include`/
+  `#@samplecode`/`#@todo`/`#@#` を強調。Preprocessor と同じく行頭（カラム0）のみを
+  指令とし、既知の指令以外の行頭 `#@` はビルドで parse error になるため
+  invalid 表示にしてタイポ検出を兼ねる。manual/ 全ツリーの行頭 `#@` 全行で
+  分類を検証済み）
+
 ### 未解決
 
-- [ ] エディタ支援: `#@` 指令用の VS Code TextMate grammar 作成
 - [ ] プリプロセッサがコードブロック内の `#@` を処理する挙動の是非
   - 現行 RRD と同じ挙動だが、Markdown パーサーの結果を利用して
     コードブロック内の指令を区別すべきか要検討
