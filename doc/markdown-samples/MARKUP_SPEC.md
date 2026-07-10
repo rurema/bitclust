@@ -855,21 +855,24 @@ capi ファイルに本文見出しは存在しないため、`###` の解釈が
 - [x] `[c:String]` 等のリンク記法（RRD `[[...]]` ↔ MD `[...]` の双方向変換で解決）
 - [x] front matter スキーマの確定（1ファイル1エンティティ、`library` スカラ、共有断片の扱い、front matter 内版分岐。§1）
 - [x] `include`/`extend`/`alias` を front matter へ集約する方針の確定（§1.2。変換器実装は未解決へ）
+- [x] 本文アンカー `{#id}` の実装（§2.4）— kramdown は不採用となり、bitclust の
+  ネイティブ実装で解決。MDCompiler が `### 見出し {#id}` を `<hN id='id'>` に描画し、
+  RefsDatabase がアンカーを収集して `[ref:...]` 参照を解決する。本番稼働済み
+- [x] 変換器の front matter 対応実装（§1 のとおり実装済み: `include`/`extend`/`alias` の
+  front matter 移送（版条件は `#@` 付き）、`#@include` グラフと版ゲートからの
+  `library`/`since`/`until` 注入、grouping 用 `#@include` の除去と共有断片の
+  拡張子なし正規化、front matter 内 `#@` 出力）
+- [x] 新パイプラインのファイル発見（glob + front matter）と孤児検出（§1.1 のとおり
+  MarkdownTree として実装済み。孤児・`library` なし・include 欠損はビルド警告）
+- [x] `#@include` での RD/MD 混在対応（移行完了により全ツリーが md 化され、
+  移行期の混在は解消。共有断片は拡張子なし表記をリゾルバが `.md` に解決する）
 
 ### 未解決
 
-- [ ] `#@include` での RD/MD 混在対応（段階的移行期の課題）
 - [ ] エディタ支援: `#@` 指令用の VS Code TextMate grammar 作成
 - [ ] プリプロセッサがコードブロック内の `#@` を処理する挙動の是非
   - 現行 RRD と同じ挙動だが、Markdown パーサーの結果を利用して
     コードブロック内の指令を区別すべきか要検討
-- [ ] kramdown での `{#id}` 対応状況の詳細検証
 - [ ] `refe` コマンド等でのプレーンテキスト表示時の可読性確認
 - [ ] RBS 形式シグネチャの実運用テスト
 - [ ] 新システム（bitclust 脱却後）のパーサー実装方針
-- [ ] 変換器の front matter 対応実装（§1）
-  - `include`/`extend`/`alias` を本文から front matter へ移送（版条件は `#@` 付きで）
-  - `#@include` グラフと版ゲートを辿り、エンティティに `library`（スカラ）と構造的 `since`/`until` を付与
-  - grouping 用 `#@include` の除去と、共有断片 `#@include` の温存・拡張子なし正規化
-  - front matter 内 `#@` 出力対応（旧「メタ行に `#@` があると front matter 生成をスキップ」制限の解除）
-- [ ] 新パイプラインのファイル発見（glob + front matter）と孤児検出（§1.1）
