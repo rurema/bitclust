@@ -32,13 +32,13 @@ HERE
   def test_run_script_is_loaded_when_enabled
     html = render(:run_ruby_wasm => WASM_URL)
     assert_include(html, META_TAG)
-    assert_include(html, 'js/run.mjs')
+    assert_include(html, 'js/run.js')
   end
 
   def test_run_script_is_not_loaded_by_default
     html = render({})
     assert_not_include(html, 'rurema-run-ruby-wasm')
-    assert_not_include(html, 'run.mjs')
+    assert_not_include(html, 'run.js')
   end
 
   def test_wasm_url_is_html_escaped

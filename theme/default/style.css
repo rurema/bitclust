@@ -142,7 +142,7 @@ pre.highlight {
     position: relative;
 }
 
-/* for RUN (js/run.mjs, statichtml --run-ruby-wasm) */
+/* for RUN (js/run.js, statichtml --run-ruby-wasm) */
 .highlight__run-button {
   float: right;
   margin: 0 0 0.25em 0.5em;
