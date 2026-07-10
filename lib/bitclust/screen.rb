@@ -314,6 +314,12 @@ module BitClust
       %Q(<meta name="description" content="">)
     end
 
+    # True when the build was told (via statichtml --eol-warning) that the
+    # documented Ruby version is no longer maintained.
+    def eol_warning?
+      !!@conf[:eol_warning]
+    end
+
     private
 
     def default_encoding
