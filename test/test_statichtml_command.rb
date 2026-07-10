@@ -50,20 +50,20 @@ class TestStatichtmlRunRubyWasm < Test::Unit::TestCase
     assert_equal(url, cmd.instance_variable_get(:@run_ruby_wasm))
   end
 
-  def test_run_mjs_is_copied
+  def test_run_js_is_copied
     Dir.mktmpdir do |dir|
       themedir = File.join(dir, 'theme')
       outputdir = File.join(dir, 'out')
       FileUtils.mkdir_p(File.join(themedir, 'js'))
       FileUtils.mkdir_p(outputdir)
-      File.write(File.join(themedir, 'js', 'run.mjs'), "// run\n")
+      File.write(File.join(themedir, 'js', 'run.js'), "// run\n")
       cmd = build_command(themedir, outputdir)
       cmd.send(:copy_run_ruby_wasm_script)
-      assert_true(File.file?(File.join(outputdir, 'js', 'run.mjs')))
+      assert_true(File.file?(File.join(outputdir, 'js', 'run.js')))
     end
   end
 
-  def test_theme_without_run_mjs_is_tolerated
+  def test_theme_without_run_js_is_tolerated
     Dir.mktmpdir do |dir|
       themedir = File.join(dir, 'theme')
       outputdir = File.join(dir, 'out')
@@ -73,11 +73,11 @@ class TestStatichtmlRunRubyWasm < Test::Unit::TestCase
       orig_stderr, $stderr = $stderr, StringIO.new
       begin
         assert_nothing_raised { cmd.send(:copy_run_ruby_wasm_script) }
-        assert_match(/run\.mjs not found/, $stderr.string)
+        assert_match(/run\.js not found/, $stderr.string)
       ensure
         $stderr = orig_stderr
       end
-      assert_false(File.exist?(File.join(outputdir, 'js', 'run.mjs')))
+      assert_false(File.exist?(File.join(outputdir, 'js', 'run.js')))
     end
   end
 end

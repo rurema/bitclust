@@ -328,17 +328,17 @@ HERE
       end
 
       # Copy the RUN-button script (statichtml --run-ruby-wasm). A themedir
-      # without js/run.mjs is tolerated: warn and skip instead of aborting the
+      # without js/run.js is tolerated: warn and skip instead of aborting the
       # whole build.
       def copy_run_ruby_wasm_script
-        run_mjs = @manager_config[:themedir] + "js" + "run.mjs"
-        unless run_mjs.file?
-          $stderr.puts "warning: #{run_mjs} not found; RUN button script not copied"
+        run_js = @manager_config[:themedir] + "js" + "run.js"
+        unless run_js.file?
+          $stderr.puts "warning: #{run_js} not found; RUN button script not copied"
           return
         end
         jsdir = @outputdir + "js"
         FileUtils.mkdir_p(jsdir) unless jsdir.directory?
-        FileUtils.cp(run_mjs.to_s, jsdir.to_s, :verbose => @verbose, :preserve => true)
+        FileUtils.cp(run_js.to_s, jsdir.to_s, :verbose => @verbose, :preserve => true)
       end
 
       def create_html_file(entry, manager, outputdir, db)

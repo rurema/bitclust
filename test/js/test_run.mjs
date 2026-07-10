@@ -1,8 +1,8 @@
-// QuickJS-based tests for the pure logic in theme/default/js/run.mjs.
+// QuickJS-based tests for the pure logic in theme/default/js/run.js.
 // Run with: qjs test/js/test_run.mjs   (see the "test:js" rake task)
 // Importing the module doubles as a syntax/eval smoke test: its DOM setup is
 // guarded by `typeof window !== 'undefined'`.
-import { createOnceLoader, PRELUDE, formatRunError, truncateOutput } from '../../theme/default/js/run.mjs'
+import { createOnceLoader, PRELUDE, formatRunError, truncateOutput } from '../../theme/default/js/run.js'
 
 let failures = 0
 function assert(cond, message) {

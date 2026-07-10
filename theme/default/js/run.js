@@ -1,5 +1,8 @@
 // RUN button for Ruby sample code: executes the sample in-browser with
-// ruby.wasm. Enabled per page via
+// ruby.wasm. Named .js rather than .mjs: module scripts are subject to
+// strict MIME checking, and servers whose MIME table lacks an "mjs" entry
+// (e.g. nginx before 1.21.4) serve .mjs as application/octet-stream, which
+// browsers refuse to execute. Enabled per page via
 //   <meta name="rurema-run-ruby-wasm" content="<ruby+stdlib.wasm URL>">
 // which the layout emits when statichtml was invoked with --run-ruby-wasm.
 // The wasm URL is chosen by the build side to match the documented Ruby
