@@ -14,6 +14,8 @@ Ancestor Methods
 継承しているメソッド
 Ancestor Methods %s
 %sから継承しているメソッド
+Ancestor Singleton Methods %s
+%sから継承している特異メソッド
 Builtin
 組み込み
 Builtin Library

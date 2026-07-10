@@ -147,17 +147,38 @@
 
 <%
 _myself, *ancestors = @entry.ancestors.reject { |c| %w[Object Kernel BasicObject].include?(c.name) }
-displayed_methods = Set.new(ents.instance_methods.flat_map(&:names))
+displayed_instance_methods = Set.new(ents.instance_methods.flat_map(&:names))
+displayed_singleton_methods = Set.new(ents.singleton_methods.flat_map(&:names))
+undefined_methods = @entry.partitioned_entries.undefined
+undefined_instance_methods = undefined_methods.select(&:instance_method?)
+undefined_singleton_methods = undefined_methods.select(&:singleton_method?)
 %>
 
 <% unless ancestors.empty? %>
   <%= headline(_("Ancestor Methods")) %>
 <dl>
+  <%# Singleton methods are inherited only through the superclass chain, not from included modules. %>
+  <% ancestors.select(&:class?).each do |c|
+       methods = c.partitioned_entries(@alevel).singleton_methods
+         .flat_map { |m| m.names.map { |n| [n, m] } }
+         .reject { |name,| displayed_singleton_methods.include?(name) }
+         .reject { |name,| undefined_singleton_methods.any? { |m| m.names.include?(name) } }
+         .sort
+       next if methods.empty? %>
+<dt><%= _('Ancestor Singleton Methods %s', c.name) %></dt>
+<dd>
+  <ul class="class-toc">
+    <% methods.each do |name, m| %>
+      <li><%= method_link(m.spec_string, name) %></li>
+      <% displayed_singleton_methods << name %>
+    <% end %>
+  </ul>
+</dd>
+  <% end %>
   <% ancestors.each do |c|
-       undefined_instance_methods = @entry.partitioned_entries.undefined.select(&:instance_method?)
        methods = c.partitioned_entries(@alevel).instance_methods
          .flat_map { |m| m.names.map { |n| [n, m] } }
-         .reject { |name,| displayed_methods.include?(name) }
+         .reject { |name,| displayed_instance_methods.include?(name) }
          .reject { |name,| undefined_instance_methods.any? { |m| m.names.include?(name) } }
          .sort
        next if methods.empty? %>
@@ -166,7 +187,7 @@ displayed_methods = Set.new(ents.instance_methods.flat_map(&:names))
   <ul class="class-toc">
     <% methods.each do |name, m| %>
       <li><%= method_link(m.spec_string, name) %></li>
-      <% displayed_methods << name %>
+      <% displayed_instance_methods << name %>
     <% end %>
   </ul>
 </dd>
