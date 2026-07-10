@@ -331,7 +331,6 @@ h3 レベル（`###`）で記述する。キーワード（`def`/`const`/`gvar`/
 ```markdown
 ### def each {|item| ... } -> self
 ### def Array.try_convert(obj) -> Array | nil
-### def self.new(size = 0, val = nil) -> Array
 ### module_function def measure(label) -> Benchmark::Tms
 ### const CR -> String
 ### gvar $DEBUG -> bool
@@ -341,17 +340,19 @@ h3 レベル（`###`）で記述する。キーワード（`def`/`const`/`gvar`/
 |-------------|------|---------|
 | インスタンスメソッド | `### def method(args)` | `def` キーワード |
 | クラスメソッド / 特異メソッド | `### def ClassName.method(args)` | `def` + `ClassName.` |
-| クラスメソッド（RBS 互換） | `### def self.method(args)` | `def` + `self.` |
 | モジュール関数 | `### module_function def method(args)` | `module_function def` |
 | 定数 | `### const CONST -> Type` | `const` キーワード |
 | グローバル変数 | `### gvar $VAR -> Type` | `gvar` キーワード |
 | 本文小見出し | `### 見出しテキスト` | キーワードなし |
 
 RRD との相互変換では `ClassName.method` をそのまま保持する（`self.` への変換はしない）。
+クラスメソッドを `self.` プレフィクスで書く形（`### def self.new(...)`）は
+RBS 互換形式の一部として将来対応の対象（§3.2。**現状は未実装でビルドエラー**になる
+ため、`ClassName.` を使うこと）。
 
-### 3.2 RBS 形式
+### 3.2 RBS 形式（将来対応予定・現状未実装）
 
-`:` の位置で Ruby 構文形式と区別する。
+RBS 型シグネチャをそのまま書ける形式。`:` の位置で Ruby 構文形式と区別する。
 
 ```markdown
 ### def self.try_convert: (untyped obj) -> Array[untyped]?
@@ -362,6 +363,16 @@ RRD との相互変換では `ClassName.method` をそのまま保持する（`s
 |---------|------|
 | `def name(` または `def name ->` | Ruby 構文 |
 | `def name:` | RBS |
+
+クラスメソッドを `self.` プレフィクスで書く形（`### def self.new(...)`）も
+RBS 互換形式の一部として将来対応の対象とする。
+
+**現状、実装（パーサ・描画）はこの形式に対応していない**（2026-07 検証）。
+書いた場合はパース時に「unsupported method signature」として明確なビルドエラーに
+なる（誤った名前で DB に登録されたり statichtml がクラッシュしたりしないよう、
+未対応形式は早期に拒否する）。対応する際は実装とあわせて §15 の項目として
+再開すること（`def name:` は Ruby 構文形式と機械的に区別できるため、
+後方互換のまま追加できる）。
 
 ### 3.3 定数
 
@@ -769,9 +780,10 @@ h3 行の種別判定（キーワードベース）:
 ```
 1. `### module_function def ` → モジュール関数
 2. `### def ` → メソッドシグネチャ
-   - `def name:` → RBS 形式
-   - `def ClassName.name` or `def self.name` → クラスメソッド / 特異メソッド
+   - `def ClassName.name` → クラスメソッド / 特異メソッド
    - `def name` → インスタンスメソッド
+   - `def name:`（RBS 形式）・`def self.name` は将来対応（§3.2）。
+     未実装のため現状はビルドエラーとして拒否される
 3. `### const ` → 定数
 4. `### gvar ` → グローバル変数
 5. それ以外の `### ` → 本文小見出し
@@ -917,6 +929,13 @@ capi ファイルに本文見出しは存在しないため、`###` の解釈が
   ゲートで変わるソースも実在するため、「Markdown パース結果でコードブロック内を
   除外する」方式は処理順序上成立しない）
 
+- [x] RBS 形式シグネチャの実運用テスト（2026-07 検証: 実装（パーサ・描画）が
+  未対応であることを確認 — RBS 形式（`def name:`）は誤った名前で DB に入ったのち
+  statichtml がクラッシュし、`self.` プレフィクスは `Foo.self` のような誤エントリに
+  なる。§3.2 に「将来対応予定・現状未実装」と明記し、未対応形式はパース時に
+  明確なビルドエラーで拒否するガードを実装（本番の全 11,902 シグネチャで
+  誤検知ゼロを検証済み）。実運用投入は実装対応とあわせて将来判断する）
+
 ### 未解決
 
-- [ ] RBS 形式シグネチャの実運用テスト
+（なし — 全項目解決済み。RBS 形式の実装対応（§3.2）は需要が生じた時点で再開）

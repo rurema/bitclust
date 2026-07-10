@@ -17,6 +17,7 @@
 
 require 'bitclust/rrdparser'
 require 'bitclust/functionreferenceparser'
+require 'bitclust/methodsignature'
 
 module BitClust
 
@@ -307,6 +308,14 @@ module BitClust
     # Signature パースを継承する。エラー時は元の行を報告する
     def method_signature(line)
       rd_line = line.sub(SIG_RE, '--- ')
+      begin
+        # 描画（MethodSignature.parse）が受理できないシグネチャは
+        # statichtml まで進んでから落ちる（か、誤った名前で DB に入る）ので
+        # パース時に拒否する。RBS 形式（def name:）や self. プレフィクスが該当
+        MethodSignature.parse(rd_line)
+      rescue ParseError
+        parse_error "unsupported method signature", line
+      end
       case
       when m = SIGNATURE.match(rd_line)
         klass, typemark_, name = m.captures

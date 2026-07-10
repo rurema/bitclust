@@ -180,6 +180,29 @@ class TestMDParser < Test::Unit::TestCase
     assert_raise(BitClust::ParseError) { parse_md(md) }
   end
 
+  def test_unsupported_signature_forms_are_rejected
+    # RBS 形式（MARKUP_SPEC §3.2 で構想）と self. プレフィクスは描画側
+    # （MethodSignature.parse）が受理できないため、パース時に拒否する
+    base = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## Instance Methods
+
+      %s
+
+      説明。
+    MD
+    ['### def each: () { (untyped) -> void } -> self',
+     '### def self.new(size = 0) -> Foo'].each do |sig|
+      assert_raise(BitClust::ParseError, sig) { parse_md(base % sig) }
+    end
+  end
+
   def test_library_file_with_category
     md = <<~MD
       ---
