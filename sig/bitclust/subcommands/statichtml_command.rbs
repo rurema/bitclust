@@ -25,6 +25,8 @@ module BitClust
 
       @eol_warning: bool
 
+      @run_ruby_wasm: String?
+
       @outputdir: Pathname
 
       type manager_config = {
@@ -42,6 +44,8 @@ module BitClust
         :gtm_tracking_id => String?,
         :meta_robots_content => Array[String],
         :stop_on_syntax_error => bool,
+        :eol_warning => bool,
+        :run_ruby_wasm => String?,
         ?:urlmapper  => URLMapperEx,
       }
 
@@ -116,6 +120,8 @@ module BitClust
       def create_html_methods: (String title, Hash[String, Array[MethodEntry]] methods, ScreenManager manager, MethodDatabase db) -> void
 
       def create_index_html: (Pathname outputdir) -> void
+
+      def copy_run_ruby_wasm_script: () -> void
 
       def create_html_file: (any_entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
 

@@ -142,6 +142,38 @@ pre.highlight {
     position: relative;
 }
 
+/* for RUN (js/run.mjs, statichtml --run-ruby-wasm) */
+.highlight__run-button {
+  float: right;
+  margin: 0 0 0.25em 0.5em;
+  padding: 0.25em 0.5em;
+  background-color: #DDD;
+  opacity: 0.75;
+  cursor: pointer;
+  border: 0;
+  font: inherit;
+}
+.highlight__run-button:hover {
+  background-color: #EE8;
+  opacity: 1;
+}
+.highlight__run-button[disabled] {
+  background-color: #070;
+  color: white;
+  opacity: 1;
+  cursor: wait;
+}
+.highlight__run-output {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f2f2f2;
+  margin-top: 0;
+  white-space: pre-wrap;
+}
+.highlight__run-output--error {
+  color: #a00;
+}
+
 /* for COPY */
 .highlight__copy-button {
   float: right;

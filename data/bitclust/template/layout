@@ -11,6 +11,10 @@
   <title><%=h @title %> (Ruby <%=h ruby_version %>)</title>
   <meta name="description" content="<%=h @description %>">
   <link rel="search" type="application/opensearchdescription+xml" title="<%= _('Ruby %s Reference Manual', ruby_version()) %>" href="<%=h opensearchdescription_url() %>">
+<% if run_ruby_wasm_url %>
+  <meta name="rurema-run-ruby-wasm" content="<%=h run_ruby_wasm_url %>">
+  <script type="module" src="<%=h custom_js_url('js/run.mjs') %>"></script>
+<% end %>
 </head>
 <body>
 <% if eol_warning?() %>

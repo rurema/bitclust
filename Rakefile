@@ -15,6 +15,13 @@ task :test do
   sh 'ruby test/run_test.rb'
 end
 
+desc "run JS tests (requires qjs / QuickJS)"
+namespace :test do
+  task :js do
+    sh 'qjs', 'test/js/test_run.mjs'
+  end
+end
+
 desc "Re-generate sig/prototype"
 task :sig do
   out_dir = 'sig-prototype'
