@@ -122,6 +122,7 @@ module BitClust
         @meta_robots_content = ["noindex"]
         @stop_on_syntax_error = true
         @eol_warning = false
+        @run_ruby_wasm = nil
         @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
         @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
@@ -160,6 +161,9 @@ module BitClust
         end
         @parser.on('--[no-]eol-warning', 'Show a warning banner that this Ruby version is no longer maintained') do |boolean|
           @eol_warning = boolean
+        end
+        @parser.on('--run-ruby-wasm=WASM_URL', 'Add a RUN button to Ruby sample code, executing it in-browser with the given ruby.wasm') do |url|
+          @run_ruby_wasm = url
         end
         @parser.on('--no-stop-on-syntax-error', 'Do not stop on syntax error') do |boolean|
           @stop_on_syntax_error = boolean
@@ -215,6 +219,7 @@ module BitClust
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         FileUtils.cp(@manager_config[:themedir] + "script.js",
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
+        copy_run_ruby_wasm_script if @run_ruby_wasm
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:favicon_url],
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         Dir.mktmpdir do |tmpdir|
@@ -247,6 +252,7 @@ module BitClust
           :meta_robots_content => @meta_robots_content,
           :stop_on_syntax_error => @stop_on_syntax_error,
           :eol_warning => @eol_warning,
+          :run_ruby_wasm => @run_ruby_wasm,
         }
         @manager_config[:urlmapper] = URLMapperEx.new(@manager_config)
         @urlmapper = @manager_config[:urlmapper]
@@ -319,6 +325,20 @@ HERE
                      :verbose => @verbose, :preserve => true)
         FileUtils.cp(themedir + "search.css", outputdir.to_s,
                      :verbose => @verbose, :preserve => true)
+      end
+
+      # Copy the RUN-button script (statichtml --run-ruby-wasm). A themedir
+      # without js/run.mjs is tolerated: warn and skip instead of aborting the
+      # whole build.
+      def copy_run_ruby_wasm_script
+        run_mjs = @manager_config[:themedir] + "js" + "run.mjs"
+        unless run_mjs.file?
+          $stderr.puts "warning: #{run_mjs} not found; RUN button script not copied"
+          return
+        end
+        jsdir = @outputdir + "js"
+        FileUtils.mkdir_p(jsdir) unless jsdir.directory?
+        FileUtils.cp(run_mjs.to_s, jsdir.to_s, :verbose => @verbose, :preserve => true)
       end
 
       def create_html_file(entry, manager, outputdir, db)

@@ -247,6 +247,8 @@ module BitClust
 
     def eol_warning?: () -> bool
 
+    def run_ruby_wasm_url: () -> String?
+
     private
 
     def default_encoding: () -> String

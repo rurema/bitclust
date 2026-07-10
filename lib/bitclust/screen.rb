@@ -320,6 +320,12 @@ module BitClust
       !!@conf[:eol_warning]
     end
 
+    # URL of the ruby.wasm module used by the in-browser RUN button on Ruby
+    # sample code (statichtml --run-ruby-wasm). nil disables the feature.
+    def run_ruby_wasm_url
+      @conf[:run_ruby_wasm]
+    end
+
     private
 
     def default_encoding
