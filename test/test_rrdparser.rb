@@ -164,20 +164,3 @@ HERE
     assert_equal(:defined, db.get_method(BitClust::MethodSpec.parse('Dummy#test_foo')).kind)
   end
 end
-
-class TestRRDParserLegacyUndef < Test::Unit::TestCase
-  # 旧 @undef の後方互換。doctree master が {: undef} へ移行するまでの
-  # 過渡期用で、移行完了後に削除する
-  def test_legacy_undef_paragraph_still_sets_kind
-    result = BitClust::RRDParser.parse(<<HERE, 'dummy')
-= module Dummy
-== Instance Methods
---- test_undef
-
-@undef
-
-HERE
-    _library, db = result
-    assert_equal(:undefined, db.get_method(BitClust::MethodSpec.parse('Dummy#test_undef')).kind)
-  end
-end

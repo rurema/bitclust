@@ -486,10 +486,6 @@ module BitClust
                                 :undefined
                               elsif attrs.include?('nomethod')
                                 :nomethod
-                              elsif chunk.source.match?(/^@undef$/)
-                                # 旧 @undef 段落の後方互換。
-                                # doctree の {: undef} への移行完了後に削除する
-                                :undefined
                               else
                                 @kind
                               end
