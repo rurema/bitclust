@@ -50,6 +50,7 @@ Subcommands(for users):
     list        List libraries/classes/methods in database.
     lookup      Lookup a library/class/method from database.
     search      Search classes/methods from database.
+    server      Run HTTP server to browse the reference manual.
 
 Subcommands(for developers):
     ancestors   Compare class/module's ancestors between Ruby and DB.
