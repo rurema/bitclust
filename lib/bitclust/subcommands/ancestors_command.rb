@@ -45,6 +45,11 @@ Options:
         }
       end
 
+      # DB はサブコマンド自身の -d/--database オプションで受ける
+      def needs_database?
+        false
+      end
+
       def exec(argv, options)
         classname = argv[0]
         db = MethodDatabase.new(@prefix || raise)

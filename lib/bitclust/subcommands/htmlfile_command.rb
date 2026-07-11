@@ -35,6 +35,11 @@ module BitClust
         }
       end
 
+      # DB は与えられれば使うが必須ではない (--database は任意)
+      def needs_database?
+        false
+      end
+
       def exec(argv, options)
         db = MethodDatabase.dummy({'version' => @version})
         if options[:prefix]

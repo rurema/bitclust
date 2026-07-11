@@ -46,6 +46,11 @@ module BitClust
         option_error("wrong number of arguments") unless argv.size == 1
       end
 
+      # システムの ruby とリファレンスファイルを比較するだけで DB を使わない
+      def needs_database?
+        false
+      end
+
       def exec(argv, options)
         classname = argv[0]
         case @mode

@@ -50,6 +50,7 @@ Subcommands(for users):
     list        List libraries/classes/methods in database.
     lookup      Lookup a library/class/method from database.
     search      Search classes/methods from database.
+    server      Run HTTP server to browse the reference manual.
 
 Subcommands(for developers):
     ancestors   Compare class/module's ancestors between Ruby and DB.
@@ -136,12 +137,16 @@ Global Options:
         @version ||= config[:default_version]
         @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
-      # searchpage のように DB パスを引数で受けるサブコマンドは
-      # グローバル --database を要求しない
-      needs_database = !cmd.respond_to?(:needs_database?) || cmd.needs_database?
+      # DB 必須のサブコマンドで --database も ~/.bitclust/config も無ければ
+      # 案内付きで中断する。needs_database? が false のサブコマンドと、
+      # 自前で DB を探す search (Searcher) は対象外
+      needs_database = cmd.respond_to?(:needs_database?) && cmd.needs_database?
+      if needs_database && !@prefix
+        error "no database given. Use --database (-d) option or ~/.bitclust/config"
+      end
       # @type var options: Subcommand::options
       options = {
-        :prefix => (needs_database ? (@prefix || raise) : @prefix),
+        :prefix => @prefix,
         :capi   => @capi
       }
       cmd.exec(argv, options)
