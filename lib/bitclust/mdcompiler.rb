@@ -140,6 +140,10 @@ module BitClust
         when /\A@todo\b/
           # findings#3: rd 側と同じく行頭アンカー付きで
           todo
+        when /\A@undef\b/
+          # 旧 @undef 段落の後方互換(rd 側と同期。移行完了後に削除する)
+          @f.gets
+          undef_message
         when RAW_META_RE
           entry_info
         when /\A\s*\|/

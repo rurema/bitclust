@@ -255,6 +255,17 @@ class TestMDCompiler < Test::Unit::TestCase
     assert_match(/本文中で @see を説明する行。/, html)
   end
 
+  def test_legacy_undef_paragraph_renders_dedicated_message
+    # 旧 @undef 段落の後方互換(doctree master 移行完了後に削除)。
+    # UNKNOWN_META_INFO にしない(doctree の check_format が落ちるため)
+    rd_src = "--- <(other) -> bool\n\n@undef\n"
+    md_src = BitClust::RRDToMarkdown.convert(rd_src)
+    rd_html = compile_method(@rd, rd_src)
+    assert_not_match(/UNKNOWN_META_INFO/, rd_html)
+    assert_match(/このメソッドは定義されていません/, rd_html)
+    assert_equal rd_html, compile_method(@md, md_src), "md source:\n#{md_src}"
+  end
+
   def test_undef_renders_dedicated_message
     # {: undef} 属性行は専用の説明文を描画する（statichtml は undefined を
     # skip するため露出は server 等の動的経路のみ）
