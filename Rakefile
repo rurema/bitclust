@@ -19,6 +19,7 @@ desc "run JS tests (requires qjs / QuickJS)"
 namespace :test do
   task :js do
     sh 'qjs', 'test/js/test_run.mjs'
+    sh 'qjs', 'test/js/test_script.mjs'
   end
 end
 
