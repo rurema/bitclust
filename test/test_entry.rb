@@ -72,3 +72,73 @@ HERE
     assert(hoge.instance_method?('fugafuga', false))
   end
 end
+
+class TestEntryDescription < Test::Unit::TestCase
+  def parse_class(class_source)
+    lib, = BitClust::RRDParser.parse(class_source, 'hoge')
+    lib.fetch_class('Hoge')
+  end
+
+  def test_description_truncates_newline_between_non_ascii
+    klass = parse_class(<<HERE)
+= class Hoge
+これは1行目で
+あとに続きます。
+
+以降の段落は含まれません。
+HERE
+    assert_equal('これは1行目であとに続きます。', klass.description)
+  end
+
+  def test_description_truncates_consecutive_newlines_between_non_ascii
+    klass = parse_class(<<HERE)
+= class Hoge
+あい
+うえ
+おか。
+HERE
+    assert_equal('あいうえおか。', klass.description)
+  end
+
+  def test_description_converts_newline_to_space_around_ascii
+    klass = parse_class(<<HERE)
+= class Hoge
+first line
+second line
+HERE
+    assert_equal('first line second line', klass.description)
+  end
+
+  def test_description_replaces_bracket_link_with_plain_text
+    klass = parse_class(<<HERE)
+= class Hoge
+自身の hostname を文字列で返します。また、[[m:URI::Generic#host]] が設
+定されていない場合は [[c:Array]] を返します。
+HERE
+    assert_equal('自身の hostname を文字列で返します。また、URI::Generic#host が設定されていない場合は Array を返します。',
+                 klass.description)
+  end
+
+  def test_description_replaces_indexer_bracket_link
+    klass = parse_class(<<HERE)
+= class Hoge
+[[m:String#[] ]] を参照。
+HERE
+    assert_equal('String#[] を参照。', klass.description)
+  end
+
+  def test_method_description_is_plain_text
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+
+[[c:Array]] を日本語で
+返します。
+
+次の段落。
+HERE
+    method = klass.entries.detect {|m| m.name == 'fuga' }
+    assert_equal('Array を日本語で返します。', method.description)
+  end
+end

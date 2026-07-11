@@ -80,7 +80,7 @@ module BitClust
     end
 
     def description
-      display_text(source.split(/\n\n+/, 2)[0])
+      description_text(source.split(/\n\n+/, 2)[0])
     end
 
     def check_link(path = [])
