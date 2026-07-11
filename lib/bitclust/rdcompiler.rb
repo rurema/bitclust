@@ -14,6 +14,7 @@ require 'bitclust/htmlutils'
 require 'bitclust/textutils'
 require 'bitclust/messagecatalog'
 require 'bitclust/syntax_highlighter'
+require 'rouge'
 require 'stringio'
 
 module BitClust
@@ -271,6 +272,29 @@ module BitClust
       @option[:stop_on_syntax_error]
     end
 
+    # lang 指定付きコードブロックのハイライト HTML を返す。
+    # ruby(rb などの Rouge 上の alias を含む)は構文チェックを兼ねる
+    # Ripper ベースの SyntaxHighlighter、その他の言語は Rouge を使う。
+    # Rouge が知らない言語はエスケープのみ(従来この経路と ruby の構文
+    # エラー時フォールバックはエスケープされずに出力されていたのを修正)
+    def highlight_source(src, lang, caption)
+      lexer = ::Rouge::Lexer.find(lang)
+      if lexer && lexer.tag == 'ruby'
+        begin
+          filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
+          BitClust::SyntaxHighlighter.new(src, filename).highlight
+        rescue BitClust::SyntaxHighlighter::Error => ex
+          $stderr.puts ex.message
+          exit(false) if stop_on_syntax_error?
+          escape_html(src)
+        end
+      elsif lexer
+        ::Rouge::Formatters::HTML.new.format(lexer.lex(src))
+      else
+        escape_html(src)
+      end
+    end
+
     def emlist
       command = @f.gets
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)?\]\[(?<lang>\w+?)\]! =~ command
@@ -283,21 +307,7 @@ module BitClust
         @f.until_terminator(%r<\A//\}>) do |line|
           src << line
         end
-        if lang == "ruby"
-          begin
-            filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
-            string BitClust::SyntaxHighlighter.new(src, filename).highlight
-          rescue BitClust::SyntaxHighlighter::Error => ex
-            $stderr.puts ex.message
-            if stop_on_syntax_error?
-              exit(false)
-            else
-              string src
-            end
-          end
-        else
-          string src
-        end
+        string highlight_source(src, lang, caption)
         line '</code></pre>'
       else
         line '<pre>'

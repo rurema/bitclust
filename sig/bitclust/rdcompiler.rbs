@@ -82,6 +82,8 @@ module BitClust
 
     def stop_on_syntax_error?: () -> bool
 
+    def highlight_source: (String src, String lang, String? caption) -> String
+
     def emlist: () -> void
 
     def list: () -> void

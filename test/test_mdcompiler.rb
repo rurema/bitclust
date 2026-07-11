@@ -610,3 +610,50 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 end
+
+# lang 指定付きコードブロックのハイライト（ruby は Ripper ベースの
+# SyntaxHighlighter、その他の言語は Rouge、未知の言語はエスケープのみ）
+class TestMDCompilerRougeHighlight < Test::Unit::TestCase
+  def setup
+    @dummy = 'dummy'
+    @u = BitClust::URLMapper.new(Hash.new { @dummy })
+    @db = BitClust::MethodDatabase.dummy("version" => "2.0.0")
+    @md = BitClust::MDCompiler.new(@u, 1, { :database => @db, :gfm => true })
+    @rd = BitClust::RDCompiler.new(@u, 1, { :database => @db })
+  end
+
+  def test_c_fence_is_highlighted_with_rouge
+    html = @md.compile("```c\nint x = 1; /* comment */\n```\n")
+    assert_match(/<pre class="highlight c">/, html)
+    assert_match(%r{<span class="kt">int</span>}, html)
+    assert_match(%r{<span class="cm">/\* comment \*/</span>}, html)
+  end
+
+  def test_ruby_alias_rb_uses_bitclust_highlighter
+    ruby_html = @md.compile("```ruby\nputs 1\n```\n")
+    rb_html = @md.compile("```rb\nputs 1\n```\n")
+    assert_equal(ruby_html.sub('highlight ruby', 'highlight rb'), rb_html)
+    # bitclust の SyntaxHighlighter 由来のマークアップ（Rouge の Ruby lexer ではなく）
+    assert_match(%r{<span class="nb">puts</span>}, rb_html)
+  end
+
+  def test_unknown_lang_fence_is_escaped
+    html = @md.compile("```nosuchlang\n<b>&raw</b>\n```\n")
+    assert_match(/<pre class="highlight nosuchlang">/, html)
+    assert_match(/&lt;b&gt;&amp;raw&lt;\/b&gt;/, html)
+    assert_not_match(/<b>/, html)
+  end
+
+  def test_text_fence_is_escaped_without_highlight
+    html = @md.compile("```text\n<b>plain</b>\n```\n")
+    assert_match(/&lt;b&gt;plain&lt;\/b&gt;/, html)
+    assert_not_match(/<b>plain/, html)
+  end
+
+  def test_rd_emlist_with_c_lang_is_equivalent
+    rd_src = "//emlist[キャプション][c]{\nint x = 1;\n//}\n"
+    md_src = BitClust::RRDToMarkdown.convert(rd_src)
+    assert_equal(@rd.compile(rd_src), @md.compile(md_src), "md source:\n#{md_src}")
+    assert_match(%r{<span class="kt">int</span>}, @rd.compile(rd_src))
+  end
+end
