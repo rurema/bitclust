@@ -1,6 +1,17 @@
 name: test
 
-on: [push, pull_request]
+# doc/ 等ドキュメントだけの変更では CI を回さない（doctree と同様）
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
+      - 'ChangeLog'
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
+      - 'ChangeLog'
 
 jobs:
   ruby-versions:
@@ -32,6 +43,24 @@ jobs:
       run: bundle install
     - name: Run test
       run: bundle exec rake
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@v1
+      with:
+        # 型検査は最新安定版1本で回す（バージョン網羅は build ジョブが担う）。
+        # rbs/steep のバージョンは Gemfile.lock で固定されている
+        ruby-version: '3.4'
+        bundler-cache: true
+    - name: Install RBS collection
+      run: bundle exec rake rbs:install
+    # sig/ が lib/ の全宣言をカバーしているか（rbs subtract の残余ゼロ）+ rbs validate
+    - name: Check sig coverage
+      run: bundle exec rake sig
+    - name: Run steep check
+      run: bundle exec steep check
 
   rurema:
     needs: ruby-versions
