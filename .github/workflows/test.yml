@@ -1,6 +1,17 @@
 name: test
 
-on: [push, pull_request]
+# doc/ 等ドキュメントだけの変更では CI を回さない（doctree と同様）
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
+      - 'ChangeLog'
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
+      - 'ChangeLog'
 
 jobs:
   ruby-versions:
@@ -32,6 +43,26 @@ jobs:
       run: bundle install
     - name: Run test
       run: bundle exec rake
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@v1
+      with:
+        # 型検査は1バージョンで回せば十分（バージョン網羅は build ジョブが担う）。
+        # rbs 3.10 / steep 1.9（Gemfile.lock で固定）の検証済み環境である 3.4 を使う
+        ruby-version: '3.4'
+        bundler-cache: true
+    - name: Install RBS collection
+      # --frozen: rbs_collection.lock.yaml のとおりに取得する。
+      # 再解決すると gem_rbs_collection の revision が動き、環境差も出るため
+      run: bundle exec rbs collection install --frozen
+    # sig/ が lib/ の全宣言をカバーしているか（rbs subtract の残余ゼロ）+ rbs validate
+    - name: Check sig coverage
+      run: bundle exec rake sig
+    - name: Run steep check
+      run: bundle exec steep check
 
   rurema:
     needs: ruby-versions
