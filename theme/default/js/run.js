@@ -106,22 +106,38 @@ function setupBlock(pre, run) {
   }
 
   let output
+  let outputTextNode
   const ensureOutput = () => {
     if (!output) {
       output = document.createElement('pre')
       output.className = 'highlight__run-output'
       output.setAttribute('aria-live', 'polite')
+      // COPY ボタン(先頭)を残したまま本文を書き換えられるように、
+      // 出力テキストは専用のテキストノードに持つ
+      outputTextNode = document.createTextNode('')
+      output.appendChild(outputTextNode)
       pre.after(output)
+      // 実行結果もコピーできるようにする(script.js の公開フック)。
+      // 出力は実行のたびに変わるので、クリック時のテキストを渡す
+      if (window.ruremaAddCopyButton) {
+        window.ruremaAddCopyButton(output, () => outputTextNode.data)
+      }
     }
     return output
   }
+  const setOutputText = (text) => {
+    outputTextNode.data = text
+  }
 
   // After the first run the sample becomes editable (like a scratchpad);
-  // Ctrl+Enter (or Cmd+Enter) re-runs the edited code. Editing gradually
-  // loses the syntax-highlight spans; the COPY button keeps copying the
-  // original text.
+  // Ctrl+Enter (or Cmd+Enter) re-runs the edited code. The COPY button
+  // keeps copying the original text.
   const enableEditing = () => {
     if (code.isContentEditable) return
+    // 編集でハイライトの span に文字が食い込むと、貼り付けた文字が
+    // その場の色を引き継いで中途半端に崩れるため、編集可能にする
+    // 時点でプレーンテキスト化して色を消す
+    code.textContent = code.textContent
     code.contentEditable = 'true'
     code.spellcheck = false
     pre.dataset.editing = 'true'
@@ -140,22 +156,22 @@ function setupBlock(pre, run) {
     button.textContent = 'LOADING...'
     const out = ensureOutput()
     out.classList.remove('highlight__run-output--error')
-    out.textContent = ''
+    setOutputText('')
     let label = 'RUN'
     try {
       const result = await run(code.textContent, () => {
         button.textContent = 'RUNNING...'
       })
       if (result) {
-        out.textContent = result.error
+        setOutputText(result.error
           ? (result.output === '' ? result.error : result.output + '\n' + result.error)
-          : result.output
+          : result.output)
         if (result.error) out.classList.add('highlight__run-output--error')
         enableEditing()
       }
     } catch (e) {
       out.classList.add('highlight__run-output--error')
-      out.textContent = formatRunError(e)
+      setOutputText(formatRunError(e))
       label = 'RETRY'
     } finally {
       button.textContent = label

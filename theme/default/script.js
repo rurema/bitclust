@@ -22,6 +22,26 @@
     })
   }
 
+  // elem の先頭に COPY ボタンを付ける。getText はクリック時に評価される
+  // ので、RUN の実行結果のように内容が変わる要素にも使える
+  function addCopyButton(elem, getText) {
+    const btn = document.createElement('span')
+    btn.setAttribute('class', 'highlight__copy-button')
+    btn.onclick = function(){
+      writeClipboard(getText()).then(function() {
+        btn.classList.add("copied")
+        window.setTimeout(function() { btn.classList.remove("copied") }, 1000)
+      }).catch(function() {
+        // コピー失敗時は従来どおり何も表示しない
+      })
+    }
+    elem.insertBefore(btn, elem.firstChild)
+    return btn
+  }
+
+  // RUN 出力(js/run.js)など、後から動的に生成される pre 用の公開フック
+  window.ruremaAddCopyButton = addCopyButton
+
   window.onload = function() {
     // 言語指定なしのコードブロックは class を持たない素の <pre> になるため、
     // highlight クラスではなく pre 要素全体に COPY ボタンを付ける
@@ -39,19 +59,7 @@
         // RUN ボタンでサンプルを編集しても COPY は元のテキストを保持する
         const text = tempDiv.textContent.replace(/^\n+/, "").replace(/\n{2,}$/, "\n")
 
-        // COPY button
-        const btn = document.createElement('span')
-        btn.setAttribute('class', 'highlight__copy-button')
-        elem.insertBefore(btn, elem.firstChild)
-
-        btn.onclick = function(){
-          writeClipboard(text).then(function() {
-            btn.classList.add("copied")
-            window.setTimeout(function() { btn.classList.remove("copied") }, 1000)
-          }).catch(function() {
-            // コピー失敗時は従来どおり何も表示しない
-          })
-        }
+        addCopyButton(elem, function() { return text })
       }
     )
   }
