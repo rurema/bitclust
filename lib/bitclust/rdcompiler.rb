@@ -32,7 +32,7 @@ module BitClust
       @type = nil
       @method = nil
       @option = opt.dup
-      init_message_catalog(@catalog)
+      init_message_catalog(@catalog || MessageCatalog.new({}, 'C'))
     end
 
     def compile(src)
@@ -449,9 +449,9 @@ module BitClust
         protect(link) {
           case arg
           when '/', '_index'
-            label = 'All libraries'
+            label = _('Library Index')
           when '_builtin'
-            label = 'Builtin libraries'
+            label = _('Builtin Library')
           end
           library_link(arg, label, frag)
         }
@@ -463,7 +463,7 @@ module BitClust
         protect(link) {
           case arg
           when '/', '_index'
-            arg, label = '', 'All C API'
+            arg, label = '', _('Function Index')
           end
           function_link(arg, label || arg, frag)
         }

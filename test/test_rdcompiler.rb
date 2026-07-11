@@ -696,9 +696,12 @@ HERE
        "instance method"     => ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
        "indexer"             => ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
        "C API"               => ['[[f:rb_ary_new3]]', '<a href="dummy/function/rb_ary_new3">rb_ary_new3</a>'],
-       "C API root"          => ['[[f:/]]',           '<a href="dummy/function/">All C API</a>'],
-       "C API index"         => ['[[f:_index]]',      '<a href="dummy/function/">All C API</a>'],
+       "C API root"          => ['[[f:/]]',           '<a href="dummy/function/">Function Index</a>'],
+       "C API index"         => ['[[f:_index]]',      '<a href="dummy/function/">Function Index</a>'],
        "standard library"    => ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
+       "library root"        => ['[[lib:/]]',         '<a href="dummy/library/">Library Index</a>'],
+       "library index"       => ['[[lib:_index]]',    '<a href="dummy/library/_index">Library Index</a>'],
+       "builtin library"     => ['[[lib:_builtin]]',  '<a href="dummy/library/_builtin">Builtin Library</a>'],
        "man command"         => ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
        "man header"          => ['[[man:sys/socket.h(header)]]', '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
        "man system call"     => ['[[man:fopen(3linux)]]', '<a class="external" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
@@ -716,6 +719,17 @@ HERE
   def test_bracket_link(data)
     target, expected = data
     assert_equal(expected, @c.send(:compile_text, target), target)
+  end
+
+  data("library root"    => ['[[lib:/]]',        '<a href="dummy/library/">ライブラリ一覧</a>'],
+       "builtin library" => ['[[lib:_builtin]]', '<a href="dummy/library/_builtin">組み込みライブラリ</a>'],
+       "C API root"      => ['[[f:/]]',          '<a href="dummy/function/">関数一覧</a>'])
+  def test_bracket_link_with_catalog(data)
+    target, expected = data
+    prefix = File.expand_path('../data/bitclust/catalog', __dir__)
+    catalog = BitClust::MessageCatalog.load_with_locales(prefix, ['ja_JP.UTF-8'])
+    compiler = BitClust::RDCompiler.new(@u, 1, {:database => @db, :catalog => catalog})
+    assert_equal(expected, compiler.send(:compile_text, target), target)
   end
 
   data("doc"             => ['[[d:hoge/bar]]',            '<a href="dummy/hoge/bar">.*</a>'],
