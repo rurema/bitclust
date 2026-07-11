@@ -70,7 +70,7 @@ module BitClust
     # コードフェンス内の行頭 `# コメント` 等が H1/H2 と衝突しないよう、
     # フェンス内は無条件に本文として消費する
     def md_break(f)
-      lines = []
+      lines = [] #: Array[String?]
       fence_len = nil
       while (line = f.peek)
         if fence_len
@@ -105,7 +105,7 @@ module BitClust
     # （include/extend/alias/require/sublibrary）のみ。#@ 行は
     # Preprocessor で版解決済みの残り（#@# コメント等）なので読み飛ばす
     def read_front_matter(f)
-      fm = {}
+      fm = {} #: front_matter
       return fm unless f.peek && f.peek =~ /\A---\s*$/
       f.gets
       key = nil
@@ -266,6 +266,7 @@ module BitClust
       f.while_match(H2_RE) do |line|
         case line.sub(/\A##/, '').strip
         when /\A((?:public|private|protected)\s+)?(?:(class|singleton|instance)\s+)?methods?\z/i
+          # @type var visibility: :public | :private | :protected
           visibility = ($1 || 'public').downcase.strip.intern
           @context.visibility = visibility
           t = ($2 || 'instance').downcase.sub(/class/, 'singleton')

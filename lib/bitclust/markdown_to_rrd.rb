@@ -63,7 +63,8 @@ module BitClust
         "\x01#{saved.size - 1}\x01#{ends_nl ? "\n" : ''}"
       end
       out = +''
-      fence = nil #: [Integer, Integer | nil]?  len と indent（emlist 形は nil）
+      # len と indent（emlist 形は nil）
+      fence = nil #: [Integer, Integer | nil]?
       text.each_line do |l|
         nl = l.end_with?("\n")
         if fence
@@ -101,9 +102,9 @@ module BitClust
       when /\A(\#{1,6}) (.*?) \{#(\w+)\}([ \t]*\n?)\z/m
         # アンカーは restore_inline の裸参照復元（[a:x]→[[a:x]]）を
         # 避けるため \x00 で包み、最後に [a:x] へ戻す
-        "#{'=' * $1.length}\x00#{$3}\x00 #{$2}#{$4}"
+        "#{'=' * ($1 || raise).length}\x00#{$3}\x00 #{$2}#{$4}"
       when /\A(\#{1,6}) (.*)\z/m
-        "#{'=' * $1.length} #{$2}"
+        "#{'=' * ($1 || raise).length} #{$2}"
       when /\A- \*\*(param|arg|raise)\*\*(\s+)`([^`]+)` --(.*)\z/m
         "@#{$1}#{$2}#{$3}#{$4}"
       when /\A- \*\*return\*\* --(.*)\z/m
@@ -138,7 +139,7 @@ module BitClust
     def parse_front_matter
       return unless @index < @lines.length && @lines[@index] =~ /\A---\s*$/
       advance  # skip opening ---
-      yaml_lines = []
+      yaml_lines = [] #: Array[String]
       while @index < @lines.length
         line = current_line
         if line =~ /\A---\s*$/
@@ -163,12 +164,16 @@ module BitClust
     # クラス関係（include/extend/alias; H1 直後）の body 行を組み立てる。
     # YAML.safe_load は #@ をコメントとして落とすため生行を使う。
     def parse_front_matter_raw(yaml_lines)
-      blocks = {}   # list key => [[:item, val] | [:dir, line]]
+      # list key => [[:item, val] | [:dir, line]]
+      blocks = {} #: Hash[String?, Array[[Symbol, String]]]
       category = nil
-      category_block = nil  # ゲート付き category（rd 行の組み立て済み列）
+      # ゲート付き category（rd 行の組み立て済み列）
+      category_block = nil #: Array[String]?
       cat_depth = 0
-      pending = []  # category ゲート候補のトップレベル #@ 行
-      leading = []  # メタ領域先頭の #@# コメント行（irb.rd の Author 行）
+      # category ゲート候補のトップレベル #@ 行
+      pending = [] #: Array[String]
+      # メタ領域先頭の #@# コメント行（irb.rd の Author 行）
+      leading = [] #: Array[String]
       key = nil
       yaml_lines.each do |l|
         case l
@@ -179,16 +184,16 @@ module BitClust
         when /\Acategory:\s*(.*)$/
           if pending.any?
             # ゲート付き category（cmath 型）: #@ 行ごと復元する
-            category_block = pending.dup << "category #{$1.strip}\n"
+            category_block = pending.dup << "category #{($1 || raise).strip}\n"
             cat_depth = pending.count { |p| p =~ /\A\#@(?:since|until|if)\b/ } -
                         pending.count { |p| p =~ /\A\#@end\b/ }
             pending = []
           else
-            category = $1.strip
+            category = ($1 || raise).strip
           end
           key = nil
         when /\A\s+- (.+?)\s*$/
-          blocks[key] << [:item, $1] if key
+          blocks[key] << [:item, $1 || raise] if key
         when /\A\#@\#/
           key ? blocks[key] << [:dir, l] : leading << l
         when /\A\#@/
@@ -268,9 +273,9 @@ module BitClust
         when /\A\*\*(\d+)\.\*\*\s/
           convert_bold_number(line)
         when /\A(\s*)- /
-          convert_list_item(line, $1)
+          convert_list_item(line, $1 || raise)
         when /\A(\s{0,3})(\d+)\.\s/
-          convert_ordered_list_item(line, $2.to_i, $1)
+          convert_ordered_list_item(line, $2.to_i, $1 || raise)
         when /\A:\s/
           convert_dlist_passthrough(line)
         when /\A {4,}/
@@ -290,7 +295,7 @@ module BitClust
     def convert_code_block(line)
       # バッククォートの個数を取得
       line =~ /\A(`{3,})/
-      fence = $1
+      fence = $1 || raise
       fence_len = fence.length
 
       # 4個以上のバッククォート（言語指定なし）→ インデントコードに復元
@@ -317,11 +322,11 @@ module BitClust
       lang = nil
       fence_len = 3
       if line =~ /\A(`{3,})(\w*)/
-        fence_len = $1.length
-        lang = $2.empty? ? nil : $2
+        fence_len = ($1 || raise).length
+        lang = ($2 || raise).empty? ? nil : $2
       end
       if line =~ /title="((?:[^"\\]|\\.)*)"/
-        title = $1.gsub(/\\(["\\])/, '\1')
+        title = ($1 || raise).gsub(/\\(["\\])/, '\1')
       end
 
       if lang == 'ruby'
@@ -500,10 +505,10 @@ module BitClust
       # - **term**:\n  line1\n  line2 → : term\n  line1\n  line2
       if line =~ /\A- \*\*(.+?)\*\*: (.+)$/
         # 構造の `term` は GNU 引用復元より先に unwrap する
-        @out << ": #{convert_inline_refs(strip_code_span($1))}\n  #{convert_inline_refs($2)}\n"
+        @out << ": #{convert_inline_refs(strip_code_span($1 || raise))}\n  #{convert_inline_refs($2 || raise)}\n"
         advance
       elsif line =~ /\A- \*\*(.+?)\*\*:\s*$/
-        @out << ": #{convert_inline_refs(strip_code_span($1))}\n"
+        @out << ": #{convert_inline_refs(strip_code_span($1 || raise))}\n"
         advance
         # 継続行を収集（空行を挟む場合も含む）。rd 側と対称:
         # RDCompiler の dd_with_p はインデント段落とコードブロックを
@@ -542,7 +547,7 @@ module BitClust
 
     def convert_dlist_item(line)
       if line =~ /\A- \*\*(.+?)\*\* -- (.*)$/
-        @out << ": #{$1}\n  #{convert_inline_refs($2)}\n"
+        @out << ": #{$1}\n  #{convert_inline_refs($2 || raise)}\n"
       end
       advance
     end
@@ -576,7 +581,7 @@ module BitClust
     def convert_list_item(line, indent)
       rrd_indent = indent.empty? ? ' ' : indent
       line =~ /\A\s*-(\s+)/
-      content_indent = (indent.empty? ? 1 : indent.length) + 1 + $1.length
+      content_indent = (indent.empty? ? 1 : indent.length) + 1 + ($1 || raise).length
       @out << convert_inline_refs(line.sub(/\A\s*-(\s+)/, "#{rrd_indent}*\\1"))
       advance
       # 継続行を収集（空行・リスト項目・#@ で停止）。
@@ -619,9 +624,9 @@ module BitClust
       while @index < @lines.length
         line = current_line
         if line =~ /\A( {4,})\S/
-          n = $1.length
+          n = ($1 || raise).length
           deindent = [n - 3, 1].max
-          @out << (' ' * deindent) + line[n..]
+          @out << (' ' * deindent) + (line[n..] || raise)
           advance
         elsif line =~ /\A\s*$/
           if @index + 1 < @lines.length && @lines[@index + 1] =~ /\A {4,}\S/
@@ -709,7 +714,7 @@ module BitClust
           # [ の開始を検出（[[ は除外）— エスケープを考慮して ] を探す
           j = find_closing_bracket(line, i + 1)
           if j
-            inner = line[i+1...j]
+            inner = line[i+1...j] || raise
             if inner =~ /\A[a-zA-Z][a-zA-Z-]*:/
               result << convert_md_ref_to_rrd(inner)
               i = j + 1
@@ -717,7 +722,7 @@ module BitClust
             end
           end
         end
-        result << line[i]
+        result << (line[i] || raise)
         i += 1
       end
       result

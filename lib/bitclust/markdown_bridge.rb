@@ -38,7 +38,7 @@ module BitClust
       referenced = files.flat_map { |f|
         base = File.dirname(f)
         File.read(File.join(md_doc_root, f)).scan(/^\#@include\((?!(?:\.\.\/)+api\/)(.*?)\)/)
-            .map { |t| File.expand_path(base == '.' ? t[0] : File.join(base, t[0]), '/')
+            .map { |t| File.expand_path(base == '.' ? (t[0] || raise) : File.join(base, t[0] || raise), '/')
                            .delete_prefix('/') }
       }.to_h { |t| [t, true] }
 
@@ -135,7 +135,7 @@ module BitClust
         [reopen_only ? 1 : 0, path]
       end
       "\n" + sorted.map { |path|
-        m = members[path][:memberships].find { |mm| mm[:library] == libname }
+        m = members[path][:memberships].find { |mm| mm[:library] == libname } || raise
         inc = "\#@include(#{relative(emitted[path], base)})\n"
         inc = "\#@since #{m[:since]}\n#{inc}\#@end\n" if m[:since]
         inc = "\#@until #{m[:until]}\n#{inc}\#@end\n" if m[:until]
@@ -156,7 +156,7 @@ module BitClust
       return rrd unless rrd.include?('#@include')
       base = File.dirname(md_file)
       rrd.gsub(INCLUDE_RE) do
-        pre, target, post = $1, $2, $3
+        pre, target, post = $1, ($2 || raise), $3
         resolved = resolve(base, target, emitted)
         "#{pre}#{resolved ? relative(emitted[resolved], File.dirname(emitted[md_file])) : target}#{post}"
       end

@@ -23,6 +23,10 @@ module BitClust
 
     def update_by_file: (String path, String filename) -> void
 
+    # C API の Markdown ツリー（manual/capi）を直接パースして更新する（M3）。
+    # filename は旧経路と同じ「eval.c」等（basename から .md を除いた形）
+    def update_by_markdowntree: (String md_root) -> void
+
     def search_functions: (string pattern) -> Array[FunctionEntry]
 
     def open_function: (String id) { (FunctionEntry) -> void } -> FunctionEntry

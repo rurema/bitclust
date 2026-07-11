@@ -1,0 +1,39 @@
+module BitClust
+  # ファイル全体を包む単一の版ゲート（#@else 無し）の検出と解除（O4）。
+  #
+  # 旧 RRD ではライブラリ/エンティティ自体の版ゲートをファイル全体の
+  # #@since/#@until/#@if ラップで表現していた。新パイプラインでは
+  # front matter の since/until（構造ゲート）で表現するため、
+  # スコープの下で「常に真」または「since/until で表現できる」ラップは外す。
+  module WholeFileGate
+    GATE_OPEN_RE: ::Regexp
+
+    BLOCK_OPEN_RE: ::Regexp
+
+    BLANK_RE: ::Regexp
+
+    # 常に真と証明できる #@if 条件の形（rss.rd の (version >= "1.8.2")）
+    VERSION_GE_RE: ::Regexp
+
+    # parse の結果: [開き行 idx, 閉じ行 idx, Condition, トップレベル #@else の有無]。
+    # 全体ゲートでなければ [nil]（多重代入で全要素 nil に落ちる）
+    type parse_result = [Integer, Integer, IncludeGraph::Condition, bool] | [nil]
+
+    # ファイル全体を包むゲートの Condition を返す。該当しなければ nil
+    def self?.detect: (String src) -> IncludeGraph::Condition?
+
+    # 据え置きゲートのメタデータ領域（require/sublibrary/category）を、本文と
+    # 分けてそれぞれ同じゲートで包んだ意味等価な正規形に書き換える。
+    # 全体ゲートでない・メタデータが無い・本文が無い場合は nil
+    def self?.regate_metadata: (String src) -> String?
+
+    # スコープの下で解除できる全体ゲートなら [解除後の src, front matter に
+    # 書く gate（{} は不要の意）] を返す。据え置きなら nil
+    def self?.unwrap_for_scope: (String src, IncludeGraph::Scope scope) -> [String, IncludeGraph::gate]?
+
+    def self?.parse: (Array[String] lines) -> parse_result
+
+    # 値は `=~` の Integer? を経由するため nil がありうる（真偽値としてのみ使う）
+    def self?.provably_true_if?: (String condition, IncludeGraph::Scope scope) -> bool?
+  end
+end

@@ -41,7 +41,7 @@ module BitClust
       lines = src.lines
       open_idx, close_idx, cond, has_else = parse(lines)
       return nil if open_idx.nil? || close_idx.nil? || has_else || cond.nil?
-      content = lines[(open_idx + 1)...close_idx]
+      content = lines[(open_idx + 1)...close_idx] || raise
       i = 0
       i += 1 while content[i] && content[i] =~ BLANK_RE
       meta_start = i
@@ -56,14 +56,14 @@ module BitClust
         j += 1
       end
       return nil unless meta_end
-      rest = content[meta_end..]
+      rest = content[meta_end..] || raise
       rest.shift while rest.first && rest.first =~ BLANK_RE
       return nil if rest.empty?
       gate_line = lines[open_idx]
       # 種別（category/require/sublibrary）ごとに独立ブロックへ分ける
       # （メタデータ収集器の「#@ ブロックは単一種のみ」の制約に合わせる）
-      runs = []
-      content[meta_start...meta_end].each do |l|
+      runs = [] #: Array[[String?, Array[String]]]
+      (content[meta_start...meta_end] || raise).each do |l|
         next if l =~ BLANK_RE
         kind = l[/\A(category|require|sublibrary)/, 1]
         if runs.last && runs.last[0] == kind
@@ -73,10 +73,10 @@ module BitClust
         end
       end
       meta_blocks = runs.flat_map { |_, ls| [gate_line] + ls + ["\#@end\n", "\n"] }
-      (lines[0...open_idx] +
+      ((lines[0...open_idx] || raise) +
         meta_blocks +
         [gate_line] + rest + ["\#@end\n"] +
-        lines[(close_idx + 1)..]).join
+        (lines[(close_idx + 1)..] || raise)).join
     end
 
     # スコープの下で解除できる全体ゲートなら [解除後の src, front matter に
@@ -84,20 +84,20 @@ module BitClust
     def unwrap_for_scope(src, scope)
       lines = src.lines
       open_idx, close_idx, cond, has_else = parse(lines)
-      return nil if open_idx.nil? || close_idx.nil? || has_else
+      return nil if open_idx.nil? || close_idx.nil? || has_else || cond.nil?
 
       gate =
         case cond.kind
         when :if
           return nil unless provably_true_if?(cond.version, scope)
-          {}
+          {} #: IncludeGraph::gate
         else
           scoped = scope.gate([cond])
           return nil unless scoped   # スコープ外 → 据え置き
           scoped
         end
 
-      body = lines[0...open_idx] + lines[(open_idx + 1)...close_idx] + lines[(close_idx + 1)..]
+      body = (lines[0...open_idx] || raise) + (lines[(open_idx + 1)...close_idx] || raise) + (lines[(close_idx + 1)..] || raise)
       body.shift while body.first && body.first =~ BLANK_RE
       [body.join, gate]
     end
@@ -107,11 +107,11 @@ module BitClust
     def parse(lines)
       open_idx = lines.index { |l| l !~ BLANK_RE }
       return [nil] unless open_idx && lines[open_idx] =~ GATE_OPEN_RE
-      cond = IncludeGraph::Condition.new($1.to_sym, $2.strip)
+      cond = IncludeGraph::Condition.new(($1 || raise).to_sym, ($2 || raise).strip)
 
       nest = 0
       has_else = false
-      close_idx = nil
+      close_idx = nil #: Integer?
       (open_idx...lines.length).each do |i|
         case lines[i]
         when BLOCK_OPEN_RE then nest += 1
@@ -126,7 +126,7 @@ module BitClust
       end
       return [nil] if close_idx.nil?
       # 閉じ行の後に非空行があれば全体ゲートではない
-      return [nil] if lines[(close_idx + 1)..].any? { |l| l !~ BLANK_RE }
+      return [nil] if (lines[(close_idx + 1)..] || raise).any? { |l| l !~ BLANK_RE }
       [open_idx, close_idx, cond, has_else]
     end
 

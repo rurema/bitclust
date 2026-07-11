@@ -15,12 +15,14 @@ module BitClust
   end
 
   class Location
-    def initialize: (String? file, Integer line) -> void
+    # line が nil の Location は「行不明」（FunctionReferenceParser の
+    # source_location フォールバック）
+    def initialize: (String? file, Integer? line) -> void
                   | (Pathname file, Integer line) -> void
 
     attr_reader file: (String? | Pathname)
 
-    attr_reader line: Integer
+    attr_reader line: Integer?
 
     def to_s: () -> String
 

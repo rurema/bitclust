@@ -20,7 +20,7 @@ module BitClust
       STANDARD_PROPERTIES = %w( encoding version )
 
       def exec(argv, options)
-        prefix = options[:prefix]
+        prefix = options[:prefix] || raise
         db = MethodDatabase.new(prefix)
         db.init
         db.transaction {

@@ -1,0 +1,108 @@
+module BitClust
+  # Markdown ソース → HTML のネイティブコンパイラ。
+  # 行レベルのディスパッチだけを Markdown 記法に差し替え、
+  # HTML の出力部品は RDCompiler から継承する
+  class MDCompiler < RDCompiler
+    # RDCompiler の宣言と同型。rbs subtract は親クラスの宣言を
+    # 参照しないため、残余ゼロにするためにここでも宣言する
+    @item_stack: Array[String?]
+
+    private
+
+    # RDCompiler のテキストコンパイル（エスケープ・参照解決）を
+    # GFM モードのセグメント処理から呼ぶための別名
+    alias rd_compile_text compile_text
+
+    def gfm?: () -> bool?
+
+    # メソッド系シグネチャ（キーワード付き h3）
+    METHOD_SIGNATURE_RE: ::Regexp
+
+    def signature_re: () -> ::Regexp
+
+    MD_ITEM_RE: ::Regexp
+
+    FENCE_RE: ::Regexp
+
+    DLIST_RE: ::Regexp
+
+    INFO_RE: ::Regexp
+
+    SEE_RE: ::Regexp
+
+    # @undef など変換器が生のまま渡す未知メタデータ
+    RAW_META_RE: ::Regexp
+
+    # 生のまま残った #@samplecode が前処理で //emlist になったもの
+    EMLIST_LEFTOVER_RE: ::Regexp
+
+    def library_file: () -> void
+
+    def entry_chunk: () -> void
+
+    # md シグネチャ行を rd 形式（--- ...）へ落とし、既存のシグネチャ処理を継承する
+    def method_signature: (String sig_line, bool first) -> void
+
+    def headline: (String line) -> void
+
+    def read_paragraph: (LineInput f) -> Array[String]
+
+    def read_entry_paragraph: (LineInput f) -> Array[String]
+
+    def paragraph: () -> void
+
+    def entry_paragraph: () -> void
+
+    def unescape_hash: (String line) -> String
+
+    # - **param** `name` -- desc / - **return** -- desc / - **raise** `Ex` -- desc
+    # および生の @xxx（未知メタデータ）
+    def entry_info: () -> void
+
+    # - **SEE** [m:X], [m:Y]（継続行あり）
+    def see: () -> void
+
+    # - **`term`**: / - **term**: の定義リスト（説明はインデント行）
+    def dlist: () -> void
+
+    def strip_code_span: (String text) -> String
+
+    # param 名・raise 例外名: GFM モードでは <code> で包む
+    def name_html: (String name) -> String
+
+    # GFM テーブルの区切り行（|---|:--:|... ）
+    TABLE_DELIM_RE: ::Regexp
+
+    # GFM テーブル。テーブルでなければ何も消費せず false を返す
+    def try_table: () -> bool
+
+    def parse_table_aligns: (String delim) -> Array[String?]
+
+    def table_row: (String row, String tag, Array[String?] aligns) -> void
+
+    # 行をセルに分割（先頭/末尾の | を除去、\| はリテラルの |）
+    def split_table_row: (String row) -> Array[String]
+
+    # フェンスドコードブロック
+    def code_fence: () -> void
+
+    def collect_fence_lines: (Regexp terminator) -> Array[String]
+
+    # 箇条書き（- item / N. item、ネスト・継続行あり）
+    def item_list: (?::Integer level) -> void
+
+    # RDCompiler の dd_with_p / dd_without_p の md 版
+    def dd_with_p: () -> void
+
+    def dd_without_p: () -> void
+
+    # テキストノード: インライン記法を rd 形式へ復元してから既存の
+    # コンパイル（エスケープ・リンク解決）を継承する
+    def compile_text: (String str) -> String
+
+    # GFM モードのテキストコンパイル
+    def compile_gfm_text: (String str) -> String
+
+    def restore_rd_text: (String str) -> String
+  end
+end

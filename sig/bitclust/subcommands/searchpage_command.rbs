@@ -20,7 +20,7 @@ module BitClust
 
       def needs_database?: () -> bool
 
-      def exec: (argv argv, options options) -> void
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
 
       private
 

@@ -3,7 +3,18 @@ module BitClust
     class UpdateCommand < Subcommand
       @root: String?
 
+      @markdowntree: String?
+
       @library: String?
+
+      # ブリッジ経路（BITCLUST_MD_BRIDGE=1）でのみ設定される一時ディレクトリ。
+      # 実行時は未設定（nil）もあり得るが、読む側（ensure 節）は truthy ガード付き
+      # なので MethodDatabase の @root と同じ扱いで非 nil 宣言
+      @bridge_dir: String
+
+      # ブリッジ出力 root => [md ツリー root, 出力相対パス => 入力 md 相対パス]。
+      # map が nil（doc が .rd のまま symlink されたケース）なら相対パスをそのまま使う
+      @location_map: Hash[String, [String, Hash[String, String]?]]
 
       def initialize: () -> void
 
@@ -12,6 +23,26 @@ module BitClust
       def exec: (Subcommand::argv argv, Subcommand::options options) -> void
 
       private
+
+      # Markdown ツリーを旧形式の rd ツリーへブリッジし、既存の
+      # stdlibtree 更新機構にそのまま渡す。
+      # doc（散文ページ）は stdlibtree/../../doc から読まれるため、
+      # md ツリー側に doc/ が同居していればレイアウトを合わせる
+      # （manual/api を渡すと manual/doc を拾う。md ならブリッジ変換、
+      # .rd のまま（移行中）なら symlink）。
+      def prepare_markdowntree: () -> void
+
+      # C API の Markdown ツリー（manual/capi）を旧形式の .rd 群へ変換し、
+      # ファイル引数として返す（--capi update <files> の経路に載せる）
+      def prepare_capi_markdowntree: () -> Array[String]
+
+      # source_location のブリッジ一時パスを manual/ の md パスへ再マップする。
+      # 編集リンク（statichtml --edit-base-url）が凍結 refm でなく編集対象の
+      # md を指すようにするため。行番号はブリッジ rd 基準の近似で、
+      # front matter 等の分だけ md とずれることがある
+      def remap_source_locations: () -> void
+
+      def remap_location: (Location loc) -> Location?
 
       def guess_library_name: (String path) -> String
 

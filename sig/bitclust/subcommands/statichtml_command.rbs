@@ -123,6 +123,10 @@ module BitClust
 
       def copy_run_ruby_wasm_script: () -> void
 
+      SEARCH_JS_FILES: Array[String]
+
+      def create_search_index: (Pathname outputdir, MethodDatabase db, FunctionDatabase fdb) -> void
+
       def create_html_file: (any_entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
 
       def create_html_method_file: (String method_name, Array[MethodEntry] entries, ScreenManager manager, Pathname outputdir, MethodDatabase db) -> void

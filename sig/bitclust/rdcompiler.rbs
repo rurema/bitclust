@@ -2,7 +2,7 @@ module BitClust
   class RDCompiler
     @urlmapper: URLMapper
 
-    @catalog: MessageCatalog
+    @catalog: MessageCatalog?
 
     @hlevel: Integer
 
@@ -16,13 +16,16 @@ module BitClust
       :entry => Entry[MethodDatabase],
       :force => bool,
       :stop_on_syntax_error => bool,
+      ?:gfm => bool,
     }
+    # :catalog は実装上省略可（無ければ MessageCatalog.new({}, 'C') が使われる）
     type option = {
-      :catalog => MessageCatalog,
+      ?:catalog => MessageCatalog,
       ?:database => Database,
       ?:entry => any_entry,
       ?:force => bool,
       ?:stop_on_syntax_error => bool,
+      ?:gfm => bool,
     }
 
     @option: option_internal

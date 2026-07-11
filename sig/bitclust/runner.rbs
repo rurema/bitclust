@@ -16,6 +16,10 @@ module BitClust
       def help: () -> String
 
       def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      def respond_to?: (Symbol name) -> bool
+
+      def needs_database?: () -> bool
     end
 
     @subcommands: Hash[String, _Subcommand]

@@ -63,7 +63,7 @@ module BitClust
       dir = library ? relpath.sub(/\.rd\z/, '') : File.dirname(relpath)
       entity_fm =
         if library
-          fm = { 'library' => relpath.sub(/\.rd\z/, '') }
+          fm = { 'library' => relpath.sub(/\.rd\z/, '') } #: IncludeGraph::front_matter
           %w[since until].each { |k| fm[k] = front_matter[k] if front_matter[k] }
           fm
         else
@@ -74,15 +74,15 @@ module BitClust
       units = segments.map do |name, text|
         next Unit.new(output_path(relpath, front_matter), text, front_matter) if name.nil?   # 概要部
 
-        fm = entity_fm.dup
+        seg_fm = entity_fm.dup
         if (unwrapped = WholeFileGate.unwrap_for_scope(text, @scope))
           # エンティティセグメントのゲートは自身の存在ゲート → 常に front matter へ
           text = unwrapped[0]
-          merge_gate(fm, unwrapped[1])
+          merge_gate(seg_fm, unwrapped[1])
         end
         text = rewrite_includes(text, source_dir, dir)
         filename = "#{EntitySplitter.entity_filename(name)}.md"
-        Unit.new(dir == '.' ? filename : File.join(dir, filename), text, fm)
+        Unit.new(dir == '.' ? filename : File.join(dir, filename), text, seg_fm)
       end
       if library && segments.none? { |name, _| name.nil? }
         # 概要部が無くてもライブラリ自体が発見から消えないよう front matter のみ合成
@@ -145,7 +145,7 @@ module BitClust
       return text if source_dir == new_dir || text !~ /\#@include/
       base = File.expand_path(new_dir, '/')
       text.gsub(/^(\#@include\s*\()(.*?)(\))/) do
-        pre, target, post = $1, $2, $3
+        pre, target, post = $1, ($2 || raise), $3
         abs = File.expand_path(source_dir == '.' ? target : File.join(source_dir, target), '/')
         "#{pre}#{Pathname.new(abs).relative_path_from(base)}#{post}"
       end
@@ -182,14 +182,14 @@ module BitClust
     # 関係を持たない H1 の直後や本文の空行・散文ゲートは触らない
     def normalize_header_regions(rrd)
       lines = rrd.lines
-      out = []
+      out = [] #: Array[String]
       i = 0
       while i < lines.length
         line = lines[i]
         out << line
         i += 1
         next unless line =~ EntitySplitter::H1_RE
-        region = []
+        region = [] #: Array[String]
         while i < lines.length &&
               (lines[i] =~ RELATION_RE || lines[i] =~ HEADER_DIR_RE || lines[i] =~ BLANK_LINE_RE)
           region << lines[i]
@@ -197,10 +197,10 @@ module BitClust
         end
         last_rel = region.rindex { |l| l =~ RELATION_RE }
         if last_rel
-          head = region[0..last_rel].reject { |l| l =~ BLANK_LINE_RE }
-                                    .map { |l| l =~ RELATION_RE ? "#{l.rstrip}\n" : l }
+          head = (region[0..last_rel] || raise).reject { |l| l =~ BLANK_LINE_RE }
+                                               .map { |l| l =~ RELATION_RE ? "#{l.rstrip}\n" : l }
           out.concat(head)
-          out.concat(region[(last_rel + 1)..])
+          out.concat(region[(last_rel + 1)..] || raise)
         else
           out.concat(region)
         end

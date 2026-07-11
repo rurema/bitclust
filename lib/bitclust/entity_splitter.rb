@@ -29,7 +29,7 @@ module BitClust
     # H1 を含まないゲート（散文の版分岐・gated relations）は触らない。
     def resolve_header_gates(src, scope)
       lines = src.lines
-      out = []
+      out = [] #: Array[String]
       i = 0
       while i < lines.length
         line = lines[i]
@@ -87,7 +87,8 @@ module BitClust
     # ベースセグメントとして返す。連結すると入力に一致する。
     def segments(src)
       lines = src.lines
-      boundaries = []   # [行index, エンティティ名, ゲート付きか]
+      # [行index, エンティティ名, ゲート付きか]
+      boundaries = [] #: Array[[Integer, String?, bool]]
       depth = 0
       lines.each_with_index do |line, i|
         case line
@@ -111,9 +112,9 @@ module BitClust
         next true unless gated
         stop = idx + 1 < boundaries.length ? boundaries[idx + 1][0] : lines.length
         gate_wraps_segment?(lines, start, stop)
-      }.map { |(start, name, _), _| [start, name] }
+      }.map { |(start, name, _), _| [start, name] } #: Array[[Integer, String?]]
       return nil if boundaries.empty?
-      if lines[0...boundaries.first[0]].all? { |l| l =~ BLANK_RE }
+      if (lines[0...(boundaries.first || raise)[0]] || raise).all? { |l| l =~ BLANK_RE }
         boundaries[0] = [0, boundaries[0][1]]   # 先頭の空行は最初のセグメントへ
       else
         boundaries.unshift([0, nil])            # ライブラリ概要部（ベースセグメント）
@@ -121,7 +122,7 @@ module BitClust
 
       boundaries.each_with_index.map do |(start, name), idx|
         stop = idx + 1 < boundaries.length ? boundaries[idx + 1][0] : lines.length
-        [name, lines[start...stop].join]
+        [name, (lines[start...stop] || raise).join]
       end
     end
 
@@ -129,7 +130,7 @@ module BitClust
     # あるか。ゲートがセグメント全体を包むときのみ真
     def gate_wraps_segment?(lines, start, stop)
       depth = 0
-      close = nil
+      close = nil #: Integer?
       (start...stop).each do |i|
         case lines[i]
         when BLOCK_OPEN_RE then depth += 1
@@ -142,7 +143,7 @@ module BitClust
         end
       end
       return false unless close
-      lines[(close + 1)...stop].all? { |l| l =~ BLANK_RE }
+      (lines[(close + 1)...stop] || raise).all? { |l| l =~ BLANK_RE }
     end
 
     # エンティティ名 → 出力ファイル名（拡張子なし）。既存の命名規約に合わせ :: → __
@@ -171,15 +172,15 @@ module BitClust
     def gate_condition(line)
       return nil unless line =~ GATE_OPEN_RE
       # Preprocessor は #@since "1.8.5" のクォート形式も受理する
-      IncludeGraph::Condition.new($1.to_sym, $2.strip.delete_prefix('"').delete_suffix('"'))
+      IncludeGraph::Condition.new(($1 || raise).to_sym, ($2 || raise).strip.delete_prefix('"').delete_suffix('"'))
     end
 
     # i のゲート開始行から対応を取り、{body:, else_body:, next:} を返す。
     # body/else_body は枝の行列、next は #@end の次の行 index。対応が取れなければ nil
     def parse_block(lines, i)
       depth = 0
-      body = []
-      else_body = []
+      body = [] #: Array[String]
+      else_body = [] #: Array[String]
       current = body
       j = i
       while j < lines.length
@@ -213,7 +214,7 @@ module BitClust
 
     # i 以降の最初の非空行が H1 ならその名前を返す
     def first_h1_name(lines, i)
-      first = lines[i..].find { |l| l !~ BLANK_RE }
+      first = (lines[i..] || raise).find { |l| l !~ BLANK_RE }
       first =~ H1_RE ? $1 : nil
     end
   end

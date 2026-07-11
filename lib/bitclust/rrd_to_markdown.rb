@@ -99,22 +99,25 @@ module BitClust
       # 本文が「require の C 版です。」のように require で始まる場合の誤認を防ぐ
       return if @capi
       scan = @index
-      tokens = []       # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:cmt, line] | [:blank]
+      # [:cat, val] | [:req, val] | [:sub, val] | [:dir, line] | [:cmt, line] | [:blank]
+      # （tuple の長さが混在するため untyped の列で扱う）
+      tokens = [] #: Array[untyped]
       nest = 0
-      checkpoint = nil  # 直近の「nest==0 の空行直後」= [scan, tokens.size]。
-                        # メタ確定をここまでで打ち切れる安全な切れ目
-                        # （md→rd の再生成がメタ群の後に空行を出すため、空行が必須）
+      # 直近の「nest==0 の空行直後」= [scan, tokens.size]。
+      # メタ確定をここまでで打ち切れる安全な切れ目
+      # （md→rd の再生成がメタ群の後に空行を出すため、空行が必須）
+      checkpoint = nil #: [Integer, Integer]?
       while scan < @lines.length
         l = @lines[scan]
         case l
         when /\Acategory\s+(.*)$/
           # 版条件つき category は「単一値の存在ゲート」のみ対応（値の差し替えは
           # 据え置き）。判定は build_metadata_front_matter のグループ検査で行う
-          tokens << [:cat, $1.strip]; scan += 1
+          tokens << [:cat, ($1 || raise).strip]; scan += 1
         when /\Arequire\s+(.*)$/
-          tokens << [:req, $1.strip]; scan += 1
+          tokens << [:req, ($1 || raise).strip]; scan += 1
         when /\Asublibrary\s+(.*)$/
-          tokens << [:sub, $1.strip]; scan += 1
+          tokens << [:sub, ($1 || raise).strip]; scan += 1
         when /\A\#@(?:since|until|if)\b/
           tokens << [:dir, l]; nest += 1; scan += 1
         when /\A\#@else\b/
@@ -133,7 +136,7 @@ module BitClust
         when /\A\#@/
           # #@todo 等 → チェックポイントまでで確定
           return unless checkpoint
-          scan, tokens = checkpoint[0], tokens[0, checkpoint[1]]
+          scan, tokens = checkpoint[0], tokens[0, checkpoint[1]] || raise
           nest = 0
           break
         else
@@ -141,7 +144,7 @@ module BitClust
           # 版分岐の途中で body に到達（set.rd/thread.rd の版分岐つき散文）
           # → チェックポイントまでで確定し、版分岐ごと body に渡す
           return unless checkpoint
-          scan, tokens = checkpoint[0], tokens[0, checkpoint[1]]
+          scan, tokens = checkpoint[0], tokens[0, checkpoint[1]] || raise
           nest = 0
           break
         end
@@ -150,10 +153,10 @@ module BitClust
       # 前置きコメント（rss.rd の「#@# = rss」）→ 最初の cmt 以降を body へ戻す
       # （連鎖先頭の空行はメタ領域の終端空行として残す）
       chain_start = (tokens.rindex { |t| !%i[cmt blank].include?(t[0]) } || -1) + 1
-      if (first_cmt = tokens[chain_start..].index { |t| t[0] == :cmt })
+      if (first_cmt = (tokens[chain_start..] || raise).index { |t| t[0] == :cmt })
         drop = tokens.length - (chain_start + first_cmt)
         scan -= drop
-        tokens = tokens[0...-drop]
+        tokens = tokens[0...-drop] || raise
       end
       return unless tokens.any? { |t| %i[cat req sub].include?(t[0]) }
       return if nest != 0               # ファイル全体の版ゲート内で EOF → 据え置き
@@ -179,8 +182,10 @@ module BitClust
       end
       toks = tokens.reject { |t| t[0] == :blank }
 
-      category = nil   # [:scalar, val] | [:block, md行列]
-      blocks = {}      # 'require' / 'sublibrary' => 組み立て済み md 行
+      # [:scalar, val] | [:block, md行列]
+      category = nil #: [Symbol, untyped]?
+      # 'require' / 'sublibrary' => 組み立て済み md 行
+      blocks = {} #: Hash[String, Array[String]]
       i = 0
       while i < toks.length
         kind, val = toks[i]
@@ -202,8 +207,8 @@ module BitClust
         when :dir
           # 完結した単一種のゲートブロックを読む
           depth = 0
-          group = []
-          gkinds = []
+          group = [] #: Array[[Symbol, String]]
+          gkinds = [] #: Array[Symbol]
           j = i
           loop do
             return false unless toks[j]
@@ -363,7 +368,7 @@ module BitClust
       elsif line =~ /\A\/\/emlist\{/
         # no caption, no lang
       end
-      parts = []
+      parts = [] #: Array[String]
       parts << "```"
       parts << (lang || "")
       if caption && !caption.empty?
@@ -448,7 +453,7 @@ module BitClust
     def convert_param(line)
       l = line.chomp
       if l =~ /\A@param(\s+)(\S+)(\s+)(.*)\z/
-        @out << "- **param**#{$1}`#{$2}` --#{$3}#{convert_inline_refs($4)}\n"
+        @out << "- **param**#{$1}`#{$2}` --#{$3}#{convert_inline_refs($4 || raise)}\n"
       elsif l =~ /\A@param(\s+)(\S+)\z/
         @out << "- **param**#{$1}`#{$2}` --\n"
       end
@@ -459,7 +464,7 @@ module BitClust
     def convert_raise(line)
       l = line.chomp
       if l =~ /\A@raise(\s+)(\S+)(\s+)(.*)\z/
-        @out << "- **raise**#{$1}`#{$2}` --#{$3}#{convert_inline_refs($4)}\n"
+        @out << "- **raise**#{$1}`#{$2}` --#{$3}#{convert_inline_refs($4 || raise)}\n"
       elsif l =~ /\A@raise(\s+)(\S+)\z/
         @out << "- **raise**#{$1}`#{$2}` --\n"
       end
@@ -543,9 +548,9 @@ module BitClust
     def convert_ulist_item(line)
       # B4: 元のインデント幅と * 後のスペースを保持
       line =~ /\A(\s+)\*(\s+)(.*)/
-      indent = $1
-      space = $2
-      text = $3
+      indent = $1 || raise
+      space = $2 || raise
+      text = $3 || raise
       content_indent = indent.length + 1 + space.length
       @out << "#{indent}-#{space}#{convert_inline_refs(text.chomp)}\n"
       advance
@@ -571,9 +576,9 @@ module BitClust
     def convert_olist_item(line)
       # B4: 元のインデント幅を保持
       line =~ /\A(\s+)\((\d+)\)\s+(.*)/
-      indent = $1
-      num = $2
-      text = $3
+      indent = $1 || raise
+      num = $2 || raise
+      text = $3 || raise
       @out << "#{indent}#{num}. #{convert_inline_refs(text.chomp)}\n"
       advance
       # 継続行を収集（ulist と同じ。RDCompiler の項目継続はインデント深さ不問）
@@ -653,7 +658,7 @@ module BitClust
 
     def convert_indented_code(line)
       # 行を収集してベースインデントを取得
-      code_lines = []
+      code_lines = [] #: Array[String]
       while @index < @lines.length
         line = current_line
         if line =~ /\A(\s+)\S/
@@ -678,7 +683,7 @@ module BitClust
       # ベースインデント（空行以外の最小インデント）を検出
       base_indent = code_lines
         .reject { |l| l =~ /\A\s*$/ }
-        .map { |l| l =~ /\A(\s+)/; $1.length }
+        .map { |l| l =~ /\A(\s+)/; ($1 || raise).length }
         .min || 1
 
       fence = '`' * (3 + base_indent)
@@ -687,7 +692,7 @@ module BitClust
         if l =~ /\A\s*$/
           @out << l
         else
-          @out << l[base_indent..]  # ベースインデントを除去
+          @out << (l[base_indent..] || raise)  # ベースインデントを除去
         end
       end
       @out << "#{fence}\n"
@@ -704,7 +709,8 @@ module BitClust
     def collect_header_relations
       return unless @single_entity
       scan = @index
-      tokens = []       # [:blank] | [:rel, kind, val] | [:dir, line]
+      # [:blank] | [:rel, kind, val] | [:dir, line]（tuple の長さが混在するため untyped の列で扱う）
+      tokens = [] #: Array[untyped]
       nest = 0
       saw_rel = false
       region_end = @index
@@ -712,7 +718,7 @@ module BitClust
         l = @lines[scan]
         case l
         when /\A(include|extend|alias)\s+(.+)$/
-          tokens << [:rel, $1, $2.strip]; scan += 1; saw_rel = true; region_end = scan
+          tokens << [:rel, $1, ($2 || raise).strip]; scan += 1; saw_rel = true; region_end = scan
         when /\A\#@(?:since|until|if)\b/
           tokens << [:dir, l]; nest += 1; scan += 1
         when /\A\#@else\b/
@@ -741,7 +747,8 @@ module BitClust
     # 1ブロック内の種別混在（データ上存在しない）は据え置き。
     def build_header_front_matter(tokens)
       toks = tokens.reject { |t| t[0] == :blank }
-      chunks = []   # [kind, 組み立て済み行の配列]
+      # [kind, 組み立て済み行の配列]
+      chunks = [] #: Array[[untyped, Array[String]]]
       i = 0
       while i < toks.length
         t = toks[i]
@@ -752,8 +759,8 @@ module BitClust
         end
         # #@ ブロック: 対応する #@end までを1チャンクに
         depth = 0
-        lines = []
-        kinds = []
+        lines = [] #: Array[String]
+        kinds = [] #: Array[String]
         while i < toks.length
           tt = toks[i]
           if tt[0] == :dir
@@ -843,8 +850,8 @@ module BitClust
       inner = inner.sub(/\.#/, '?.')
       # メソッド名内の [ ] をバックスラッシュエスケープ
       if inner =~ /\A([\w-]+:)(.*)/n
-        prefix = $1
-        target = $2
+        prefix = $1 || raise
+        target = $2 || raise
         target = target.gsub('\\', '\\\\\\\\').gsub('[', '\\[').gsub(']', '\\]')
         inner = prefix + target
       end

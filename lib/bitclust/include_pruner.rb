@@ -33,14 +33,14 @@ module BitClust
 
     def prune(src, targets)
       return src if targets.empty?
-      lookup = {}
+      lookup = {} #: Hash[String?, bool]
       targets.each { |t| lookup[t] = true }
 
       lines = src.lines
       nodes = catch(:unbalanced) { parse(lines) }
       return src if nodes.nil?
 
-      stream = []
+      stream = [] #: stream
       changed = emit(nodes, lookup, stream)
       return src unless changed
       tidy(stream).join
@@ -54,7 +54,7 @@ module BitClust
     end
 
     def parse_nodes(lines, i)
-      nodes = []
+      nodes = [] #: Array[node]
       while i < lines.length
         line = lines[i]
         if line =~ ELSE_RE || line =~ END_RE
@@ -63,7 +63,7 @@ module BitClust
           gate = line !~ CODE_OPEN_RE
           body, j = parse_nodes(lines, i + 1)
           else_line = nil
-          else_body = []
+          else_body = [] #: Array[node]
           if j < lines.length && lines[j] =~ ELSE_RE
             else_line = lines[j]
             else_body, j = parse_nodes(lines, j + 1)
@@ -96,9 +96,9 @@ module BitClust
     end
 
     def emit_block(block, lookup, stream)
-      body = []
+      body = [] #: stream
       body_changed = emit(block.body, lookup, body)
-      else_body = []
+      else_body = [] #: stream
       else_changed = block.else_line ? emit(block.else_body, lookup, else_body) : false
       changed = body_changed || else_changed
 
@@ -124,7 +124,7 @@ module BitClust
     # REMOVED 番兵を取り除きつつ、除去痕の前後が空行同士なら1つに畳み、
     # 先頭に残った空行を削る
     def tidy(stream)
-      result = []
+      result = [] #: Array[String]
       pending = false
       stream.each do |item|
         if item.equal?(REMOVED)
