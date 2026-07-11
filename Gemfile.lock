@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bitclust-core (1.4.0)
+    bitclust-core (1.5.0)
       drb
       json
       nkf
@@ -9,10 +9,10 @@ PATH
       rack
       rouge
       webrick
-    bitclust-dev (1.4.0)
-      bitclust-core (= 1.4.0)
-    refe2 (1.4.0)
-      bitclust-core (= 1.4.0)
+    bitclust-dev (1.5.0)
+      bitclust-core (= 1.5.0)
+    refe2 (1.5.0)
+      bitclust-core (= 1.5.0)
 
 GEM
   remote: https://rubygems.org/
@@ -146,8 +146,8 @@ CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bigdecimal (4.0.1) sha256=8b07d3d065a9f921c80ceaea7c9d4ae596697295b584c296fe599dd0ad01c4a7
-  bitclust-core (1.4.0)
-  bitclust-dev (1.4.0)
+  bitclust-core (1.5.0)
+  bitclust-dev (1.5.0)
   concurrent-ruby (1.3.7) sha256=4412caec3a5ea2e5fdc52076724c071a81f2c0593d83b2ac8cbb8ca63b3151b0
   connection_pool (3.0.2) sha256=33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a
   csv (3.3.5) sha256=6e5134ac3383ef728b7f02725d9872934f523cb40b961479f69cf3afa6c8e73f
@@ -183,7 +183,7 @@ CHECKSUMS
   rb-fsevent (0.11.2) sha256=43900b972e7301d6570f64b850a5aa67833ee7d87b458ee92805d56b7318aefe
   rb-inotify (0.11.1) sha256=a0a700441239b0ff18eb65e3866236cd78613d6b9f78fea1f9ac47a85e47be6e
   rbs (3.10.3) sha256=70627f3919016134d554e6c99195552ae3ef6020fe034c8e983facc9c192daa6
-  refe2 (1.4.0)
+  refe2 (1.5.0)
   rouge (5.0.0) sha256=e2de9bba2f9cb88f8a73bca3643b560b2b398f32f91bf716f584477bc0175ebc
   rr (3.1.2) sha256=cc4a5cc91f012327d317dc661154419f9d36d8f9c05031ac46accd89ceb0ff1b
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
