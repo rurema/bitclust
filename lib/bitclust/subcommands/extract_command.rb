@@ -17,6 +17,11 @@ module BitClust
         }
       end
 
+      # ソースファイルを処理するだけで DB を使わない
+      def needs_database?
+        false
+      end
+
       def exec(argv, options)
         success = true
         argv.each do |path|

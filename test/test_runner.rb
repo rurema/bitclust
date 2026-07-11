@@ -94,4 +94,55 @@ class TestRunner < Test::Unit::TestCase
     command.exec(["--list"], {:prefix=>@prefix, :capi => false})
     @runner.run(["property", "--list"])
   end
+
+  def test_run_search_without_database
+    # search (Searcher) は自前で DB を探すので、--database も config も
+    # なしで実行できる
+    command = mock(Object.new)
+    mock(::BitClust::Searcher).new.returns(command)
+    mock(@runner).load_config.returns(nil)
+    command.parse(["String#gsub"])
+    command.exec(["String#gsub"], {:prefix => nil, :capi => false})
+    @runner.run(["search", "String#gsub"])
+  end
+
+  def test_run_database_command_without_database
+    # DB 必須のサブコマンドは、裸の raise ではなく案内付きのエラーで中断する
+    command = mock(Object.new)
+    mock(::BitClust::Subcommands::InitCommand).new.returns(command)
+    mock(@runner).load_config.returns(nil)
+    command.parse([])
+    command.needs_database?.returns(true)
+    original_stderr = $stderr
+    $stderr = StringIO.new
+    assert_raise(SystemExit) { @runner.run(["init"]) }
+    assert_include($stderr.string, "--database")
+  ensure
+    $stderr = original_stderr
+  end
+
+  def test_needs_database
+    # グローバル --database が不要なサブコマンド
+    # (DB を使わない・自前の -d を持つ・DB が任意)
+    [
+      BitClust::Subcommands::SetupCommand,
+      BitClust::Subcommands::PreprocCommand,
+      BitClust::Subcommands::ExtractCommand,
+      BitClust::Subcommands::ClassesCommand,
+      BitClust::Subcommands::MethodsCommand,
+      BitClust::Subcommands::AncestorsCommand,
+      BitClust::Subcommands::HtmlfileCommand,
+      BitClust::Subcommands::SearchpageCommand,
+    ].each do |klass|
+      assert_false(klass.new.needs_database?, klass.name)
+    end
+    # グローバル --database が必須のサブコマンド
+    [
+      BitClust::Subcommands::InitCommand,
+      BitClust::Subcommands::UpdateCommand,
+      BitClust::Subcommands::ListCommand,
+    ].each do |klass|
+      assert_true(klass.new.needs_database?, klass.name)
+    end
+  end
 end

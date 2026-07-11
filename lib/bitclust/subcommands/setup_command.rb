@@ -40,6 +40,11 @@ module BitClust
         }
       end
 
+      # DB は ~/.bitclust 配下に自前で作るのでグローバル --database は不要
+      def needs_database?
+        false
+      end
+
       def exec(argv, options)
         purge if @purge
         prepare
