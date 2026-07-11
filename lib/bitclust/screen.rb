@@ -323,7 +323,8 @@ module BitClust
     # URL of the ruby.wasm module used by the in-browser RUN button on Ruby
     # sample code (statichtml --run-ruby-wasm). nil disables the feature.
     def run_ruby_wasm_url
-      @conf[:run_ruby_wasm]
+      url = @conf[:run_ruby_wasm] #: String?
+      url
     end
 
     private
@@ -483,7 +484,8 @@ module BitClust
       opt = {:catalog => message_catalog()}.merge(@conf) #: RDCompiler::option
       if markdown_source?
         require 'bitclust/mdcompiler'
-        MDCompiler.new(@urlmapper, @hlevel, opt.merge(:gfm => true))
+        gfm_opt = opt.merge(:gfm => true) #: RDCompiler::option
+        MDCompiler.new(@urlmapper, @hlevel, gfm_opt)
       else
         RDCompiler.new(@urlmapper, @hlevel, opt)
       end
@@ -734,7 +736,8 @@ module BitClust
       h = {:force => true, :catalog => message_catalog() }.merge(@conf) #: RDCompiler::option
       if markdown_source?
         require 'bitclust/mdcompiler'
-        MDCompiler.new(@urlmapper, @hlevel, h.merge(:gfm => true))
+        gfm_opt = h.merge(:gfm => true) #: RDCompiler::option
+        MDCompiler.new(@urlmapper, @hlevel, gfm_opt)
       else
         RDCompiler.new(@urlmapper, @hlevel, h)
       end

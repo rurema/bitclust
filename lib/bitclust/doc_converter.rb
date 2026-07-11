@@ -27,7 +27,7 @@ module BitClust
         when /\A(={1,4}\[a:[^\]]+\])\s{2,}(.*)/m
           "#{$1} #{$2}"                          # アンカー見出しの余分なスペース
         when /\A\t+/
-          line.sub(/\A\t+/) { ' ' * $&.length }  # 行頭タブ（doc の散文1行のみ）
+          line.sub(/\A\t+/) { ' ' * ($& || raise).length }  # 行頭タブ（doc の散文1行のみ）
         when /\A\#@include\((?:\.\.\/)+api\/src\//
           # 旧レイアウト ../api/src/X → 新レイアウト ../api/X
           # （manual/ 配下では src 階層が無い。ブリッジが逆変換する）
@@ -54,7 +54,7 @@ module BitClust
         base = File.dirname(f)
         File.read(File.join(doc_root, f))
             .scan(/^\#@include\((?!(?:\.\.\/)+api\/)(.*?)\)/)
-            .map { |t| File.expand_path(base == '.' ? t[0] : File.join(base, t[0]), '/')
+            .map { |t| File.expand_path(base == '.' ? (t[0] || raise) : File.join(base, t[0] || raise), '/')
                            .delete_prefix('/') }
       }
       (pages + (all & referenced)).sort

@@ -61,7 +61,7 @@ module BitClust
       end
 
       def exec(argv, options)
-        error("no --outputdir given") unless @outputdir
+        outputdir = @outputdir or error("no --outputdir given")
         error("no database given (pass one path per version)") if argv.empty?
 
         generator = SearchIndexGenerator.new(suffix: @suffix,
@@ -72,30 +72,29 @@ module BitClust
           version = db.properties['version'] or
             error("#{path}: no version property (not a bitclust database?)")
           $stderr.puts "indexing #{path} (#{version})" if @verbose
-          [version, generator.build_index(db, fdb)]
+          [version, generator.build_index(db, fdb)] #: [String, Array[SearchIndexGenerator::entry]]
         }
         versions = version_indexes.map {|version, _| version }
                                   .sort_by {|v| Gem::Version.new(v) }
 
-        jsdir = @outputdir + "js"
+        jsdir = outputdir + "js"
         FileUtils.mkdir_p(jsdir)
-        File.write(jsdir + "search_data.js",
-                   SearchIndexGenerator.merged_js(version_indexes))
+        (jsdir + "search_data.js").write(SearchIndexGenerator.merged_js(version_indexes))
         VENDORED_JS_FILES.each do |js|
           FileUtils.cp(@themedir + "js" + js, jsdir.to_s, :preserve => true)
         end
         # Ship the MIT notice for the vendored Aliki files alongside them.
         FileUtils.cp(@themedir + "js" + "NOTICE", jsdir.to_s, :preserve => true)
         FileUtils.cp(@themedir + "js" + "search_page.js", jsdir.to_s, :preserve => true)
-        FileUtils.cp(@themedir + "search.css", @outputdir.to_s, :preserve => true)
-        File.write(@outputdir + "index.html", render_page(versions))
+        FileUtils.cp(@themedir + "search.css", outputdir.to_s, :preserve => true)
+        (outputdir + "index.html").write(render_page(versions))
         $stderr.puts "generated search page for #{versions.join(', ')}" if @verbose
       end
 
       private
 
       def render_page(versions)
-        template = File.read(@templatedir + "index.html")
+        template = (@templatedir + "index.html").read
         template.sub('%%SEARCH_VERSIONS%%', JSON.generate(versions))
       end
     end

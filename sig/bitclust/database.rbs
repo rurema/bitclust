@@ -10,7 +10,7 @@ module BitClust
     type properties_type = ::Hash[propkey_type, String]
 
     # 'source' is internal use only
-    type database_propkey = 'version' | 'encoding' | 'source'
+    type database_propkey = 'version' | 'encoding' | 'source' | 'source_format'
     type database_properties = Hash[database_propkey, String]
 
     def self.dummy: (?database_properties params) -> instance

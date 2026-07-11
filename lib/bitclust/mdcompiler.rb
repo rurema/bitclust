@@ -214,10 +214,10 @@ module BitClust
         end
         case header
         when /\A- \*\*(param|arg)\*\*\s+`([^`]+)`( --(?:.*))?$/m
-          line "<dt class='#{@type.to_s}-param'>[PARAM] #{name_html($2)}:</dt>"
+          line "<dt class='#{@type.to_s}-param'>[PARAM] #{name_html($2 || raise)}:</dt>"
           rest = $3 ? ($3 || raise).sub(/\A --/, '') : +"\n"
         when /\A- \*\*raise\*\*\s+`([^`]+)`( --(?:.*))?$/m
-          line "<dt>[EXCEPTION] #{name_html($1)}:</dt>"
+          line "<dt>[EXCEPTION] #{name_html($1 || raise)}:</dt>"
           rest = $2 ? ($2 || raise).sub(/\A --/, '') : +"\n"
         when /\A- \*\*return\*\*( --(?:.*))?$/m
           line "<dt>[RETURN]</dt>"
@@ -370,7 +370,7 @@ module BitClust
         # #@since/#@else ゲートで分断されたインデントブロックは前処理後に
         # 隣接フェンスとして現れるため、続けてマージする（rd では連続
         # インデント行として1つの <pre> になる。ArgumentError 等）
-        segments = [[fence.size - 3, collect_fence_lines(terminator)]]
+        segments = [[fence.size - 3, collect_fence_lines(terminator)]] #: Array[[Integer, Array[String]]]
         loop do
           # rd の pre は空白行を跨ぐ（list は /\A\S/ まで継続）ため、
           # フェンス間の空白のみ行も次が 4+ フェンスならブロックの一部

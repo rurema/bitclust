@@ -1,0 +1,55 @@
+module BitClust
+  # RRD テキストから指定 target の #@include 行を除去する純変換（rd→rd）
+  module IncludePruner
+    INCLUDE_RE: ::Regexp
+
+    GATE_OPEN_RE: ::Regexp
+
+    CODE_OPEN_RE: ::Regexp
+
+    ELSE_RE: ::Regexp
+
+    END_RE: ::Regexp
+
+    BLANK_RE: ::Regexp
+
+    # ブロック除去・空行畳み込みの位置を示す番兵（固有の Object インスタンス）
+    REMOVED: Object
+
+    # パース結果のノード。行（String）か入れ子ブロック
+    type node = String | Block
+
+    # 展開後のストリーム。行（String）と REMOVED 番兵が混在するため
+    # 要素は untyped（番兵は equal? でのみ識別する）
+    type stream = Array[untyped]
+
+    # 版ゲート/サンプルコードブロック（#@... 〜 #@end）
+    class Block < ::Struct[untyped]
+      attr_accessor open: String
+      attr_accessor body: Array[node]
+      attr_accessor else_line: String?
+      attr_accessor else_body: Array[node]
+      attr_accessor end_line: String
+      attr_accessor gate: bool
+
+      def self.new: (String open, Array[node] body, String? else_line,
+                     Array[node] else_body, String end_line, bool gate) -> instance
+                  | ...
+    end
+
+    # lookup のキーは $1 由来の String? を受けるため nilable
+    def self?.prune: (String src, Array[String] targets) -> String
+
+    def self?.parse: (Array[String] lines) -> Array[node]
+
+    def self?.parse_nodes: (Array[String] lines, Integer i) -> [Array[node], Integer]
+
+    def self?.emit: (Array[node] nodes, Hash[String?, bool] lookup, stream stream) -> bool
+
+    def self?.emit_block: (Block block, Hash[String?, bool] lookup, stream stream) -> bool
+
+    def self?.blank_only?: (stream stream) -> bool
+
+    def self?.tidy: (stream stream) -> Array[String]
+  end
+end

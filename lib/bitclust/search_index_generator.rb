@@ -45,7 +45,7 @@ module BitClust
     # Builds the search index as an array of entry hashes.
     # +db+ is a MethodDatabase; +fdb+ is an optional FunctionDatabase (C API).
     def build_index(db, fdb = nil)
-      index = []
+      index = [] #: Array[entry]
       index.concat(class_entries(db))
       index.concat(method_entries(db))
       index.concat(library_entries(db))
@@ -67,7 +67,7 @@ module BitClust
     # scanning versions in ascending order — independent of the caller's
     # argument order, so the generated file diffs stay stable.
     def self.merge(version_indexes)
-      merged = {}
+      merged = {} #: Hash[Array[String?], merged_entry]
       sorted = version_indexes.sort_by { |version, _| Gem::Version.new(version) }
       sorted.each do |version, index|
         index.each do |e|
@@ -98,8 +98,8 @@ module BitClust
     end
 
     def method_entries(db)
-      seen = {}
-      result = []
+      seen = {} #: Hash[String, bool]
+      result = [] #: Array[entry]
       db.methods.each do |entry|
         next if entry.undefined?
 

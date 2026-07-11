@@ -40,8 +40,8 @@ module BitClust
     # 分解して境界に寄与させる。分解できない連言子は寄与しない（保守的に広く扱う。
     # 恒偽の証明は Scope#never? が連言子単位で別途行う）
     def self.bounds(conditions)
-      sinces = []
-      untils = []
+      sinces = [] #: Array[bound]
+      untils = [] #: Array[bound]
       conditions.each do |c|
         case c.kind
         when :since then sinces << [Gem::Version.new(c.version), c.version]
@@ -60,7 +60,7 @@ module BitClust
     # <= や否定（#@else 反転）は正確に表現できないので分解しない
     def self.if_bounds(expr)
       return [] if expr.lstrip.start_with?('!')
-      bounds = []
+      bounds = [] #: Array[[Symbol, String?]]
       expr.split(/\band\b/).each do |c|
         case c
         when /version\s*<\s*"([\d.]+)"/ then bounds << [:until, $1]
@@ -142,7 +142,7 @@ module BitClust
       def gate(conditions)
         return nil unless cover?(conditions)
         lo, hi = IncludeGraph.bounds(conditions)
-        gate = {}
+        gate = {} #: IncludeGraph::gate
         gate[:since] = lo[1] if lo && lo[0] > @lo
         gate[:until] = hi[1] if hi && hi[0] < @hi
         gate
@@ -199,7 +199,7 @@ module BitClust
     # LIBRARIES 内の版ゲート（fiber: until 3.1 等）をスコープ適用して付与する。
     # スコープ外のライブラリ（cmath/scanf/sync 等）は含まない。
     def library_front_matter_map(scope)
-      result = {}
+      result = {} #: Hash[String, Hash[String, String]]
       @library_gates.each do |name, gate|
         root = "#{name}.rd"
         scoped = scope.gate(gate)
@@ -227,7 +227,7 @@ module BitClust
     # - 同一ライブラリ内の複数 include サイトは、いずれかが有効なら
     #   エンティティが存在するため、ゲートは区間の hull（弱い方）を取る
     def front_matter_map(scope)
-      result = {}
+      result = {} #: Hash[String, front_matter]
       groupings.each do |path, ms|
         covered = ms.select { |m| scope.cover?(m.conditions) }
         next if covered.empty?
@@ -264,7 +264,7 @@ module BitClust
       return {} if gates.any?(&:empty?)
       sinces = gates.map { |g| g[:since] }
       untils = gates.map { |g| g[:until] }
-      result = {}
+      result = {} #: gate
       result[:since] = sinces.min_by { |v| Gem::Version.new(v) } if sinces.all?
       result[:until] = untils.max_by { |v| Gem::Version.new(v) } if untils.all?
       result
@@ -272,8 +272,8 @@ module BitClust
 
     # LIBRARIES を版ゲート付きで読む。 [[name, [Condition]], ...]
     def read_libraries
-      entries = {}
-      stack = []
+      entries = {} #: Hash[String, Array[Condition]]
+      stack = [] #: Array[Condition]
       File.foreach(File.join(@src_root, 'LIBRARIES')) do |line|
         line = line.chomp
         if line.start_with?('#@#') || apply_directive(stack, line)
@@ -292,7 +292,7 @@ module BitClust
       case line
       when /\A\#@since\s+(\S+)/  then stack.push(Condition.new(:since, $1))
       when /\A\#@until\s+(\S+)/  then stack.push(Condition.new(:until, $1))
-      when /\A\#@if\s*(.*)/      then stack.push(Condition.new(:if, $1.strip))
+      when /\A\#@if\s*(.*)/      then stack.push(Condition.new(:if, ($1 || raise).strip))
       when /\A\#@samplecode\b/   then stack.push(Condition.new(:samplecode, nil))
       when /\A\#@else\b/         then (cond = stack.pop) && stack.push(invert(cond))
       when /\A\#@end\b/          then stack.pop
@@ -313,12 +313,12 @@ module BitClust
     # relpath のファイル内の #@include を条件スタック付きで走査する。
     # base_conditions は LIBRARIES ゲート＋ここまでの include 経路の条件。
     def walk(relpath, library, base_conditions, path_stack)
-      stack = []
+      stack = [] #: Array[Condition]
       File.foreach(File.join(@src_root, relpath)) do |line|
         line = line.chomp
         if line =~ /\A\#@include\s*\((.*?)\)/
           conditions = (base_conditions + stack).reject { |c| c.kind == :samplecode }
-          add_include(relpath, $1, library, conditions, path_stack)
+          add_include(relpath, $1 || raise, library, conditions, path_stack)
         else
           apply_directive(stack, line)
         end

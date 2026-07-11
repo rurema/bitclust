@@ -1,0 +1,113 @@
+module BitClust
+  # doctree の #@include グラフを版ゲート付きで解析する
+  class IncludeGraph
+    # 版条件。kind は :since / :until / :if（#@end との対応取りのため
+    # :samplecode も積まれるが、snapshot 前に必ず除外される）。
+    # version は :since/:until ではバージョン文字列、:if では条件式文字列
+    # （:samplecode のみ nil で構築されるため new は String? を受ける）
+    class Condition < ::Struct[untyped]
+      attr_accessor kind: Symbol
+      attr_accessor version: String
+
+      def self.new: (Symbol kind, String? version) -> instance
+                  | ...
+    end
+
+    # grouping ファイルの1所属
+    class Membership < ::Struct[untyped]
+      attr_accessor library: String
+      attr_accessor conditions: Array[Condition]
+
+      def self.new: (String library, Array[Condition] conditions) -> instance
+                  | ...
+    end
+
+    # [Gem::Version, 原文字列] の境界の組。原文字列は $1 由来の String? を含む
+    type bound = [Gem::Version, String?]
+
+    # front matter に書く構造ゲート（キーは :since / :until のみ）
+    type gate = Hash[Symbol, String?]
+
+    # 注入する front matter。単一所属は 'library' => 名前、
+    # 複数所属は 'library' => ゲート付きリスト（MARKUP_SPEC §1.2）
+    type front_matter = Hash[String, String? | Array[Hash[String, String]]]
+
+    ENTITY_H1_RE: ::Regexp
+
+    def self.analyze: (String src_root) -> instance
+
+    def self.interval: (Array[Condition] conditions) -> [Gem::Version?, Gem::Version?]
+
+    def self.bounds: (Array[Condition] conditions) -> [bound?, bound?]
+
+    def self.if_bounds: (String expr) -> Array[[Symbol, String?]]
+
+    # 対象版範囲 [lo, hi)
+    class Scope
+      attr_reader lo: Gem::Version
+
+      attr_reader hi: Gem::Version
+
+      def initialize: (String lo, String hi) -> void
+
+      def cover?: (Array[Condition] conditions) -> bool
+
+      def always?: (Condition cond) -> bool
+
+      def never?: (Condition cond) -> bool
+
+      def never_conjunct?: (String conjunct) -> bool
+
+      def gate: (Array[Condition] conditions) -> gate?
+    end
+
+    attr_reader warnings: Array[String]
+
+    @src_root: String
+
+    @memberships: Hash[String, Array[Membership]]
+
+    @kinds: Hash[String, :grouping | :fragment]
+
+    @grouping_sites: Hash[String, Array[String]]
+
+    @library_gates: Hash[String, Array[Condition]]
+
+    def initialize: (String src_root) -> void
+
+    def analyze: () -> self
+
+    def memberships: (String relpath) -> Array[Membership]
+
+    def groupings: () -> Hash[String, Array[Membership]]
+
+    def fragments: () -> Array[String]
+
+    def grouping_include_sites: () -> Hash[String, Array[String]]
+
+    def library_front_matter_map: (Scope scope) -> Hash[String, Hash[String, String]]
+
+    def front_matter_map: (Scope scope) -> Hash[String, front_matter]
+
+    private
+
+    # 複数サイトのゲートの hull。実引数は Scope#gate の結果（cover? で
+    # フィルタ済みのため実際には非 nil）で、nil 合流を steep が解けないため
+    # untyped で受け渡す
+    def hull: (Array[untyped] gates) -> untyped
+
+    def read_libraries: () -> Hash[String, Array[Condition]]
+
+    def apply_directive: (Array[Condition] stack, String line) -> bool
+
+    def invert: (Condition cond) -> Condition
+
+    def walk: (String relpath, String library, Array[Condition] base_conditions, Array[String] path_stack) -> void
+
+    def add_include: (String from, String target, String library, Array[Condition] conditions, Array[String] path_stack) -> void
+
+    def resolve: (String from, String target) -> String?
+
+    def classify: (String relpath) -> (:grouping | :fragment)
+  end
+end

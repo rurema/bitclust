@@ -1,0 +1,64 @@
+module BitClust
+  # 新パイプラインのファイル発見（MARKUP_SPEC §1.1）
+  class MarkdownTree
+    # ゲート付き所属（{ library:, since:, until: }）。項目は動的なキー
+    # （gate_stack 由来の Symbol）で代入されるためレコードではなく Hash。
+    # 値は $1 由来の String? を受ける
+    type membership = Hash[Symbol, String?]
+
+    # @libraries の値（name => { path:, since:, until: }）
+    type library_info = { path: String, since: String?, until: String? }
+
+    # @entities の値。kinds の要素は [種別, 名前]（ENTITY_H1_RE の $1/$2）
+    type entity_info = { names: Array[String], kinds: Array[[String, String]],
+                         library: String?, memberships: Array[membership],
+                         since: String?, until: String? }
+
+    # parse_file が返す1ファイル分の生情報。name/since/until/fragment は
+    # 出現したときのみ設定される
+    type file_info = { kinds: Array[[String, String]], library: String?,
+                       library_file: bool, memberships: Array[membership],
+                       front_matter_relations: bool, body_relations: bool,
+                       includes: Array[String],
+                       ?name: String?, ?since: String?, ?until: String?,
+                       ?fragment: bool? }
+
+    ENTITY_H1_RE: ::Regexp
+
+    RELATION_LINE_RE: ::Regexp
+
+    RELATION_KEY_RE: ::Regexp
+
+    INCLUDE_RE: ::Regexp
+
+    FENCE_RE: ::Regexp
+
+    BLANK_RE: ::Regexp
+
+    def self.scan: (String root) -> instance
+
+    attr_reader libraries: Hash[String, library_info]
+
+    attr_reader entities: Hash[String, entity_info]
+
+    attr_reader fragments: Array[String]
+
+    attr_reader warnings: Array[String]
+
+    @root: String
+
+    def initialize: (String root) -> void
+
+    def scan: () -> self
+
+    private
+
+    def validate: (String path, file_info info) -> void
+
+    def parse_file: (String path) -> file_info
+
+    def warn_case_collisions: (Array[String] files) -> void
+
+    def resolve: (String from, String target, Hash[String, file_info] infos) -> String?
+  end
+end

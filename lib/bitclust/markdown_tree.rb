@@ -44,7 +44,7 @@ module BitClust
       warn_case_collisions(files)
       infos = files.to_h { |f| [f, parse_file(f)] }
 
-      referenced = {}
+      referenced = {} #: Hash[String, bool]
       infos.each do |path, info|
         info[:includes].each do |target|
           if (resolved = resolve(path, target, infos))
@@ -92,7 +92,7 @@ module BitClust
           @warnings << "entity with no library: #{path}"
         else
           info[:memberships].each do |m|
-            next if @libraries.key?(m[:library])
+            next if @libraries.key?(m[:library] || raise)
             @warnings << "entity refers to unknown library #{m[:library]}: #{path}"
           end
         end
@@ -108,6 +108,7 @@ module BitClust
     # front matter（raw 走査。#@ を含むため YAML パーサは使わない）と本文
     # （フェンス外の H1・H1 直後の関係行・#@include）を読む
     def parse_file(path)
+      # @type var info: file_info
       info = { kinds: [], library: nil, library_file: false, memberships: [],
                front_matter_relations: false, body_relations: false, includes: [] }
       lines = File.readlines(File.join(@root, path))
@@ -115,7 +116,7 @@ module BitClust
       if lines[0] =~ /\A---\s*\z/
         i = 1
         in_library_block = false
-        gate_stack = []
+        gate_stack = [] #: Array[[Symbol, String?]]
         while i < lines.length && lines[i] !~ /\A---\s*\z/
           line = lines[i]
           if in_library_block
@@ -137,7 +138,7 @@ module BitClust
           case line
           when /\Atype:\s*library\s*\z/ then info[:library_file] = true
           when /\Aname:\s*(\S+)/ then info[:name] = $1
-          when /\Alibrary:\s*\z/ then in_library_block = true; gate_stack = []
+          when /\Alibrary:\s*\z/ then in_library_block = true; gate_stack = [] #: Array[[Symbol, String?]]
           when /\Alibrary:\s*(\S+)/ then info[:memberships] << { library: $1 }
           when /\Asince:\s*"?([^"\s]+)"?/ then info[:since] = $1
           when /\Auntil:\s*"?([^"\s]+)"?/ then info[:until] = $1
@@ -153,7 +154,7 @@ module BitClust
       in_header = false
       h1_gated = false
       gate_depth = 0
-      lines[i..].each do |line|
+      (lines[i..] || raise).each do |line|
         if line =~ FENCE_RE
           in_fence = !in_fence
           in_header = false
@@ -169,11 +170,11 @@ module BitClust
         end
 
         if line =~ ENTITY_H1_RE
-          info[:kinds] << [$1, $2]
+          info[:kinds] << [$1 || raise, $2 || raise]
           in_header = true
           h1_gated = gate_depth > 0
         elsif line =~ INCLUDE_RE
-          info[:includes] << $1
+          info[:includes] << ($1 || raise)
           in_header = false
         elsif in_header
           case line

@@ -66,7 +66,7 @@ module BitClust
       when "[]="    # aset
         params = @params&.split(',')
         if params && params.size >= 2
-          val = params.pop
+          val = params.pop || raise
           "self[#{params.join(',').strip}] = #{val.strip}"
         else
           # Signatures like []=(*idxary) in historic documents cannot be

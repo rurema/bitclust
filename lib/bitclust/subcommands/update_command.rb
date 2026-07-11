@@ -48,7 +48,7 @@ module BitClust
                                                : (prepare_markdowntree; argv)
           else
             @db.transaction {
-              @db.update_by_markdowntree(@markdowntree)
+              @db.update_by_markdowntree(@markdowntree || raise)
             }
             return
           end
@@ -81,11 +81,11 @@ module BitClust
         require 'bitclust/markdown_bridge'
         @bridge_dir = Dir.mktmpdir('bitclust-md-bridge')
         root = File.join(@bridge_dir, 'api/src')
-        bridge = MarkdownBridge.build(@markdowntree, root)
+        bridge = MarkdownBridge.build(@markdowntree || raise, root)
         @location_map = { root => [@markdowntree, bridge.source_map] }
         # markdowntree と同じ渡され方（相対/絶対）を保った隣接 doc パス。
         # copy_doc は stdlibtree 相対（../../doc/...）の location を記録する
-        doc = File.join(File.dirname(@markdowntree), 'doc')
+        doc = File.join(File.dirname(@markdowntree || raise), 'doc')
         if File.directory?(doc)
           if Dir.glob(File.join(doc, '**/*.md')).any?
             doc_map = MarkdownBridge.build_doc(doc, File.join(@bridge_dir, 'doc'))
@@ -109,8 +109,8 @@ module BitClust
         # （関数の filename が旧経路と同じ「eval.c」等になる）
         src = File.join(@bridge_dir, 'src')
         FileUtils.mkdir_p(src)
-        capi_map = {}
-        files = Dir.glob(File.join(@markdowntree, '*.md')).sort.map do |f|
+        capi_map = {} #: Hash[String, String]
+        files = Dir.glob(File.join(@markdowntree || raise, '*.md')).sort.map do |f|
           name = "#{File.basename(f, '.md')}.rd"
           rd = File.join(src, name)
           File.write(rd, MarkdownToRRD.convert(File.read(f), capi: true))
@@ -126,11 +126,11 @@ module BitClust
       # md を指すようにするため。行番号はブリッジ rd 基準の近似で、
       # front matter 等の分だけ md とずれることがある
       def remap_source_locations
+        db = @db
         entries =
-          if @db.is_a?(FunctionDatabase)
-            @db.functions
+          if db.is_a?(FunctionDatabase)
+            db.functions
           else
-            db = @db
             db.is_a?(MethodDatabase) or raise
             db.libraries + db.classes + db.methods + db.docs
           end
@@ -143,10 +143,12 @@ module BitClust
       end
 
       def remap_location(loc)
+        file = loc.file
+        file.is_a?(String) or raise
         @location_map.each do |bridge_root, (md_root, map)|
           prefix = "#{bridge_root}/"
-          next unless loc.file.start_with?(prefix)
-          rel = loc.file.delete_prefix(prefix)
+          next unless file.start_with?(prefix)
+          rel = file.delete_prefix(prefix)
           rel = map[rel] || rel if map
           return Location.new(File.join(md_root, rel), loc.line)
         end

@@ -44,9 +44,11 @@ module BitClust
 
     BracketLink: ::Regexp
 
-    def display_text: (String? text) -> String?
+    def display_text: (String text) -> String
+                    | (String? text) -> String?
 
-    def description_text: (String? text) -> String?
+    def description_text: (String text) -> String
+                        | (String? text) -> String?
 
     def type_id: () -> Symbol
 
