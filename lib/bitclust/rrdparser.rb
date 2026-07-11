@@ -269,13 +269,30 @@ module BitClust
       result
     end
 
+    # シグネチャ行に続くメソッド属性行({: ...}。直前のシグネチャ行に束縛)
+    METHOD_ATTRIBUTE_LINE_RE = /\A\{:.*\}[ \t]*$/
+
     def read_chunk(f)
-      header = f.span(/\A---/)
+      # シグネチャ行の直後には {: ...} 属性行を置ける。属性行を挟んでも
+      # ひとつのチャンク(別名グループ)として読む
+      header = [] #: Array[String]
+      sig_lines = [] #: Array[String]
+      while f.next?
+        if /\A---/ =~ f.peek
+          line = f.gets or raise
+          header.push line
+          sig_lines.push line
+        elsif !sig_lines.empty? && METHOD_ATTRIBUTE_LINE_RE =~ f.peek
+          header.push(f.gets || raise)
+        else
+          break
+        end
+      end
       body = f.break(/\A(?:---|={1,2}[^=])/)
       src = (header + body).join('')
-      src.location = header[0].location
-      sigs = header.map {|line| method_signature(line) }
-      mainsig = check_chunk_signatures(sigs, header[0])
+      src.location = sig_lines[0].location
+      sigs = sig_lines.map {|line| method_signature(line) }
+      mainsig = check_chunk_signatures(sigs, sig_lines[0])
       names = sigs.map {|s| s.name }.compact.uniq.sort
       Chunk.new(mainsig, names, src)
     end
@@ -462,9 +479,20 @@ module BitClust
 
       def define_method(chunk)
         id = method_id(chunk)
+        attrs = method_attributes(chunk)
         @db.open_method(id) {|m|
           m.names           = chunk.names.sort
-          m.kind            = chunk.source.match?(/^@undef$/) ? :undefined : @kind
+          m.kind            = if attrs.include?('undef')
+                                :undefined
+                              elsif attrs.include?('nomethod')
+                                :nomethod
+                              elsif chunk.source.match?(/^@undef$/)
+                                # 旧 @undef 段落の後方互換。
+                                # doctree の {: undef} への移行完了後に削除する
+                                :undefined
+                              else
+                                @kind
+                              end
           # steep:ignore:start
           m.visibility      = @visibility || :public
           # steep:ignore:end
@@ -475,6 +503,44 @@ module BitClust
             @library.add_method m
           end
         }
+      end
+
+      # 現在サポートするメソッド属性({: ...} 属性行のトークン)。
+      # since/until は将来のバージョン情報表示(#132)用に予約
+      METHOD_ATTRIBUTES = %w[nomethod undef]
+
+      # kramdown Block IAL 風の {: ...} 属性行からメタデータを集める。
+      # 属性行は「直前のシグネチャ行のみ」に束縛される(kramdown と同じ解釈)。
+      # kind はエントリ単位でしか持てないので、別名(複数シグネチャ)の
+      # エントリでは全シグネチャに同じ属性が付いていることを要求する。
+      # 本文に入ったら探索を打ち切る(コード例中の {: ...} を誤検出しないため)
+      def method_attributes(chunk)
+        per_sig = [] #: Array[Array[String]]
+        chunk.source.each_line do |line_|
+          line = line_.chomp
+          case line
+          when /\A---\s/, /\A\#\#\#\s/
+            per_sig.push []
+          when /\A\{:(.*)\}[ \t]*\z/
+            break if per_sig.empty?
+            ($1 || raise).strip.split(/\s+/).each do |token|
+              unless METHOD_ATTRIBUTES.include?(token)
+                raise ParseError,
+                      "#{chunk.source.location}: unknown method attribute #{token.inspect} (supported: #{METHOD_ATTRIBUTES.join(', ')})"
+              end
+              per_sig.last&.push token
+            end
+          else
+            break
+          end
+        end
+        return [] if per_sig.empty?
+        sets = per_sig.map {|a| a.uniq.sort }
+        unless sets.uniq.size == 1
+          raise ParseError,
+                "#{chunk.source.location}: method attributes must be the same on every signature of an entry: #{sets.inspect}"
+        end
+        sets.first || raise
       end
 
       def method_id(chunk)

@@ -95,11 +95,20 @@ module BitClust
     def entry_chunk
       @out.puts '<dl>' if @option[:force]
       first = true
-      @f.while_match(signature_re) do |line|
-        method_signature(line, first)
-        first = false
+      attrs = [] #: Array[String]
+      while @f.next?
+        if signature_re =~ @f.peek
+          method_signature(@f.gets || raise, first)
+          first = false
+        elsif !first && METHOD_ATTRIBUTE_LINE_RE =~ @f.peek
+          # メソッド属性行は本文には描画しない(undef のみ後でメッセージ)
+          attrs.concat attribute_tokens(@f.gets)
+        else
+          break
+        end
       end
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
+      undef_message if attrs.include?('undef')
       while @f.next?
         case @f.peek
         when signature_re
@@ -132,6 +141,8 @@ module BitClust
           # findings#3: rd 側と同じく行頭アンカー付きで
           todo
         when /\A@undef\b/
+          # 旧 @undef 段落の後方互換(rd 側と同期。移行完了後に削除する)
+          @f.gets
           undef_message
         when RAW_META_RE
           entry_info

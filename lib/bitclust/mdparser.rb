@@ -294,12 +294,26 @@ module BitClust
     end
 
     def read_chunk(f)
-      header = f.span(SIG_RE)
+      # シグネチャ行の直後には {: ...} 属性行を置ける(rd 側と同じ)。
+      # 属性行を挟んでもひとつのチャンク(別名グループ)として読む
+      header = [] #: Array[String]
+      sig_lines = [] #: Array[String]
+      while f.next?
+        if SIG_RE =~ f.peek
+          line = f.gets or raise
+          header.push line
+          sig_lines.push line
+        elsif !sig_lines.empty? && METHOD_ATTRIBUTE_LINE_RE =~ f.peek
+          header.push(f.gets || raise)
+        else
+          break
+        end
+      end
       body = md_break(f)
       src = (header + body).join('')
-      src.location = header[0].location
-      sigs = header.map {|line| method_signature(line) }
-      mainsig = check_chunk_signatures(sigs, header[0])
+      src.location = sig_lines[0].location
+      sigs = sig_lines.map {|line| method_signature(line) }
+      mainsig = check_chunk_signatures(sigs, sig_lines[0])
       names = sigs.map {|s| s.name }.compact.uniq.sort
       Chunk.new(mainsig, names, src)
     end

@@ -257,7 +257,7 @@ module BitClust
                        :instance_methods,  :private_instance_methods, :protected_instance_methods,
                        :module_functions,
                        :constants, :special_variables,
-                       :added, :undefined)
+                       :added, :undefined, :nomethod)
 
     def partitioned_entries(level = 0)
       # @type var s: Array[MethodEntry]
@@ -270,12 +270,14 @@ module BitClust
       # @type var v: Array[MethodEntry]
       # @type var added: Array[MethodEntry]
       # @type var undefined: Array[MethodEntry]
+      # @type var nomethod: Array[MethodEntry]
       s = []; spv = []
       i = []; ipv = []; ipt = []
       mf = []
       c = []; v = []
       added = []
       undefined = []
+      nomethod = []
       entries(level).sort_by(&:name).each do |m|
         case m.kind
         when :defined, :redefined
@@ -299,10 +301,12 @@ module BitClust
           added.push m
         when :undefined
           undefined.push m
+        when :nomethod
+          nomethod.push m
         end
       end
       # steep:ignore:start
-      Parts.new(s,spv, i,ipv,ipt, mf, c, v, added, undefined)
+      Parts.new(s,spv, i,ipv,ipt, mf, c, v, added, undefined, nomethod)
       # steep:ignore:end
     end
 

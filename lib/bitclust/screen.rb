@@ -494,10 +494,20 @@ module BitClust
       sig_re = markdown_source? ? MDParser::SIG_RE : /\A---/
       f = LineInput.for_string(src)
       while f.next?
-        sigs = f.span(sig_re).map {|line|
-          line = line.sub(sig_re, '--- ') if markdown_source?
-          MethodSignature.parse(line.rstrip)
-        }
+        # シグネチャ行の直後の {: ...} メソッド属性行はシグネチャブロックの
+        # 一部として読み飛ばす(シグネチャにも本文にも含めない)
+        sigs = [] #: Array[MethodSignature]
+        while f.next?
+          if sig_re =~ f.peek
+            line = f.gets or raise
+            line = line.sub(sig_re, '--- ') if markdown_source?
+            sigs.push MethodSignature.parse(line.rstrip)
+          elsif !sigs.empty? && /\A\{:.*\}[ \t]*$/ =~ f.peek
+            f.gets
+          else
+            break
+          end
+        end
         body = f.break(sig_re).join.split(/\n\n/, 2).first || ''
         yield sigs, body
       end

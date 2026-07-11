@@ -14,9 +14,9 @@ module BitClust
 
     def <=>: (untyped other) -> ::Integer?
 
-    KIND_NUM: { defined: 0, redefined: 1, added: 2 }
+    KIND_NUM: { defined: 0, redefined: 1, added: 2, undefined: 3, nomethod: 4 }
 
-    def sort_key: () -> [String, (0 | 1 | 2)]
+    def sort_key: () -> [String, (0 | 1 | 2 | 3 | 4)]
 
     def name: () -> String
 
@@ -40,7 +40,7 @@ module BitClust
 
     attr_accessor names: Array[String]
     attr_accessor visibility: (:public | :private | :protected)
-    attr_accessor kind: (:defined | :added | :redefined | :undefined)
+    attr_accessor kind: (:defined | :added | :redefined | :undefined | :nomethod)
     attr_accessor source: String
     attr_accessor source_location: Location
 
@@ -95,6 +95,8 @@ module BitClust
     def redefined?: () -> bool
 
     def undefined?: () -> bool
+
+    def nomethod?: () -> bool
 
     def description: () -> String?
   end

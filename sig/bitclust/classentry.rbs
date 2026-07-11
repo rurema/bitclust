@@ -100,12 +100,13 @@ module BitClust
       attr_accessor special_variables: Array[MethodEntry]
       attr_accessor added: Array[MethodEntry]
       attr_accessor undefined: Array[MethodEntry]
+      attr_accessor nomethod: Array[MethodEntry]
 
       def initialize: (Array[MethodEntry] singleton_methods, Array[MethodEntry] private_singleton_methods,
                        Array[MethodEntry] instance_methods,  Array[MethodEntry] private_instance_methods, Array[MethodEntry] protected_instance_methods,
                        Array[MethodEntry] module_functions,
                        Array[MethodEntry] constants, Array[MethodEntry] special_variables,
-                       Array[MethodEntry] added, Array[MethodEntry] undefined) -> void
+                       Array[MethodEntry] added, Array[MethodEntry] undefined, Array[MethodEntry] nomethod) -> void
     end
 
     def partitioned_entries: (?::Integer level) -> Parts

@@ -110,6 +110,8 @@ Thread
 スレッド
 This reference manual is for a version of Ruby that is no longer maintained.
 このマニュアルは既にメンテナンスが終了したバージョンの Ruby を対象としています。
+Undefined Methods for Explanation
+説明のための未定義メソッド
 ancestors
 クラス・モジュールの継承リスト
 class %s

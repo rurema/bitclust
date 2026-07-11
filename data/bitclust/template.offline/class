@@ -122,6 +122,7 @@
      [_('Private Instance Methods'),  ents.private_instance_methods   ],
      [_('Protected Instance Methods'),ents.protected_instance_methods ],
      [_('Module Functions'),          ents.module_functions           ],
+     [_('Undefined Methods for Explanation'), ents.nomethod           ],
      [_('Constants'),                 ents.constants                  ],
      [_('Special Variables'),         ents.special_variables          ,'$']] %>
 <%= headline(_("Index")) %>
