@@ -1,6 +1,8 @@
 (function() {
   window.onload = function() {
-    const elems = document.getElementsByClassName('highlight')
+    // 言語指定なしのコードブロックは class を持たない素の <pre> になるため、
+    // highlight クラスではなく pre 要素全体に COPY ボタンを付ける
+    const elems = document.querySelectorAll('pre')
 
     let tempDiv = document.createElement('div')
 
