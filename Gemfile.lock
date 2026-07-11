@@ -7,6 +7,7 @@ PATH
       nkf
       progressbar (>= 1.9.0, < 2.0)
       rack
+      rouge
       webrick
     bitclust-dev (1.4.0)
       bitclust-core (= 1.4.0)
@@ -78,6 +79,8 @@ GEM
     rbs (3.10.3)
       logger
       tsort
+    rouge (5.0.0)
+      strscan (~> 3.1)
     rr (3.1.2)
     securerandom (0.4.1)
     steep (1.9.4)
@@ -181,6 +184,7 @@ CHECKSUMS
   rb-inotify (0.11.1) sha256=a0a700441239b0ff18eb65e3866236cd78613d6b9f78fea1f9ac47a85e47be6e
   rbs (3.10.3) sha256=70627f3919016134d554e6c99195552ae3ef6020fe034c8e983facc9c192daa6
   refe2 (1.4.0)
+  rouge (5.0.0) sha256=e2de9bba2f9cb88f8a73bca3643b560b2b398f32f91bf716f584477bc0175ebc
   rr (3.1.2) sha256=cc4a5cc91f012327d317dc661154419f9d36d8f9c05031ac46accd89ceb0ff1b
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   steep (1.9.4) sha256=09a941469b55d31cdc70a3812b5c1d4102d361f628f5fe5497b6a9aabc3cee05

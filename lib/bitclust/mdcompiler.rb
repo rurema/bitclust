@@ -347,21 +347,7 @@ module BitClust
         @f.until_terminator(terminator) do |code_line|
           src << code_line
         end
-        if lang == "ruby"
-          begin
-            filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
-            string BitClust::SyntaxHighlighter.new(src, filename).highlight
-          rescue BitClust::SyntaxHighlighter::Error => ex
-            $stderr.puts ex.message
-            if stop_on_syntax_error?
-              exit(false)
-            else
-              string src
-            end
-          end
-        else
-          string src
-        end
+        string highlight_source(src, lang, caption)
         line '</code></pre>'
       elsif fence.size == 3
         line '<pre>'
