@@ -126,21 +126,16 @@ code, pre, tt {
     font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
+/* COPY ボタン(script.js)が全 pre の先頭行に入るため、上 padding は
+   highlight の有無によらず 0 にしてボタンを上端に密着させる */
 pre {
-    line-height: 1.1;
-    background-color: #f2f2f2;
-    padding: 1.1em;
-    font-weight: normal;
-    overflow: auto;
-}
-
-pre.highlight {
     line-height: 1.1;
     background-color: #f2f2f2;
     padding: 0px 1.1em 1.1em 1.1em;
     font-weight: normal;
-    position: relative;
+    overflow: auto;
 }
+
 
 /* for RUN (js/run.js, statichtml --run-ruby-wasm) */
 .highlight__run-button {
@@ -212,13 +207,16 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
   left: -1000px;
 }
 
-pre .caption {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 0.2em;
+/* サンプルコードのキャプション。pre の上に密着したタブとして表示する
+   (pre 内の absolute 配置だと、編集・貼り付けで先頭行と重なるため) */
+.caption {
+    display: inline-block;
+    padding: 0.2em 0.5em;
     background: #ddd;
-    border-width: 0 1px 1px 0;
+    margin: 1em 0 0;
+}
+.caption + pre {
+    margin-top: 0;
 }
 
 blockquote {

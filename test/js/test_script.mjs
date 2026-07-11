@@ -213,6 +213,29 @@ async function settle() {
          'copied text is trimmed (leading newlines dropped, trailing squeezed)')
 }
 
+// RUN 出力など、後から生成される pre にもボタンを付けられる公開フック。
+// getText はクリック時に評価されるので、内容が変わる要素にも使える
+{
+  const spy = clipboardSpy()
+  const pre = new FakeElement('pre', '')
+  runOnload([pre], spy.navigator)
+  assert(typeof globalThis.window.ruremaAddCopyButton === 'function',
+         'window.ruremaAddCopyButton is exposed for dynamically created pre')
+  const output = new FakeElement('pre', 'highlight__run-output')
+  let current = 'first output\n'
+  const btn = globalThis.window.ruremaAddCopyButton(output, () => current)
+  assert(output.firstChild === btn,
+         'the hook prepends a COPY button to the given element')
+  btn.onclick()
+  await settle()
+  current = 'second output\n'
+  btn.onclick()
+  await settle()
+  assert(spy.written.length === 2 &&
+         spy.written[0] === 'first output\n' && spy.written[1] === 'second output\n',
+         'getText is evaluated at click time (dynamic content is copied as-is)')
+}
+
 // Clipboard API が無い環境では textarea + execCommand にフォールバックする
 {
   const pre = new FakeElement('pre', '', 'fallback code\n')

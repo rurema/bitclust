@@ -310,8 +310,10 @@ module BitClust
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)?\]\[(?<lang>\w+?)\]! =~ command
         # @type var caption: String?
         # @type var lang: String
-        line "<pre class=\"highlight #{lang}\">"
+        # caption は pre 内の absolute 配置ではなく、pre の上に密着した
+        # タブとして描画する(pre 内だと編集・貼り付けで先頭行と重なる)
         line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
+        line "<pre class=\"highlight #{lang}\">"
         line "<code>"
         src = +""
         @f.until_terminator(%r<\A//\}>) do |line|

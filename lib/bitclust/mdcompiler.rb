@@ -347,8 +347,9 @@ module BitClust
       end
       terminator = /\A`{#{fence.size}}\s*$/
       if lang
-        line "<pre class=\"highlight #{lang}\">"
+        # caption はタブとして pre の前に置く(rd 側と同期)
         line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
+        line "<pre class=\"highlight #{lang}\">"
         line "<code>"
         src = +""
         @f.until_terminator(terminator) do |code_line|

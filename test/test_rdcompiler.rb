@@ -359,8 +359,8 @@ HERE
 <dt class='method-param'>[PARAM] arg:</dt>
 <dd>
 dsc1
-<pre class="highlight ruby">
 <span class="caption">This is caption</span>
+<pre class="highlight ruby">
 <code>
 dsc2
 dsc3
@@ -387,8 +387,8 @@ HERE
 <p>
 abs
 </p>
-<pre class="highlight ruby">
 <span class="caption">description</span>
+<pre class="highlight ruby">
 <code>
 <span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
 </code></pre>
