@@ -162,11 +162,6 @@ module BitClust
           see
         when /\A@todo\b/
           todo
-        when /\A@undef\b/
-          # 旧 @undef 段落の後方互換(UNKNOWN_META_INFO にすると doctree の
-          # check_format が落ちる)。{: undef} への移行完了後に削除する
-          @f.gets
-          undef_message
         when /\A@[a-z]/
           entry_info
         else
