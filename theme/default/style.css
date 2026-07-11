@@ -448,11 +448,16 @@ hr {
  right: 10px;
 }
 
+/* EOL 警告バナー(statichtml --eol-warning、body の先頭に入る)。
+   #rurema-topbar と同じく負マージンで body の余白(上 20px・左右 2%)を
+   突き破って全幅にする。下マージン 20px は直後の topbar の margin-top -20px と
+   相殺され、topbar がバナーの真下に密着する(バナーが無いページでは
+   topbar 自身の負マージンが従来どおり body の余白を打ち消す) */
 .eol-warning {
     background-color: #aa3333;
     color: white;
-    padding: 0.4em;
-    margin: 0;
+    padding: 0.4em 2%;
+    margin: -20px -2% 20px;
 }
 
 .eol-warning a {
