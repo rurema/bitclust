@@ -84,7 +84,7 @@ module BitClust
     end
 
     def description
-      display_text(source.split(/\n\n/, 2)[0].strip)
+      description_text(source.split(/\n\n/, 2)[0].strip)
     end
   end
 end

@@ -165,6 +165,25 @@ module BitClust
     end
     private :display_text
 
+    # BitClust::RDCompiler::BracketLink と同等の正規表現(/n なし)
+    BracketLink = /\[\[[\w-]+?:[!-~]+?(?:\[\] )?\]\]/
+
+    # meta description など、コンパイラを通さずマークアップも解釈されない
+    # 場所に使うテキスト。非 ASCII 文字間の改行は削除し(ブラウザでは
+    # 空白扱いになり日本語文中に不自然な空白が見えるため)、残りの改行は
+    # 空白に変換、ブラケットリンクはリンク先名のみにする
+    def description_text(text)
+      text = display_text(text)
+      return text unless text
+      text = text.split("\n").map(&:strip).join("\n")
+        .gsub(/(\P{ascii})\n(?=\P{ascii})/) { $1 || raise }
+        .tr("\n", ' ')
+      text.gsub(BracketLink) {|link|
+        ((link[2..-3] || raise).split(':', 2).last || raise).rstrip
+      }
+    end
+    private :description_text
+
     def type_id
       self.class.type_id
     end
