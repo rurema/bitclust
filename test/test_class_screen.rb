@@ -31,10 +31,14 @@ sub class
 --- sub_class_method
 sub class method
 --- hidden_class_method
-@undef
+{: undef}
 == Instance Methods
 --- shared_name
-@undef
+{: undef}
+
+--- explanatory_method
+{: nomethod}
+説明のために記載しているメソッドです。
 HERE
 
   def setup
@@ -65,6 +69,16 @@ HERE
 
   def test_undefined_singleton_method_is_hidden
     assert_not_include(@html, 'hidden_class_method')
+  end
+
+  def test_nomethod_method_is_listed_in_its_own_section
+    assert_include(@html, '説明のための未定義メソッド')
+    assert_include(@html, 'explanatory_method')
+  end
+
+  def test_nomethod_metadata_is_not_rendered_as_unknown
+    assert_not_include(@html, 'UNKNOWN_META_INFO')
+    assert_not_include(@html, '{:')
   end
 
   def test_undefined_instance_method_does_not_hide_singleton_method

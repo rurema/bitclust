@@ -744,6 +744,62 @@ HERE
     assert_match(/#{expected}/, @c.send(:compile_text, target), target)
   end
 
+  def test_nomethod_is_not_rendered
+    src = <<'HERE'
+--- to_a -> Array
+{: nomethod}
+
+説明のためここに記載しています。
+HERE
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { "dummy" }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { "String/i.index._builtin" }
+    html = @c.compile_method(method_entry)
+    assert_not_include(html, 'UNKNOWN_META_INFO')
+    assert_not_include(html, '{:')
+    assert_include(html, '説明のためここに記載しています。')
+  end
+
+  def test_attribute_lines_between_alias_signatures_are_not_rendered
+    src = <<'HERE'
+--- to_a -> Array
+{: nomethod}
+--- to_a2 -> Array
+{: nomethod}
+
+説明のためここに記載しています。
+HERE
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { "dummy" }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { "String/i.index._builtin" }
+    html = @c.compile_method(method_entry)
+    assert_not_include(html, '{:')
+    assert_include(html, 'to_a2')
+    assert_include(html, '説明のためここに記載しています。')
+    # 別名はひとつのエントリとして描画される(dt 2つ + dd 1つ)
+    assert_equal(1, html.scan(/<dd class="method-description">/).size)
+    assert_equal(2, html.scan(/<dt class="method-heading"/).size)
+  end
+
+  def test_undef_attribute_renders_message
+    src = <<'HERE'
+--- <=>(other) -> -1 | 0 | 1 | nil
+{: undef}
+HERE
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { "dummy" }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { "String/i.index._builtin" }
+    html = @c.compile_method(method_entry)
+    assert_not_include(html, '{:')
+    assert_include(html, 'このメソッドは定義されていません。')
+  end
+
   def test_array_join
     src = <<'HERE'
 --- join(sep = $,)    -> String

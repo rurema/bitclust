@@ -443,4 +443,51 @@ class TestMDParser < Test::Unit::TestCase
     _, lib = parse_md(md)
     assert_equal %w[Errno::EPERM Errno::ENOENT], lib.classes.map(&:name)
   end
+  def test_method_attribute_list_sets_kind
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Hoge
+
+      クラスの説明。
+
+      ## Instance Methods
+
+      ### def fuga -> nil
+      {: nomethod}
+
+      説明のためのエントリです。
+
+      ### def piyo -> nil
+      {: undef}
+    MD
+    db, = parse_md(md)
+    assert_equal(:nomethod, db.get_method(BitClust::MethodSpec.parse('Hoge#fuga')).kind)
+    assert_equal(:undefined, db.get_method(BitClust::MethodSpec.parse('Hoge#piyo')).kind)
+  end
+
+  def test_method_attribute_on_every_alias_signature
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Hoge
+
+      クラスの説明。
+
+      ## Instance Methods
+
+      ### def fuga -> nil
+      {: nomethod}
+      ### def fuga2 -> nil
+      {: nomethod}
+
+      説明のためのエントリです。
+    MD
+    db, = parse_md(md)
+    fuga = db.get_method(BitClust::MethodSpec.parse('Hoge#fuga'))
+    assert_equal(:nomethod, fuga.kind)
+    assert_equal(['fuga', 'fuga2'], fuga.names)
+  end
 end

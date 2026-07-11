@@ -11,11 +11,11 @@ alias HogeHogeHoge
 --- hoge
 hoge
 --- fuga
-@undef
+{: undef}
 fuga
 == Instance Methods
 --- fugafuga
-@undef
+{: undef}
 fugafuga
 = class Bar < Hoge
 == Class Methods
@@ -140,5 +140,50 @@ HERE
 HERE
     method = klass.entries.detect {|m| m.name == 'fuga' }
     assert_equal('Array を日本語で返します。', method.description)
+  end
+end
+
+class TestEntryNomethod < Test::Unit::TestCase
+  def parse_class(class_source)
+    lib, = BitClust::RRDParser.parse(class_source, 'hoge')
+    lib.fetch_class('Hoge')
+  end
+
+  def test_nomethod_is_partitioned_separately
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+{: nomethod}
+
+説明のためのエントリです。
+HERE
+    parts = klass.partitioned_entries
+    assert_equal(['fuga'], parts.nomethod.map(&:name))
+    assert_equal([], parts.instance_methods.map(&:name))
+  end
+
+  def test_description_skips_leading_metadata_paragraph
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+{: nomethod}
+
+説明のためのエントリです。
+HERE
+    method = klass.entries.detect {|m| m.name == 'fuga' }
+    assert_equal('説明のためのエントリです。', method.description)
+  end
+
+  def test_description_is_empty_when_only_metadata
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+{: undef}
+HERE
+    method = klass.entries.detect {|m| m.name == 'fuga' }
+    assert_equal('', method.description)
   end
 end

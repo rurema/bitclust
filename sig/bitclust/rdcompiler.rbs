@@ -80,6 +80,12 @@ module BitClust
 
     def dt: (String s) -> String
 
+    METHOD_ATTRIBUTE_LINE_RE: ::Regexp
+
+    def attribute_tokens: (String? attr_line) -> Array[String]
+
+    def undef_message: () -> void
+
     def stop_on_syntax_error?: () -> bool
 
     def emlist: () -> void

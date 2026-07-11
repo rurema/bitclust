@@ -109,12 +109,23 @@ module BitClust
       end
     end
 
+    # シグネチャ行に続くメソッド属性行({: ...}。直前のシグネチャ行に束縛)
+    METHOD_ATTRIBUTE_LINE_RE = /\A\{:.*\}[ \t]*$/
+
     def entry_chunk
       @out.puts '<dl>' if @option[:force]
       first = true
-      @f.while_match(/\A---/) do |line|
-        method_signature(line, first)
-        first = false
+      attrs = [] #: Array[String]
+      while @f.next?
+        if /\A---/ =~ @f.peek
+          method_signature(@f.gets || raise, first)
+          first = false
+        elsif !first && METHOD_ATTRIBUTE_LINE_RE =~ @f.peek
+          # メソッド属性行は本文には描画しない(undef のみ後でメッセージ)
+          attrs.concat attribute_tokens(@f.gets)
+        else
+          break
+        end
       end
       props = {} #: Hash[String?, String?]
       @f.while_match(/\A:/) do |line|
@@ -122,6 +133,7 @@ module BitClust
         props[k&.strip] = v&.strip
       end if @type == :method
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
+      undef_message if attrs.include?('undef')
       while @f.next?
         case @f.peek
         when /\A===+/
@@ -150,8 +162,6 @@ module BitClust
           see
         when /\A@todo\b/
           todo
-        when /\A@undef\b/
-          undef_message
         when /\A@[a-z]/
           entry_info
         else
@@ -352,11 +362,14 @@ module BitClust
       line '</p>'
     end
 
-    # findings#2: @undef の専用描画。entry_info の else 枝に落として
-    # 内部用語 [UNKNOWN_META_INFO] を出さない（Complex の比較演算子等。
-    # statichtml は undefined エントリを skip するので server 等の動的経路用）
+    def attribute_tokens(attr_line)
+      (attr_line || '')[/\A\{:(.*)\}/, 1].to_s.strip.split(/\s+/)
+    end
+
+    # {: undef} 属性付きエントリのメッセージ。ページを見に来た人向け
+    # (statichtml は undefined エントリを skip するので server 等の動的経路用)。
+    # nomethod は説明が本文に書かれている前提のマーカーなので何も描画しない
     def undef_message
-      @f.gets
       line '<p>'
       line 'このメソッドは定義されていません。'
       line '</p>'
