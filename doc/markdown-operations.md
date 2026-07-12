@@ -60,7 +60,7 @@ $ ruby tools/md-db-check.rb /tmp/db-old /tmp/db-new
 $ ruby tools/md-compile-check.rb /tmp/db-old
 ```
 
-期待値: (1) api 1166/1166・doc 70/70・capi 16/16 byte-exact、
+期待値: (1) api 1166/1166・doc 68/68・capi 16/16 byte-exact、
 (2) ライブラリ集合一致・要対応警告 0、(3) 全ライブラリ structurally identical、
 (4) `DATABASES EQUIVALENT`（末尾空白のみ・シグネチャスペースのみの差分は
 許容として別掲される）、(5) `HTML EQUIVALENT`（method/doc/lib/function 全件）。

@@ -1,5 +1,11 @@
 # ネイティブ MD パース設計（フェーズ3 M3）
 
+> **ステータス（2026年7月）**: 本文書は Markdown 移行プロジェクトのうち
+> ネイティブパース（フェーズ3 M3）の設計記録です。移行は 2026年7月に完了し、
+> 現在の編集ソースは doctree の `manual/`、記法仕様は
+> [markdown-samples/MARKUP_SPEC.md](markdown-samples/MARKUP_SPEC.md) です。
+> 本文書は設計判断の記録として維持します。
+
 M3 のゴール: ブリッジ（md→rd 変換して既存機構に渡す）を廃止し、
 md ツリーを直接パースして DB を構築、描画は MDCompiler（GFM モード）を
 既定にする。エントリの `source` には md 断片がそのまま入る。
