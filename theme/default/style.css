@@ -138,23 +138,30 @@ pre {
 }
 
 
-/* pre の直前に密着するツールバー行(script.js が生成)。
-   左端に caption のタブ、右端に RUN/COPY のボタン群を置く */
+/* pre の直前に密着するヘッダー行(script.js が生成)。pre と同じ背景色で
+   コードブロックと一体に見せる(白い帯として浮くと、コードの上の隙間が
+   広く見える)。左端に caption のタブ、右端に RUN/COPY のボタン群を置く */
 .highlight__toolbar {
   display: flex;
   align-items: flex-end;
   margin: 1em 0 0;
+  padding: 0.25em 0.25em 0 0.25em;
+  background-color: #f2f2f2;
 }
 .highlight__toolbar + pre {
   margin-top: 0;
+  /* ヘッダー行が上の余白を兼ねるので、上 padding は控えめにする */
+  padding-top: 0.25em;
 }
-/* RUN の出力欄: 入力欄の pre と出力欄(ツールバー+pre)を密着させて
-   1つのブロックに見せる(js/run.js が付与) */
+/* RUN の出力欄: 入力欄の pre と出力欄(ヘッダー行+pre)を密着させて
+   1つのブロックに見せる(js/run.js が付与)。境には 2px だけ白を挟み、
+   出力欄のヘッダー(「実行結果」タブ+COPY)が入力欄の枠に貼り付いて
+   見えないよう区切る */
 .highlight--with-output {
   margin-bottom: 0;
 }
 .highlight__toolbar--attached {
-  margin-top: 0;
+  margin-top: 2px;
 }
 
 /* ツールバー右端のボタン置き場。ボタン間の隙間のカーソル形状と

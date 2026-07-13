@@ -138,8 +138,7 @@ function setupBlock(pre, runner) {
       output = document.createElement('pre')
       output.className = 'highlight__run-output'
       output.setAttribute('aria-live', 'polite')
-      // COPY ボタン(先頭)を残したまま本文を書き換えられるように、
-      // 出力テキストは専用のテキストノードに持つ
+      // 出力テキストは専用のテキストノードに持つ(丸ごと差し替えられる)
       outputTextNode = document.createTextNode('')
       output.appendChild(outputTextNode)
       pre.after(output)
@@ -147,11 +146,16 @@ function setupBlock(pre, runner) {
       // 出力は実行のたびに変わるので、クリック時のテキストを渡す
       if (window.ruremaAddCopyButton) {
         window.ruremaAddCopyButton(output, () => outputTextNode.data)
-        // 出力欄のツールバーと出力欄は、入力欄の pre に密着させて
-        // 1つのブロックに見せる(pre 下マージンとツールバー上マージンを消す)
+        // 出力欄のヘッダー行と出力欄は、入力欄の pre に密着させて
+        // 1つのブロックに見せる(境の 2px の白は CSS 側)。左端には
+        // 出力欄だとわかるように「実行結果」のタブを付ける
         const outToolbar = output.previousElementSibling
         if (outToolbar && outToolbar.classList.contains('highlight__toolbar')) {
           outToolbar.classList.add('highlight__toolbar--attached')
+          const label = document.createElement('span')
+          label.className = 'caption'
+          label.textContent = '実行結果'
+          outToolbar.insertBefore(label, outToolbar.firstChild)
           pre.classList.add('highlight--with-output')
         }
       }
