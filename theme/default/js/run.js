@@ -71,6 +71,14 @@ export function timeoutNote(seconds) {
   return `(${seconds}秒でタイムアウトしました)`
 }
 
+// Text used when flattening the highlighted sample for editing. The
+// compiler emits a newline right after <code>, which textContent keeps —
+// left as-is it shows up as an empty first line once the block becomes
+// editable (script.js strips the same artifact for COPY).
+export function editableText(text) {
+  return text.replace(/^\n+/, '')
+}
+
 // Compiles the wasm module once (cached like the old single-VM version) and
 // hands a fresh Worker + that same compiled Module to each run. The Module
 // is a structured-cloneable postMessage payload, so terminate()-ing a run
@@ -102,14 +110,19 @@ function setupBlock(pre, runner) {
   button.type = 'button'
   button.className = 'highlight__run-button'
   button.textContent = 'RUN'
-  // script.js has already prepended the COPY button (its window.onload
-  // handler fires before our load listener); keep COPY rightmost.
-  const copyButton = pre.querySelector('.highlight__copy-button')
-  if (copyButton) {
-    copyButton.after(button)
-  } else {
-    pre.prepend(button)
+  // script.js has already created the shared button group with the COPY
+  // button in it (its window.onload handler fires before our load
+  // listener). Prepend RUN into the same group so COPY stays rightmost,
+  // and so the gaps between/around the buttons belong to the group
+  // (cursor: default) instead of the text area — hovering the cluster no
+  // longer flickers between pointer and text cursors.
+  let group = pre.querySelector('.highlight__button-group')
+  if (!group) {
+    group = document.createElement('span')
+    group.className = 'highlight__button-group'
+    pre.prepend(group)
   }
+  group.prepend(button)
 
   let output
   let outputTextNode
@@ -135,6 +148,26 @@ function setupBlock(pre, runner) {
     outputTextNode.data = text
   }
 
+  // plaintext-only が使えないブラウザ向けの paste フォールバック。
+  // 既定のリッチペーストは改行を <br>/<div> に変えたり先頭の改行を
+  // 落としたりする(貼り付けた内容が前の行にくっつく)ので、text/plain
+  // をキャレット位置にそのまま挿入する
+  const pastePlainText = (event) => {
+    if (!event.clipboardData) return
+    event.preventDefault()
+    const text = event.clipboardData.getData('text/plain')
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) return
+    const range = selection.getRangeAt(0)
+    range.deleteContents()
+    const node = document.createTextNode(text)
+    range.insertNode(node)
+    range.setStartAfter(node)
+    range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
   // After the first run the sample becomes editable (like a scratchpad);
   // Ctrl+Enter (or Cmd+Enter) re-runs the edited code. The COPY button
   // keeps copying the original text.
@@ -142,9 +175,21 @@ function setupBlock(pre, runner) {
     if (code.isContentEditable) return
     // 編集でハイライトの span に文字が食い込むと、貼り付けた文字が
     // その場の色を引き継いで中途半端に崩れるため、編集可能にする
-    // 時点でプレーンテキスト化して色を消す
-    code.textContent = code.textContent
-    code.contentEditable = 'true'
+    // 時点でプレーンテキスト化して色を消す。コンパイラが <code> の
+    // 直後に置く改行(編集開始時に先頭の空行として見える)もここで除く
+    code.textContent = editableText(code.textContent)
+    // 改行入力・貼り付けが <br>/<div> にならないよう plaintext-only を
+    // 優先する。未対応ブラウザは代入が SyntaxError になるか値が変わらない
+    // ので、従来どおり true にして paste だけ自前で処理する
+    try {
+      code.contentEditable = 'plaintext-only'
+    } catch (e) {
+      // fall through
+    }
+    if (code.contentEditable !== 'plaintext-only') {
+      code.contentEditable = 'true'
+      code.addEventListener('paste', pastePlainText)
+    }
     code.spellcheck = false
     pre.dataset.editing = 'true'
     pre.addEventListener('keydown', (event) => {

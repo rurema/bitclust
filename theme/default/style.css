@@ -137,10 +137,21 @@ pre {
 }
 
 
+/* RUN/COPY ボタン共用の float コンテナ(script.js が生成)。ボタンを
+   個別に float させるとボタン間・周囲の余白が pre の text カーソル領域の
+   ままになり、ポインタ形状がちらついてクリックしにくいため、隙間の
+   カーソル形状と選択不可はコンテナが引き受ける */
+.highlight__button-group {
+  float: right;
+  margin: 0 -1.1em 0.25em 0.5em;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* for RUN (js/run.js, statichtml --run-ruby-wasm) */
 .highlight__run-button {
-  float: right;
-  margin: 0 0 0.25em 0.5em;
+  margin: 0 0.5em 0 0;
   padding: 0.25em 0.5em;
   background-color: #DDD;
   opacity: 0.75;
@@ -171,18 +182,19 @@ pre {
 pre.highlight.ruby[data-editing="true"]:focus-within {
   outline: auto;
 }
+/* inline-block + width:100% だと float のボタン群と同じ行に入れず
+   ボタンの下へ押し下げられて先頭に空行が見えるため、block にして
+   通常表示と同じく先頭行がボタンの左に回り込むようにする */
 pre.highlight.ruby[data-editing="true"] > code {
-  display: inline-block;
-  width: 100%;
+  display: block;
 }
 pre.highlight.ruby[data-editing="true"] > code:focus {
   outline: none;
 }
 
-/* for COPY */
+/* for COPY(highlight__button-group の中に入る) */
 .highlight__copy-button {
-  float: right;
-  margin: 0 -1.1em 0.25em 0.5em;
+  display: inline-block;
   padding: 0.25em 0.5em;
   background: #DDD;
   opacity: 0.75;

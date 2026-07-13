@@ -8,7 +8,7 @@
 // importing either file here never touches a real DOM/Worker.
 import {
   createOnceLoader, formatRunError, truncateOutput,
-  accumulateOutput, STOPPED_NOTE, timeoutNote,
+  accumulateOutput, STOPPED_NOTE, timeoutNote, editableText,
 } from '../../theme/default/js/run.js'
 import { PRELUDE, formatRunError as formatWorkerRunError } from '../../theme/default/js/run-worker.js'
 
@@ -119,6 +119,15 @@ assert(accumulateOutput('', 'first') === 'first',
 assert(STOPPED_NOTE === '(停止しました)', 'STOPPED_NOTE is the stop notice')
 assert(timeoutNote(30) === '(30秒でタイムアウトしました)',
        'timeoutNote formats the configured timeout in seconds')
+
+// editableText: flattening for edit drops the compiler's leading newline
+// (the artifact after <code>) but keeps interior/trailing newlines intact
+assert(editableText('\np 1\np 2\n') === 'p 1\np 2\n',
+       'editableText strips the leading newline artifact')
+assert(editableText('\n\n\np 1\n') === 'p 1\n',
+       'editableText strips all leading blank lines')
+assert(editableText('p 1\n\np 2\n') === 'p 1\n\np 2\n',
+       'editableText keeps interior and trailing newlines')
 
 if (failures > 0) {
   throw new Error(failures + ' JS test(s) failed')

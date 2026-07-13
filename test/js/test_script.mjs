@@ -139,15 +139,25 @@ async function settle() {
   await 0
 }
 
+// group(RUN/COPY 共用コンテナ)経由でボタンを取り出すヘルパー
+function buttonGroupOf(elem) { return elem.childByClass('highlight__button-group') }
+function copyButtonOf(elem) {
+  const group = buttonGroupOf(elem)
+  return group && group.childByClass('highlight__copy-button')
+}
+
 // A ruby sample keeps getting the COPY button (regression)
 {
   const spy = clipboardSpy()
   const pre = new FakeElement('pre', 'highlight ruby')
   pre.appendChild(new FakeElement('code', '', 'puts 1\n'))
   runOnload([pre], spy.navigator)
-  const btn = pre.childByClass('highlight__copy-button')
+  const btn = copyButtonOf(pre)
   assert(btn !== null, 'pre.highlight.ruby gets a COPY button')
-  assert(pre.firstChild === btn, 'COPY button is prepended as the first child')
+  assert(pre.firstChild === buttonGroupOf(pre),
+         'the shared button group is prepended as the first child')
+  assert(buttonGroupOf(pre).firstChild === btn,
+         'COPY button lives inside the button group')
   btn.onclick()
   await settle()
   assert(spy.written.length === 1 && spy.written[0] === 'puts 1\n',
@@ -161,7 +171,7 @@ async function settle() {
   const spy = clipboardSpy()
   const pre = new FakeElement('pre', '', 'ary = []\n')
   runOnload([pre], spy.navigator)
-  const btn = pre.childByClass('highlight__copy-button')
+  const btn = copyButtonOf(pre)
   assert(btn !== null, 'plain <pre> without highlight class gets a COPY button')
   btn.onclick()
   await settle()
@@ -174,7 +184,7 @@ async function settle() {
   const pre = new FakeElement('pre', 'highlight c')
   pre.appendChild(new FakeElement('code', '', 'VALUE v;\n'))
   runOnload([pre], clipboardSpy().navigator)
-  assert(pre.childByClass('highlight__copy-button') !== null,
+  assert(copyButtonOf(pre) !== null,
          'pre.highlight.c gets a COPY button')
 }
 
@@ -183,7 +193,7 @@ async function settle() {
   const div = new FakeElement('div', 'highlight')
   const pre = new FakeElement('pre', '')
   runOnload([div, pre], clipboardSpy().navigator)
-  assert(div.childByClass('highlight__copy-button') === null,
+  assert(copyButtonOf(div) === null,
          'non-pre element does not get a COPY button')
 }
 
@@ -194,7 +204,7 @@ async function settle() {
   pre.appendChild(new FakeElement('span', 'caption', '例'))
   pre.appendChild(new FakeElement('code', '', 'p 42\n'))
   runOnload([pre], spy.navigator)
-  pre.childByClass('highlight__copy-button').onclick()
+  copyButtonOf(pre).onclick()
   await settle()
   assert(spy.written[0] === 'p 42\n',
          'caption text is excluded from the copied text')
@@ -207,7 +217,7 @@ async function settle() {
   const spy = clipboardSpy()
   const pre = new FakeElement('pre', '', '\n\nputs 1\n\n\n')
   runOnload([pre], spy.navigator)
-  pre.childByClass('highlight__copy-button').onclick()
+  copyButtonOf(pre).onclick()
   await settle()
   assert(spy.written[0] === 'puts 1\n',
          'copied text is trimmed (leading newlines dropped, trailing squeezed)')
@@ -224,8 +234,14 @@ async function settle() {
   const output = new FakeElement('pre', 'highlight__run-output')
   let current = 'first output\n'
   const btn = globalThis.window.ruremaAddCopyButton(output, () => current)
-  assert(output.firstChild === btn,
-         'the hook prepends a COPY button to the given element')
+  assert(output.firstChild === buttonGroupOf(output) &&
+         buttonGroupOf(output).childByClass('highlight__copy-button') === btn,
+         'the hook puts the COPY button into a prepended button group')
+  // 既にグループがある要素にもう一度呼んでも、グループは1つのまま再利用される
+  globalThis.window.ruremaAddCopyButton(output, () => current)
+  assert(output.children.filter(
+           c => c.className === 'highlight__button-group').length === 1,
+         'an existing button group is reused instead of stacking a second one')
   btn.onclick()
   await settle()
   current = 'second output\n'
@@ -253,7 +269,7 @@ async function settle() {
   globalThis.navigator = {}   // clipboard なし
   ;(0, eval)(source)
   globalThis.window.onload()
-  const btn = pre.childByClass('highlight__copy-button')
+  const btn = copyButtonOf(pre)
   btn.onclick()
   await settle()
   assert(captured === 'fallback code\n',

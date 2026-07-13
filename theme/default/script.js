@@ -22,6 +22,23 @@
     })
   }
 
+  // elem 先頭のボタン置き場(RUN/COPY 共用の float コンテナ)を返す。
+  // 無ければ作る。ボタンを個別に float させるとボタン間の隙間で text
+  // カーソルとちらついてクリックしにくいため、1つのコンテナにまとめて
+  // 隙間のカーソル形状はコンテナ(cursor: default)が引き受ける。
+  // js/run.js も同じコンテナに RUN ボタンを入れる
+  function buttonGroup(elem) {
+    const first = elem.firstChild
+    if (first && first.className &&
+        String(first.className).split(' ').indexOf('highlight__button-group') >= 0) {
+      return first
+    }
+    const group = document.createElement('span')
+    group.setAttribute('class', 'highlight__button-group')
+    elem.insertBefore(group, elem.firstChild)
+    return group
+  }
+
   // elem の先頭に COPY ボタンを付ける。getText はクリック時に評価される
   // ので、RUN の実行結果のように内容が変わる要素にも使える
   function addCopyButton(elem, getText) {
@@ -35,7 +52,8 @@
         // コピー失敗時は従来どおり何も表示しない
       })
     }
-    elem.insertBefore(btn, elem.firstChild)
+    // COPY は常にグループ右端(RUN は run.js が先頭に prepend する)
+    buttonGroup(elem).appendChild(btn)
     return btn
   }
 
