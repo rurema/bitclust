@@ -121,6 +121,8 @@ module BitClust
 
       def create_index_html: (Pathname outputdir) -> void
 
+      RUN_RUBY_WASM_JS_FILES: Array[String]
+
       def copy_run_ruby_wasm_script: () -> void
 
       SEARCH_JS_FILES: Array[String]

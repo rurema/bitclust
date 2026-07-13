@@ -1,8 +1,16 @@
-// QuickJS-based tests for the pure logic in theme/default/js/run.js.
+// QuickJS-based tests for the pure logic in theme/default/js/run.js and
+// theme/default/js/run-worker.js.
 // Run with: qjs test/js/test_run.mjs   (see the "test:js" rake task)
-// Importing the module doubles as a syntax/eval smoke test: its DOM setup is
-// guarded by `typeof window !== 'undefined'`.
-import { createOnceLoader, PRELUDE, formatRunError, truncateOutput } from '../../theme/default/js/run.js'
+// Importing each module doubles as a syntax/eval smoke test: run.js's DOM
+// setup is guarded by `typeof window !== 'undefined'`, and run-worker.js's
+// Worker setup is guarded by `typeof self !== 'undefined' && typeof
+// WorkerGlobalScope !== 'undefined'` -- neither exists under QuickJS, so
+// importing either file here never touches a real DOM/Worker.
+import {
+  createOnceLoader, formatRunError, truncateOutput,
+  accumulateOutput, STOPPED_NOTE, DONE_NOTE, timeoutNote, editableText,
+} from '../../theme/default/js/run.js'
+import { PRELUDE, formatRunError as formatWorkerRunError } from '../../theme/default/js/run-worker.js'
 
 let failures = 0
 function assert(cond, message) {
@@ -52,11 +60,20 @@ function assert(cond, message) {
          'next call after a rejection retries the load')
 }
 
-// PRELUDE captures both streams into one StringIO
-assert(PRELUDE.includes('require "stringio"') &&
-       PRELUDE.includes('$stdout = StringIO.new') &&
+// PRELUDE (run-worker.js) streams both channels to the main thread via the
+// JS bridge, instead of buffering into a StringIO like the old single-eval
+// PRELUDE did.
+assert(PRELUDE.includes('require "js"') &&
+       PRELUDE.includes('JS.global.call(:postOutput, text)') &&
+       PRELUDE.includes('$stdout = JSStreamIO.new') &&
        PRELUDE.includes('$stderr = $stdout'),
-       'PRELUDE redirects $stdout and $stderr into one StringIO')
+       'PRELUDE redirects $stdout and $stderr through postOutput()')
+
+// run-worker.js's formatRunError is the same shape as run.js's copy (each
+// runs in its own realm -- main thread vs. worker -- so it is a small
+// intentional duplication rather than an import cycle across the two files)
+assert(formatWorkerRunError(new Error('boom')) === 'boom',
+       'run-worker.js formatRunError matches run.js formatRunError')
 
 // formatRunError
 assert(formatRunError(new Error('boom')) === 'boom',
@@ -77,6 +94,43 @@ assert(truncateOutput('short') === 'short', 'truncateOutput keeps short output')
   assert(truncated.startsWith('x'.repeat(10)) && truncated.endsWith('... (truncated)'),
          'truncateOutput cuts long output with a marker')
 }
+
+// accumulateOutput: incremental version of truncateOutput, used to append
+// each Worker 'output' message to what is already on screen.
+assert(accumulateOutput('foo', 'bar') === 'foobar',
+       'accumulateOutput appends a chunk to the existing text')
+assert(accumulateOutput('', 'first') === 'first',
+       'accumulateOutput handles an empty starting value')
+{
+  const grown = accumulateOutput('x'.repeat(8), 'y'.repeat(8), 10)
+  assert(grown === 'x'.repeat(8) + 'y'.repeat(2) + '\n... (truncated)',
+         'accumulateOutput truncates once the cap is crossed mid-chunk')
+}
+{
+  // A chunk arriving after the cap was already hit must be a no-op, not a
+  // second "... (truncated)" marker or renewed growth.
+  const alreadyTruncated = truncateOutput('x'.repeat(20), 10)
+  const next = accumulateOutput(alreadyTruncated, 'more output', 10)
+  assert(next === alreadyTruncated,
+         'accumulateOutput drops further chunks once truncated')
+}
+
+// STOPPED_NOTE / DONE_NOTE / timeoutNote: the notes appended to the output
+// on STOP / normal completion / timeout
+assert(STOPPED_NOTE === '(停止しました)', 'STOPPED_NOTE is the stop notice')
+assert(DONE_NOTE === '(正常終了しました)',
+       'DONE_NOTE marks a normal completion (visible even with empty output)')
+assert(timeoutNote(30) === '(30秒でタイムアウトしました)',
+       'timeoutNote formats the configured timeout in seconds')
+
+// editableText: flattening for edit drops the compiler's leading newline
+// (the artifact after <code>) but keeps interior/trailing newlines intact
+assert(editableText('\np 1\np 2\n') === 'p 1\np 2\n',
+       'editableText strips the leading newline artifact')
+assert(editableText('\n\n\np 1\n') === 'p 1\n',
+       'editableText strips all leading blank lines')
+assert(editableText('p 1\n\np 2\n') === 'p 1\n\np 2\n',
+       'editableText keeps interior and trailing newlines')
 
 if (failures > 0) {
   throw new Error(failures + ' JS test(s) failed')

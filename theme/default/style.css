@@ -126,36 +126,73 @@ code, pre, tt {
     font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
-/* COPY ボタン(script.js)が全 pre の先頭行に入るため、上 padding は
-   highlight の有無によらず 0 にしてボタンを上端に密着させる */
+/* RUN/COPY ボタンは pre の外のツールバー行(script.js が生成)にあるので、
+   pre の中身は四辺とも均等に padding をとれる(上だけ 0 にして中身が
+   上端に張り付く、以前のボタン内蔵ハックは不要になった) */
 pre {
     line-height: 1.1;
     background-color: #f2f2f2;
-    padding: 0px 1.1em 1.1em 1.1em;
+    padding: 1.1em;
     font-weight: normal;
     overflow: auto;
 }
 
 
-/* for RUN (js/run.js, statichtml --run-ruby-wasm) */
+/* pre の直前に密着するヘッダー行(script.js が生成)。コード部分より
+   ひと段暗い背景でコードブロックと一体に見せつつ(白い帯として浮くと、
+   コードの上の隙間が広く見える)、コード部分と同色の caption タブや
+   白背景のボタンが埋没しないようにする。左端に caption のタブ、右端に
+   RUN/COPY のボタン群を置く */
+.highlight__toolbar {
+  display: flex;
+  align-items: flex-end;
+  margin: 1em 0 0;
+  padding: 0.25em 0.25em 0 0.25em;
+  background-color: #e6e6e6;
+}
+.highlight__toolbar + pre {
+  margin-top: 0;
+  /* ヘッダー行が上の余白を兼ねるので、上 padding は控えめにする */
+  padding-top: 0.25em;
+}
+/* RUN の出力欄: 入力欄の pre と出力欄(ヘッダー行+pre)を密着させて
+   1つのブロックに見せる(js/run.js が付与)。境には 2px だけ白を挟み、
+   出力欄のヘッダー(「実行結果」タブ+COPY)が入力欄の枠に貼り付いて
+   見えないよう区切る */
+.highlight--with-output {
+  margin-bottom: 0;
+}
+.highlight__toolbar--attached {
+  margin-top: 2px;
+}
+
+/* ツールバー右端のボタン置き場。ボタン間の隙間のカーソル形状と
+   選択不可はここが引き受ける */
+.highlight__button-group {
+  margin-left: auto;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* for RUN (js/run.js, statichtml --run-ruby-wasm)。
+   ヘッダー行の灰色に埋没しないよう、白背景+枠線でボタンらしくする */
 .highlight__run-button {
-  float: right;
-  margin: 0 0 0.25em 0.5em;
+  margin: 0 0.5em 0.25em 0;
   padding: 0.25em 0.5em;
-  background-color: #DDD;
-  opacity: 0.75;
+  background-color: #fff;
   cursor: pointer;
-  border: 0;
+  border: 1px solid #999;
+  border-radius: 4px;
   font: inherit;
 }
 .highlight__run-button:hover {
   background-color: #EE8;
-  opacity: 1;
 }
 .highlight__run-button[disabled] {
   background-color: #070;
+  border-color: #070;
   color: white;
-  opacity: 1;
   cursor: wait;
 }
 .highlight__run-output {
@@ -171,32 +208,35 @@ pre {
 pre.highlight.ruby[data-editing="true"]:focus-within {
   outline: auto;
 }
+/* 編集時は code をブロック化して pre の内容幅いっぱいをクリック・
+   編集対象にする(内容の外側のクリックは js/run.js が code に
+   フォーカスを移す) */
 pre.highlight.ruby[data-editing="true"] > code {
-  display: inline-block;
-  width: 100%;
+  display: block;
 }
 pre.highlight.ruby[data-editing="true"] > code:focus {
   outline: none;
 }
 
-/* for COPY */
+/* for COPY(highlight__button-group の中に入る)。RUN と同じ見た目 */
 .highlight__copy-button {
-  float: right;
-  margin: 0 -1.1em 0.25em 0.5em;
+  display: inline-block;
+  margin-bottom: 0.25em;
   padding: 0.25em 0.5em;
-  background: #DDD;
-  opacity: 0.75;
+  background: #fff;
   cursor: pointer;
+  border: 1px solid #999;
+  border-radius: 4px;
 }
 .highlight__copy-button:hover {
   background: #EE8;
-  opacity: 1;
 }
 .highlight__copy-button::after {
   content: "COPY"
 }
 .highlight__copy-button.copied {
   background: #070;
+  border-color: #070;
   color: white;
 }
 .highlight__copy-button.copied::after {
@@ -208,15 +248,22 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
 }
 
 /* サンプルコードのキャプション。pre の上に密着したタブとして表示する
-   (pre 内の absolute 配置だと、編集・貼り付けで先頭行と重なるため) */
+   (上だけ角丸でタブらしく)。script.js がツールバー行の左端に取り込む。
+   下のコード部分と同じ背景色にして「つながったタブ」に見せる(ヘッダー
+   行のほうがひと段暗いので埋没しない) */
 .caption {
     display: inline-block;
     padding: 0.2em 0.5em;
-    background: #ddd;
+    background: #f2f2f2;
     margin: 1em 0 0;
+    border-radius: 6px 6px 0 0;
 }
+/* JS 無効時など、ツールバー化されず pre の直前に残った場合の密着 */
 .caption + pre {
     margin-top: 0;
+}
+.highlight__toolbar > .caption {
+    margin: 0;
 }
 
 blockquote {
