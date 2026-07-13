@@ -57,9 +57,11 @@ class TestStatichtmlRunRubyWasm < Test::Unit::TestCase
       FileUtils.mkdir_p(File.join(themedir, 'js'))
       FileUtils.mkdir_p(outputdir)
       File.write(File.join(themedir, 'js', 'run.js'), "// run\n")
+      File.write(File.join(themedir, 'js', 'run-worker.js'), "// worker\n")
       cmd = build_command(themedir, outputdir)
       cmd.send(:copy_run_ruby_wasm_script)
       assert_true(File.file?(File.join(outputdir, 'js', 'run.js')))
+      assert_true(File.file?(File.join(outputdir, 'js', 'run-worker.js')))
     end
   end
 
@@ -74,10 +76,35 @@ class TestStatichtmlRunRubyWasm < Test::Unit::TestCase
       begin
         assert_nothing_raised { cmd.send(:copy_run_ruby_wasm_script) }
         assert_match(/run\.js not found/, $stderr.string)
+        assert_match(/run-worker\.js not found/, $stderr.string)
       ensure
         $stderr = orig_stderr
       end
       assert_false(File.exist?(File.join(outputdir, 'js', 'run.js')))
+      assert_false(File.exist?(File.join(outputdir, 'js', 'run-worker.js')))
+    end
+  end
+
+  # A themedir with run.js but not yet upgraded with run-worker.js (or vice
+  # versa) should still copy whichever file it does have, rather than
+  # aborting or silently skipping both.
+  def test_partial_theme_copies_what_it_has
+    Dir.mktmpdir do |dir|
+      themedir = File.join(dir, 'theme')
+      outputdir = File.join(dir, 'out')
+      FileUtils.mkdir_p(File.join(themedir, 'js'))
+      FileUtils.mkdir_p(outputdir)
+      File.write(File.join(themedir, 'js', 'run.js'), "// run\n")
+      cmd = build_command(themedir, outputdir)
+      orig_stderr, $stderr = $stderr, StringIO.new
+      begin
+        cmd.send(:copy_run_ruby_wasm_script)
+        assert_match(/run-worker\.js not found/, $stderr.string)
+      ensure
+        $stderr = orig_stderr
+      end
+      assert_true(File.file?(File.join(outputdir, 'js', 'run.js')))
+      assert_false(File.exist?(File.join(outputdir, 'js', 'run-worker.js')))
     end
   end
 end

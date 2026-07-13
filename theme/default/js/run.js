@@ -1,19 +1,30 @@
 // RUN button for Ruby sample code: executes the sample in-browser with
-// ruby.wasm. Named .js rather than .mjs: module scripts are subject to
-// strict MIME checking, and servers whose MIME table lacks an "mjs" entry
-// (e.g. nginx before 1.21.4) serve .mjs as application/octet-stream, which
-// browsers refuse to execute. Enabled per page via
+// ruby.wasm, off the main thread in a Web Worker (theme/default/js/run-worker.js)
+// so an infinite loop or long sleep in the sample can't freeze the page; a
+// STOP button and a timeout both just Worker.terminate() it. Named .js
+// rather than .mjs: module scripts are subject to strict MIME checking, and
+// servers whose MIME table lacks an "mjs" entry (e.g. nginx before 1.21.4)
+// serve .mjs as application/octet-stream, which browsers refuse to execute.
+// The same reasoning applies to run-worker.js. Enabled per page via
 //   <meta name="rurema-run-ruby-wasm" content="<ruby+stdlib.wasm URL>">
 // which the layout emits when statichtml was invoked with --run-ruby-wasm.
 // The wasm URL is chosen by the build side to match the documented Ruby
-// version; this file only pins the loader library.
-
-// Exact pin of the npm "latest" dist-tag at the time of writing. Note the
-// version scheme: stable @ruby/* packages are published as
-// "<pkg version>-<ruby.wasm version>" (e.g. 2.9.3-2.9.4); plain "2.9.4"
-// does not exist on npm.
-const VM_ESM_URL = 'https://cdn.jsdelivr.net/npm/@ruby/wasm-wasi@2.9.3-2.9.4/dist/browser/+esm'
+// version. This file only compiles that wasm (WebAssembly.compileStreaming
+// needs no loader library, just the bytes); the CDN-hosted @ruby/wasm-wasi
+// loader is pinned and imported inside run-worker.js, which is the only
+// place that actually instantiates a VM from the compiled module.
 const OUTPUT_LIMIT = 64 * 1024
+const RUN_TIMEOUT_MS = 30 * 1000
+
+// Resolved relative to this module's own URL (not the page URL), so it keeps
+// working regardless of how deep the current page is under the site root or
+// how custom_js_url() built run.js's own <script src>. Computed lazily
+// (rather than as a module-level constant) because the `URL` global does
+// not exist under QuickJS, which imports this file for its pure-function
+// tests without ever calling into the browser-only code path below.
+function workerUrl() {
+  return new URL('run-worker.js', import.meta.url)
+}
 
 // Wrap an async loader so concurrent and repeated calls share one in-flight
 // promise, while a rejected attempt clears the cache so the next call
@@ -35,10 +46,6 @@ export function createOnceLoader(loadFn) {
   }
 }
 
-// Collect $stdout/$stderr into one StringIO so the output can be read back
-// after eval; sharing one StringIO preserves stdout/stderr interleaving.
-export const PRELUDE = 'require "stringio"; $stdout = StringIO.new; $stderr = $stdout'
-
 export function formatRunError(error) {
   const text = String((error && error.message) || error)
   return text.split('\n').slice(0, 20).join('\n')
@@ -49,46 +56,45 @@ export function truncateOutput(text, limit = OUTPUT_LIMIT) {
   return text.slice(0, limit) + '\n... (truncated)'
 }
 
-// One runner per page: the wasm module is compiled once and cached, but each
-// run gets a fresh VM so samples never see each other's state. `running`
-// keeps a single VM alive at a time; a run attempted meanwhile returns null.
+// Appends one output chunk to the accumulated text, applying the same
+// display cap as truncateOutput. Once the cap is hit, further chunks are
+// dropped (not just re-truncating the same prefix again and again), so a
+// runaway output loop does the "... (truncated)" marker once and then does
+// O(1) work per chunk instead of O(output length).
+export function accumulateOutput(current, chunk, limit = OUTPUT_LIMIT) {
+  if (current.endsWith('\n... (truncated)')) return current
+  return truncateOutput(current + chunk, limit)
+}
+
+export const STOPPED_NOTE = '(停止しました)'
+export function timeoutNote(seconds) {
+  return `(${seconds}秒でタイムアウトしました)`
+}
+
+// Compiles the wasm module once (cached like the old single-VM version) and
+// hands a fresh Worker + that same compiled Module to each run. The Module
+// is a structured-cloneable postMessage payload, so terminate()-ing a run
+// and starting another never needs to recompile.
 function createRunner(wasmUrl) {
   const loadModule = createOnceLoader(async () => {
-    const [{ DefaultRubyVM }, module] = await Promise.all([
-      import(VM_ESM_URL),
-      WebAssembly.compileStreaming(fetch(wasmUrl)).catch(async () => {
-        // Retry without streaming for servers that send a non-wasm MIME type
-        // (e.g. `ruby -run -e httpd` when testing locally).
-        const response = await fetch(wasmUrl)
-        return WebAssembly.compile(await response.arrayBuffer())
-      }),
-    ])
-    return { DefaultRubyVM, module }
+    return WebAssembly.compileStreaming(fetch(wasmUrl)).catch(async () => {
+      // Retry without streaming for servers that send a non-wasm MIME type
+      // (e.g. `ruby -run -e httpd` when testing locally).
+      const response = await fetch(wasmUrl)
+      return WebAssembly.compile(await response.arrayBuffer())
+    })
   })
-  let running = false
-  return async function run(code, onLoaded) {
-    if (running) return null
-    running = true
-    try {
-      const { DefaultRubyVM, module } = await loadModule()
-      if (onLoaded) onLoaded()
-      const { vm } = await DefaultRubyVM(module, { consolePrint: false })
-      vm.eval(PRELUDE)
-      let error = null
-      try {
-        vm.eval(code)
-      } catch (e) {
-        error = formatRunError(e)
-      }
-      const output = vm.eval('$stdout.string').toString()
-      return { output: truncateOutput(output), error }
-    } finally {
-      running = false
-    }
+  return {
+    loadModule,
+    // One Worker per run (see module comment): terminate() always yields a
+    // clean slate, and samples never see another run's VM state.
+    spawn() {
+      return new Worker(workerUrl(), { type: 'module' })
+    },
   }
 }
 
-function setupBlock(pre, run) {
+function setupBlock(pre, runner) {
   const code = pre.querySelector('code')
   if (!code) return
 
@@ -149,7 +155,41 @@ function setupBlock(pre, run) {
     })
   }
 
+  // Non-null exactly while a run's Worker is alive; STOP terminates it and
+  // the timeout/message handlers all check this to avoid acting twice on
+  // the same run (e.g. a timeout racing a message that just arrived).
+  let current = null
+
+  const finish = (out, label, isError) => {
+    if (current && current.timer) clearTimeout(current.timer)
+    current = null
+    if (isError) out.classList.add('highlight__run-output--error')
+    enableEditing()
+    button.textContent = label
+    button.disabled = false
+    button.removeAttribute('aria-busy')
+  }
+
+  // Final notes (stop / timeout / the run's error message) are appended
+  // directly, bypassing accumulateOutput's 64KB cap: the cap exists to stop
+  // unbounded *output* growth, and these one-shot notes are bounded — they
+  // must stay visible precisely in the runaway-output case where the cap
+  // has already been hit and accumulateOutput would drop them.
+  const appendNote = (text) => {
+    const separator = outputTextNode.data === '' ? '' : '\n'
+    setOutputText(outputTextNode.data + separator + text)
+  }
+
+  const stop = () => {
+    if (!current) return
+    current.worker.terminate()
+    const out = ensureOutput()
+    appendNote(STOPPED_NOTE)
+    finish(out, 'RUN', false)
+  }
+
   const execute = async () => {
+    if (current) return // mid-run click on the (now STOP-labeled) button; use the dedicated STOP path
     if (button.disabled) return
     button.disabled = true
     button.setAttribute('aria-busy', 'true')
@@ -157,29 +197,56 @@ function setupBlock(pre, run) {
     const out = ensureOutput()
     out.classList.remove('highlight__run-output--error')
     setOutputText('')
-    let label = 'RUN'
+
+    let module
     try {
-      const result = await run(code.textContent, () => {
-        button.textContent = 'RUNNING...'
-      })
-      if (result) {
-        setOutputText(result.error
-          ? (result.output === '' ? result.error : result.output + '\n' + result.error)
-          : result.output)
-        if (result.error) out.classList.add('highlight__run-output--error')
-        enableEditing()
-      }
+      module = await runner.loadModule()
     } catch (e) {
-      out.classList.add('highlight__run-output--error')
       setOutputText(formatRunError(e))
-      label = 'RETRY'
-    } finally {
-      button.textContent = label
-      button.disabled = false
-      button.removeAttribute('aria-busy')
+      finish(out, 'RETRY', true)
+      return
     }
+
+    const worker = runner.spawn()
+    const timer = setTimeout(() => {
+      if (!current) return
+      worker.terminate()
+      appendNote(timeoutNote(RUN_TIMEOUT_MS / 1000))
+      finish(out, 'RUN', false)
+    }, RUN_TIMEOUT_MS)
+    current = { worker, timer }
+
+    button.textContent = 'STOP'
+    button.disabled = false
+    button.setAttribute('aria-busy', 'true')
+
+    worker.onmessage = (event) => {
+      const message = event.data
+      if (!current || current.worker !== worker) return
+      if (message.type === 'output') {
+        setOutputText(accumulateOutput(outputTextNode.data, message.text))
+      } else if (message.type === 'done') {
+        finish(out, 'RUN', false)
+      } else if (message.type === 'error') {
+        appendNote(message.message)
+        finish(out, 'RUN', true)
+      }
+    }
+    worker.onerror = (event) => {
+      if (!current || current.worker !== worker) return
+      event.preventDefault()
+      setOutputText(formatRunError(event.message || event))
+      finish(out, 'RETRY', true)
+    }
+    worker.postMessage({ module, code: code.textContent })
   }
-  button.addEventListener('click', execute)
+  button.addEventListener('click', () => {
+    if (current) {
+      stop()
+    } else {
+      execute()
+    }
+  })
 }
 
 function init() {
@@ -187,8 +254,8 @@ function init() {
   if (!meta || !meta.content) return
   const blocks = document.querySelectorAll('pre.highlight.ruby')
   if (blocks.length === 0) return
-  const run = createRunner(meta.content)
-  blocks.forEach((pre) => setupBlock(pre, run))
+  const runner = createRunner(meta.content)
+  blocks.forEach((pre) => setupBlock(pre, runner))
 }
 
 // Guarded so the module stays side-effect-free outside a browser
