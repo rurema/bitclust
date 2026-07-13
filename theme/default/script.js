@@ -22,25 +22,48 @@
     })
   }
 
-  // elem 先頭のボタン置き場(RUN/COPY 共用の float コンテナ)を返す。
-  // 無ければ作る。ボタンを個別に float させるとボタン間の隙間で text
-  // カーソルとちらついてクリックしにくいため、1つのコンテナにまとめて
-  // 隙間のカーソル形状はコンテナ(cursor: default)が引き受ける。
-  // js/run.js も同じコンテナに RUN ボタンを入れる
-  function buttonGroup(elem) {
-    const first = elem.firstChild
-    if (first && first.className &&
-        String(first.className).split(' ').indexOf('highlight__button-group') >= 0) {
-      return first
+  function hasClass(elem, name) {
+    return Boolean(elem && elem.className &&
+      String(elem.className).split(' ').indexOf(name) >= 0)
+  }
+
+  function findChildByClass(elem, name) {
+    const children = elem.children
+    for (let i = 0; i < children.length; i++) {
+      if (hasClass(children[i], name)) return children[i]
     }
+    return null
+  }
+
+  // elem(pre)の直前にツールバー行 <div class="highlight__toolbar"> を
+  // 用意し、その右端のボタン置き場(highlight__button-group)を返す。
+  // ボタンを pre の中に float させる方式は、カーソル形状のちらつき・
+  // 編集時のレイアウト崩れ・pre の上 padding を 0 にする必要など無理が
+  // 多かったため、pre の外に出している。コンパイラが pre の直前に置く
+  // caption(タブ)があればツールバー左端に取り込み、pre への密着を保つ。
+  // js/run.js も同じボタン置き場に RUN ボタンを入れる
+  function buttonGroup(elem) {
+    const prev = elem.previousElementSibling
+    if (hasClass(prev, 'highlight__toolbar')) {
+      return findChildByClass(prev, 'highlight__button-group')
+    }
+    const toolbar = document.createElement('div')
+    toolbar.setAttribute('class', 'highlight__toolbar')
     const group = document.createElement('span')
     group.setAttribute('class', 'highlight__button-group')
-    elem.insertBefore(group, elem.firstChild)
+    if (hasClass(prev, 'caption')) {
+      elem.parentNode.insertBefore(toolbar, prev)
+      toolbar.appendChild(prev) // caption をタブとして左端へ移動
+    } else {
+      elem.parentNode.insertBefore(toolbar, elem)
+    }
+    toolbar.appendChild(group)
     return group
   }
 
-  // elem の先頭に COPY ボタンを付ける。getText はクリック時に評価される
-  // ので、RUN の実行結果のように内容が変わる要素にも使える
+  // elem の直前のツールバーに COPY ボタンを付ける。getText はクリック時に
+  // 評価されるので、RUN の実行結果のように内容が変わる要素にも使える。
+  // elem は DOM ツリーに挿入済みであること(直前にツールバーを差し込む)
   function addCopyButton(elem, getText) {
     const btn = document.createElement('span')
     btn.setAttribute('class', 'highlight__copy-button')

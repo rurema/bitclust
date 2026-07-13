@@ -126,24 +126,41 @@ code, pre, tt {
     font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
-/* COPY ボタン(script.js)が全 pre の先頭行に入るため、上 padding は
-   highlight の有無によらず 0 にしてボタンを上端に密着させる */
+/* RUN/COPY ボタンは pre の外のツールバー行(script.js が生成)にあるので、
+   pre の中身は四辺とも均等に padding をとれる(上だけ 0 にして中身が
+   上端に張り付く、以前のボタン内蔵ハックは不要になった) */
 pre {
     line-height: 1.1;
     background-color: #f2f2f2;
-    padding: 0px 1.1em 1.1em 1.1em;
+    padding: 1.1em;
     font-weight: normal;
     overflow: auto;
 }
 
 
-/* RUN/COPY ボタン共用の float コンテナ(script.js が生成)。ボタンを
-   個別に float させるとボタン間・周囲の余白が pre の text カーソル領域の
-   ままになり、ポインタ形状がちらついてクリックしにくいため、隙間の
-   カーソル形状と選択不可はコンテナが引き受ける */
+/* pre の直前に密着するツールバー行(script.js が生成)。
+   左端に caption のタブ、右端に RUN/COPY のボタン群を置く */
+.highlight__toolbar {
+  display: flex;
+  align-items: flex-end;
+  margin: 1em 0 0;
+}
+.highlight__toolbar + pre {
+  margin-top: 0;
+}
+/* RUN の出力欄: 入力欄の pre と出力欄(ツールバー+pre)を密着させて
+   1つのブロックに見せる(js/run.js が付与) */
+.highlight--with-output {
+  margin-bottom: 0;
+}
+.highlight__toolbar--attached {
+  margin-top: 0;
+}
+
+/* ツールバー右端のボタン置き場。ボタン間の隙間のカーソル形状と
+   選択不可はここが引き受ける */
 .highlight__button-group {
-  float: right;
-  margin: 0 -1.1em 0.25em 0.5em;
+  margin-left: auto;
   cursor: default;
   -webkit-user-select: none;
   user-select: none;
@@ -151,12 +168,13 @@ pre {
 
 /* for RUN (js/run.js, statichtml --run-ruby-wasm) */
 .highlight__run-button {
-  margin: 0 0.5em 0 0;
+  margin: 0 0.5em 0.25em 0;
   padding: 0.25em 0.5em;
   background-color: #DDD;
   opacity: 0.75;
   cursor: pointer;
   border: 0;
+  border-radius: 4px;
   font: inherit;
 }
 .highlight__run-button:hover {
@@ -182,9 +200,9 @@ pre {
 pre.highlight.ruby[data-editing="true"]:focus-within {
   outline: auto;
 }
-/* inline-block + width:100% だと float のボタン群と同じ行に入れず
-   ボタンの下へ押し下げられて先頭に空行が見えるため、block にして
-   通常表示と同じく先頭行がボタンの左に回り込むようにする */
+/* 編集時は code をブロック化して pre の内容幅いっぱいをクリック・
+   編集対象にする(内容の外側のクリックは js/run.js が code に
+   フォーカスを移す) */
 pre.highlight.ruby[data-editing="true"] > code {
   display: block;
 }
@@ -195,10 +213,12 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
 /* for COPY(highlight__button-group の中に入る) */
 .highlight__copy-button {
   display: inline-block;
+  margin-bottom: 0.25em;
   padding: 0.25em 0.5em;
   background: #DDD;
   opacity: 0.75;
   cursor: pointer;
+  border-radius: 4px;
 }
 .highlight__copy-button:hover {
   background: #EE8;
@@ -220,15 +240,20 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
 }
 
 /* サンプルコードのキャプション。pre の上に密着したタブとして表示する
-   (pre 内の absolute 配置だと、編集・貼り付けで先頭行と重なるため) */
+   (上だけ角丸でタブらしく)。script.js がツールバー行の左端に取り込む */
 .caption {
     display: inline-block;
     padding: 0.2em 0.5em;
     background: #ddd;
     margin: 1em 0 0;
+    border-radius: 6px 6px 0 0;
 }
+/* JS 無効時など、ツールバー化されず pre の直前に残った場合の密着 */
 .caption + pre {
     margin-top: 0;
+}
+.highlight__toolbar > .caption {
+    margin: 0;
 }
 
 blockquote {

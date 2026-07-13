@@ -110,17 +110,24 @@ function setupBlock(pre, runner) {
   button.type = 'button'
   button.className = 'highlight__run-button'
   button.textContent = 'RUN'
-  // script.js has already created the shared button group with the COPY
-  // button in it (its window.onload handler fires before our load
-  // listener). Prepend RUN into the same group so COPY stays rightmost,
-  // and so the gaps between/around the buttons belong to the group
-  // (cursor: default) instead of the text area — hovering the cluster no
-  // longer flickers between pointer and text cursors.
-  let group = pre.querySelector('.highlight__button-group')
+  // script.js has already inserted the toolbar row (with the COPY button
+  // in its button group) right before the pre — its window.onload handler
+  // fires before our load listener. Prepend RUN into the same group so
+  // COPY stays rightmost. The buttons live outside the pre: keeping them
+  // inside required a zero top padding, made the cursor flicker between
+  // pointer and text, and broke the editable-code layout.
+  const toolbar = pre.previousElementSibling
+  let group = toolbar && toolbar.classList.contains('highlight__toolbar')
+    ? toolbar.querySelector('.highlight__button-group')
+    : null
   if (!group) {
+    // script.js が無いテーマ向けの保険: 最小構成のツールバーを自前で作る
+    const ownToolbar = document.createElement('div')
+    ownToolbar.className = 'highlight__toolbar'
     group = document.createElement('span')
     group.className = 'highlight__button-group'
-    pre.prepend(group)
+    ownToolbar.appendChild(group)
+    pre.before(ownToolbar)
   }
   group.prepend(button)
 
@@ -140,6 +147,13 @@ function setupBlock(pre, runner) {
       // 出力は実行のたびに変わるので、クリック時のテキストを渡す
       if (window.ruremaAddCopyButton) {
         window.ruremaAddCopyButton(output, () => outputTextNode.data)
+        // 出力欄のツールバーと出力欄は、入力欄の pre に密着させて
+        // 1つのブロックに見せる(pre 下マージンとツールバー上マージンを消す)
+        const outToolbar = output.previousElementSibling
+        if (outToolbar && outToolbar.classList.contains('highlight__toolbar')) {
+          outToolbar.classList.add('highlight__toolbar--attached')
+          pre.classList.add('highlight--with-output')
+        }
       }
     }
     return output
@@ -197,6 +211,20 @@ function setupBlock(pre, runner) {
         event.preventDefault()
         execute()
       }
+    })
+    // code は内容ぶんの高さしかないので、その外側(pre の padding や
+    // 1行サンプルの下の余白)をクリックしたときも入力欄に入れるよう、
+    // pre 自身へのクリックで code にフォーカスして末尾にキャレットを置く
+    pre.addEventListener('click', (event) => {
+      if (event.target !== pre) return
+      code.focus()
+      const selection = window.getSelection()
+      if (!selection) return
+      const range = document.createRange()
+      range.selectNodeContents(code)
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
     })
   }
 
