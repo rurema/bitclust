@@ -8,7 +8,7 @@
 // importing either file here never touches a real DOM/Worker.
 import {
   createOnceLoader, formatRunError, truncateOutput,
-  accumulateOutput, STOPPED_NOTE, timeoutNote, editableText,
+  accumulateOutput, STOPPED_NOTE, DONE_NOTE, timeoutNote, editableText,
 } from '../../theme/default/js/run.js'
 import { PRELUDE, formatRunError as formatWorkerRunError } from '../../theme/default/js/run-worker.js'
 
@@ -115,8 +115,11 @@ assert(accumulateOutput('', 'first') === 'first',
          'accumulateOutput drops further chunks once truncated')
 }
 
-// STOPPED_NOTE / timeoutNote: the notes appended to output on STOP / timeout
+// STOPPED_NOTE / DONE_NOTE / timeoutNote: the notes appended to the output
+// on STOP / normal completion / timeout
 assert(STOPPED_NOTE === '(停止しました)', 'STOPPED_NOTE is the stop notice')
+assert(DONE_NOTE === '(正常終了しました)',
+       'DONE_NOTE marks a normal completion (visible even with empty output)')
 assert(timeoutNote(30) === '(30秒でタイムアウトしました)',
        'timeoutNote formats the configured timeout in seconds')
 

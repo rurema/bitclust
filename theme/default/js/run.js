@@ -67,6 +67,9 @@ export function accumulateOutput(current, chunk, limit = OUTPUT_LIMIT) {
 }
 
 export const STOPPED_NOTE = '(停止しました)'
+// 出力が空のサンプルでも実行が終わったことがわかるように、
+// 正常終了時も必ずこの注記を出力欄の末尾に付ける
+export const DONE_NOTE = '(正常終了しました)'
 export function timeoutNote(seconds) {
   return `(${seconds}秒でタイムアウトしました)`
 }
@@ -303,6 +306,7 @@ function setupBlock(pre, runner) {
       if (message.type === 'output') {
         setOutputText(accumulateOutput(outputTextNode.data, message.text))
       } else if (message.type === 'done') {
+        appendNote(DONE_NOTE)
         finish(out, 'RUN', false)
       } else if (message.type === 'error') {
         appendNote(message.message)

@@ -138,15 +138,17 @@ pre {
 }
 
 
-/* pre の直前に密着するヘッダー行(script.js が生成)。pre と同じ背景色で
-   コードブロックと一体に見せる(白い帯として浮くと、コードの上の隙間が
-   広く見える)。左端に caption のタブ、右端に RUN/COPY のボタン群を置く */
+/* pre の直前に密着するヘッダー行(script.js が生成)。コード部分より
+   ひと段暗い背景でコードブロックと一体に見せつつ(白い帯として浮くと、
+   コードの上の隙間が広く見える)、コード部分と同色の caption タブや
+   白背景のボタンが埋没しないようにする。左端に caption のタブ、右端に
+   RUN/COPY のボタン群を置く */
 .highlight__toolbar {
   display: flex;
   align-items: flex-end;
   margin: 1em 0 0;
   padding: 0.25em 0.25em 0 0.25em;
-  background-color: #f2f2f2;
+  background-color: #e6e6e6;
 }
 .highlight__toolbar + pre {
   margin-top: 0;
@@ -173,25 +175,24 @@ pre {
   user-select: none;
 }
 
-/* for RUN (js/run.js, statichtml --run-ruby-wasm) */
+/* for RUN (js/run.js, statichtml --run-ruby-wasm)。
+   ヘッダー行の灰色に埋没しないよう、白背景+枠線でボタンらしくする */
 .highlight__run-button {
   margin: 0 0.5em 0.25em 0;
   padding: 0.25em 0.5em;
-  background-color: #DDD;
-  opacity: 0.75;
+  background-color: #fff;
   cursor: pointer;
-  border: 0;
+  border: 1px solid #999;
   border-radius: 4px;
   font: inherit;
 }
 .highlight__run-button:hover {
   background-color: #EE8;
-  opacity: 1;
 }
 .highlight__run-button[disabled] {
   background-color: #070;
+  border-color: #070;
   color: white;
-  opacity: 1;
   cursor: wait;
 }
 .highlight__run-output {
@@ -217,25 +218,25 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
   outline: none;
 }
 
-/* for COPY(highlight__button-group の中に入る) */
+/* for COPY(highlight__button-group の中に入る)。RUN と同じ見た目 */
 .highlight__copy-button {
   display: inline-block;
   margin-bottom: 0.25em;
   padding: 0.25em 0.5em;
-  background: #DDD;
-  opacity: 0.75;
+  background: #fff;
   cursor: pointer;
+  border: 1px solid #999;
   border-radius: 4px;
 }
 .highlight__copy-button:hover {
   background: #EE8;
-  opacity: 1;
 }
 .highlight__copy-button::after {
   content: "COPY"
 }
 .highlight__copy-button.copied {
   background: #070;
+  border-color: #070;
   color: white;
 }
 .highlight__copy-button.copied::after {
@@ -247,11 +248,13 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
 }
 
 /* サンプルコードのキャプション。pre の上に密着したタブとして表示する
-   (上だけ角丸でタブらしく)。script.js がツールバー行の左端に取り込む */
+   (上だけ角丸でタブらしく)。script.js がツールバー行の左端に取り込む。
+   下のコード部分と同じ背景色にして「つながったタブ」に見せる(ヘッダー
+   行のほうがひと段暗いので埋没しない) */
 .caption {
     display: inline-block;
     padding: 0.2em 0.5em;
-    background: #ddd;
+    background: #f2f2f2;
     margin: 1em 0 0;
     border-radius: 6px 6px 0 0;
 }
