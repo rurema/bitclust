@@ -81,7 +81,7 @@ module BitClust
     # empty lines do not separate paragraphs.
     def dd_without_p: () -> void
 
-    def dt: (String s) -> String
+    def dt: (String s, ?String? id) -> String
 
     METHOD_ATTRIBUTE_LINE_RE: ::Regexp
 

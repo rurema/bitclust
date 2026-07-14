@@ -158,6 +158,18 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 
+  def test_dlist_term_anchor
+    # 用語の後ろの {#id} は dt のアンカー id になる（用語集の各用語リンク用, rurema/doctree#2634）
+    html = @md.compile("- **アリティー**: {#arity}\n- **`arity`**:\n  仮引数の数。\n")
+    assert_include(html, '<dt id="arity">アリティー</dt>')
+    # {#id} が無い項目には id は付かない
+    assert_not_include(html, '<dt id="arity">arity')
+    # 通常の dlist は従来どおり id 無し
+    plain = @md.compile("- **foo**:\n  bar\n")
+    assert_include(plain, '<dt>foo</dt>')
+    assert_not_include(plain, '<dt id')
+  end
+
   def test_entry_heading
     assert_equivalent_method <<~RD
       --- index(val) -> Integer
