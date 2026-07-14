@@ -45,6 +45,10 @@ module BitClust
 
     MD_ITEM_RE = /\A(\s*)(?:- |\d+\. )/
     FENCE_RE = /\A`{3,}/
+    # インデントされたフェンス（リスト項目・dlist 説明内のコードブロック）
+    INDENTED_FENCE_RE = /\A([ \t]+)(`{3,})/
+    # dd 段落の継続行（インデント行。ただしインデントフェンスの手前で止まる）
+    DD_TEXT_RE = /\A[ \t](?![ \t]*`{3})/
     DLIST_RE = /\A- \*\*(.+?)\*\*:(?:\s|$)/
     INFO_RE = /\A- \*\*(?:param|arg|return|raise)\*\*/
     SEE_RE = /\A- \*\*SEE\*\*/
@@ -76,6 +80,8 @@ module BitClust
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when FENCE_RE
           code_fence
+        when INDENTED_FENCE_RE
+          indented_code_fence
         when EMLIST_LEFTOVER_RE
           # リスト脈絡などで生のまま残った #@samplecode は前処理で
           # //emlist になる。RDCompiler と同じ独立ブロックとして描画する
@@ -135,6 +141,8 @@ module BitClust
           raise "@item_stack should be empty. #{@item_stack.inspect}" unless @item_stack.empty?
         when FENCE_RE
           code_fence
+        when INDENTED_FENCE_RE
+          indented_code_fence
         when EMLIST_LEFTOVER_RE
           emlist
         when /\A@todo\b/
@@ -184,14 +192,24 @@ module BitClust
 
     def paragraph
       line '<p>'
-      line compile_text(text_node_from_lines(read_paragraph(@f).map { |l| unescape_hash(l) }))
+      line compile_text(text_node_from_lines(consume_paragraph_lines { read_paragraph(@f) }))
       line '</p>'
     end
 
     def entry_paragraph
       line '<p>'
-      line compile_text(text_node_from_lines(read_entry_paragraph(@f).map { |l| unescape_hash(l) }))
+      line compile_text(text_node_from_lines(consume_paragraph_lines { read_entry_paragraph(@f) }))
       line '</p>'
+    end
+
+    # 段落行の読み取り。リストと空行で切り離された残余のインデント行は
+    # どのブロック処理にも該当しないため、ここで段落として消費する
+    # （読み取りが空のままだとディスパッチが進まなくなる）
+    def consume_paragraph_lines
+      lines = yield.map { |l| unescape_hash(l) }
+      lines = @f.span(DD_TEXT_RE) if lines.empty?
+      lines = [@f.gets || raise] if lines.empty?   # 最低1行は必ず進める
+      lines
     end
 
     def unescape_hash(line)
@@ -338,25 +356,10 @@ module BitClust
     def code_fence
       open_line = @f.gets or raise
       fence = open_line[/\A`+/] or raise
-      rest = open_line[fence.size..].to_s.strip
-      lang = nil
-      caption = nil
-      if rest =~ /\A(\w+)?(?:\s+title="((?:[^"\\]|\\.)*)")?\z/
-        lang = $1
-        caption = $2&.gsub(/\\(["\\])/, '\1')
-      end
+      lang, caption = parse_fence_info(open_line[fence.size..].to_s.strip)
       terminator = /\A`{#{fence.size}}\s*$/
       if lang
-        # caption はタブとして pre の前に置く(rd 側と同期)
-        line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
-        line "<pre class=\"highlight #{lang}\">"
-        line "<code>"
-        src = +""
-        @f.until_terminator(terminator) do |code_line|
-          src << code_line
-        end
-        string highlight_source(src, lang, caption)
-        line '</code></pre>'
+        highlighted_fence_body(lang, caption, terminator)
       elsif fence.size == 3
         line '<pre>'
         @f.until_terminator(terminator) do |code_line|
@@ -409,6 +412,51 @@ module BitClust
       lines
     end
 
+    # info string（lang と title="cap"）のパース
+    def parse_fence_info(rest)
+      if rest =~ /\A(\w+)?(?:\s+title="((?:[^"\\]|\\.)*)")?\z/
+        [$1, $2&.gsub(/\\(["\\])/, '\1')]
+      else
+        [nil, nil]
+      end
+    end
+
+    # ハイライト付き <pre> の本体。caption はタブとして pre の前に置く
+    # (rd 側と同期)。strip_re はインデントフェンスのデデント用
+    def highlighted_fence_body(lang, caption, terminator, strip_re = nil)
+      line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
+      line "<pre class=\"highlight #{lang}\">"
+      line "<code>"
+      src = +""
+      @f.until_terminator(terminator) do |code_line|
+        src << (strip_re ? code_line.sub(strip_re, '') : code_line)
+      end
+      string highlight_source(src, lang, caption)
+      line '</code></pre>'
+    end
+
+    # リスト項目・dlist 説明の中のインデントされたフェンス（GFM のリスト内
+    # コードブロック）。GFM と同じく、内容と閉じフェンスからフェンス行の
+    # インデント幅までを除去する
+    def indented_code_fence
+      open_line = @f.gets or raise
+      INDENTED_FENCE_RE =~ open_line or raise
+      indent = ($1 || raise)
+      fence = ($2 || raise)
+      lang, caption = parse_fence_info(open_line[(indent.size + fence.size)..].to_s.strip)
+      terminator = /\A[ \t]{0,#{indent.size}}`{#{fence.size}}\s*$/
+      strip_re = /\A[ \t]{1,#{indent.size}}/
+      if lang
+        highlighted_fence_body(lang, caption, terminator, strip_re)
+      else
+        line '<pre>'
+        @f.until_terminator(terminator) do |code_line|
+          line escape_html(code_line.sub(strip_re, '').rstrip)
+        end
+        line '</pre>'
+      end
+    end
+
     # 箇条書き（- item / N. item、ネスト・継続行あり）
     def item_list(level = 0)
       open_tag = nil
@@ -427,10 +475,16 @@ module BitClust
         string "<li>"
         @item_stack.push("</li>")
         string compile_text(item_line.sub(/\A\s*(?:-|\d+\.)\s?/, '').strip)
-        if /\A(\s+)(?!- |\d+\. )\S/ =~ @f.peek
-          @f.while_match(/\A\s+(?!- |\d+\. )\S/) do |cont|
+        # 継続行（折り返しテキスト）とインデントフェンス（項目内コードブロック）
+        while @f.peek
+          if INDENTED_FENCE_RE =~ @f.peek
             nl
-            string compile_text(cont.strip)
+            indented_code_fence
+          elsif /\A\s+(?!- |\d+\. )\S/ =~ @f.peek
+            nl
+            string compile_text((@f.gets || raise).strip)
+          else
+            break
           end
         end
         if (m = MD_ITEM_RE.match(@f.peek)) && level < (m[1] || raise).size
@@ -455,9 +509,11 @@ module BitClust
         case @f.peek
         when /\A$/
           @f.gets
+        when INDENTED_FENCE_RE
+          indented_code_fence
         when /\A[ \t]/
           line '<p>'
-          line compile_text(text_node_from_lines(@f.span(/\A[ \t]/)))
+          line compile_text(text_node_from_lines(@f.span(DD_TEXT_RE)))
           line '</p>'
         when FENCE_RE
           code_fence
@@ -472,8 +528,10 @@ module BitClust
       line '<dd>'
       while /\A[ \t]/ =~ @f.peek or FENCE_RE =~ @f.peek
         case @f.peek
+        when INDENTED_FENCE_RE
+          indented_code_fence
         when /\A[ \t]/
-          line compile_text(text_node_from_lines(@f.span(/\A[ \t]/)))
+          line compile_text(text_node_from_lines(@f.span(DD_TEXT_RE)))
         when FENCE_RE
           code_fence
         end
@@ -491,19 +549,103 @@ module BitClust
 
     # GFM モードのテキストコンパイル:
     # コードスパン `x` → <code>（中身は参照解決しない・HTML エスケープのみ）、
-    # 行頭 **N.** → <strong>。エスケープ済み \` はリテラルのバッククォート
+    # 行頭 **N.** → <strong>、Markdown リンク（<url> 自動リンク・
+    # [テキスト](URL)・[テキスト](#アンカー)）→ <a>。
+    # エスケープ済み \` はリテラルのバッククォート
     def compile_gfm_text(str)
       hidden = str.gsub(/\\`/, "\x00")
       hidden.split(/(`[^`\n]+`)/, -1).map { |seg|
         if seg =~ /\A`([^`\n]+)`\z/
           "<code>#{escape_html(($1 || raise).gsub("\x00", '`'))}</code>"
         else
+          links = [] #: Array[String]
+          seg = extract_md_links(seg, links)
           seg = seg.gsub(/^\*\*(\d+\.)\*\* /, "\x01\\1\x02 ")
           rd_compile_text(MarkdownToRRD.restore_inline(seg))
             .gsub("\x01", '<strong>').gsub("\x02", '</strong>')
             .gsub("\x00", '`')
+            .gsub(/\x03(\d+)\x03/) { links[($1 || raise).to_i] || raise }
         end
       }.join
+    end
+
+    AUTOLINK_RE = %r{<(https?://[^<>\s]+)>}
+    # インラインリンクの宛先として受ける形。散文の「[c:String](を参照)」の
+    # ような括弧書きをリンクと誤認しないため URL と #フラグメントに限る
+    # （MARKUP_SPEC §7.4/§7.5）
+    MD_LINK_DEST_RE = %r{\A(?:https?://|\#)}
+
+    # Markdown のリンクを描画済み <a> へ退避し \x03idx\x03 プレースホルダに
+    # 置き換える。後段の rd_compile_text（HTML エスケープ・参照解決）を
+    # 素通しし、compile_gfm_text の最後で戻す
+    def extract_md_links(str, saved)
+      str = str.gsub(AUTOLINK_RE) {
+        saved << direct_url($1 || raise)
+        "\x03#{saved.size - 1}\x03"
+      }
+      return str unless str.include?('[')
+      result = +''
+      i = 0
+      while i < str.length
+        if str[i] == '\\' && i + 1 < str.length
+          result << (str[i, 2] || raise)
+          i += 2
+          next
+        end
+        if str[i] == '['
+          close = matching_delimiter(str, i, '[', ']')
+          if close && str[close + 1] == '(' &&
+             (dest_end = matching_delimiter(str, close + 1, '(', ')', space_ends: true)) &&
+             (dest = str[(close + 2)...dest_end]) && MD_LINK_DEST_RE =~ dest
+            saved << md_link(str[(i + 1)...close] || raise, dest)
+            result << "\x03#{saved.size - 1}\x03"
+            i = dest_end + 1
+            next
+          end
+        end
+        result << (str[i] || raise)
+        i += 1
+      end
+      result
+    end
+
+    # open 位置の括弧に対応する閉じ括弧の位置（\ エスケープ対応・ネスト可）。
+    # space_ends: リンク宛先用。空白が現れたらリンクではない（nil）
+    def matching_delimiter(str, open, open_char, close_char, space_ends: false)
+      depth = 0
+      i = open
+      while i < str.length
+        c = str[i]
+        if c == '\\'
+          i += 1
+        elsif space_ends && c =~ /\s/
+          return nil
+        elsif c == open_char
+          depth += 1
+        elsif c == close_char
+          depth -= 1
+          return i if depth == 0
+        end
+        i += 1
+      end
+      nil
+    end
+
+    # 表示テキスト付きリンクの描画。テキストは参照解決しないプレーン表示
+    # （リンク内リンクは HTML として成立しないため）。外部 URL は rd の
+    # [[url:]] と同じ external クラス、#アンカーはページ内リンク
+    def md_link(text, dest)
+      label = escape_html(unescape_md_brackets(text).gsub("\x00", '`'))
+      href = escape_html(unescape_md_brackets(dest))
+      if dest.start_with?('#')
+        %Q(<a href="#{href}">#{label}</a>)
+      else
+        %Q(<a class="external" href="#{href}">#{label}</a>)
+      end
+    end
+
+    def unescape_md_brackets(str)
+      str.gsub(/\\([\[\]\\])/, '\1')
     end
 
     def restore_rd_text(str)

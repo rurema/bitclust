@@ -24,6 +24,12 @@ module BitClust
 
     FENCE_RE: ::Regexp
 
+    # インデントされたフェンス（リスト項目・dlist 説明内のコードブロック）
+    INDENTED_FENCE_RE: ::Regexp
+
+    # dd 段落の継続行（インデントフェンスの手前で止まる）
+    DD_TEXT_RE: ::Regexp
+
     DLIST_RE: ::Regexp
 
     INFO_RE: ::Regexp
@@ -52,6 +58,9 @@ module BitClust
     def paragraph: () -> void
 
     def entry_paragraph: () -> void
+
+    # 段落行の読み取り（残余のインデント行も段落として消費する）
+    def consume_paragraph_lines: () { () -> Array[String] } -> Array[String]
 
     def unescape_hash: (String line) -> String
 
@@ -88,6 +97,15 @@ module BitClust
 
     def collect_fence_lines: (Regexp terminator) -> Array[String]
 
+    # info string（lang と title="cap"）のパース
+    def parse_fence_info: (String rest) -> [String?, String?]
+
+    # ハイライト付き <pre> の本体
+    def highlighted_fence_body: (String lang, String? caption, Regexp terminator, ?Regexp? strip_re) -> void
+
+    # リスト項目・dlist 説明の中のインデントされたフェンス
+    def indented_code_fence: () -> void
+
     # 箇条書き（- item / N. item、ネスト・継続行あり）
     def item_list: (?::Integer level) -> void
 
@@ -102,6 +120,22 @@ module BitClust
 
     # GFM モードのテキストコンパイル
     def compile_gfm_text: (String str) -> String
+
+    AUTOLINK_RE: ::Regexp
+
+    # インラインリンクの宛先として受ける形（URL と #フラグメントのみ）
+    MD_LINK_DEST_RE: ::Regexp
+
+    # Markdown のリンクを描画済み <a> へ退避しプレースホルダに置き換える
+    def extract_md_links: (String str, Array[String] saved) -> String
+
+    # open 位置の括弧に対応する閉じ括弧の位置
+    def matching_delimiter: (String str, Integer open, String open_char, String close_char, ?space_ends: bool) -> Integer?
+
+    # 表示テキスト付きリンクの描画
+    def md_link: (String text, String dest) -> String
+
+    def unescape_md_brackets: (String str) -> String
 
     def restore_rd_text: (String str) -> String
   end
