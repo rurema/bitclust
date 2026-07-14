@@ -594,6 +594,150 @@ class TestMDCompiler < Test::Unit::TestCase
     assert_not_include html, "<code>code"
   end
 
+  # ---- M2: Markdown リンク（MARKUP_SPEC §7.4/§7.5、news/1_9_0 型） ----
+
+  def test_gfm_autolink
+    html = gfm_compiler.compile("# T\n\n<https://example.com/a#b> を参照。\n")
+    assert_include html,
+      '<a class="external" href="https://example.com/a#b">https://example.com/a#b</a> を参照。'
+  end
+
+  def test_gfm_autolink_in_dlist_description
+    md = "# T\n\n- **`__callee__`**:\n\n  <https://example.com/x>\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, '<a class="external" href="https://example.com/x">https://example.com/x</a>'
+  end
+
+  def test_gfm_autolink_requires_url_scheme
+    html = gfm_compiler.compile("# T\n\na <b> c です。\n")
+    assert_include html, "a &lt;b&gt; c です。"
+    assert_not_include html, "<a "
+  end
+
+  def test_gfm_inline_link
+    html = gfm_compiler.compile("# T\n\n[例示ドメイン](https://example.com)のサポート\n")
+    assert_include html, '<a class="external" href="https://example.com">例示ドメイン</a>のサポート'
+  end
+
+  def test_gfm_inline_link_with_bracketed_text
+    # news/1_9_0 型: [[ruby-cvs:16833]](アーカイブURL) — 表示テキストに角括弧
+    html = gfm_compiler.compile("# T\n\n[[ruby-cvs:16833]](https://example.com/16833)\n")
+    assert_include html, '<a class="external" href="https://example.com/16833">[ruby-cvs:16833]</a>'
+  end
+
+  def test_gfm_inline_link_text_with_parens_and_url_query
+    md = "# T\n\n[patch: activity in 1.9 (2006-06)](https://example.com/hiki.rb?Changes+in+Ruby)\n"
+    html = gfm_compiler.compile(md)
+    assert_include html,
+      '<a class="external" href="https://example.com/hiki.rb?Changes+in+Ruby">patch: activity in 1.9 (2006-06)</a>'
+  end
+
+  def test_gfm_fragment_link
+    html = gfm_compiler.compile("# T\n\n[破壊的な変更](#mutable) を参照。\n")
+    assert_include html, '<a href="#mutable">破壊的な変更</a> を参照。'
+  end
+
+  def test_gfm_non_url_destination_stays_text
+    # 参照直後の括弧書きをリンクと誤認しない（宛先は URL/#フラグメントのみ）
+    html = gfm_compiler.compile("# T\n\n[c:String](文字列)を参照。\n")
+    assert_include html, "</a>(文字列)を参照。"
+  end
+
+  def test_gfm_link_inside_code_span_stays_code
+    html = gfm_compiler.compile("# T\n\n`[x](https://example.com)` はコード。\n")
+    assert_include html, "<code>[x](https://example.com)</code> はコード。"
+  end
+
+  def test_gfm_link_escapes_html_in_text_and_url
+    html = gfm_compiler.compile("# T\n\n[a<b>](https://example.com/?q=<x>)\n")
+    assert_include html, '<a class="external" href="https://example.com/?q=&lt;x&gt;">a&lt;b&gt;</a>'
+  end
+
+  # ---- M2: インデントされたコードフェンス（リスト・dlist 内、news/1_9_0 型） ----
+
+  def test_gfm_indented_fence_in_dlist_description
+    md = <<~MD
+      # T
+
+      - **`Dir.glob`**:
+
+        説明文です。
+
+        ```ruby
+        p Dir.glob(["f*","b*"])  # => ["foo", "bar"]
+        ```
+
+        続きの説明。
+    MD
+    html = gfm_compiler.compile(md)
+    assert_include html, '<pre class="highlight ruby">'
+    assert_include html, 'Dir.glob'
+    assert_not_include html, '```'
+    # 内容はフェンス行のインデント分がデデントされる
+    assert_include html, "<span class=\"nb\">p</span>"
+    assert_include html, "<p>\n続きの説明。\n</p>"
+  end
+
+  def test_gfm_indented_fence_without_lang
+    md = "# T\n\n- **`proc`**:\n\n  説明。\n\n  ```text\n  x = {|a| p a}\n  ```\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, "x = {|a| p a}"
+    assert_not_include html, '```'
+  end
+
+  def test_gfm_indented_fence_in_list_item
+    md = "# T\n\n- 項目\n  ```ruby\n  p 1\n  ```\n- 次の項目\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, '<pre class="highlight ruby">'
+    assert_include html, "次の項目"
+    assert_not_include html, '```'
+  end
+
+  def test_gfm_indented_fence_at_top_level
+    # リスト項目と空行で切り離されたフェンス（行駆動モデルではトップレベル扱い）
+    md = "# T\n\n- 項目\n\n  ```ruby\n  p 1\n  ```\n\n本文。\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, '<pre class="highlight ruby">'
+    assert_include html, "本文。"
+    assert_not_include html, '```'
+  end
+
+  def test_gfm_indented_fence_in_method_entry
+    md = "### def m(v) -> String\n\n説明。\n\n- **`opt`**:\n\n  ```ruby\n  p 1\n  ```\n"
+    html = compile_method(gfm_compiler, md)
+    assert_include html, '<pre class="highlight ruby">'
+    assert_not_include html, '```'
+  end
+
+  def test_gfm_indented_fence_in_param_continuation
+    md = "### def m(v) -> String\n\n説明。\n\n- **param** `v` -- 値。\n\n  ```ruby\n  p 1\n  ```\n"
+    html = compile_method(gfm_compiler, md)
+    assert_include html, '<pre class="highlight ruby">'
+    assert_not_include html, '```'
+  end
+
+  def test_gfm_stray_indented_line_does_not_hang
+    # リストと空行で切り離された残余のインデント行はどのブロックにも
+    # 該当しない。段落として消費する（従来はディスパッチが進まずハング）
+    md = "# T\n\n- 項目\n\n  切り離された継続行。\n\n本文。\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, "切り離された継続行。"
+    assert_include html, "本文。"
+  end
+
+  def test_gfm_stray_indented_line_in_method_entry_does_not_hang
+    md = "### def m(v) -> String\n\n- 項目\n\n  切り離された継続行。\n"
+    html = compile_method(gfm_compiler, md)
+    assert_include html, "切り離された継続行。"
+  end
+
+  def test_gfm_indented_fence_with_title
+    md = "# T\n\n- 項目\n  ```ruby title=\"例\"\n  p 1\n  ```\n"
+    html = gfm_compiler.compile(md)
+    assert_include html, '<span class="caption">例</span>'
+    assert_include html, '<pre class="highlight ruby">'
+  end
+
   # ---- doc / ライブラリページ ----
 
   def test_doc_headline_and_paragraph
