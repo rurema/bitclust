@@ -39,6 +39,11 @@ sub class method
 --- explanatory_method
 {: nomethod}
 説明のために記載しているメソッドです。
+
+= redefine Sub
+== Instance Methods
+--- redefined_instance_method
+redefined instance method
 HERE
 
   def setup
@@ -92,5 +97,10 @@ HERE
     assert_include(@html, 'base_instance_method')
     assert_include(@html, 'Mixinから継承しているメソッド')
     assert_include(@html, 'mixin_instance_method')
+  end
+
+  def test_redefined_method_is_listed_in_its_own_section
+    assert_include(@html, '再定義されたメソッド')
+    assert_include(@html, 'redefined_instance_method')
   end
 end

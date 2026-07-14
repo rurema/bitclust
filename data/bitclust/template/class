@@ -115,6 +115,41 @@
 <%  end %>
 
 <%
+    [[_('Redefined Methods'),      ents.redefined]]\
+    .each do |label, entries|
+      unless entries.empty?  %>
+<%=     headline(label) %>
+<table class="entries methods">
+<tr>
+  <th><%= _('Signature') %></th>
+  <th><%= _('Description') %></th>
+  <th><%= _('Library') %></th>
+</tr>
+<%
+        headline_push
+        entries.each do |m|
+          foreach_method_chunk(m.source) do |sigs, src| %>
+<tr>
+<td class="signature">
+  <a href="<%=h method_url(m.spec_string) %>"><code>
+  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
+  </code></a>
+</td>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= library_link(m.library.name) %></td>
+</tr>
+<%
+          end
+        end
+        headline_pop
+%>
+</table>
+<%
+      end
+    end
+%>
+
+<%
     [[_('Added Methods'),          ents.added]]\
     .each do |label, entries|
       unless entries.empty?  %>

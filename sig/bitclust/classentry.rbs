@@ -98,6 +98,7 @@ module BitClust
       attr_accessor module_functions: Array[MethodEntry]
       attr_accessor constants: Array[MethodEntry]
       attr_accessor special_variables: Array[MethodEntry]
+      attr_accessor redefined: Array[MethodEntry]
       attr_accessor added: Array[MethodEntry]
       attr_accessor undefined: Array[MethodEntry]
       attr_accessor nomethod: Array[MethodEntry]
@@ -106,6 +107,7 @@ module BitClust
                        Array[MethodEntry] instance_methods,  Array[MethodEntry] private_instance_methods, Array[MethodEntry] protected_instance_methods,
                        Array[MethodEntry] module_functions,
                        Array[MethodEntry] constants, Array[MethodEntry] special_variables,
+                       Array[MethodEntry] redefined,
                        Array[MethodEntry] added, Array[MethodEntry] undefined, Array[MethodEntry] nomethod) -> void
     end
 
