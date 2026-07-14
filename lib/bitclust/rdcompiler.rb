@@ -451,19 +451,29 @@ module BitClust
     end
 
     BracketLink = /\[\[[\w-]+?:[!-~]+?(?:\[\] )?\]\]/n
+    # BitClust には ISO/JIS へのリンク機能がないため、[[ISO:8601]]/[[JIS:X 0301]] は
+    # リンクにせず平文で表示する (rurema/bitclust#236)。引数に空白を含む JIS も拾う。
+    StandardRef = /\[\[(?:ISO|JIS):[!-~][!-~ ]*?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)
       escape_table = HTMLUtils::ESC
-      str.gsub(/(#{NeedESC})|(#{BracketLink})/o) {
+      str.gsub(/(#{NeedESC})|(#{StandardRef})|(#{BracketLink})/o) {
         # @type var char: '&' | '"' | '<' | '>'
         if    char = _ = $1 then escape_table[char]
-        elsif tok  = $2 then bracket_link(tok[2..-3] || raise)
-        elsif tok  = $3 then seems_code(tok)
+        elsif tok  = $2 then standard_ref(tok[2..-3] || raise)
+        elsif tok  = $3 then bracket_link(tok[2..-3] || raise)
         else
           raise 'must not happen'
         end
       }
+    end
+
+    def standard_ref(link)
+      # 例: "ISO:8601" -> "ISO 8601", "JIS:X 0301" -> "JIS X 0301"
+      type, _arg = link.split(':', 2)
+      arg = _arg&.strip or raise
+      escape_html("#{type} #{arg}")
     end
 
     def bracket_link(link, label = nil, frag = nil)

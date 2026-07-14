@@ -118,9 +118,13 @@ module BitClust
 
     BracketLink: ::Regexp
 
+    StandardRef: ::Regexp
+
     NeedESC: ::Regexp
 
     def compile_text: (String str) -> String
+
+    def standard_ref: (String link) -> String
 
     def bracket_link: (String link, ?String? label, ?String? frag) -> String
 
