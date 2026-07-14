@@ -84,6 +84,8 @@ Private Instance Methods
 privateメソッド
 Protected Instance Methods
 protectedメソッド
+Redefined Methods
+再定義されたメソッド
 Private Singleton Methods
 private特異メソッド
 Required Libraries

@@ -63,6 +63,7 @@
      [_('Module Functions'),          ents.module_functions           ],
      [_('Constants'),                 ents.constants                  ],
      [_('Special Variables'),         ents.special_variables          ],
+     [_('Redefined Methods'),         ents.redefined                  ],
      [_('Added Methods'),             ents.added                      ] ]\
     .each do |label, entries|
       unless entries.empty? %>

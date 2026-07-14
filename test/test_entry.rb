@@ -163,6 +163,25 @@ HERE
     assert_equal([], parts.instance_methods.map(&:name))
   end
 
+  def test_redefined_is_partitioned_separately
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- bar
+
+説明です。
+
+= redefine Hoge
+== Instance Methods
+--- baz
+
+再定義の説明です。
+HERE
+    parts = klass.partitioned_entries
+    assert_equal(['baz'], parts.redefined.map(&:name))
+    assert_equal(['bar'], parts.instance_methods.map(&:name))
+  end
+
   def test_description_skips_leading_metadata_paragraph
     klass = parse_class(<<HERE)
 = class Hoge
