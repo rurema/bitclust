@@ -49,7 +49,9 @@ module BitClust
     INDENTED_FENCE_RE = /\A([ \t]+)(`{3,})/
     # dd 段落の継続行（インデント行。ただしインデントフェンスの手前で止まる）
     DD_TEXT_RE = /\A[ \t](?![ \t]*`{3})/
-    DLIST_RE = /\A- \*\*(.+?)\*\*:(?:\s|$)/
+    # 用語の後ろに {#id} があればアンカー id として扱う（用語集の各用語への
+    # リンク用。rurema/doctree#2634）。id は $2 に入る。
+    DLIST_RE = /\A- \*\*(.+?)\*\*:(?:[ \t]*\{#([\w-]+)\})?(?:\s|$)/
     INFO_RE = /\A- \*\*(?:param|arg|return|raise)\*\*/
     SEE_RE = /\A- \*\*SEE\*\*/
     # @undef など変換器が生のまま渡す未知メタデータ
@@ -271,12 +273,13 @@ module BitClust
           # GFM モード: `term` のコードスパンは <code> として描画し、
           # 中身の参照はその中で解決する（<code><a>...</a></code>。spec/eval）
           term = ($1 || raise)
+          id = $2   # {#id} があれば dt にアンカーを付ける（term の再マッチ前に退避）
           if gfm? && term =~ /\A`(.+)`\z/
             inner = ($1 || raise).strip
-            line dt("<code>#{rd_compile_text(MarkdownToRRD.restore_inline(inner))}</code>")
+            line dt("<code>#{rd_compile_text(MarkdownToRRD.restore_inline(inner))}</code>", id)
           else
             term = strip_code_span(term).strip
-            line dt(compile_text(term))
+            line dt(compile_text(term), id)
           end
           inline = l.sub(DLIST_RE, '').strip
           @f.ungets("  #{inline}\n") unless inline.empty?

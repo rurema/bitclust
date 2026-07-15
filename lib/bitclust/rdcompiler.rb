@@ -273,8 +273,8 @@ module BitClust
       line '</dd>'
     end
 
-    def dt(s)
-      "<dt>#{s}</dt>"
+    def dt(s, id = nil)
+      id ? %Q(<dt id="#{escape_html(id)}">#{s}</dt>) : "<dt>#{s}</dt>"
     end
 
     def stop_on_syntax_error?
