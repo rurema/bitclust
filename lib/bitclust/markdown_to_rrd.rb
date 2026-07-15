@@ -365,6 +365,53 @@ module BitClust
       end
     end
 
+    # dd/@param 系の説明内にある、インデントされたフェンス（rd では
+    # //emlist・#@samplecode の桁0出力に対応。CommonMark 準拠のため
+    # rrd_to_markdown.rb が項目の内容カラムへインデントして出すように
+    # なった分の桁0版）を、桁0の //emlist{ / #@samplecode に戻す。
+    # convert_code_block の 3 バッククォート（lang 付き）分岐と対称。
+    # 4+ バッククォート（インデントコード由来）のインデント版は
+    # rrd_to_markdown.rb が dd/@param からその形式を出さないため未対応
+    def convert_indented_code_block(line, indent)
+      line =~ /\A[ \t]+(`{3,})(\w*)(?:\s+title="((?:[^"\\]|\\.)*)")?\s*$/ or raise
+      fence_len = ($1 || raise).length
+      lang = ($2 || raise).empty? ? nil : $2
+      title = $3&.gsub(/\\(["\\])/, '\1')
+      strip_re = /\A[ \t]{1,#{indent.length}}/
+
+      if lang == 'ruby'
+        samplecode = '#@samplecode'
+        samplecode_end = '#@end'
+        @out << (title && !title.empty? ? "#{samplecode} #{title}\n" : "#{samplecode}\n")
+      else
+        parts = ['//emlist']
+        if title && !title.empty?
+          parts << "[#{title}]"
+          parts << "[#{lang}]" if lang
+        elsif lang
+          parts << '[]'
+          parts << "[#{lang}]"
+        end
+        parts << "{"
+        @out << parts.join + "\n"
+      end
+      advance
+      terminator = /\A[ \t]{0,#{indent.length}}`{#{fence_len}}\s*\n?\z/
+      while @index < @lines.length
+        l = current_line
+        if l =~ terminator
+          @out << (lang == 'ruby' ? "#{samplecode_end}\n" : "//}\n")
+          advance
+          return
+        elsif l =~ /\A\#@/
+          @out << l   # ディレクティブはカラム0のまま（rrd_to_markdown.rb 側と対称）
+        else
+          @out << l.sub(strip_re, '')
+        end
+        advance
+      end
+    end
+
     def convert_method_signature(line)
       @out << line.sub(/\A### def /, '--- ')
       advance
@@ -419,7 +466,7 @@ module BitClust
           # rd 側と対称: nest 0 の #@end も透過（fileutils の @param 継続）
           nest -= 1 if nest > 0
           raw_passthrough(line)
-        elsif line =~ /\A\s+\S/ && line !~ /\A- / && line !~ /\A\*\*/ && line !~ /\A```/
+        elsif line =~ /\A\s+\S/ && line !~ /\A- / && line !~ /\A\*\*/ && line !~ /\A[ \t]*`{3,}/
           @out << convert_inline_refs(line)
           advance
         elsif greedy && line =~ /\A[ \t]+$/
@@ -427,6 +474,8 @@ module BitClust
           advance
         elsif greedy && line =~ /\A`{3,}/
           convert_code_block(line)   # rd 側と対称: 直結するコードブロックは説明の一部
+        elsif greedy && line =~ /\A([ \t]+)`{3,}/
+          convert_indented_code_block(line, $1 || raise)   # 上と同じくインデント版
         else
           break
         end
@@ -515,11 +564,13 @@ module BitClust
         # 交互に何個でも説明として受ける（String#% 型）
         while @index < @lines.length
           l = current_line
-          if l =~ /\A\s+\S/
+          if l =~ /\A\s+\S/ && l !~ /\A[ \t]+`{3,}/
             @out << convert_inline_refs(l)
             advance
           elsif l =~ /\A`{3,}/
             convert_code_block(l)
+          elsif l =~ /\A([ \t]+)`{3,}/
+            convert_indented_code_block(l, $1 || raise)   # 上と同じくインデント版
           elsif l =~ /\A\#@/
             # rd 側と対称: #@ 指令行は dd の文脈に透明
             raw_passthrough(l)

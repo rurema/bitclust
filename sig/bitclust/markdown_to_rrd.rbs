@@ -61,6 +61,12 @@ module BitClust
 
     def convert_code_block: (String line) -> void
 
+    # dd/@param 系の説明内にある、インデントされたフェンス（rd では
+    # //emlist・#@samplecode の桁0出力に対応）を桁0の //emlist{ /
+    # #@samplecode に戻す。convert_code_block の 3 バッククォート
+    # （lang 付き）分岐と対称
+    def convert_indented_code_block: (String line, String indent) -> void
+
     def convert_method_signature: (String line) -> void
 
     def convert_module_function_signature: (String line) -> void

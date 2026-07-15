@@ -64,13 +64,22 @@ module BitClust
 
     def process_body: () -> void
 
-    def convert_emlist: (String line) -> void
+    # dd（記述リストの説明）/ @param 等の説明の中でフェンスを出すときの
+    # 内容カラムのインデント幅。項目マーカー「- 」の幅に合わせる
+    DD_CONTENT_INDENT: String
+
+    # フェンス内容行にインデントを前置する（空行・前処理ディレクティブ行は除く）
+    def indent_content_line: (String line, String indent) -> String
+
+    # indent: 呼び出し文脈の内容カラム（トップレベルは既定の ''、
+    # dd/@param 系の説明内から呼ぶ場合は DD_CONTENT_INDENT）
+    def convert_emlist: (String line, ?String indent) -> void
 
     DIRECTIVE_NEST_RE: ::Regexp
 
     DIRECTIVE_END_RE: ::Regexp
 
-    def convert_samplecode: (String line) -> void
+    def convert_samplecode: (String line, ?String indent) -> void
 
     def convert_signature: (String line) -> void
 
@@ -106,7 +115,7 @@ module BitClust
     # term は process_body の正規表現キャプチャ（$1 = String?）由来
     def convert_dlist_item: (String line, untyped term) -> void
 
-    def convert_indented_code: (String line) -> void
+    def convert_indented_code: (String line, ?String indent) -> void
 
     def convert_h1: (String line) -> void
 

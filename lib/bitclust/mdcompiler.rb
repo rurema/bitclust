@@ -502,10 +502,13 @@ module BitClust
     end
 
     # RDCompiler の dd_with_p / dd_without_p の md 版:
-    # コードブロック（rd では //emlist）の判定をフェンスに差し替える
+    # コードブロック（rd では //emlist）の判定をインデントフェンスに差し替える。
+    # RD の //emlist は桁0で書いても dd に取り込まれたが、Markdown では
+    # CommonMark に合わせて「項目の内容カラムにインデントされたフェンス」だけを
+    # 説明（dd）の一部として取り込む。桁0のフェンスは dd の外（トップレベル）。
     def dd_with_p
       line '<dd>'
-      while /\A(?:\s|\z)/ =~ @f.peek or FENCE_RE =~ @f.peek
+      while /\A(?:\s|\z)/ =~ @f.peek
         case @f.peek
         when /\A$/
           @f.gets
@@ -515,8 +518,6 @@ module BitClust
           line '<p>'
           line compile_text(text_node_from_lines(@f.span(DD_TEXT_RE)))
           line '</p>'
-        when FENCE_RE
-          code_fence
         else
           raise 'must not happen'
         end
@@ -526,14 +527,12 @@ module BitClust
 
     def dd_without_p
       line '<dd>'
-      while /\A[ \t]/ =~ @f.peek or FENCE_RE =~ @f.peek
+      while /\A[ \t]/ =~ @f.peek
         case @f.peek
         when INDENTED_FENCE_RE
           indented_code_fence
         when /\A[ \t]/
           line compile_text(text_node_from_lines(@f.span(DD_TEXT_RE)))
-        when FENCE_RE
-          code_fence
         end
       end
       line '</dd>'

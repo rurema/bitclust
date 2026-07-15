@@ -356,7 +356,28 @@ module BitClust
       end
     end
 
-    def convert_emlist(line)
+    # dd（記述リストの説明）/ @param 等の説明の中でフェンスを出すときの
+    # 内容カラムのインデント幅。項目マーカー「- 」の幅に合わせる
+    DD_CONTENT_INDENT = '  '
+
+    # フェンス内容行にインデントを前置する。ただし:
+    # - 空行には前置しない（末尾空白を増やさないため）
+    # - 前処理ディレクティブ行（#@since/#@until/#@if/#@else/#@end 等）には
+    #   前置しない。Preprocessor はこれらを行頭カラム0でしか認識しない
+    #   （bitclust/lib/bitclust/preprocessor.rb の /\A\#@since\b/ 等）ため、
+    #   インデントすると版解決が効かなくなる
+    def indent_content_line(line, indent)
+      return line if indent.empty?
+      return line if line =~ /\A[ \t]*\n?\z/
+      return line if line =~ /\A\#@/
+      indent + line
+    end
+
+    # indent: 呼び出し文脈の内容カラム（トップレベルは既定の ''、
+    # dd/@param 系の説明内から呼ぶ場合は DD_CONTENT_INDENT）。
+    # CommonMark でリスト項目/dd の説明に確実にネストさせるための字下げで、
+    # 新しい MDCompiler の INDENTED_FENCE_RE がこれを見て dd/li に取り込む
+    def convert_emlist(line, indent = '')
       # //emlist[caption][lang]{...//}
       caption = nil
       lang = nil
@@ -375,16 +396,16 @@ module BitClust
         escaped_caption = caption.gsub('\\', '\\\\\\\\').gsub('"', '\\"')
         parts << " title=\"#{escaped_caption}\""
       end
-      @out << parts.join + "\n"
+      @out << indent + parts.join + "\n"
       advance
       while @index < @lines.length
         line = current_line
         if line =~ /\A\/\/\}\s*$/
-          @out << "```\n"
+          @out << indent + "```\n"
           advance
           return
         end
-        @out << line
+        @out << indent_content_line(line, indent)
         advance
       end
     end
@@ -392,13 +413,13 @@ module BitClust
     DIRECTIVE_NEST_RE = /\A\#@(?:since|until|if)\b/
     DIRECTIVE_END_RE = /\A\#@end\s*$/
 
-    def convert_samplecode(line)
+    def convert_samplecode(line, indent = '')
       label = line.sub(SAMPLECODE_RE, '').strip
       if label.empty?
-        @out << "```ruby\n"
+        @out << indent + "```ruby\n"
       else
         escaped_label = label.gsub('\\', '\\\\\\\\').gsub('"', '\\"')
-        @out << "```ruby title=\"#{escaped_label}\"\n"
+        @out << indent + "```ruby title=\"#{escaped_label}\"\n"
       end
       advance
       nest = 0
@@ -406,20 +427,20 @@ module BitClust
         line = current_line
         if line =~ DIRECTIVE_NEST_RE
           nest += 1
-          @out << line
+          @out << line   # ディレクティブは常にカラム0（Preprocessor 要件）
           advance
         elsif line =~ DIRECTIVE_END_RE
           if nest > 0
             nest -= 1
-            @out << line
+            @out << line   # 同上
             advance
           else
-            @out << "```\n"
+            @out << indent + "```\n"
             advance
             return
           end
         else
-          @out << line
+          @out << indent_content_line(line, indent)
           advance
         end
       end
@@ -514,9 +535,11 @@ module BitClust
           @out << line
           advance
         elsif greedy && line =~ SAMPLECODE_RE
-          convert_samplecode(line)   # RDCompiler の dd はコードブロックも説明の一部
+          # RDCompiler の dd はコードブロックも説明の一部。新 MDCompiler が
+          # dd に取り込めるよう、内容カラムにインデントしたフェンスで出す
+          convert_samplecode(line, DD_CONTENT_INDENT)
         elsif greedy && line =~ /\A\/\/emlist/
-          convert_emlist(line)
+          convert_emlist(line, DD_CONTENT_INDENT)
         else
           break
         end
@@ -627,9 +650,11 @@ module BitClust
           @out << convert_inline_refs(l)
           advance
         elsif l =~ SAMPLECODE_RE
-          convert_samplecode(l)
+          # 項目の内容カラムにインデントしたフェンスにする（CommonMark で
+          # dd にネストさせ、新 MDCompiler の INDENTED_FENCE_RE に取り込ませる）
+          convert_samplecode(l, DD_CONTENT_INDENT)
         elsif l =~ /\A\/\/emlist/
-          convert_emlist(l)
+          convert_emlist(l, DD_CONTENT_INDENT)
         elsif l =~ /\A\#@/
           # #@ 指令行は dd の文脈に透明（版解決後は消えて説明が連続する。
           # ここで打ち切ると後続インデント行がコード扱いになる。pack-template）
@@ -656,7 +681,12 @@ module BitClust
       end
     end
 
-    def convert_indented_code(line)
+    # indent: 呼び出し文脈の内容カラム（他のフェンス出力メソッドと揃えるため
+    # 用意。現状このメソッドはトップレベル（process_body）からしか呼ばれず、
+    # RDCompiler の list（インデントのみのコード相当）は dd/li には取り込まれ
+    # ないため、呼び出し側は常に既定の '' のまま。将来 dd/li 文脈から呼ぶ
+    # 必要が生じた場合のための口として引数だけ揃えておく
+    def convert_indented_code(line, indent = '')
       # 行を収集してベースインデントを取得
       code_lines = [] #: Array[String]
       while @index < @lines.length
@@ -687,15 +717,15 @@ module BitClust
         .min || 1
 
       fence = '`' * (3 + base_indent)
-      @out << "#{fence}\n"
+      @out << indent + "#{fence}\n"
       code_lines.each do |l|
         if l =~ /\A\s*$/
           @out << l
         else
-          @out << (l[base_indent..] || raise)  # ベースインデントを除去
+          @out << indent + (l[base_indent..] || raise)  # ベースインデントを除去
         end
       end
-      @out << "#{fence}\n"
+      @out << indent + "#{fence}\n"
     end
 
     def convert_h1(line)
