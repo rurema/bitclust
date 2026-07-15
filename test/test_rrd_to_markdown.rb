@@ -116,10 +116,12 @@ class TestRRDToMarkdown < Test::Unit::TestCase
   def test_dlist_description_across_samplecode
     # pack-template 型: dd 内の #@samplecode 後の字下げ行も dd 段落継続。
     # 空行スキャンが #@samplecode を透過するとコード本体の行（カラム0）を見て
-    # dd を打ち切り、後続段落がトップレベル pre と誤分類される
+    # dd を打ち切り、後続段落がトップレベル pre と誤分類される。
+    # フェンスは CommonMark で dd にネストするよう内容カラム(2桁)へインデント
+    # される（新 MDCompiler の INDENTED_FENCE_RE が取り込む対象）
     rrd = ": w\n\n  説明。\n\n\#@samplecode\n[0].pack(\"w\")\n\#@end\n\n  なお、後続の説明。\n"
     md = convert(rrd)
-    assert_equal "- **`w`**:\n\n  説明。\n\n```ruby\n[0].pack(\"w\")\n```\n\n  なお、後続の説明。\n", md
+    assert_equal "- **`w`**:\n\n  説明。\n\n  ```ruby\n  [0].pack(\"w\")\n  ```\n\n  なお、後続の説明。\n", md
     assert_equal rrd, BitClust::MarkdownToRRD.convert(md)
   end
 
