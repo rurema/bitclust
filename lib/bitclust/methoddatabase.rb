@@ -265,8 +265,15 @@ module BitClust
           [p, "#{p}.md", p.sub(/\.rd\z/, '.md')]
         }.flatten
       }.to_set
+      version = properties()["version"]
       files.each do |f|
         next if referenced.include?(File.expand_path(f))
+        # front matter の since/until でページ自体をバージョンで出し分ける
+        # （ライブラリ側 update_by_markdowntree と同じ意味論）。範囲外の版では
+        # ページを登録しない（例: doc/spec/safelevel は until: "3.2" で 3.2 以降
+        # 非生成）
+        since_version, until_version = doc_md_version_range(f)
+        next unless md_version_covers?(version, since_version, until_version)
         id = libname2id(f.delete_prefix("#{doc_root}/").sub(/\.md\z/, ''))
         se = DocEntry.new(self, id)
         s = Preprocessor.read(f, properties)
@@ -278,6 +285,25 @@ module BitClust
       end
     end
     private :copy_doc_md
+
+    # doc ページの先頭 front matter から since/until を読む
+    # （MarkdownTree.scan がライブラリ/エンティティで読むのと同じ書式）。
+    # front matter が無い、または since/until を持たなければ [nil, nil]。
+    def doc_md_version_range(path)
+      since_version = nil
+      until_version = nil
+      File.open(path, 'r:UTF-8') do |io|
+        first = io.gets
+        return [nil, nil] unless first && first =~ /\A---\s*$/
+        while (line = io.gets)
+          break if line =~ /\A---\s*$/
+          since_version = $1 if line =~ /\Asince:\s*"?([^"\s]+)"?/
+          until_version = $1 if line =~ /\Auntil:\s*"?([^"\s]+)"?/
+        end
+      end
+      [since_version, until_version]
+    end
+    private :doc_md_version_range
 
     #
     # Doc Entry
