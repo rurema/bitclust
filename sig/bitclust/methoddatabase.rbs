@@ -93,6 +93,9 @@ module BitClust
     # source には md がそのまま入り、source_location は md の実パスを指す
     def copy_doc_md: () -> void
 
+    # doc ページの先頭 front matter から since/until を読む
+    def doc_md_version_range: (String path) -> [ String?, String? ]
+
     public
 
     def docs: () -> Array[DocEntry]
