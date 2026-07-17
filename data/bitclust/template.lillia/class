@@ -83,6 +83,25 @@
 <%
       end
     end
+%>
+
+<%
+    dyninc_groups = @entry.dynamically_included_entries.group_by(&:klass)
+    unless dyninc_groups.empty? %>
+<%=   headline(_('Methods Added by Dynamic Include')) %>
+<dl class="rightlist">
+<%    dyninc_groups.each do |mod, mod_entries| %>
+<dt><%= mod.name %> (by <%= mod.library.name %>)</dt>
+<dd>
+<ul>
+<%      mod_entries.each do |m| %>
+<li><%= method_link(m.spec_string, m.name) %></li>
+<%      end %>
+</ul>
+</dd>
+<%    end %>
+</dl>
+<%  end
     headline_pop
 %>
 </div>

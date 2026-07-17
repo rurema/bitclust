@@ -182,5 +182,38 @@
 <%
       end
     end
+%>
+
+<%
+    dyninc_entries = @entry.dynamically_included_entries
+    unless dyninc_entries.empty?  %>
+<%=   headline(_('Methods Added by Dynamic Include')) %>
+<table class="entries methods">
+<tr>
+  <th><%= _('Signature') %></th>
+  <th><%= _('Description') %></th>
+  <th><%= _('Module') %></th>
+</tr>
+<%
+      headline_push
+      dyninc_entries.each do |m|
+        foreach_method_chunk(m.source) do |sigs, src| %>
+<tr>
+<td class="signature">
+  <a href="<%=h method_url(m.spec_string) %>"><code>
+  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
+  </code></a>
+</td>
+<td class="description"><%= compile_rd(src) %></td>
+<td class="library"><%= class_link(m.klass.name) + " (by " + library_link(m.library.name) + ")" %></td>
+</tr>
+<%
+        end
+      end
+      headline_pop
+%>
+</table>
+<%
+    end
     headline_pop
 %>
