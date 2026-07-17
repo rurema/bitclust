@@ -97,11 +97,11 @@ module BitClust
 
     def collect_fence_lines: (Regexp terminator) -> Array[String]
 
-    # info string（lang と title="cap"）のパース
-    def parse_fence_info: (String rest) -> [String?, String?]
+    # info string（lang [invalid] [title="cap"]）のパース
+    def parse_fence_info: (String rest) -> [String?, String?, bool]
 
     # ハイライト付き <pre> の本体
-    def highlighted_fence_body: (String lang, String? caption, Regexp terminator, ?Regexp? strip_re) -> void
+    def highlighted_fence_body: (String lang, String? caption, Regexp terminator, ?Regexp? strip_re, ?invalid: bool) -> void
 
     # リスト項目・dlist 説明の中のインデントされたフェンス
     def indented_code_fence: () -> void

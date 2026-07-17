@@ -286,10 +286,12 @@ module BitClust
     # ruby(rb などの Rouge 上の alias を含む)は構文チェックを兼ねる
     # Ripper ベースの SyntaxHighlighter、その他の言語は Rouge を使う。
     # Rouge が知らない言語はエスケープのみ(従来この経路と ruby の構文
-    # エラー時フォールバックはエスケープされずに出力されていたのを修正)
-    def highlight_source(src, lang, caption)
+    # エラー時フォールバックはエスケープされずに出力されていたのを修正)。
+    # invalid: true(md の ```ruby invalid)は構文として完全でないコードの
+    # 印で、Ripper の構文チェックをせず Rouge の lexer で色付けする(#251)
+    def highlight_source(src, lang, caption, invalid: false)
       lexer = ::Rouge::Lexer.find(lang)
-      if lexer && lexer.tag == 'ruby'
+      if lexer && lexer.tag == 'ruby' && !invalid
         begin
           filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
           BitClust::SyntaxHighlighter.new(src, filename).highlight

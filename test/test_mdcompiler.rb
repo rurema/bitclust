@@ -826,6 +826,38 @@ class TestMDCompilerRougeHighlight < Test::Unit::TestCase
     assert_not_match(/<b>plain/, html)
   end
 
+  # ```ruby invalid: 構文として完全でないコード(SyntaxError の例・文法断片)を
+  # Ripper の構文チェックなしで Rouge の Ruby lexer により色付けする(issue #251)
+  def test_ruby_invalid_fence_uses_rouge_without_syntax_check
+    # Ripper ではパースできない断片でもビルドエラーにならない
+    html = @md.compile("```ruby invalid\nif cond then\n```\n")
+    assert_match(/<pre class="highlight ruby">/, html)
+    assert_match(%r{<span class="k">if</span>}, html)
+  end
+
+  def test_ruby_invalid_fence_with_title
+    html = @md.compile("```ruby invalid title=\"SyntaxError の例\"\ndef broken(\n```\n")
+    assert_match(%r{<span class="caption">SyntaxError の例</span>}, html)
+    assert_match(/<pre class="highlight ruby">/, html)
+    assert_match(%r{<span class="k">def</span>}, html)
+  end
+
+  def test_invalid_flag_on_other_lang_is_harmless
+    plain = @md.compile("```c\nint x = 1;\n```\n")
+    flagged = @md.compile("```c invalid\nint x = 1;\n```\n")
+    assert_equal(plain, flagged)
+  end
+
+  def test_ruby_fence_without_invalid_still_checks_syntax
+    md = BitClust::MDCompiler.new(@u, 1,
+      { :database => @db, :gfm => true, :stop_on_syntax_error => false })
+    html = md.compile("```ruby\nif cond then\n```\n")
+    # invalid なしの ruby は従来どおり構文チェックされ、エラー時は
+    # エスケープのみのフォールバック(色付けなし)になる
+    assert_not_match(/<span class="k">/, html)
+    assert_match(/if cond then/, html)
+  end
+
   def test_rd_emlist_with_c_lang_is_equivalent
     rd_src = "//emlist[キャプション][c]{\nint x = 1;\n//}\n"
     md_src = BitClust::RRDToMarkdown.convert(rd_src)
