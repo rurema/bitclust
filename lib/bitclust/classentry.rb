@@ -230,6 +230,24 @@ module BitClust
       list
     end
 
+    # Public instance methods contributed by modules that are dynamically
+    # included into this class (via `# reopen` + `include:`/`include`).
+    #
+    # Unlike +included+, +dynamically_included+ does not affect +ancestors+
+    # or the method resolution order, so these methods are never returned by
+    # +entries+/+partitioned_entries+. This method exists so that screens and
+    # templates can list them separately, attributed to the module (and its
+    # library) that defines them, without disturbing the MRO.
+    #
+    # Only each module's own public instance methods are returned (i.e. its
+    # +entries(0)+ filtered like +public_instance_methods+); methods that the
+    # dynamically included module itself inherits are not followed. If no
+    # module has been dynamically included, this returns an empty array, so
+    # output for classes without dynamic include is unaffected.
+    def dynamically_included_entries
+      dynamically_included().flat_map {|m| m.public_instance_methods(0) }
+    end
+
     def extended_modules
       ancestors().select(&:class?).map(&:extended).flatten
     end

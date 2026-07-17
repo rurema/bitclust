@@ -206,3 +206,66 @@ HERE
     assert_equal('', method.description)
   end
 end
+
+class TestClassEntryDynamicallyIncludedEntries < Test::Unit::TestCase
+  SRC = <<'HERE'
+= module DynMod
+dyn module
+== Instance Methods
+--- dyn_method
+dyn method
+== Private Instance Methods
+--- hidden_dyn_method
+hidden dyn method
+= class Host < Object
+host class
+== Instance Methods
+--- host_method
+host method
+= reopen Host
+include DynMod
+HERE
+
+  def setup
+    @lib, = BitClust::RRDParser.parse(SRC, 'dynlib')
+    @host = @lib.fetch_class('Host')
+  end
+
+  def test_returns_public_instance_methods_of_dynamically_included_modules
+    assert_equal(['dyn_method'], @host.dynamically_included_entries.map(&:name))
+  end
+
+  def test_excludes_private_instance_methods_of_the_dynamically_included_module
+    names = @host.dynamically_included_entries.map(&:name)
+    assert_not_include(names, 'hidden_dyn_method')
+  end
+
+  def test_entries_keep_their_originating_module_and_library
+    entry = @host.dynamically_included_entries.first
+    assert_equal('DynMod', entry.klass.name)
+    assert_equal('dynlib', entry.library.name)
+  end
+
+  def test_does_not_affect_ancestors
+    # dynamic include must not change the MRO/ancestors chain.
+    assert_equal(['Host', 'Object'], @host.ancestors.map(&:name))
+  end
+
+  def test_does_not_affect_entries_or_partitioned_entries
+    assert_not_include(@host.entries.map(&:name), 'dyn_method')
+    parts = @host.partitioned_entries
+    assert_not_include(parts.instance_methods.map(&:name), 'dyn_method')
+    assert_not_include(parts.added.map(&:name), 'dyn_method')
+  end
+
+  def test_is_empty_when_class_has_no_dynamic_include
+    plain, = BitClust::RRDParser.parse(<<'PLAIN', 'dynlib')
+= class Plain < Object
+plain class
+== Instance Methods
+--- plain_method
+plain method
+PLAIN
+    assert_equal([], plain.fetch_class('Plain').dynamically_included_entries)
+  end
+end

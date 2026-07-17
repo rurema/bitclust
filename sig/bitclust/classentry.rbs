@@ -82,6 +82,8 @@ module BitClust
 
     def extended_modules: () -> Array[ClassEntry]
 
+    def dynamically_included_entries: () -> Array[MethodEntry]
+
     def entries: (?Integer level) -> Array[MethodEntry]
     alias methods entries
 

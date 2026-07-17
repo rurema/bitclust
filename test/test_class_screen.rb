@@ -103,4 +103,60 @@ HERE
     assert_include(@html, '再定義されたメソッド')
     assert_include(@html, 'redefined_instance_method')
   end
+
+  def test_class_without_dynamic_include_does_not_show_dynamic_include_section
+    # Regression guard: classes that never use dynamic include must render
+    # exactly as before (no new headline, no leftover markers).
+    assert_not_include(@html, '動的includeで追加されるメソッド')
+  end
+end
+
+class TestClassScreenDynamicInclude < Test::Unit::TestCase
+  SRC = <<'HERE'
+= module JsonMixin
+json mixin module
+== Instance Methods
+--- to_json
+to json
+== Private Instance Methods
+--- hidden_json_helper
+hidden json helper
+= class Host < Object
+host class
+== Instance Methods
+--- host_method
+host method
+= reopen Host
+include JsonMixin
+HERE
+
+  def setup
+    @lib, = BitClust::RRDParser.parse(SRC, 'jsonlib')
+    datadir = File.expand_path('../data/bitclust', __dir__)
+    manager = BitClust::ScreenManager.new(
+      :templatedir => "#{datadir}/template.offline",
+      :catalogdir => "#{datadir}/catalog",
+      :encoding => 'utf-8',
+      :default_encoding => 'utf-8',
+      :base_url => '',
+      :target_version => '3.4'
+    )
+    db = BitClust::MethodDatabase.dummy('version' => '3.4')
+    @html = manager.class_screen(@lib.fetch_class('Host'), :database => db).body
+  end
+
+  def test_dynamically_included_method_is_listed_with_attribution
+    assert_include(@html, '動的includeで追加されるメソッド')
+    assert_include(@html, 'to_json')
+    assert_include(@html, 'JsonMixin')
+    assert_include(@html, '(by jsonlib)')
+  end
+
+  def test_ancestors_are_not_affected_by_dynamic_include
+    assert_not_include(@lib.fetch_class('Host').ancestors.map(&:name), 'JsonMixin')
+  end
+
+  def test_private_instance_method_of_dynamically_included_module_is_hidden
+    assert_not_include(@html, 'hidden_json_helper')
+  end
 end
