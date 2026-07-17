@@ -160,3 +160,52 @@ HERE
     assert_not_include(@html, 'hidden_json_helper')
   end
 end
+
+class TestClassScreenAddedMethods < Test::Unit::TestCase
+  SRC = <<'HERE'
+= class Target < Object
+target class
+== Instance Methods
+--- own_method
+own method
+= reopen Target
+== Instance Methods
+--- added_by_reopen
+added by reopen
+HERE
+
+  def setup
+    @lib, = BitClust::RRDParser.parse(SRC, 'extlib')
+    datadir = File.expand_path('../data/bitclust', __dir__)
+    @manager = BitClust::ScreenManager.new(
+      :templatedir => "#{datadir}/template.offline",
+      :catalogdir => "#{datadir}/catalog",
+      :encoding => 'utf-8',
+      :default_encoding => 'utf-8',
+      :base_url => '',
+      :target_version => '3.4'
+    )
+    db = BitClust::MethodDatabase.dummy('version' => '3.4')
+    @html = @manager.class_screen(@lib.fetch_class('Target'), :database => db).body
+  end
+
+  # reopen 本文に直接定義されたメソッド(kind = :added)が
+  # statichtml 用テンプレートの目次に出ること
+  def test_added_methods_are_listed_in_offline_index
+    assert_include(@html, '追加されるメソッド')
+    assert_include(@html, 'added_by_reopen')
+  end
+
+  def test_class_without_added_methods_has_no_added_heading
+    plain, = BitClust::RRDParser.parse(<<'PLAIN', 'extlib')
+= class Plain < Object
+plain class
+== Instance Methods
+--- plain_method
+plain method
+PLAIN
+    db = BitClust::MethodDatabase.dummy('version' => '3.4')
+    html = @manager.class_screen(plain.fetch_class('Plain'), :database => db).body
+    assert_not_include(html, '追加されるメソッド')
+  end
+end
