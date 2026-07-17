@@ -620,8 +620,14 @@ module BitClust
 
     def rdoc_url(method_id, version)
       cname, tmark, mname, _libname = methodid2specparts(method_id)
-      tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
       cname = cname.split(".").first || raise
+      # rdoc は Kernel のモジュール関数(rb_define_global_function 由来)を
+      # private インスタンスメソッドとして掲載しているため i にする
+      if typemark2char(tmark) == 'i' || (cname == "Kernel" && tmark == '.#')
+        tchar = 'i'
+      else
+        tchar = 'c'
+      end
       cname = cname.gsub('::', '/')
       id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
 
