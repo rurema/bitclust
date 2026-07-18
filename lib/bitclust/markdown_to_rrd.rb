@@ -47,7 +47,7 @@ module BitClust
             .gsub(/^\*\*(\d+\.)\*\* /, '\1 ')
             .gsub(/^\\#/, '#')
             .gsub(/\\`/, '`')
-      ).gsub(/\x00(\w+)\x00/) { "[a:#{$1}]" }
+      ).gsub(/\x00([-\w]+)\x00/) { "[a:#{$1}]" }
        .gsub(/\x01(\d+)\x01/) { saved[$1.to_i] }
     end
 
@@ -99,7 +99,7 @@ module BitClust
     # 全文変換（convert）の対応箇所と同じ規則の表示専用ミラー
     def self.restore_display_line(l)
       case l
-      when /\A(\#{1,6}) (.*?) \{#(\w+)\}([ \t]*\n?)\z/m
+      when /\A(\#{1,6}) (.*?) \{#([-\w]+)\}([ \t]*\n?)\z/m
         # アンカーは restore_inline の裸参照復元（[a:x]→[[a:x]]）を
         # 避けるため \x00 で包み、最後に [a:x] へ戻す
         "#{'=' * ($1 || raise).length}\x00#{$3}\x00 #{$2}#{$4}"

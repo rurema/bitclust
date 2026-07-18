@@ -726,16 +726,30 @@ HERE
     assert_equal(expected, compiler.send(:compile_text, target), target)
   end
 
-  data("doc"             => ['[[d:hoge/bar]]',            '<a href="dummy/hoge/bar">.*</a>'],
-       "ref doc"         => ['[[ref:d:hoge/bar#frag]]',   '<a href="dummy/hoge/bar#frag">.*</a>'],
-       "ref class"       => ['[[ref:c:Hoge#frag]]',       '<a href="dummy/class/Hoge#frag">.*</a>'],
-       "ref special var" => ['[[ref:m:$~#frag]]',         '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
-       "ref library"     => ['[[ref:lib:jcode#frag]]',    '<a href="dummy/library/jcode#frag">.*</a>'],
-       "ref class error" => ['[[ref:c:Hoge]]',            'compileerror'],
-       "ref ref"         => ['[[ref:ref:hoge/bar#frag]]', 'compileerror'],)
+  data("doc"                    => ['[[d:hoge/bar]]',                 '<a href="dummy/hoge/bar">.*</a>'],
+       "ref doc"                => ['[[ref:d:hoge/bar#frag]]',        '<a href="dummy/hoge/bar#frag">.*</a>'],
+       "ref doc hyphen frag"    => ['[[ref:d:hoge/bar#thread-safe]]', '<a href="dummy/hoge/bar#thread-safe">.*</a>'],
+       "ref class"              => ['[[ref:c:Hoge#frag]]',            '<a href="dummy/class/Hoge#frag">.*</a>'],
+       "ref special var"        => ['[[ref:m:$~#frag]]',              '<a href="dummy/method/Kernel/v/=7e#frag">.*</a>'],
+       "ref library"            => ['[[ref:lib:jcode#frag]]',         '<a href="dummy/library/jcode#frag">.*</a>'],
+       "ref class error"        => ['[[ref:c:Hoge]]',                 'compileerror'],
+       "ref ref"                => ['[[ref:ref:hoge/bar#frag]]',      'compileerror'],)
   def test_bracket_link_doc(data)
     target, expected = data
     assert_match(/#{expected}/, @c.send(:compile_text, target), target)
+  end
+
+  def test_reference_link_same_page_hyphen_fragment
+    # [ref:frag]（type:name 無し）は同一ページ内アンカーへのリンク。
+    # ハイフン入りフラグメント（doctree/manual の {#id} アンカーに合わせる）
+    entry = BitClust::DocEntry.new(@db, 'glossary')
+    entry.source = "### スレッドセーフ {#thread-safe}\n\n本文。\n"
+    refs = BitClust::RefsDatabase.new
+    refs.extract(entry)
+    stub(@db).refs { refs }
+    compiler = BitClust::RDCompiler.new(@u, 1, {:database => @db, :entry => entry})
+    assert_equal('<a href="#thread-safe">スレッドセーフ</a>',
+                 compiler.send(:reference_link, 'thread-safe'))
   end
 
   def test_nomethod_is_not_rendered

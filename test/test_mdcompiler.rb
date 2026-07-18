@@ -95,6 +95,16 @@ class TestMDCompiler < Test::Unit::TestCase
     RD
   end
 
+  def test_inline_ref_with_hyphenated_fragment
+    # [ref:d:page#frag] のフラグメントはハイフンを含められる
+    # （doctree/manual の glossary.md 用語アンカー等、rd 直接/md 変換後で等価）
+    assert_equivalent_method <<~RD
+      --- index(val) -> Integer
+
+      [[ref:d:hoge/bar#thread-safe]] を参照。
+    RD
+  end
+
   def test_code_block_from_emlist
     assert_equivalent_method <<~RD
       --- index(val) -> Integer
@@ -177,6 +187,20 @@ class TestMDCompiler < Test::Unit::TestCase
       説明。
 
       ===[a:anchor] 深掘り
+
+      本文。
+    RD
+  end
+
+  def test_entry_heading_with_hyphenated_anchor
+    # ハイフン入りアンカー（doctree/manual の glossary.md 用語アンカー等）でも
+    # rd 直接コンパイルと md 変換後コンパイルが等価であること
+    assert_equivalent_method <<~RD
+      --- index(val) -> Integer
+
+      説明。
+
+      ===[a:thread-safe] スレッドセーフ
 
       本文。
     RD

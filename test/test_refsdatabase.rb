@@ -81,4 +81,36 @@ HERE
       assert_equal(s.upcase, db.refs['class',  'ARGF', s])
     end
   end
+
+  # rd 形式の [a:xxx] アンカーもハイフンを含められる（doctree/bitclust#(このPR)）
+  S3 = <<HERE
+===[a:with-hyphen] With Hyphen
+HERE
+
+  def test_make_refs_rd_anchor_with_hyphen
+    _, db = BitClust::RRDParser.parse(S3, 'dummy')
+    db.make_refs
+    assert_equal('With Hyphen', db.refs['library', 'dummy', 'with-hyphen'])
+  end
+
+  # md ソースの見出しアンカー {#xxx} 収集はハイフンを許容する
+  # （doctree/manual の glossary.md 等、用語アンカーはハイフン区切り）
+  def test_extract_markdown_heading_anchor_with_hyphen
+    db = BitClust::MethodDatabase.dummy("version" => "3.4.0")
+    entry = BitClust::DocEntry.new(db, 'glossary')
+    entry.source = "### スレッドセーフ {#thread-safe}\n\n本文。\n"
+    refs = BitClust::RefsDatabase.new
+    refs.extract(entry)
+    assert_equal('スレッドセーフ', refs['doc', 'glossary', 'thread-safe'])
+  end
+
+  # 従来のアンダースコア・単語アンカーの回帰が無いことも確認する
+  def test_extract_markdown_heading_anchor_with_underscore
+    db = BitClust::MethodDatabase.dummy("version" => "3.4.0")
+    entry = BitClust::DocEntry.new(db, 'glossary')
+    entry.source = "### 見出し {#my_anchor}\n\n本文。\n"
+    refs = BitClust::RefsDatabase.new
+    refs.extract(entry)
+    assert_equal('見出し', refs['doc', 'glossary', 'my_anchor'])
+  end
 end
