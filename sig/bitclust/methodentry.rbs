@@ -58,6 +58,8 @@ module BitClust
 
     def labels: () -> Array[String]
 
+    def title_labels: () -> Array[String]
+
     def name?: (String name) -> bool
 
     def name_match?: (Regexp re) -> bool

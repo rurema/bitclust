@@ -1,6 +1,6 @@
 <%
     entry = @entries.sort.first
-    @title = "#{entry.type_label} #{entry.label}"
+    @title = "#{entry.type_label} #{entry.title_labels.join(', ')}"
 %>
 <p>
 <%= manual_home_link() %>
