@@ -15,14 +15,13 @@ EOD
 
   s.metadata = {
     "bug_tracker_uri"   => "https://github.com/rurema/bitclust/issues",
-    "documentation_uri" => "https://github.com/rurema/doctree/wiki",
+    "documentation_uri" => "https://github.com/rurema/bitclust/blob/master/doc/usage.md",
     "homepage_uri"      => s.homepage,
     "source_code_uri"   => "https://github.com/rurema/bitclust",
     "github_repo"       => "https://github.com/rurema/bitclust",
-    "wiki_uri"          => "https://github.com/rurema/doctree/wiki",
   }
 
-  s.files         = Dir["ChangeLog", "Gemfile", "README", "Rakefile", "bitclust.gemspec",
+  s.files         = Dir["ChangeLog", "Gemfile", "README.md", "Rakefile", "bitclust.gemspec",
                         "data/**/*", "lib/**/*.rb", "theme/**/*"].reject {|f| f =~ /.*~/ }
   s.test_files    = Dir["test/**/*.rb"].reject {|f| f =~ /.*~/ }
   s.executables   = ["bitclust"]
@@ -32,6 +31,7 @@ EOD
   s.add_development_dependency "test-unit-notify"
   s.add_development_dependency "test-unit-rr"
   s.add_runtime_dependency "rack"
+  s.add_runtime_dependency "rouge"
   s.add_runtime_dependency "progressbar", ">= 1.9.0", "< 2.0"
   s.add_runtime_dependency "webrick"
   s.add_runtime_dependency "drb"

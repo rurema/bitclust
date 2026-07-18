@@ -230,6 +230,24 @@ module BitClust
       list
     end
 
+    # Public instance methods contributed by modules that are dynamically
+    # included into this class (via `# reopen` + `include:`/`include`).
+    #
+    # Unlike +included+, +dynamically_included+ does not affect +ancestors+
+    # or the method resolution order, so these methods are never returned by
+    # +entries+/+partitioned_entries+. This method exists so that screens and
+    # templates can list them separately, attributed to the module (and its
+    # library) that defines them, without disturbing the MRO.
+    #
+    # Only each module's own public instance methods are returned (i.e. its
+    # +entries(0)+ filtered like +public_instance_methods+); methods that the
+    # dynamically included module itself inherits are not followed. If no
+    # module has been dynamically included, this returns an empty array, so
+    # output for classes without dynamic include is unaffected.
+    def dynamically_included_entries
+      dynamically_included().flat_map {|m| m.public_instance_methods(0) }
+    end
+
     def extended_modules
       ancestors().select(&:class?).map(&:extended).flatten
     end
@@ -257,7 +275,8 @@ module BitClust
                        :instance_methods,  :private_instance_methods, :protected_instance_methods,
                        :module_functions,
                        :constants, :special_variables,
-                       :added, :undefined)
+                       :redefined,
+                       :added, :undefined, :nomethod)
 
     def partitioned_entries(level = 0)
       # @type var s: Array[MethodEntry]
@@ -268,17 +287,21 @@ module BitClust
       # @type var mf: Array[MethodEntry]
       # @type var c: Array[MethodEntry]
       # @type var v: Array[MethodEntry]
+      # @type var redefined: Array[MethodEntry]
       # @type var added: Array[MethodEntry]
       # @type var undefined: Array[MethodEntry]
+      # @type var nomethod: Array[MethodEntry]
       s = []; spv = []
       i = []; ipv = []; ipt = []
       mf = []
       c = []; v = []
+      redefined = []
       added = []
       undefined = []
+      nomethod = []
       entries(level).sort_by(&:name).each do |m|
         case m.kind
-        when :defined, :redefined
+        when :defined
           case m.type
           when :singleton_method
             (m.public? ? s : spv).push m
@@ -295,14 +318,18 @@ module BitClust
           else
             raise "must not happen: m.type=#{m.type.inspect} (#{m.inspect})"
           end
+        when :redefined
+          redefined.push m
         when :added
           added.push m
         when :undefined
           undefined.push m
+        when :nomethod
+          nomethod.push m
         end
       end
       # steep:ignore:start
-      Parts.new(s,spv, i,ipv,ipt, mf, c, v, added, undefined)
+      Parts.new(s,spv, i,ipv,ipt, mf, c, v, redefined, added, undefined, nomethod)
       # steep:ignore:end
     end
 
@@ -425,7 +452,7 @@ module BitClust
     end
 
     def description
-      source.split(/\n\n+/, 2)[0].strip
+      description_text(source.split(/\n\n+/, 2)[0].strip)
     end
 
     def clear_cache

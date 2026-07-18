@@ -53,6 +53,8 @@ module BitClust
 
     def read_chunks: (LineInput f) -> Array[Chunk]
 
+    METHOD_ATTRIBUTE_LINE_RE: ::Regexp
+
     def read_chunk: (LineInput f) -> Chunk
 
     def check_chunk_signatures: (Array[Signature] sigs, String line) -> Signature
@@ -122,6 +124,10 @@ module BitClust
       def signature: () -> Signature?
 
       def define_method: (Chunk chunk) -> void
+
+      METHOD_ATTRIBUTES: Array[String]
+
+      def method_attributes: (Chunk chunk) -> Array[String]
 
       def method_id: (Chunk chunk) -> MethodID
     end

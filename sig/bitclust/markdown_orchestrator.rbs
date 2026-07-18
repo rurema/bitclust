@@ -1,0 +1,119 @@
+module BitClust
+  # RRD ツリー → Markdown ツリー変換のクロスファイル方針を束ねるオーケストレータ。
+  #
+  # 単一ファイル記法変換（RRDToMarkdown）はそのままに、include グラフの解析結果から
+  # 各ファイルへ次を適用する:
+  # - grouping include の prune（エンティティ取り込みは front matter 発見へ移行）
+  # - ファイル全体を包む版ゲートの解除（front matter の since/until へ移行）
+  # - front matter 注入（member: library/構造ゲート、library ルート: type/版ゲート）
+  #
+  # スコープ（対象版範囲）はパラメータ。旧版サルベージ時は別スコープで再実行する。
+  class MarkdownOrchestrator
+    # relpath → 注入する front matter（IncludeGraph の解析結果 +
+    # library ルートの type/版ゲートをマージしたもの）
+    @extra: Hash[String, IncludeGraph::front_matter]
+
+    @prune_sites: Hash[String, Array[String]]
+
+    attr_reader scope: IncludeGraph::Scope
+
+    attr_reader graph: IncludeGraph
+
+    def initialize: (String src_root, ?scope: IncludeGraph::Scope) -> void
+
+    def warnings: () -> Array[String]
+
+    # 変換対象か。LIBRARIES は front matter による発見に置き換わるため対象外
+    def convert?: (String relpath) -> bool
+
+    # 1つの出力 .md ファイルに対応する単位。
+    # path = 出力相対パス、rrd = rd 側到達点（md→rd 検証の期待値）、
+    # front_matter = 注入する front matter
+    class Unit < ::Struct[untyped]
+      attr_accessor path: String
+      attr_accessor rrd: String
+      attr_accessor front_matter: IncludeGraph::front_matter
+
+      def self.new: (String path, String rrd, IncludeGraph::front_matter front_matter) -> instance
+                  | ...
+    end
+
+    # relpath の RRD を出力単位の列に還元する。
+    # ヘッダ関係（include/extend/alias）を持つマルチエンティティファイルは
+    # エンティティ単位に分割する（関係の front matter 一元化のため）。
+    # 関係を持たない束ね（Errno 族等）と lib+単一エンティティ兼用ファイルは
+    # 1 単位のまま。ライブラリファイルの分割ではエンティティを <libname>/ 配下に
+    # 置き、library と版ゲートを注入する
+    def units: (String relpath, String rrd) -> Array[Unit]
+
+    def convert_unit: (Unit unit) -> String
+
+    # relpath の RRD を新パイプライン形の Markdown へ変換する（分割なしファイル用）
+    def convert: (String relpath, String rrd) -> String
+
+    # 変換の rd 側到達点（prune + 全体ゲート解除 + 定数 H1 ゲート解決後の RRD）と
+    # front matter。MarkdownToRRD.convert(convert(...)) はこの RRD と一致する
+    def reduce: (String relpath, String rrd) -> [String, IncludeGraph::front_matter]
+
+    private
+
+    # 分割すべきならセグメント列（EntitySplitter.segments と同形の
+    # [エンティティ名, テキスト] の列。名前 nil はライブラリ概要部）を、
+    # そうでなければ nil を返す。
+    # 条件: エンティティ（名前付きセグメント）が2つ以上 + いずれかがヘッダ関係を持つ。
+    # lib+単一エンティティ兼用（pathname 型、仕様が認める形）は分割しない
+    def split_segments: (String reduced) -> Array[[String?, String]]?
+
+    # セグメントの置き場所が元ファイルと異なるディレクトリになる場合
+    # （lib 分割 → <libname>/ 配下）、相対 #@include を新ディレクトリから
+    # 解決できるよう書き換える
+    def rewrite_includes: (String text, String source_dir, String new_dir) -> String
+
+    # 出力 .md の相対パス（.rd は差し替え、その他は付加）
+    def md_path: (String relpath) -> String
+
+    # ライブラリファイルの出力パス。他ファイルの出力と大文字小文字のみで
+    # 衝突する場合（rdoc/rdoc.md と rdoc/RDoc.md）は basename に .lib を挟んで
+    # 回避する（macOS/Windows の case-insensitive FS でチェックアウト不能に
+    # なるため）。名前がパスから導出できなくなるので front matter の name: で保持する
+    def output_path: (String relpath, IncludeGraph::front_matter front_matter) -> String
+
+    RELATION_RE: ::Regexp
+
+    HEADER_DIR_RE: ::Regexp
+
+    BLANK_LINE_RE: ::Regexp
+
+    # H1 直後のヘッダ関係領域を md→rd の再生成形に正規化する:
+    # 最後の関係行までの空行を除き、関係行の末尾空白を落とす。
+    # 関係を持たない H1 の直後や本文の空行・散文ゲートは触らない
+    def normalize_header_regions: (String rrd) -> String
+
+    # 「=class Encoding」のようなスペース無し H1（RRDParser は受理）を
+    # 正規形「= class」に直す。単一ファイル変換器は正規形のみ扱う
+    def normalize_entity_h1: (String rrd) -> String
+
+    # 「---critical=(bool)」のようなスペース無しシグネチャ（RDCompiler は
+    # /\A---/ で受理）を正規形「--- name」に直す。コードブロック内に
+    # 行頭 --- は現れない前提（roundtrip 検証が破れを検出する）
+    def normalize_signature_spacing: (String rrd) -> String
+
+    # ファイル全体ゲートを front matter へ解除してよいか。
+    # - 常真ゲート（gate == {}）: 常に解除（従来どおり）
+    # - 断片・スコープ外（front matter なし）: 据え置き。front matter を付けると
+    #   #@include 展開の途中に `---` が現れてパースが壊れる（_builtin/Fiber.current）
+    # - type: library ルート: LIBRARIES 由来境界に包含される場合のみ（下記）
+    # - メンバー: エンティティ自身の存在ゲートなので常に解除
+    def unwrap_allowed?: (IncludeGraph::front_matter front_matter, IncludeGraph::gate gate) -> bool
+
+    # ライブラリルートのファイル全体ゲートが LIBRARIES 由来の既存境界に
+    # 包含されるか。包含されないゲート（cmath: LIBRARIES は until のみ +
+    # ファイルは #@since 1.9.1）をマージすると「ライブラリの存在」まで
+    # 狭めてしまう（旧世界ではスコープ下限の版にも存在して内容が空）
+    def gate_subsumed?: (IncludeGraph::front_matter front_matter, IncludeGraph::gate gate) -> bool
+
+    # ファイル全体ゲートと注入済みゲート（include サイト / LIBRARIES 由来）の交差を取る
+    # （since は max、until は min。両者は同じ制約の別表現なので通常は一致する）
+    def merge_gate: (IncludeGraph::front_matter front_matter, IncludeGraph::gate gate) -> void
+  end
+end

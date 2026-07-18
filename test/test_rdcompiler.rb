@@ -359,10 +359,8 @@ HERE
 <dt class='method-param'>[PARAM] arg:</dt>
 <dd>
 dsc1
-<pre class="highlight ruby">
 <span class="caption">This is caption</span>
-<code>
-dsc2
+<pre class="highlight ruby"><code>dsc2
 dsc3
 </code></pre>
 </dd>
@@ -387,10 +385,8 @@ HERE
 <p>
 abs
 </p>
-<pre class="highlight ruby">
 <span class="caption">description</span>
-<code>
-<span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
+<pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
 </code></pre>
 </dd>
 HERE
@@ -412,9 +408,7 @@ HERE
 <p>
 abs
 </p>
-<pre class="highlight ruby">
-<code>
-<span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
+<pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
 </code></pre>
 </dd>
 HERE
@@ -443,9 +437,7 @@ HERE
   expected = <<'HERE'
 <dt class="method-heading" id="dummy"><code>singleton_method(name) -&gt; Method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
-<pre class="highlight ruby">
-<code>
-<span class="k">class</span> <span class="o">&lt;&lt;</span>obj
+<pre class="highlight ruby"><code><span class="k">class</span> <span class="o">&lt;&lt;</span>obj
   <span class="k">def</span> <span class="nf">foo</span>
     <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
   <span class="k">end</span>
@@ -696,13 +688,18 @@ HERE
        "instance method"     => ['[[m:String#dump]]', '<a href="dummy/method/String/i/dump">String#dump</a>'],
        "indexer"             => ['[[m:String#[] ]]',  '<a href="dummy/method/String/i/=5b=5d">String#[]</a>'],
        "C API"               => ['[[f:rb_ary_new3]]', '<a href="dummy/function/rb_ary_new3">rb_ary_new3</a>'],
-       "C API root"          => ['[[f:/]]',           '<a href="dummy/function/">All C API</a>'],
-       "C API index"         => ['[[f:_index]]',      '<a href="dummy/function/">All C API</a>'],
+       "C API root"          => ['[[f:/]]',           '<a href="dummy/function/">Function Index</a>'],
+       "C API index"         => ['[[f:_index]]',      '<a href="dummy/function/">Function Index</a>'],
        "standard library"    => ['[[lib:jcode]]',     '<a href="dummy/library/jcode">jcode</a>'],
+       "library root"        => ['[[lib:/]]',         '<a href="dummy/library/">Library Index</a>'],
+       "library index"       => ['[[lib:_index]]',    '<a href="dummy/library/_index">Library Index</a>'],
+       "builtin library"     => ['[[lib:_builtin]]',  '<a href="dummy/library/_builtin">Builtin Library</a>'],
        "man command"         => ['[[man:tr(1)]]',     '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/utilities/tr.html">tr(1)</a>'],
        "man header"          => ['[[man:sys/socket.h(header)]]', '<a class="external" href="http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html">sys/socket.h(header)</a>'],
        "man system call"     => ['[[man:fopen(3linux)]]', '<a class="external" href="http://man7.org/linux/man-pages/man3/fopen.3.html">fopen(3linux)</a>'],
        "RFC"                 => ['[[RFC:2822]]',      '<a class="external" href="https://tools.ietf.org/html/rfc2822">[RFC2822]</a>'],
+       "ISO standard"        => ['[[ISO:8601]]',      'ISO 8601'],
+       "JIS standard"        => ['[[JIS:X 0301]]',    'JIS X 0301'],
        "special var $~"      => ['[[m:$~]]',          '<a href="dummy/method/Kernel/v/=7e">$~</a>'],
        "special var $,"      => ['[[m:$,]]',          '<a href="dummy/method/Kernel/v/=2c">$,</a>'],
        "extra close bracket" => ['[[c:String]]]', '<a href="dummy/class/String">String</a>]'],
@@ -718,6 +715,17 @@ HERE
     assert_equal(expected, @c.send(:compile_text, target), target)
   end
 
+  data("library root"    => ['[[lib:/]]',        '<a href="dummy/library/">ライブラリ一覧</a>'],
+       "builtin library" => ['[[lib:_builtin]]', '<a href="dummy/library/_builtin">組み込みライブラリ</a>'],
+       "C API root"      => ['[[f:/]]',          '<a href="dummy/function/">関数一覧</a>'])
+  def test_bracket_link_with_catalog(data)
+    target, expected = data
+    prefix = File.expand_path('../data/bitclust/catalog', __dir__)
+    catalog = BitClust::MessageCatalog.load_with_locales(prefix, ['ja_JP.UTF-8'])
+    compiler = BitClust::RDCompiler.new(@u, 1, {:database => @db, :catalog => catalog})
+    assert_equal(expected, compiler.send(:compile_text, target), target)
+  end
+
   data("doc"             => ['[[d:hoge/bar]]',            '<a href="dummy/hoge/bar">.*</a>'],
        "ref doc"         => ['[[ref:d:hoge/bar#frag]]',   '<a href="dummy/hoge/bar#frag">.*</a>'],
        "ref class"       => ['[[ref:c:Hoge#frag]]',       '<a href="dummy/class/Hoge#frag">.*</a>'],
@@ -728,6 +736,62 @@ HERE
   def test_bracket_link_doc(data)
     target, expected = data
     assert_match(/#{expected}/, @c.send(:compile_text, target), target)
+  end
+
+  def test_nomethod_is_not_rendered
+    src = <<'HERE'
+--- to_a -> Array
+{: nomethod}
+
+説明のためここに記載しています。
+HERE
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { "dummy" }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { "String/i.index._builtin" }
+    html = @c.compile_method(method_entry)
+    assert_not_include(html, 'UNKNOWN_META_INFO')
+    assert_not_include(html, '{:')
+    assert_include(html, '説明のためここに記載しています。')
+  end
+
+  def test_attribute_lines_between_alias_signatures_are_not_rendered
+    src = <<'HERE'
+--- to_a -> Array
+{: nomethod}
+--- to_a2 -> Array
+{: nomethod}
+
+説明のためここに記載しています。
+HERE
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { "dummy" }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { "String/i.index._builtin" }
+    html = @c.compile_method(method_entry)
+    assert_not_include(html, '{:')
+    assert_include(html, 'to_a2')
+    assert_include(html, '説明のためここに記載しています。')
+    # 別名はひとつのエントリとして描画される(dt 2つ + dd 1つ)
+    assert_equal(1, html.scan(/<dd class="method-description">/).size)
+    assert_equal(2, html.scan(/<dt class="method-heading"/).size)
+  end
+
+  def test_undef_attribute_renders_message
+    src = <<'HERE'
+--- <=>(other) -> -1 | 0 | 1 | nil
+{: undef}
+HERE
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { "dummy" }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { "String/i.index._builtin" }
+    html = @c.compile_method(method_entry)
+    assert_not_include(html, '{:')
+    assert_include(html, 'このメソッドは定義されていません。')
   end
 
   def test_array_join
@@ -865,6 +929,16 @@ HERE
           :method_id => "ARGF.class/i.binmode.argf._builtin",
           :version   => "2.0.0",
           :expected  => "https://docs.ruby-lang.org/en/2.0.0/ARGF.html#method-i-binmode"
+       },
+       "Kernel.#trace_var" => {
+          :method_id => "Kernel/m.trace_var._builtin",
+          :version   => "2.0.0",
+          :expected  => "https://docs.ruby-lang.org/en/2.0.0/Kernel.html#method-i-trace_var"
+       },
+       "Math.#sqrt" => {
+          :method_id => "Math/m.sqrt._builtin",
+          :version   => "2.0.0",
+          :expected  => "https://docs.ruby-lang.org/en/2.0.0/Math.html#method-c-sqrt"
        })
   def test_rdoc_url(data)
     assert_equal(data[:expected], @c.rdoc_url(data[:method_id], data[:version]))

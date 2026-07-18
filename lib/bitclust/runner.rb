@@ -50,6 +50,7 @@ Subcommands(for users):
     list        List libraries/classes/methods in database.
     lookup      Lookup a library/class/method from database.
     search      Search classes/methods from database.
+    server      Run HTTP server to browse the reference manual.
 
 Subcommands(for developers):
     ancestors   Compare class/module's ancestors between Ruby and DB.
@@ -63,6 +64,7 @@ Subcommands(for developers):
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
+    searchpage  Generate a static cross-version search page.
     epub        Generate EPUB file.
     chm         Generate static HTML files for CHM.
 
@@ -96,6 +98,7 @@ Global Options:
         'setup'       => BitClust::Subcommands::SetupCommand.new,
         'server'      => BitClust::Subcommands::ServerCommand.new,
         'statichtml'  => BitClust::Subcommands::StatichtmlCommand.new,
+        'searchpage'  => BitClust::Subcommands::SearchpageCommand.new,
         'htmlfile'    => BitClust::Subcommands::HtmlfileCommand.new,
         'chm'         => BitClust::Subcommands::ChmCommand.new,
         'epub'        => BitClust::Subcommands::EPUBCommand.new,
@@ -134,9 +137,16 @@ Global Options:
         @version ||= config[:default_version]
         @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
+      # DB 必須のサブコマンドで --database も ~/.bitclust/config も無ければ
+      # 案内付きで中断する。needs_database? が false のサブコマンドと、
+      # 自前で DB を探す search (Searcher) は対象外
+      needs_database = cmd.respond_to?(:needs_database?) && cmd.needs_database?
+      if needs_database && !@prefix
+        error "no database given. Use --database (-d) option or ~/.bitclust/config"
+      end
       # @type var options: Subcommand::options
       options = {
-        :prefix => (@prefix || raise),
+        :prefix => @prefix,
         :capi   => @capi
       }
       cmd.exec(argv, options)

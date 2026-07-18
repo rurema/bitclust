@@ -44,7 +44,8 @@ module BitClust
       sort_key() <=> other.sort_key
     end
 
-    KIND_NUM = {:defined => 0, :redefined => 1, :added => 2}
+    KIND_NUM = {:defined => 0, :redefined => 1, :added => 2,
+                :undefined => 3, :nomethod => 4}
 
     def sort_key
       [label(), KIND_NUM[kind()]]
@@ -99,7 +100,7 @@ module BitClust
     persistent_properties {
       property :names,           '[String]'
       property :visibility,      'Symbol'   ## :public | :private | :protected
-      property :kind,            'Symbol'   ## :defined | :added | :redefined | :undefined
+      property :kind,            'Symbol'   ## :defined | :added | :redefined | :undefined | :nomethod
       property :source,          'String'
       property :source_location, 'Location'
     }
@@ -135,6 +136,15 @@ module BitClust
     def labels
       c, t, _m, _lib = methodid2specparts(@id)
       names().map {|name| "#{c}#{t}#{name}" }
+    end
+
+    # Every name of this entry, formatted the same way as #label (i.e.
+    # without the redundant class prefix on special variables such as $!,
+    # unlike #labels). Used where all aliases of a method need to be listed
+    # together, e.g. the <title> of its page.
+    def title_labels
+      c, t, _m, _lib = methodid2specparts(@id)
+      names().map {|name| "#{t == '$' ? '' : c}#{t}#{name}" }
     end
 
     def name?(name)
@@ -215,8 +225,17 @@ module BitClust
       kind() == :undefined
     end
 
+    # 説明のためだけに記載されていて実際には定義されていないメソッド
+    # （ソースの @nomethod メタデータ行で指定する）
+    def nomethod?
+      kind() == :nomethod
+    end
+
     def description
-      source.split(/\n\n+/, 3)[1]
+      paragraphs = source.split(/\n\n+/).drop(1)
+      # {: ...} 属性行や @param などのメタデータ段落は説明文として使わない
+      para = paragraphs.find {|p| !p.start_with?('@', '{:') } || paragraphs.first || ''
+      description_text(para)
     end
   end
 end

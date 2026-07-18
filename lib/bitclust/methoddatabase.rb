@@ -18,6 +18,7 @@ require 'bitclust/refsdatabase'
 require 'bitclust/rrdparser'
 require 'bitclust/exception'
 require 'fileutils'
+require 'pathname'
 
 module BitClust
 
@@ -163,6 +164,56 @@ module BitClust
       RRDParser.new(self).parse_file(path, libname, properties())
     end
 
+    # Markdown ツリー（manual/api）を直接パースして DB を更新する（M3）。
+    # front matter の library: が所属を表すため、ライブラリごとに
+    # lib ファイル → メンバーファイル（reopen/redefine のみのファイルは後置。
+    # dynamic include の対象 module が先に定義されている必要があるため）の
+    # 順でパースする。版ゲート（since/until）外のライブラリ/メンバーはスキップ。
+    # エントリの source には md 断片が入り、source_location は md の実パスを指す
+    def update_by_markdowntree(md_root)
+      require 'bitclust/markdown_tree'
+      require 'bitclust/mdparser'
+      @md_root = md_root
+      # 描画層（screen.rb）が MDCompiler を選択するためのマーカー
+      propset 'source_format', 'markdown'
+      tree = MarkdownTree.scan(md_root)
+      version = properties()["version"]
+      tree.libraries.sort.each do |libname, lib|
+        next unless md_version_covers?(version, lib[:since], lib[:until])
+        lib_entry = MDParser.new(self).parse_file(File.join(md_root, lib[:path]), libname, properties())
+        lib_location = lib_entry.source_location
+        # 多重所属（ゲート付き library リスト）は、この版でゲートが生きている
+        # membership を持つライブラリだけがメンバーとして取り込む
+        members = tree.entities.select { |_, e|
+          e[:memberships].any? { |m|
+            m[:library] == libname && md_version_covers?(version, m[:since], m[:until])
+          }
+        }
+        sorted = members.keys.sort_by { |path|
+          reopen_only = members[path][:kinds].all? { |kind, _| %w[reopen redefine].include?(kind) }
+          [reopen_only ? 1 : 0, path]
+        }
+        sorted.each do |path|
+          entity = members[path]
+          next unless md_version_covers?(version, entity[:since], entity[:until])
+          MDParser.new(self).parse_file(File.join(md_root, path), libname, properties())
+        end
+        # parse_file は毎回 library の source_location を上書きするため
+        # lib ファイルの値へ戻す
+        lib_entry.source_location = lib_location
+      end
+    end
+
+    # since は「その版以降」、until は「その版未満」（ブリッジの
+    # #@since/#@until ラッパーと同じ意味論）
+    def md_version_covers?(version, since_version, until_version)
+      v = Gem::Version.new(version)
+      return false if since_version && v < Gem::Version.new(since_version)
+      return false if until_version && v >= Gem::Version.new(until_version)
+      true
+    end
+    private :md_version_covers?
+
     def refs
       @refs ||= RefsDatabase.load(realpath('refs'))
     end
@@ -177,6 +228,8 @@ module BitClust
     end
 
     def copy_doc
+      return copy_doc_md if @md_root
+      return unless @root
       root_path = Pathname.new(@root).expand_path
       Dir.glob("#{@root}/../../doc/**/*.rd").each do |f|
         if %r!\A#{Regexp.escape(@root)}/\.\./\.\./doc/([-\./\w]+)\.rd\z! =~ f
@@ -192,6 +245,65 @@ module BitClust
         end
       end
     end
+
+    # ネイティブ md ツリーの doc ページ登録（manual/api の隣の manual/doc）。
+    # ページ = 他の doc ファイルから #@include 参照されていない .md。
+    # source には md がそのまま入り、source_location は md の実パスを指す
+    def copy_doc_md
+      require 'bitclust/mdparser'
+      # source_location は md_root と同じ形で格納する（api 側と同じ慣例。
+      # Rakefile の相対 manual/api なら manual/doc/... になる）。絶対化すると
+      # Windows のドライブレターのコロンで file:line 分割が壊れ、
+      # 編集リンクも実行環境のパス依存になる
+      doc_root = Pathname.new(File.join(@md_root, '..', 'doc')).cleanpath.to_s
+      return unless File.directory?(doc_root)
+      files = Dir.glob("#{doc_root}/**/*.md").sort
+      referenced = files.flat_map { |f|
+        base = File.dirname(f)
+        File.read(f).scan(/^\#@include\((.*?)\)/).map { |t|
+          p = File.expand_path(t[0] || raise, base)
+          [p, "#{p}.md", p.sub(/\.rd\z/, '.md')]
+        }.flatten
+      }.to_set
+      version = properties()["version"]
+      files.each do |f|
+        next if referenced.include?(File.expand_path(f))
+        # front matter の since/until でページ自体をバージョンで出し分ける
+        # （ライブラリ側 update_by_markdowntree と同じ意味論）。範囲外の版では
+        # ページを登録しない（例: doc/spec/safelevel は until: "3.2" で 3.2 以降
+        # 非生成）
+        since_version, until_version = doc_md_version_range(f)
+        next unless md_version_covers?(version, since_version, until_version)
+        id = libname2id(f.delete_prefix("#{doc_root}/").sub(/\.md\z/, ''))
+        se = DocEntry.new(self, id)
+        s = Preprocessor.read(f, properties)
+        title, source = MDParser.split_doc(s)
+        se.title = title
+        se.source = source
+        se.source_location = Location.new(f, 1)
+        se.save
+      end
+    end
+    private :copy_doc_md
+
+    # doc ページの先頭 front matter から since/until を読む
+    # （MarkdownTree.scan がライブラリ/エンティティで読むのと同じ書式）。
+    # front matter が無い、または since/until を持たなければ [nil, nil]。
+    def doc_md_version_range(path)
+      since_version = nil
+      until_version = nil
+      File.open(path, 'r:UTF-8') do |io|
+        first = io.gets
+        return [nil, nil] unless first && first =~ /\A---\s*$/
+        while (line = io.gets)
+          break if line =~ /\A---\s*$/
+          since_version = $1 if line =~ /\Asince:\s*"?([^"\s]+)"?/
+          until_version = $1 if line =~ /\Auntil:\s*"?([^"\s]+)"?/
+        end
+      end
+      [since_version, until_version]
+    end
+    private :doc_md_version_range
 
     #
     # Doc Entry

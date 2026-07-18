@@ -65,9 +65,14 @@ module BitClust
         "self[#{@params}]" + (@type ? " -> #{@type}" : "")
       when "[]="    # aset
         params = @params&.split(',')
-        raise ParseError, "invalid parameters for []= operator: #{@params.inspect}" if params.nil? || params.size < 2
-        val = params.pop or raise ParseError, "missing value parameter for []= operator: #{@params.inspect}"
-        "self[#{params.join(',').strip}] = #{val.strip}"
+        if params && params.size >= 2
+          val = params.pop || raise
+          "self[#{params.join(',').strip}] = #{val.strip}"
+        else
+          # Signatures like []=(*idxary) in historic documents cannot be
+          # shaped into "self[...] = ..."; show the raw signature instead
+          to_s()
+        end
       when "`"  # `command`
         "`#{@params}`" + (@type ? " -> #{@type}" : "")
       when /\A\W/   # binary operator

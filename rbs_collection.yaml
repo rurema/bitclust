@@ -21,6 +21,16 @@ gems:
   - name: steep
     ignore: true
 
+  # bitclust 自身（path gem）は sig/ を持つため、コレクション解決に
+  # 含まれると Steepfile の signature "sig" と二重ロードになり
+  # DuplicatedDeclaration で steep が失敗する。必ず除外する
+  - name: bitclust-core
+    ignore: true
+  - name: bitclust-dev
+    ignore: true
+  - name: refe2
+    ignore: true
+
   - name: date
   #- name: drb
   - name: erb

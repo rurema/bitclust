@@ -314,6 +314,19 @@ module BitClust
       %Q(<meta name="description" content="">)
     end
 
+    # True when the build was told (via statichtml --eol-warning) that the
+    # documented Ruby version is no longer maintained.
+    def eol_warning?
+      !!@conf[:eol_warning]
+    end
+
+    # URL of the ruby.wasm module used by the in-browser RUN button on Ruby
+    # sample code (statichtml --run-ruby-wasm). nil disables the feature.
+    def run_ruby_wasm_url
+      url = @conf[:run_ruby_wasm] #: String?
+      url
+    end
+
     private
 
     def default_encoding
@@ -460,16 +473,44 @@ module BitClust
       rdcompiler().compile(src)
     end
 
+    # DB が Markdown ソース（update --markdowntree のネイティブパース）なら
+    # MDCompiler（GFM モード）で描画する
+    def markdown_source?
+      db = @conf[:database]
+      db && db.properties['source_format'] == 'markdown'
+    end
+
     def rdcompiler
       opt = {:catalog => message_catalog()}.merge(@conf) #: RDCompiler::option
-      RDCompiler.new(@urlmapper, @hlevel, opt)
+      if markdown_source?
+        require 'bitclust/mdcompiler'
+        gfm_opt = opt.merge(:gfm => true) #: RDCompiler::option
+        MDCompiler.new(@urlmapper, @hlevel, gfm_opt)
+      else
+        RDCompiler.new(@urlmapper, @hlevel, opt)
+      end
     end
 
     def foreach_method_chunk(src)
+      require 'bitclust/mdparser' if markdown_source?
+      sig_re = markdown_source? ? MDParser::SIG_RE : /\A---/
       f = LineInput.for_string(src)
       while f.next?
-        sigs = f.span(/\A---/).map {|line| MethodSignature.parse(line.rstrip) }
-        body = f.break(/\A---/).join.split(/\n\n/, 2).first || ''
+        # シグネチャ行の直後の {: ...} メソッド属性行はシグネチャブロックの
+        # 一部として読み飛ばす(シグネチャにも本文にも含めない)
+        sigs = [] #: Array[MethodSignature]
+        while f.next?
+          if sig_re =~ f.peek
+            line = f.gets or raise
+            line = line.sub(sig_re, '--- ') if markdown_source?
+            sigs.push MethodSignature.parse(line.rstrip)
+          elsif !sigs.empty? && /\A\{:.*\}[ \t]*$/ =~ f.peek
+            f.gets
+          else
+            break
+          end
+        end
+        body = f.break(sig_re).join.split(/\n\n/, 2).first || ''
         yield sigs, body
       end
     end
@@ -693,7 +734,13 @@ module BitClust
 
     def rdcompiler
       h = {:force => true, :catalog => message_catalog() }.merge(@conf) #: RDCompiler::option
-      RDCompiler.new(@urlmapper, @hlevel, h)
+      if markdown_source?
+        require 'bitclust/mdcompiler'
+        gfm_opt = h.merge(:gfm => true) #: RDCompiler::option
+        MDCompiler.new(@urlmapper, @hlevel, gfm_opt)
+      else
+        RDCompiler.new(@urlmapper, @hlevel, h)
+      end
     end
 
     def current_url

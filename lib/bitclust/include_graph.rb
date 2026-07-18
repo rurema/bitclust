@@ -1,0 +1,375 @@
+# frozen_string_literal: true
+
+module BitClust
+  # doctree の #@include グラフを版ゲート付きで解析する。
+  #
+  # LIBRARIES の各エントリ <name> をルートファイル <name>.rd として、
+  # #@include(target) を include 元ディレクトリ相対で解決しながら再帰的に走査し、
+  # 各ファイルの分類（grouping = エンティティ / fragment = 共有断片）と、
+  # grouping ファイルの全所属（ライブラリ + 経路上の版条件）を生のまま収集する。
+  #
+  # 特定の版範囲（[3.0, 4.2) 等）への絞り込みは行わない faithful 層。
+  # スコープ適用は IncludeGraph::Scope が担い、範囲はパラメータ化されている
+  # （旧版サルベージ時に別範囲で再利用するため）。
+  class IncludeGraph
+    # 版条件。kind は :since / :until / :if。
+    # version は :since/:until ではバージョン文字列、:if では条件式文字列。
+    Condition = Struct.new(:kind, :version)
+
+    # grouping ファイルの1所属。conditions は LIBRARIES のゲート＋include 経路上の
+    # 条件スタックのスナップショット（faithful、スコープ未適用）。
+    Membership = Struct.new(:library, :conditions)
+
+    # RRDParser は /\A=[^=]/ で H1 行を認識し `=` 直後の空白は必須でない
+    # （実データ: _builtin/Encoding は「=class Encoding」）
+    ENTITY_H1_RE = /\A=(?!=)\s*(?:class|module|object|reopen|redefine)\b/
+
+    def self.analyze(src_root)
+      new(src_root).analyze
+    end
+
+    # conditions が表す版区間 [lo, hi)。lo/hi は Gem::Version、制約なしは nil。
+    # :since は max、:until は min を取る。
+    def self.interval(conditions)
+      lo, hi = bounds(conditions)
+      [lo&.first, hi&.first]
+    end
+
+    # conditions から下限・上限を [Gem::Version, 原文字列] の組で集める。
+    # :if の連言（ubygems の "1.9.1" <= version and version < "2.5.0" 等）も
+    # 分解して境界に寄与させる。分解できない連言子は寄与しない（保守的に広く扱う。
+    # 恒偽の証明は Scope#never? が連言子単位で別途行う）
+    def self.bounds(conditions)
+      sinces = [] #: Array[bound]
+      untils = [] #: Array[bound]
+      conditions.each do |c|
+        case c.kind
+        when :since then sinces << [Gem::Version.new(c.version), c.version]
+        when :until then untils << [Gem::Version.new(c.version), c.version]
+        when :if
+          if_bounds(c.version).each do |kind, v|
+            (kind == :since ? sinces : untils) << [Gem::Version.new(v), v]
+          end
+        end
+      end
+      [sinces.max_by(&:first), untils.min_by(&:first)]
+    end
+
+    # 連言（and 区切り）の #@if 条件式を since/until 境界に分解する。
+    # 対応形: "X" <= version / version >= "X" → since X、version < "X" → until X。
+    # <= や否定（#@else 反転）は正確に表現できないので分解しない
+    def self.if_bounds(expr)
+      return [] if expr.lstrip.start_with?('!')
+      bounds = [] #: Array[[Symbol, String?]]
+      expr.split(/\band\b/).each do |c|
+        case c
+        when /version\s*<\s*"([\d.]+)"/ then bounds << [:until, $1]
+        when /version\s*>=\s*"([\d.]+)"/, /"([\d.]+)"\s*<=\s*version/ then bounds << [:since, $1]
+        end
+      end
+      bounds
+    end
+
+    # 対象版範囲 [lo, hi)。範囲はパラメータであり、[3.0, 4.2) 以外
+    # （旧版サルベージ等）でも同じ解析結果に対して再利用できる。
+    class Scope
+      attr_reader :lo, :hi
+
+      def initialize(lo, hi)
+        @lo = Gem::Version.new(lo)
+        @hi = Gem::Version.new(hi)
+      end
+
+      # conditions の版区間がスコープと交差するか。
+      # 恒偽と証明できる :if 条件が含まれる場合も交差しない
+      def cover?(conditions)
+        return false if conditions.any? { |c| c.kind == :if && never?(c) }
+        lo, hi = IncludeGraph.interval(conditions)
+        return false if lo && hi && lo >= hi   # 空区間
+        (lo.nil? || lo < @hi) && (hi.nil? || hi > @lo)
+      end
+
+      # 条件がスコープ内の全バージョンで真か（:if・不正な版文字列は判定不能なので false）
+      def always?(cond)
+        case cond.kind
+        when :since then Gem::Version.new(cond.version) <= @lo
+        when :until then Gem::Version.new(cond.version) >= @hi
+        else false
+        end
+      rescue ArgumentError
+        false
+      end
+
+      # 条件がスコープ内の全バージョンで偽か（不正な版文字列は判定不能なので false）。
+      # :if は連言子（and 区切り）のいずれかが恒偽と証明できる場合のみ true
+      # （LIBRARIES の #@if("1.9.1" <= version and version < "2.5.0") 等）
+      def never?(cond)
+        case cond.kind
+        when :since then Gem::Version.new(cond.version) >= @hi
+        when :until then Gem::Version.new(cond.version) <= @lo
+        when :if
+          cond.version.split(/\band\b/).any? { |c| never_conjunct?(c) }
+        else false
+        end
+      rescue ArgumentError
+        false
+      end
+
+      # #@if の連言子が恒偽と証明できるか。
+      # 対応形: version < "X" / version <= "X" / version >= "X" /
+      # "X" <= version / version == "X"（判定できない形は false）
+      def never_conjunct?(conjunct)
+        case conjunct
+        when /version\s*<=?\s*"([\d.]+)"/
+          op_lt = !conjunct.include?('<=')
+          v = Gem::Version.new($1)
+          op_lt ? v <= @lo : v < @lo
+        when /version\s*>=\s*"([\d.]+)"/, /"([\d.]+)"\s*<=\s*version/
+          Gem::Version.new($1) >= @hi
+        when /version\s*==\s*"([\d.]+)"/
+          v = Gem::Version.new($1)
+          v < @lo || v >= @hi
+        else
+          false
+        end
+      rescue ArgumentError
+        false
+      end
+
+      # front matter に書く構造ゲート。スコープ内で効く境界のみ残す
+      # （下限以下の since・上限以上の until は省略）。スコープ外なら nil。
+      # バージョン文字列は原文の表記を保持する。
+      def gate(conditions)
+        return nil unless cover?(conditions)
+        lo, hi = IncludeGraph.bounds(conditions)
+        gate = {} #: IncludeGraph::gate
+        gate[:since] = lo[1] if lo && lo[0] > @lo
+        gate[:until] = hi[1] if hi && hi[0] < @hi
+        gate
+      end
+    end
+
+    attr_reader :warnings
+
+    def initialize(src_root)
+      @src_root = src_root
+      @memberships = {}     # relpath => [Membership]
+      @kinds = {}           # relpath => :grouping | :fragment
+      @grouping_sites = {}  # relpath => [include target（記載どおりの文字列）]
+      @library_gates = {}   # library name => [Condition]（LIBRARIES 由来）
+      @warnings = []
+    end
+
+    def analyze
+      read_libraries.each do |name, gate|
+        root = "#{name}.rd"
+        unless File.file?(File.join(@src_root, root))
+          @warnings << "library root not found: #{root}"
+          next
+        end
+        @library_gates[name] = gate
+        walk(root, name, gate, [root])
+      end
+      self
+    end
+
+    # grouping ファイル relpath の全 membership（生・スコープ未適用）
+    def memberships(relpath)
+      @memberships.fetch(relpath, [])
+    end
+
+    def groupings
+      @kinds.select { |_, kind| kind == :grouping }.keys.sort
+             .to_h { |path| [path, @memberships.fetch(path, [])] }
+    end
+
+    def fragments
+      @kinds.select { |_, kind| kind == :fragment }.keys.sort
+    end
+
+    # grouping include のサイト一覧（prune 対象）。
+    # { relpath => [#@include に記載どおりの target 文字列] }
+    # fragment include は含まない（transclusion として温存する）。
+    def grouping_include_sites
+      @grouping_sites
+    end
+
+    # 各ライブラリ概要ファイル（LIBRARIES のルート）へ注入する front matter。
+    # { relpath => { "type" => "library", "since" => v, "until" => v } }
+    # LIBRARIES 内の版ゲート（fiber: until 3.1 等）をスコープ適用して付与する。
+    # スコープ外のライブラリ（cmath/scanf/sync 等）は含まない。
+    def library_front_matter_map(scope)
+      result = {} #: Hash[String, Hash[String, String]]
+      @library_gates.each do |name, gate|
+        root = "#{name}.rd"
+        scoped = scope.gate(gate)
+        next unless scoped
+        fm = { 'type' => 'library' }
+        fm['since'] = scoped[:since] if scoped[:since]
+        fm['until'] = scoped[:until] if scoped[:until]
+        result[root] = fm
+      end
+      result
+    end
+
+    # 各 grouping メンバーへ注入する front matter（スコープ適用済み）。
+    # 単一所属:   { relpath => { "library" => name, "since" => v, "until" => v } }
+    # 複数所属:   { relpath => { "library" => [{ "name" => n, "since" => v,
+    #                                            "until" => v }, ...], ... } }
+    # RRDToMarkdown の extra_front_matter: にそのまま渡せる形。
+    #
+    # - スコープ外のメンバーは含まない（旧版サルベージは別スコープで再実行）
+    # - 複数ライブラリへの所属（旧 rdoc の同時所属、thread 系の版切替所属）は
+    #   ゲート付きリストで表現する（MARKUP_SPEC §1.2）。並び順は
+    #   「現在まで存在する側（until なし）→ 名前順」で決定的にする。
+    #   このときトップレベルの since/until はライブラリ横断の hull
+    #   （エンティティ自体の存在ゲート）
+    # - 同一ライブラリ内の複数 include サイトは、いずれかが有効なら
+    #   エンティティが存在するため、ゲートは区間の hull（弱い方）を取る
+    def front_matter_map(scope)
+      result = {} #: Hash[String, front_matter]
+      groupings.each do |path, ms|
+        covered = ms.select { |m| scope.cover?(m.conditions) }
+        next if covered.empty?
+        libraries = covered.map(&:library).uniq
+        per_lib = libraries.to_h { |lib|
+          [lib, hull(covered.select { |m| m.library == lib }
+                            .map { |m| scope.gate(m.conditions) })]
+        }
+        if libraries.size == 1
+          fm = { 'library' => libraries.first }
+          gate = per_lib.values.first
+        else
+          entries = per_lib.map { |lib, g|
+            e = { 'name' => lib }
+            e['since'] = g[:since] if g[:since]
+            e['until'] = g[:until] if g[:until]
+            e
+          }.sort_by { |e| [e['until'] ? 1 : 0, e['name']] }
+          fm = { 'library' => entries }
+          gate = hull(per_lib.values)
+        end
+        fm['since'] = gate[:since] if gate[:since]
+        fm['until'] = gate[:until] if gate[:until]
+        result[path] = fm
+      end
+      result
+    end
+
+    private
+
+    # 複数サイトのゲートの hull。片方でも無条件（{}）なら無条件。
+    # since は最小、until は最大を取る（全サイトに揃っている境界のみ残る）。
+    def hull(gates)
+      return {} if gates.any?(&:empty?)
+      sinces = gates.map { |g| g[:since] }
+      untils = gates.map { |g| g[:until] }
+      result = {} #: gate
+      result[:since] = sinces.min_by { |v| Gem::Version.new(v) } if sinces.all?
+      result[:until] = untils.max_by { |v| Gem::Version.new(v) } if untils.all?
+      result
+    end
+
+    # LIBRARIES を版ゲート付きで読む。 [[name, [Condition]], ...]
+    def read_libraries
+      entries = {} #: Hash[String, Array[Condition]]
+      stack = [] #: Array[Condition]
+      File.foreach(File.join(@src_root, 'LIBRARIES')) do |line|
+        line = line.chomp
+        if line.start_with?('#@#') || apply_directive(stack, line)
+          next
+        elsif line !~ /\A\s*\z/
+          entries[line] ||= stack.dup
+        end
+      end
+      entries
+    end
+
+    # #@ ディレクティブなら条件スタックを更新して true を返す。
+    # #@samplecode もブロック（#@end で閉じる）なので、pop の対応を
+    # 取るために :samplecode を積む（版条件ではないので snapshot では除外する）。
+    def apply_directive(stack, line)
+      case line
+      when /\A\#@since\s+(\S+)/  then stack.push(Condition.new(:since, $1))
+      when /\A\#@until\s+(\S+)/  then stack.push(Condition.new(:until, $1))
+      when /\A\#@if\s*(.*)/      then stack.push(Condition.new(:if, ($1 || raise).strip))
+      when /\A\#@samplecode\b/   then stack.push(Condition.new(:samplecode, nil))
+      when /\A\#@else\b/         then (cond = stack.pop) && stack.push(invert(cond))
+      when /\A\#@end\b/          then stack.pop
+      else return false
+      end
+      true
+    end
+
+    def invert(cond)
+      case cond.kind
+      when :since then Condition.new(:until, cond.version)
+      when :until then Condition.new(:since, cond.version)
+      when :if    then Condition.new(:if, "!(#{cond.version})")
+      else cond
+      end
+    end
+
+    # relpath のファイル内の #@include を条件スタック付きで走査する。
+    # base_conditions は LIBRARIES ゲート＋ここまでの include 経路の条件。
+    def walk(relpath, library, base_conditions, path_stack)
+      stack = [] #: Array[Condition]
+      File.foreach(File.join(@src_root, relpath)) do |line|
+        line = line.chomp
+        if line =~ /\A\#@include\s*\((.*?)\)/
+          conditions = (base_conditions + stack).reject { |c| c.kind == :samplecode }
+          add_include(relpath, $1 || raise, library, conditions, path_stack)
+        else
+          apply_directive(stack, line)
+        end
+      end
+    end
+
+    def add_include(from, target, library, conditions, path_stack)
+      relpath = resolve(from, target)
+      unless relpath
+        @warnings << "include target not found: #{target} (from #{from})"
+        return
+      end
+      kind = classify(relpath)
+      @kinds[relpath] ||= kind
+
+      if kind == :grouping
+        m = Membership.new(library, conditions)
+        list = (@memberships[relpath] ||= [])
+        list << m unless list.include?(m)
+        sites = (@grouping_sites[from] ||= [])
+        sites << target unless sites.include?(target)
+      end
+
+      if path_stack.include?(relpath)
+        @warnings << "include cycle: #{(path_stack + [relpath]).join(' -> ')}"
+        return
+      end
+      # fragment も走査する: fragment を経由して grouping へ至る transclusion
+      # チェーンがある（fiddle.rd → fiddle/2.0/fiddle.lib.rd → Fiddle 等）
+      walk(relpath, library, conditions, path_stack + [relpath])
+    end
+
+    # include 元ディレクトリ相対で target → target.rd の順に解決。
+    # `../` を含む参照があるため正規化する（同一ファイルの二重登録防止）
+    def resolve(from, target)
+      base = File.dirname(from)
+      [target, "#{target}.rd"].each do |cand|
+        rel = base == '.' ? cand : File.join(base, cand)
+        rel = File.expand_path(rel, '/').delete_prefix('/')
+        return rel if File.file?(File.join(@src_root, rel))
+      end
+      nil
+    end
+
+    # 最初の非空・非 #@ 行がエンティティ H1 なら grouping、そうでなければ fragment
+    def classify(relpath)
+      File.foreach(File.join(@src_root, relpath)) do |line|
+        next if line =~ /\A\s*\z/ || line.start_with?('#@')
+        return line =~ ENTITY_H1_RE ? :grouping : :fragment
+      end
+      :fragment
+    end
+  end
+end

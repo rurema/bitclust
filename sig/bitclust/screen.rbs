@@ -116,6 +116,10 @@ module BitClust
 
     def custom_js_url: (String js) -> ::String
 
+    # 実装は statichtml の URLMapperEx のみ。呼び出し側（TemplateScreen#html_base）は
+    # respond_to? ガード付きで呼ぶため、基底の sig でのみ宣言する
+    def bitclust_html_base: () -> String
+
     def favicon_url: () -> ::String
 
     def library_index_url: () -> ::String
@@ -245,6 +249,10 @@ module BitClust
 
     def meta_description: () -> String
 
+    def eol_warning?: () -> bool
+
+    def run_ruby_wasm_url: () -> String?
+
     private
 
     def default_encoding: () -> String
@@ -263,6 +271,11 @@ module BitClust
     def js_url: () -> String
 
     def custom_js_url: (String js) -> String
+
+    # Relative path from the current page to the site root, used as the
+    # prefix for client-side search result links in statichtml output.
+    # （statichtml の URLMapperEx のみが bitclust_html_base を持つ）
+    def html_base: () -> String
 
     def favicon_url: () -> String
 
@@ -305,6 +318,10 @@ module BitClust
     def compile_function: (FunctionEntry f, ?RDCompiler::opt opt) -> String
 
     def compile_rd: (String src) -> String
+
+    # DB が Markdown ソース（update --markdowntree のネイティブパース）なら
+    # MDCompiler（GFM モード）で描画する
+    def markdown_source?: () -> bool
 
     def rdcompiler: () -> RDCompiler
 

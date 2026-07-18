@@ -1,0 +1,80 @@
+module BitClust
+  # C API リファレンス（manual/capi）の md を直接パースする。
+  # capi の md は本文見出しを持たず、### 全行がシグネチャ
+  # （--- <C sig> 相当、キーワード無し）。source は本文の md がそのまま入る
+  class MDFunctionParser < FunctionReferenceParser
+    private
+
+    def file_entries: (LineInput f) -> void
+  end
+
+  class MDParser < RRDParser
+    # lib 内の型注釈（#: Array[Chunk]）が親クラスの Chunk を参照できるようにする
+    # （Ruby の定数探索と同じ解決結果）
+    class Chunk = RRDParser::Chunk
+
+    # front matter（YAML のサブセット）。値はスカラー（String）とリスト
+    # （Array[String]）がキーごとに混在するため untyped。キーは $1 由来の
+    # String? を受けるため nilable
+    type front_matter = Hash[String?, untyped]
+
+    def self.split_doc: (String source) -> [String, String]
+
+    # メソッド系シグネチャ（キーワード付き h3）
+    SIG_RE: ::Regexp
+
+    # H1（エンティティ見出し）。エスケープされた行頭リテラル \# は除外
+    H1_RE: ::Regexp
+
+    # H2（レベル2セクション見出し）
+    H2_RE: ::Regexp
+
+    # klass.source / library.source の終端（H1・H2・シグネチャ）
+    BREAK_RE: ::Regexp
+
+    # RRDParser と同じ（rbs subtract がスーパークラスの宣言を見ないため再掲）
+    @context: RRDParser::Context
+
+    @front_matter: front_matter
+
+    def parse: (File | StringIO f, String libname, ?Database::database_properties params) -> LibraryEntry
+
+    private
+
+    # BREAK_RE まで行を収集する。要素は実際には非 nil（peek で確認済みの行のみ
+    # gets する）だが、LineInput#gets の型に合わせて String?
+    def md_break: (LineInput f) -> Array[String?]
+
+    def merge_front_matter: (front_matter fm) -> void
+
+    def read_front_matter: (LineInput f) -> front_matter
+
+    def do_parse: (LineInput f) -> void
+
+    RELATION_KEYS: Array[String]
+
+    def read_classes: (LineInput f) -> void
+
+    def parse_level1_header: (String line) -> [String?, String?, String?]
+
+    def read_aliases: (LineInput f) -> void
+
+    def read_includes: (LineInput f, ?bool reopen) -> void
+
+    def read_extends: (LineInput f, ?bool reopen) -> void
+
+    def read_class_body: (LineInput f) -> void
+
+    def read_reopen_body: (LineInput f) -> void
+
+    def read_object_body: (LineInput f) -> void
+
+    def read_level2_blocks: (LineInput f) -> void
+
+    def read_chunks: (LineInput f) -> Array[Chunk]
+
+    def read_chunk: (LineInput f) -> Chunk
+
+    def method_signature: (String line) -> RRDParser::Signature
+  end
+end

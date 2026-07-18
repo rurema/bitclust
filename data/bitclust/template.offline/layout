@@ -21,8 +21,18 @@
 <script src="<%=h custom_js_url('js/search_ranker.js') %>"></script>
 <script src="<%=h custom_js_url('js/search_controller.js') %>"></script>
 <script src="<%=h custom_js_url('js/search_init.js') %>"></script>
+<% if run_ruby_wasm_url %>
+<meta name="rurema-run-ruby-wasm" content="<%=h run_ruby_wasm_url %>">
+<script type="module" src="<%=h custom_js_url('js/run.js') %>"></script>
+<% end %>
 </head>
 <body>
+<% if eol_warning?() %>
+<p class="eol-warning">
+<%= _('This reference manual is for a version of Ruby that is no longer maintained.') %>
+<a href="https://docs.ruby-lang.org/ja/latest/"><%= _('Latest version') %></a>
+</p>
+<% end %>
 <div id="rurema-topbar">
   <div id="rurema-brand"><%= manual_home_link %></div>
   <div id="search-section" role="search">

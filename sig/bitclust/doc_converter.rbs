@@ -1,0 +1,22 @@
+module BitClust
+  # refm/doc（散文ページ）の Markdown 変換。
+  #
+  # doc ページにはクロスファイル情報（library 所属等）が無いため、
+  # オーケストレータは不要で、reduce（正規化）+ 単一ファイル変換のみ。
+  # タイトルは H1 が担い、front matter は使わない。
+  #
+  # reduce は意味を変えない表記ゆれを md→rd の再生成形に合わせる正規化と、
+  # クロスツリー include（api 断片の transclude）の manual レイアウトへの
+  # 書き換えを行う。md→rd 変換は reduce の結果を復元する（検証の期待値）。
+  module DocConverter
+    def self?.reduce: (String rrd) -> String
+
+    def self?.convert: (String rrd) -> String
+
+    # 変換対象ファイルの一覧（doc ルート相対）。
+    # 旧パイプライン（copy_doc）は **/*.rd だけをページとして読むため、
+    # .rd 以外は doc 内 include から参照される断片のみを対象にし、
+    # 参照されない死にファイル（news/1.8.0.rd-2 等）は凍結側に残す
+    def self?.files: (String doc_root) -> Array[String]
+  end
+end

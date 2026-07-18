@@ -1,0 +1,57 @@
+module BitClust
+  # マルチエンティティ RRD のエンティティ単位分割（O3）。
+  #
+  # 関係を持つマルチエンティティファイルをエンティティ単位のセグメントへ
+  # 分割する（判断はオーケストレータが行う。ここは純テキスト変換）。
+  module EntitySplitter
+    H1_RE: ::Regexp
+
+    GATE_OPEN_RE: ::Regexp
+
+    BLOCK_OPEN_RE: ::Regexp
+
+    BLANK_RE: ::Regexp
+
+    # parse_block の結果。body/else_body は枝の行列、next は #@end の次の行 index
+    type block = { body: Array[String], else_body: Array[String], next: Integer }
+
+    # エンティティ単位のセグメント [エンティティ名, テキスト]。
+    # ライブラリ概要部（ベースセグメント）は名前が nil
+    type segment = [String?, String]
+
+    # スコープ定数（スコープ内で常に真/偽）な版ゲートのうち、エンティティ H1 を
+    # 含むブロックを解決する
+    def self?.resolve_header_gates: (String src, IncludeGraph::Scope scope) -> String
+
+    # ゲート行のスコープ定数評価: 常真なら true、常偽なら false、
+    # 定数でない／ゲートでないなら nil
+    def self?.constant_truth: (String line, IncludeGraph::Scope scope) -> bool?
+
+    # samplecode の内容を除いて、エンティティ H1 行を含むか
+    def self?.contains_entity_h1?: (Array[String] lines) -> bool
+
+    # エンティティ単位のセグメント列を返す。境界が無ければ nil。
+    # 連結すると入力に一致する
+    def self?.segments: (String src) -> Array[segment]?
+
+    # start のゲート開き行に対応する #@end がセグメント終端（末尾の空行は許容）に
+    # あるか
+    def self?.gate_wraps_segment?: (Array[String] lines, Integer start, Integer stop) -> bool
+
+    # エンティティ名 → 出力ファイル名（拡張子なし）。:: → __
+    def self?.entity_filename: (String name) -> String
+
+    # いずれかのエンティティの H1 直後のヘッダ領域に include/extend/alias があるか
+    def self?.header_relations?: (String src) -> bool
+
+    def self?.gate_condition: (String line) -> IncludeGraph::Condition?
+
+    # i のゲート開始行から対応を取る。対応が取れなければ nil
+    def self?.parse_block: (Array[String] lines, Integer i) -> block?
+
+    def self?.first_content_is_h1?: (Array[String] branch_lines) -> bool
+
+    # i 以降の最初の非空行が H1 ならその名前を返す
+    def self?.first_h1_name: (Array[String] lines, Integer i) -> String?
+  end
+end

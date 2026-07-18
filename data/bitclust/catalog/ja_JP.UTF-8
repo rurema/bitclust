@@ -14,6 +14,8 @@ Ancestor Methods
 継承しているメソッド
 Ancestor Methods %s
 %sから継承しているメソッド
+Ancestor Singleton Methods %s
+%sから継承している特異メソッド
 Builtin
 組み込み
 Builtin Library
@@ -62,10 +64,14 @@ Library
 ライブラリ
 Library Index
 ライブラリ一覧
+Latest version
+最新版のマニュアルへ
 Math
 数学
 Method
 メソッド
+Methods Added by Dynamic Include
+動的includeで追加されるメソッド
 Modules
 モジュール
 Module Functions
@@ -80,6 +86,8 @@ Private Instance Methods
 privateメソッド
 Protected Instance Methods
 protectedメソッド
+Redefined Methods
+再定義されたメソッド
 Private Singleton Methods
 private特異メソッド
 Required Libraries
@@ -104,6 +112,10 @@ Text
 テキスト
 Thread
 スレッド
+This reference manual is for a version of Ruby that is no longer maintained.
+このマニュアルは既にメンテナンスが終了したバージョンの Ruby を対象としています。
+Undefined Methods for Explanation
+説明のための未定義メソッド
 ancestors
 クラス・モジュールの継承リスト
 class %s

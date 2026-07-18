@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruby リファレンスマニュアル検索</title>
+<link rel="stylesheet" href="search.css">
+<style>
+/* 検索ボックス用の search.css を全画面ページ向けに上書きする */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  color: #222;
+  background: #fff;
+}
+a { color: #33a; }
+#searchpage-main {
+  max-width: 46em;
+  margin: 0 auto;
+  padding: 1.5em 1em 3em;
+}
+#searchpage-main h1 {
+  font-size: 1.3em;
+  border-bottom: 2px solid #33a;
+  padding-bottom: 0.3em;
+}
+#searchpage-main h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+#search-section {
+  position: static;
+  width: auto;
+  max-width: none;
+  margin: 1em 0 0.5em;
+}
+#search-field {
+  font-size: 1.1em;
+}
+.search-results {
+  position: static;
+  border: none;
+  box-shadow: none;
+  max-height: none;
+  overflow: visible;
+}
+.search-versions {
+  margin: 0.15em 0 0;
+  font-size: 0.8em;
+  color: #555;
+}
+.search-versions a {
+  display: inline-block;
+  margin-right: 0.35em;
+  padding: 0 0.4em;
+  border: 1px solid #99a;
+  border-radius: 3px;
+  text-decoration: none;
+}
+.searchpage-note {
+  font-size: 0.85em;
+  color: #555;
+}
+</style>
+<script>
+var search_versions = %%SEARCH_VERSIONS%%;
+var search_version_base = "../";
+</script>
+<script src="js/search_data.js"></script>
+<script src="js/search_navigation.js"></script>
+<script src="js/search_ranker.js"></script>
+<script src="js/search_controller.js"></script>
+<script src="js/search_page.js"></script>
+</head>
+<body>
+<main id="searchpage-main">
+<h1><a href="../">Ruby リファレンスマニュアル</a> 検索</h1>
+<div id="search-section" role="search">
+  <input id="search-field" type="text" autocomplete="off" spellcheck="false"
+         placeholder="クラス / メソッド / ライブラリ名で検索 (例: Array#each, String, socket)"
+         aria-label="リファレンス検索">
+  <ul id="search-results" class="search-results" aria-expanded="false"></ul>
+</div>
+<div class="searchpage-note">
+  <p>クラス・モジュール・メソッド・ライブラリ・特殊変数・ドキュメントの<strong>名前</strong>を全バージョン横断で検索します。検索結果のバージョンリンクから各バージョンのページを開けます。</p>
+  <p>本文の全文検索が必要な場合は、検索エンジンで <code>site:docs.ruby-lang.org/ja/ キーワード</code> を利用してください。</p>
+</div>
+</main>
+</body>
+</html>

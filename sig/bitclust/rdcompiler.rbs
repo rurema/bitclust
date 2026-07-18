@@ -2,7 +2,7 @@ module BitClust
   class RDCompiler
     @urlmapper: URLMapper
 
-    @catalog: MessageCatalog
+    @catalog: MessageCatalog?
 
     @hlevel: Integer
 
@@ -16,13 +16,16 @@ module BitClust
       :entry => Entry[MethodDatabase],
       :force => bool,
       :stop_on_syntax_error => bool,
+      ?:gfm => bool,
     }
+    # :catalog は実装上省略可（無ければ MessageCatalog.new({}, 'C') が使われる）
     type option = {
-      :catalog => MessageCatalog,
+      ?:catalog => MessageCatalog,
       ?:database => Database,
       ?:entry => any_entry,
       ?:force => bool,
       ?:stop_on_syntax_error => bool,
+      ?:gfm => bool,
     }
 
     @option: option_internal
@@ -78,9 +81,17 @@ module BitClust
     # empty lines do not separate paragraphs.
     def dd_without_p: () -> void
 
-    def dt: (String s) -> String
+    def dt: (String s, ?String? id) -> String
+
+    METHOD_ATTRIBUTE_LINE_RE: ::Regexp
+
+    def attribute_tokens: (String? attr_line) -> Array[String]
+
+    def undef_message: () -> void
 
     def stop_on_syntax_error?: () -> bool
+
+    def highlight_source: (String src, String lang, String? caption, ?invalid: bool) -> String
 
     def emlist: () -> void
 
@@ -107,9 +118,13 @@ module BitClust
 
     BracketLink: ::Regexp
 
+    StandardRef: ::Regexp
+
     NeedESC: ::Regexp
 
     def compile_text: (String str) -> String
+
+    def standard_ref: (String link) -> String
 
     def bracket_link: (String link, ?String? label, ?String? frag) -> String
 

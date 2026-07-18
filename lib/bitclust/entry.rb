@@ -150,6 +150,40 @@ module BitClust
       @db = db
     end
 
+    # description 等、コンパイラを通さない表示テキスト。
+    # md ソースの DB では旧経路と同じ表示形（rd インライン形式）へ戻す
+    def display_text(text)
+      return text unless text
+      if @db.properties['source_format'] == 'markdown'
+        # LibraryEntry#require（ライブラリ関係の登録）が Kernel#require を
+        # 隠蔽するため、ファイルロードは Kernel を明示する
+        Kernel.require 'bitclust/markdown_to_rrd'
+        ::BitClust::MarkdownToRRD.restore_description(text)
+      else
+        text
+      end
+    end
+    private :display_text
+
+    # BitClust::RDCompiler::BracketLink と同等の正規表現(/n なし)
+    BracketLink = /\[\[[\w-]+?:[!-~]+?(?:\[\] )?\]\]/
+
+    # meta description など、コンパイラを通さずマークアップも解釈されない
+    # 場所に使うテキスト。非 ASCII 文字間の改行は削除し(ブラウザでは
+    # 空白扱いになり日本語文中に不自然な空白が見えるため)、残りの改行は
+    # 空白に変換、ブラケットリンクはリンク先名のみにする
+    def description_text(text)
+      text = display_text(text)
+      return text unless text
+      text = text.split("\n").map(&:strip).join("\n")
+        .gsub(/(\P{ascii})\n(?=\P{ascii})/) { $1 || raise }
+        .tr("\n", ' ')
+      text.gsub(BracketLink) {|link|
+        ((link[2..-3] || raise).split(':', 2).last || raise).rstrip
+      }
+    end
+    private :description_text
+
     def type_id
       self.class.type_id
     end

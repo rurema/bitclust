@@ -59,11 +59,44 @@ module BitClust
 
     def update_by_file: (String path, String libname) -> LibraryEntry
 
+    # Markdown ツリー（manual/api）を直接パースして DB を更新する（M3）。
+    # front matter の library: が所属を表すため、ライブラリごとに
+    # lib ファイル → メンバーファイル（reopen/redefine のみのファイルは後置。
+    # dynamic include の対象 module が先に定義されている必要があるため）の
+    # 順でパースする。版ゲート（since/until）外のライブラリ/メンバーはスキップ。
+    # エントリの source には md 断片が入り、source_location は md の実パスを指す
+    def update_by_markdowntree: (String md_root) -> void
+    # md モード（update --markdowntree）でのみ設定される。実行時は未設定（nil）も
+    # あり得るが、読む側は常に truthy ガード付きなので @root と同じ扱いで非 nil 宣言
+    @md_root: String
+
+    private
+
+    # since は「その版以降」、until は「その版未満」（ブリッジの
+    # #@since/#@until ラッパーと同じ意味論）。
+    # version は properties()["version"]、since/until は MarkdownTree の
+    # front matter 由来のバージョン文字列（Gem::Version へ変換して比較する）
+    def md_version_covers?: (String version, String? since_version, String? until_version) -> bool
+
+    public
+
     def refs: () -> RefsDatabase
 
     def make_refs: () -> RefsDatabase
 
     def copy_doc: () -> void
+
+    private
+
+    # ネイティブ md ツリーの doc ページ登録（manual/api の隣の manual/doc）。
+    # ページ = 他の doc ファイルから #@include 参照されていない .md。
+    # source には md がそのまま入り、source_location は md の実パスを指す
+    def copy_doc_md: () -> void
+
+    # doc ページの先頭 front matter から since/until を読む
+    def doc_md_version_range: (String path) -> [ String?, String? ]
+
+    public
 
     def docs: () -> Array[DocEntry]
 

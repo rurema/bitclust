@@ -11,11 +11,11 @@ alias HogeHogeHoge
 --- hoge
 hoge
 --- fuga
-@undef
+{: undef}
 fuga
 == Instance Methods
 --- fugafuga
-@undef
+{: undef}
 fugafuga
 = class Bar < Hoge
 == Class Methods
@@ -70,5 +70,202 @@ HERE
     hoge = @lib.fetch_class("Hoge")
     assert(hoge.instance_method?('fugafuga'))
     assert(hoge.instance_method?('fugafuga', false))
+  end
+end
+
+class TestEntryDescription < Test::Unit::TestCase
+  def parse_class(class_source)
+    lib, = BitClust::RRDParser.parse(class_source, 'hoge')
+    lib.fetch_class('Hoge')
+  end
+
+  def test_description_truncates_newline_between_non_ascii
+    klass = parse_class(<<HERE)
+= class Hoge
+これは1行目で
+あとに続きます。
+
+以降の段落は含まれません。
+HERE
+    assert_equal('これは1行目であとに続きます。', klass.description)
+  end
+
+  def test_description_truncates_consecutive_newlines_between_non_ascii
+    klass = parse_class(<<HERE)
+= class Hoge
+あい
+うえ
+おか。
+HERE
+    assert_equal('あいうえおか。', klass.description)
+  end
+
+  def test_description_converts_newline_to_space_around_ascii
+    klass = parse_class(<<HERE)
+= class Hoge
+first line
+second line
+HERE
+    assert_equal('first line second line', klass.description)
+  end
+
+  def test_description_replaces_bracket_link_with_plain_text
+    klass = parse_class(<<HERE)
+= class Hoge
+自身の hostname を文字列で返します。また、[[m:URI::Generic#host]] が設
+定されていない場合は [[c:Array]] を返します。
+HERE
+    assert_equal('自身の hostname を文字列で返します。また、URI::Generic#host が設定されていない場合は Array を返します。',
+                 klass.description)
+  end
+
+  def test_description_replaces_indexer_bracket_link
+    klass = parse_class(<<HERE)
+= class Hoge
+[[m:String#[] ]] を参照。
+HERE
+    assert_equal('String#[] を参照。', klass.description)
+  end
+
+  def test_method_description_is_plain_text
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+
+[[c:Array]] を日本語で
+返します。
+
+次の段落。
+HERE
+    method = klass.entries.detect {|m| m.name == 'fuga' }
+    assert_equal('Array を日本語で返します。', method.description)
+  end
+end
+
+class TestEntryNomethod < Test::Unit::TestCase
+  def parse_class(class_source)
+    lib, = BitClust::RRDParser.parse(class_source, 'hoge')
+    lib.fetch_class('Hoge')
+  end
+
+  def test_nomethod_is_partitioned_separately
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+{: nomethod}
+
+説明のためのエントリです。
+HERE
+    parts = klass.partitioned_entries
+    assert_equal(['fuga'], parts.nomethod.map(&:name))
+    assert_equal([], parts.instance_methods.map(&:name))
+  end
+
+  def test_redefined_is_partitioned_separately
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- bar
+
+説明です。
+
+= redefine Hoge
+== Instance Methods
+--- baz
+
+再定義の説明です。
+HERE
+    parts = klass.partitioned_entries
+    assert_equal(['baz'], parts.redefined.map(&:name))
+    assert_equal(['bar'], parts.instance_methods.map(&:name))
+  end
+
+  def test_description_skips_leading_metadata_paragraph
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+{: nomethod}
+
+説明のためのエントリです。
+HERE
+    method = klass.entries.detect {|m| m.name == 'fuga' }
+    assert_equal('説明のためのエントリです。', method.description)
+  end
+
+  def test_description_is_empty_when_only_metadata
+    klass = parse_class(<<HERE)
+= class Hoge
+== Instance Methods
+--- fuga
+{: undef}
+HERE
+    method = klass.entries.detect {|m| m.name == 'fuga' }
+    assert_equal('', method.description)
+  end
+end
+
+class TestClassEntryDynamicallyIncludedEntries < Test::Unit::TestCase
+  SRC = <<'HERE'
+= module DynMod
+dyn module
+== Instance Methods
+--- dyn_method
+dyn method
+== Private Instance Methods
+--- hidden_dyn_method
+hidden dyn method
+= class Host < Object
+host class
+== Instance Methods
+--- host_method
+host method
+= reopen Host
+include DynMod
+HERE
+
+  def setup
+    @lib, = BitClust::RRDParser.parse(SRC, 'dynlib')
+    @host = @lib.fetch_class('Host')
+  end
+
+  def test_returns_public_instance_methods_of_dynamically_included_modules
+    assert_equal(['dyn_method'], @host.dynamically_included_entries.map(&:name))
+  end
+
+  def test_excludes_private_instance_methods_of_the_dynamically_included_module
+    names = @host.dynamically_included_entries.map(&:name)
+    assert_not_include(names, 'hidden_dyn_method')
+  end
+
+  def test_entries_keep_their_originating_module_and_library
+    entry = @host.dynamically_included_entries.first
+    assert_equal('DynMod', entry.klass.name)
+    assert_equal('dynlib', entry.library.name)
+  end
+
+  def test_does_not_affect_ancestors
+    # dynamic include must not change the MRO/ancestors chain.
+    assert_equal(['Host', 'Object'], @host.ancestors.map(&:name))
+  end
+
+  def test_does_not_affect_entries_or_partitioned_entries
+    assert_not_include(@host.entries.map(&:name), 'dyn_method')
+    parts = @host.partitioned_entries
+    assert_not_include(parts.instance_methods.map(&:name), 'dyn_method')
+    assert_not_include(parts.added.map(&:name), 'dyn_method')
+  end
+
+  def test_is_empty_when_class_has_no_dynamic_include
+    plain, = BitClust::RRDParser.parse(<<'PLAIN', 'dynlib')
+= class Plain < Object
+plain class
+== Instance Methods
+--- plain_method
+plain method
+PLAIN
+    assert_equal([], plain.fetch_class('Plain').dynamically_included_entries)
   end
 end

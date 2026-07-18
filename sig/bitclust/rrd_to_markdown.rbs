@@ -1,0 +1,160 @@
+module BitClust
+  class RRDToMarkdown
+    # include グラフ解析（IncludeGraph）が計算して注入する front matter。
+    # 値は scalar（type/name/library/since/until）か、library 多重所属の
+    # ゲート付きリスト（{"name" => .., "since" => .., "until" => ..}）
+    # 値の nil は「境界なし」（呼び出し側の gate 由来）。emit 時に無視される
+    type extra_front_matter = Hash[Symbol | String, String? | Array[Hash[String, String]]]
+
+    @src: String
+
+    @capi: bool
+
+    @extra_front_matter: Hash[String, String? | Array[Hash[String, String]]]
+
+    @lines: Array[String]
+
+    @out: Array[String]
+
+    @index: Integer
+
+    # キーごとに値の形が異なる:
+    # - type/name/library: String | Array[Hash[String, String]]（ゲート付き多重所属）
+    # - since/until/category(scalar): String
+    # - category(ゲート付き)/require/sublibrary/include/extend/alias/leading:
+    #   Array[String]（組み立て済み行）
+    @front_matter: Hash[String, untyped]
+
+    @current_section: (:module_function | nil)
+
+    # front matter はファイル単位。複数エンティティを含むファイルでは
+    # include/extend/alias の帰属が曖昧になるため、単一エンティティ時のみ front matter 化する
+    # （分割前の安全策。分割後は全ファイルが単一エンティティになる）。
+    @single_entity: bool
+
+    def self.convert: (String rrd, ?extra_front_matter: extra_front_matter, ?capi: bool) -> String
+
+    # RDCompiler の dlist 継続は /\A:/（スペース不要）で dt になる
+    # （spec/operator の「:再定義できない演算子」）。dlist 文脈にある
+    # 「:term」だけを正規形「: term」に直す。
+    def self.normalize_dlist_colon_spacing: (String rrd) -> String
+
+    # ファイル単体からは決められない front matter（library 所属・構造 since/until）を
+    # 注入するための口。include グラフを解析したオーケストレータが値を計算して渡す。
+    EXTRA_FRONT_MATTER_KEYS: Array[String]
+
+    # capi: C API リファレンス（refm/capi）モード。シグネチャは C の
+    # 「--- <型付きシグネチャ>」で、def 等のキーワードを付けずに ### へ変換する
+    def initialize: (String rrd, ?extra_front_matter: extra_front_matter, ?capi: bool) -> void
+
+    def convert: () -> String
+
+    private
+
+    SAMPLECODE_RE: ::Regexp
+
+    def collect_library_metadata: () -> void
+
+    # 先頭メタデータ領域の tokens を front matter へ組み立てる。
+    # tokens は [:cat|:req|:sub|:dir|:cmt, String] | [:blank] のトークン列。
+    # チェックポイント巻き戻しのスライス再代入で nilable になるため untyped
+    def build_metadata_front_matter: (untyped tokens) -> bool
+
+    def emit_front_matter: () -> String
+
+    def process_body: () -> void
+
+    # dd（記述リストの説明）/ @param 等の説明の中でフェンスを出すときの
+    # 内容カラムのインデント幅。項目マーカー「- 」の幅に合わせる
+    DD_CONTENT_INDENT: String
+
+    # フェンス内容行にインデントを前置する（空行・前処理ディレクティブ行は除く）
+    def indent_content_line: (String line, String indent) -> String
+
+    # indent: 呼び出し文脈の内容カラム（トップレベルは既定の ''、
+    # dd/@param 系の説明内から呼ぶ場合は DD_CONTENT_INDENT）
+    def convert_emlist: (String line, ?String indent) -> void
+
+    DIRECTIVE_NEST_RE: ::Regexp
+
+    DIRECTIVE_END_RE: ::Regexp
+
+    def convert_samplecode: (String line, ?String indent) -> void
+
+    def convert_signature: (String line) -> void
+
+    def convert_param: (String line) -> void
+
+    def convert_raise: (String line) -> void
+
+    def convert_return: (String line) -> void
+
+    def convert_see: (String line) -> void
+
+    # greedy: RDCompiler の dd_without_p と同じ貪欲さ（@param 等のメタデータ用）。
+    def collect_continuation_lines: (?greedy: bool) -> void
+
+    # anchor/text は正規表現キャプチャ（$1/$2 = String?）で渡される。
+    # line は行頭 =+ の再マッチ結果（String#[] が nilable）を直接 .length するため untyped
+    def convert_anchored_heading: (untyped line, String? anchor, untyped text) -> void
+
+    def convert_h3: (String line, String? text) -> void
+
+    def convert_h4: (String line, String? text) -> void
+
+    def convert_h5: (String line) -> void
+
+    def convert_ulist_item: (String line) -> void
+
+    def convert_olist_item: (String line) -> void
+
+    def code_like_term?: (String term) -> bool
+
+    def format_dlist_term: (String term) -> String
+
+    # term は process_body の正規表現キャプチャ（$1 = String?）由来
+    def convert_dlist_item: (String line, untyped term) -> void
+
+    def convert_indented_code: (String line, ?String indent) -> void
+
+    def convert_h1: (String line) -> void
+
+    # H1 直後の include/extend/alias を front matter へ集約する。
+    def collect_header_relations: () -> void
+
+    # tokens（[:rel, kind, val] | [:dir, line] | [:blank]）を
+    # front matter のブロック行（`  - item\n` / `#@...\n`）へ組み立てる。
+    def build_header_front_matter: (Array[untyped] tokens) -> bool
+
+    def convert_h2: (String line) -> void
+
+    def convert_text_number: (String line) -> void
+
+    def raw_passthrough: (String line) -> void
+
+    def passthrough: (String line) -> void
+
+    # テキスト行の __WORD__ パターンをコードスパンに変換
+    def add_code_spans: (String text) -> String
+
+    # BitClust::RDCompiler::BracketLink と同等の正規表現
+    BRACKET_LINK: ::Regexp
+
+    def convert_inline_refs: (String text) -> String
+
+    # match は MatchData#[]（String?）由来で、[[ ]] 除去のスライスも
+    # nilable になるため untyped
+    def convert_one_ref: (untyped match) -> String
+
+    # 参照に見えるリテラル本文 [ruby-talk:198440] 等（旧 news）をエスケープする
+    def escape_ref_lookalikes: (String bin) -> String
+
+    # GNU 風引用 `token' → コードスパン、残りの生バッククォート → \`
+    def escape_backticks: (String bin) -> String
+
+    # ループ不変条件（@index < @lines.length）の下でのみ呼ばれる
+    def current_line: () -> String
+
+    def advance: () -> void
+  end
+end

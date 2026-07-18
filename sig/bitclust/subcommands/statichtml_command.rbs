@@ -23,6 +23,14 @@ module BitClust
 
       @stop_on_syntax_error: bool
 
+      @eol_warning: bool
+
+      @run_ruby_wasm: String?
+
+      @sitemap_baseurl: String?
+
+      @sitemap_paths: Array[String]
+
       @outputdir: Pathname
 
       type manager_config = {
@@ -40,6 +48,8 @@ module BitClust
         :gtm_tracking_id => String?,
         :meta_robots_content => Array[String],
         :stop_on_syntax_error => bool,
+        :eol_warning => bool,
+        :run_ruby_wasm => String?,
         ?:urlmapper  => URLMapperEx,
       }
 
@@ -114,6 +124,24 @@ module BitClust
       def create_html_methods: (String title, Hash[String, Array[MethodEntry]] methods, ScreenManager manager, MethodDatabase db) -> void
 
       def create_index_html: (Pathname outputdir) -> void
+
+      RUN_RUBY_WASM_JS_FILES: Array[String]
+
+      def copy_run_ruby_wasm_script: () -> void
+
+      SEARCH_JS_FILES: Array[String]
+
+      def create_search_index: (Pathname outputdir, MethodDatabase db, FunctionDatabase fdb) -> void
+
+      MAX_SITEMAP_URLS: Integer
+
+      XML_ESCAPES: Hash[String, String]
+
+      def escape_xml: (String str) -> String
+
+      def record_sitemap_path: (Pathname path) -> void
+
+      def create_sitemap: (Pathname outputdir, String baseurl) -> void
 
       def create_html_file: (any_entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
 

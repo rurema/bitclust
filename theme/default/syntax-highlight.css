@@ -8,6 +8,14 @@
   color: #999999;
   font-weight: bold;
 }
+.highlight .cpf { /* preprocessor file (C の #include <...> など。Rouge 用) */
+  color: #999999;
+  font-weight: bold;
+}
+.highlight .pi { /* YAML などの indicator (Rouge 用) */
+  color: #999999;
+  font-weight: bold;
+}
 .highlight .c1 {
   color: #999988;
   font-style: italic;

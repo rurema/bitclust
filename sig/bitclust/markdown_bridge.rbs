@@ -1,0 +1,88 @@
+module BitClust
+  # md ツリー → 旧形式の rd ツリー（LIBRARIES + .rd）を生成するブリッジ。
+  #
+  # 既存の update 機構（LIBRARIES → RRDParser/Preprocessor）を一切変更せずに
+  # md ツリーから DB を組み立てるための変換層。MarkdownTree の発見結果から:
+  # - LIBRARIES を再生成（ライブラリの since/until は #@ ゲートとして再具現化）
+  # - ライブラリ .rd = 変換済み本文 + メンバーへの #@include を再生成
+  # - メンバー = 変換済み本文を front matter の since/until で #@ ラップ
+  #   （版指定ビルドで構造ゲートが効くように）
+  # - 断片 = そのまま変換
+  # 出力ファイル名は「md 名から .md を剥いだもの」（ライブラリのみ .rd 付き）に
+  # 統一し、本文中の #@include ターゲットも emit 名へ書き換える
+  # （Preprocessor はリテラルパスで解決するため）。
+  class MarkdownBridge
+    @md_root: String
+
+    @out_root: String
+
+    @tree: MarkdownTree
+
+    @warnings: Array[String]
+
+    # 出力相対パス（emit 名） => 入力 md 相対パス
+    @source_map: Hash[String, String]
+
+    # 名前はパス由来とは限らない（ファイル名衝突回避で改名された
+    # rdoc/rdoc.lib.md は front matter の name: が正）ので、パスから引く
+    # （md 相対パス => ライブラリ名）
+    @lib_by_path: Hash[String, String]
+
+    # md ツリー内の全ディレクトリ相対パス（emit_name の衝突判定用。build で設定）
+    @dirs: Array[String]
+
+    INCLUDE_RE: ::Regexp
+
+    def self.build: (String md_root, String out_root) -> instance
+
+    # doc（散文ページ）の md ツリー → 旧形式の doc/*.rd。
+    # - クロスツリー include（api 断片の transclude）は旧レイアウト
+    #   （../api/src/）へ戻す（ブリッジの api ツリーは api/src に置かれるため）
+    # - doc 内ローカル include から参照される断片（spec/regexp19 等）は
+    #   拡張子なしで emit する（copy_doc は **/*.rd だけをページとして読む）
+    # 戻り値は source_map（出力相対パス => 入力 md 相対パス）
+    def self.build_doc: (String md_doc_root, String out_doc_root) -> Hash[String, String]
+
+    attr_reader warnings: Array[String]
+
+    # 出力相対パス（emit 名） => 入力 md 相対パス。
+    # source_location を manual/ の md へ再マップするために使う
+    attr_reader source_map: Hash[String, String]
+
+    def initialize: (String md_root, String out_root) -> void
+
+    def build: () -> self
+
+    private
+
+    # ライブラリは <name>.rd（update_by_stdlibtree の解決規約）。
+    # 非ライブラリは拡張子なし（doc ツリーが `../api/src/_builtin/pack-template` の
+    # ように元式の拡張子なし名で断片を transclude しているため）。
+    # ただし同名ディレクトリと衝突する場合は .rd を付ける（scanf.md と scanf/）
+    def emit_name: (String f) -> String
+
+    # LIBRARIES: 名前順。ライブラリの版ゲートは #@ で再具現化する
+    def libraries_manifest: () -> String
+
+    # ライブラリのメンバー（membership がこのライブラリを指すエンティティ）への
+    # #@include をライブラリ .rd のディレクトリ相対で再生成する。
+    # reopen/redefine だけのファイルは後ろに並べる（reopen が dynamic include する
+    # module は同ライブラリ内で先に定義されている必要がある: json/rake）。
+    # 多重所属（ゲート付き library リスト）は membership のゲートで
+    # include サイトをラップする（旧 LIBRARIES 世界のゲート付き include と同義）
+    def member_includes: (String libname, Hash[String, String] emitted) -> String
+
+    # front matter の構造ゲート（since/until）を #@ ラッパーとして再具現化する
+    def wrap_gate: (String rrd, MarkdownTree::entity_info entity) -> String
+
+    # 本文中の #@include ターゲットを emit 名（相対）へ書き換える。
+    # 解決できないターゲットはそのまま（発見段階で警告済み）
+    def rewrite_includes: (String rrd, String md_file, Hash[String, String] emitted) -> String
+
+    def resolve: (String base, String target, Hash[String, String] emitted) -> String?
+
+    def relative: (String path, String from_dir) -> String
+
+    def write: (String rel, String content) -> void
+  end
+end

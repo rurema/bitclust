@@ -27,6 +27,11 @@ module BitClust
         option_error('wrong number of arguments') unless argv.size == 1
       end
 
+      # システムの ruby を調べるだけで DB を使わない
+      def needs_database?
+        false
+      end
+
       def exec(argv, options)
         lib = argv[0]
         print_crossruby_table {|ruby| defined_classes(ruby, lib, @rejects) }

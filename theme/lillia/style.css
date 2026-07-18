@@ -173,8 +173,27 @@ td.library {
     border: 3px solid white;
 }
 
-code {
+code, tt {
     font-family: monospace;
+}
+
+/* 地の文中のインラインコード(<code>, <tt>)に淡い背景を敷いて、地の文との
+   区別をはっきりさせる。色は pre の背景(#eee)と同系統だが、それより少し
+   薄くして地の文中では主張しすぎないようにする */
+code, tt {
+    background-color: #f5f5f5;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+}
+
+/* pre の中の code/tt は pre 自体がブロックとして背景色を持つため、上の
+   ルールをここで打ち消して二重に背景・パディングがつかないようにする
+   (pre 内の見た目は従来どおり) */
+pre code,
+pre tt {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
 }
 
 a {

@@ -1,0 +1,17 @@
+# Rouge gem(シンタックスハイライト)の最小スタブ。
+# RDCompiler#highlight_source で使う API のみ定義する。
+module Rouge
+  class Lexer
+    def self.find: (String name) -> singleton(Lexer)?
+
+    def self.tag: (?String? t) -> String
+
+    def self.lex: (String stream, ?Hash[Symbol, untyped] opts) -> untyped
+  end
+
+  module Formatters
+    class HTML
+      def format: (untyped tokens) -> String
+    end
+  end
+end

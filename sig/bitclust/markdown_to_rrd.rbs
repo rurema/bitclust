@@ -1,0 +1,149 @@
+module BitClust
+  # Markdown（MARKUP_SPEC 形式）のドキュメントを RRD 形式へ復元する変換器
+  class MarkdownToRRD
+    @src: String
+
+    @capi: bool
+
+    @lines: Array[String]
+
+    @out: Array[String]
+
+    @index: Integer
+
+    @front_matter: Hash[String, untyped]
+
+    # クラス関係（H1 直後、RRD 文法順 alias → extend → include）。
+    # front matter が無いソースでは未設定（nil）だが、参照側は常に
+    # 真偽ガード付きなので実用上 non-nil として扱う
+    @class_relations: Array[String]
+
+    # ライブラリメタ（H1 前）。@class_relations と同じく実用上 non-nil
+    @library_metadata_body: Array[String]
+
+    def self.convert: (String markdown, ?capi: bool) -> String
+
+    # md テキスト断片のインライン記法を rd 形式へ復元する
+    # （[type:target] → [[type:target]]、\[ エスケープ解除）。
+    # MDCompiler がテキストノードの処理を共有するための公開 API
+    def self.restore_inline: (String text) -> String
+
+    # md テキストノードを旧経路と同じ表示形（rd のインライン形式）へ戻す
+    def self.restore_text: (String text) -> String
+
+    # entry#description（コンパイラ非経由テキスト）と RefsDatabase のラベル用:
+    # インラインに加えて行頭構造も旧表示形へ戻す
+    def self.restore_description: (String text) -> String
+
+    # description 内のフェンスを旧経路の表示形へ戻す。
+    # フェンス内容は \x01<idx>\x01 プレースホルダで saved に退避される
+    def self.restore_display_fences: (String text, Array[String] saved) -> String
+
+    # 行頭構造（見出し・メタデータ行）の rd 表示形への復元
+    def self.restore_display_line: (String l) -> String
+
+    # capi: C API リファレンスモード。### は見出しではなくシグネチャ
+    def initialize: (String markdown, ?capi: bool) -> void
+
+    def convert: () -> String
+
+    private
+
+    def parse_front_matter: () -> void
+
+    def emit_library_metadata: () -> void
+
+    # front matter を生行で走査し、#@ ディレクティブを保持したまま
+    # ライブラリメタとクラス関係の body 行を組み立てる
+    def parse_front_matter_raw: (Array[String] yaml_lines) -> void
+
+    def process_body: () -> void
+
+    def convert_code_block: (String line) -> void
+
+    # dd/@param 系の説明内にある、インデントされたフェンス（rd では
+    # //emlist・#@samplecode の桁0出力に対応）を桁0の //emlist{ /
+    # #@samplecode に戻す。convert_code_block の 3 バッククォート
+    # （lang 付き）分岐と対称
+    def convert_indented_code_block: (String line, String indent) -> void
+
+    def convert_method_signature: (String line) -> void
+
+    def convert_module_function_signature: (String line) -> void
+
+    def convert_const_signature: (String line) -> void
+
+    def convert_gvar_signature: (String line) -> void
+
+    # kind は process_body の $1（param/return/raise）
+    def convert_metadata: (String line, String? kind) -> void
+
+    # greedy: rd 側の @param 系継続（RDCompiler の dd_without_p 相当）と対称
+    def collect_md_continuation_lines: (?greedy: bool) -> void
+
+    def convert_see: (String line) -> void
+
+    def convert_see_list_upper: (String line) -> void
+
+    def convert_see_list: (String line) -> void
+
+    def convert_see_passthrough: (String line) -> void
+
+    def convert_heading_with_anchor: (String line, String prefix) -> void
+
+    # 見出しテキストのバッククォート復元（参照変換は通さない）
+    def restore_heading_backticks: (String text) -> String
+
+    def convert_h3_heading: (String line) -> void
+
+    def convert_h4_heading: (String line) -> void
+
+    def convert_h5_heading: (String line) -> void
+
+    def strip_code_span: (String text) -> String
+
+    def convert_dlist_colon_item: (String line) -> void
+
+    def convert_dlist_item: (String line) -> void
+
+    def convert_bold_number: (String line) -> void
+
+    def convert_ordered_list_item: (String line, Integer num, String indent) -> void
+
+    def convert_list_item: (String line, String indent) -> void
+
+    def convert_dlist_passthrough: (String line) -> void
+
+    def convert_indented_code: (String line) -> void
+
+    def convert_h2: (String line) -> void
+
+    # capi の C シグネチャ（キーワード無し ###）を復元する
+    def convert_capi_signature: (String line) -> void
+
+    # rd→md がエスケープした行頭 # のリテラル本文を復元する
+    def convert_escaped_hash_line: (String line) -> void
+
+    def convert_h1: (String line) -> void
+
+    def raw_passthrough: (String line) -> void
+
+    def passthrough: (String line) -> void
+
+    # テキスト行のコードスパンを rd の元表記へ復元する
+    def strip_code_spans: (String text) -> String
+
+    # Markdown のブラケットリンク: エスケープされた \[ \] を含むパターン
+    def convert_inline_refs: (String line) -> String
+
+    def convert_bare_refs: (String line) -> String
+
+    def find_closing_bracket: (String line, Integer start) -> Integer?
+
+    def convert_md_ref_to_rrd: (String ref) -> String
+
+    def current_line: () -> String
+
+    def advance: () -> void
+  end
+end

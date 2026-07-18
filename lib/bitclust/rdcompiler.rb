@@ -14,6 +14,7 @@ require 'bitclust/htmlutils'
 require 'bitclust/textutils'
 require 'bitclust/messagecatalog'
 require 'bitclust/syntax_highlighter'
+require 'rouge'
 require 'stringio'
 
 module BitClust
@@ -32,7 +33,7 @@ module BitClust
       @type = nil
       @method = nil
       @option = opt.dup
-      init_message_catalog(@catalog)
+      init_message_catalog(@catalog || MessageCatalog.new({}, 'C'))
     end
 
     def compile(src)
@@ -89,6 +90,10 @@ module BitClust
           dlist
         when /\A\s+\S/
           list
+        when /\A@see\b/
+          # findings#1: doc/lib ページの @see もメソッドエントリと同じく
+          # SEE_ALSO として解釈する（従来は段落テキストだった）
+          see
         else
           if @f.peek&.strip&.empty?
             @f.gets
@@ -105,12 +110,23 @@ module BitClust
       end
     end
 
+    # シグネチャ行に続くメソッド属性行({: ...}。直前のシグネチャ行に束縛)
+    METHOD_ATTRIBUTE_LINE_RE = /\A\{:.*\}[ \t]*$/
+
     def entry_chunk
       @out.puts '<dl>' if @option[:force]
       first = true
-      @f.while_match(/\A---/) do |line|
-        method_signature(line, first)
-        first = false
+      attrs = [] #: Array[String]
+      while @f.next?
+        if /\A---/ =~ @f.peek
+          method_signature(@f.gets || raise, first)
+          first = false
+        elsif !first && METHOD_ATTRIBUTE_LINE_RE =~ @f.peek
+          # メソッド属性行は本文には描画しない(undef のみ後でメッセージ)
+          attrs.concat attribute_tokens(@f.gets)
+        else
+          break
+        end
       end
       props = {} #: Hash[String?, String?]
       @f.while_match(/\A:/) do |line|
@@ -118,6 +134,7 @@ module BitClust
         props[k&.strip] = v&.strip
       end if @type == :method
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
+      undef_message if attrs.include?('undef')
       while @f.next?
         case @f.peek
         when /\A===+/
@@ -140,9 +157,11 @@ module BitClust
           emlist
         when /\A\s+\S/
           list
-        when /@see/
+        when /\A@see\b/
+          # findings#3: 無アンカーの /@see/ は行の途中に @see を含む
+          # 本文行を吸ってしまう（@todo も同様）
           see
-        when /@todo/
+        when /\A@todo\b/
           todo
         when /\A@[a-z]/
           entry_info
@@ -254,8 +273,8 @@ module BitClust
       line '</dd>'
     end
 
-    def dt(s)
-      "<dt>#{s}</dt>"
+    def dt(s, id = nil)
+      id ? %Q(<dt id="#{escape_html(id)}">#{s}</dt>) : "<dt>#{s}</dt>"
     end
 
     def stop_on_syntax_error?
@@ -263,33 +282,48 @@ module BitClust
       @option[:stop_on_syntax_error]
     end
 
+    # lang 指定付きコードブロックのハイライト HTML を返す。
+    # ruby(rb などの Rouge 上の alias を含む)は構文チェックを兼ねる
+    # Ripper ベースの SyntaxHighlighter、その他の言語は Rouge を使う。
+    # Rouge が知らない言語はエスケープのみ(従来この経路と ruby の構文
+    # エラー時フォールバックはエスケープされずに出力されていたのを修正)。
+    # invalid: true(md の ```ruby invalid)は構文として完全でないコードの
+    # 印で、Ripper の構文チェックをせず Rouge の lexer で色付けする(#251)
+    def highlight_source(src, lang, caption, invalid: false)
+      lexer = ::Rouge::Lexer.find(lang)
+      if lexer && lexer.tag == 'ruby' && !invalid
+        begin
+          filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
+          BitClust::SyntaxHighlighter.new(src, filename).highlight
+        rescue BitClust::SyntaxHighlighter::Error => ex
+          $stderr.puts ex.message
+          exit(false) if stop_on_syntax_error?
+          escape_html(src)
+        end
+      elsif lexer
+        ::Rouge::Formatters::HTML.new.format(lexer.lex(src))
+      else
+        escape_html(src)
+      end
+    end
+
     def emlist
       command = @f.gets
       if %r!\A//emlist\[(?<caption>[^\[\]]+?)?\]\[(?<lang>\w+?)\]! =~ command
         # @type var caption: String?
         # @type var lang: String
-        line "<pre class=\"highlight #{lang}\">"
+        # caption は pre 内の absolute 配置ではなく、pre の上に密着した
+        # タブとして描画する(pre 内だと編集・貼り付けで先頭行と重なる)
         line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
-        line "<code>"
+        # <code> の直後に改行を入れると pre の内容の先頭に余計な空行として
+        # 表示される(pre 開始タグ直後の改行と違いブラウザは無視しない)
+        # ため、コード本体は <code> に直接続ける(#254)
+        string "<pre class=\"highlight #{lang}\"><code>"
         src = +""
         @f.until_terminator(%r<\A//\}>) do |line|
           src << line
         end
-        if lang == "ruby"
-          begin
-            filename = (caption&.size || 0) > 2 ? caption : @f.name or raise
-            string BitClust::SyntaxHighlighter.new(src, filename).highlight
-          rescue BitClust::SyntaxHighlighter::Error => ex
-            $stderr.puts ex.message
-            if stop_on_syntax_error?
-              exit(false)
-            else
-              string src
-            end
-          end
-        else
-          string src
-        end
+        string highlight_source(src, lang, caption)
         line '</code></pre>'
       else
         line '<pre>'
@@ -341,6 +375,19 @@ module BitClust
       body = header
       line '<p class="todo">'
       line '[TODO]' + body
+      line '</p>'
+    end
+
+    def attribute_tokens(attr_line)
+      (attr_line || '')[/\A\{:(.*)\}/, 1].to_s.strip.split(/\s+/)
+    end
+
+    # {: undef} 属性付きエントリのメッセージ。ページを見に来た人向け
+    # (statichtml は undefined エントリを skip するので server 等の動的経路用)。
+    # nomethod は説明が本文に書かれている前提のマーカーなので何も描画しない
+    def undef_message
+      line '<p>'
+      line 'このメソッドは定義されていません。'
       line '</p>'
     end
 
@@ -408,19 +455,29 @@ module BitClust
     end
 
     BracketLink = /\[\[[\w-]+?:[!-~]+?(?:\[\] )?\]\]/n
+    # BitClust には ISO/JIS へのリンク機能がないため、[[ISO:8601]]/[[JIS:X 0301]] は
+    # リンクにせず平文で表示する (rurema/bitclust#236)。引数に空白を含む JIS も拾う。
+    StandardRef = /\[\[(?:ISO|JIS):[!-~][!-~ ]*?\]\]/n
     NeedESC = /[&"<>]/
 
     def compile_text(str)
       escape_table = HTMLUtils::ESC
-      str.gsub(/(#{NeedESC})|(#{BracketLink})/o) {
+      str.gsub(/(#{NeedESC})|(#{StandardRef})|(#{BracketLink})/o) {
         # @type var char: '&' | '"' | '<' | '>'
         if    char = _ = $1 then escape_table[char]
-        elsif tok  = $2 then bracket_link(tok[2..-3] || raise)
-        elsif tok  = $3 then seems_code(tok)
+        elsif tok  = $2 then standard_ref(tok[2..-3] || raise)
+        elsif tok  = $3 then bracket_link(tok[2..-3] || raise)
         else
           raise 'must not happen'
         end
       }
+    end
+
+    def standard_ref(link)
+      # 例: "ISO:8601" -> "ISO 8601", "JIS:X 0301" -> "JIS X 0301"
+      type, _arg = link.split(':', 2)
+      arg = _arg&.strip or raise
+      escape_html("#{type} #{arg}")
     end
 
     def bracket_link(link, label = nil, frag = nil)
@@ -431,9 +488,9 @@ module BitClust
         protect(link) {
           case arg
           when '/', '_index'
-            label = 'All libraries'
+            label = _('Library Index')
           when '_builtin'
-            label = 'Builtin libraries'
+            label = _('Builtin Library')
           end
           library_link(arg, label, frag)
         }
@@ -445,7 +502,7 @@ module BitClust
         protect(link) {
           case arg
           when '/', '_index'
-            arg, label = '', 'All C API'
+            arg, label = '', _('Function Index')
           end
           function_link(arg, label || arg, frag)
         }
@@ -567,8 +624,14 @@ module BitClust
 
     def rdoc_url(method_id, version)
       cname, tmark, mname, _libname = methodid2specparts(method_id)
-      tchar = typemark2char(tmark) == 'i' ? 'i' : 'c'
       cname = cname.split(".").first || raise
+      # rdoc は Kernel のモジュール関数(rb_define_global_function 由来)を
+      # private インスタンスメソッドとして掲載しているため i にする
+      if typemark2char(tmark) == 'i' || (cname == "Kernel" && tmark == '.#')
+        tchar = 'i'
+      else
+        tchar = 'c'
+      end
       cname = cname.gsub('::', '/')
       id = "method-#{tchar}-#{encodename_rdocurl(mname)}"
 
