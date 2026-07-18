@@ -65,7 +65,6 @@ GEM
     parser (3.3.10.2)
       ast (~> 2.4.1)
       racc
-    pathname (0.4.0)
     power_assert (3.0.1)
     prism (1.9.0)
     progressbar (1.13.0)
@@ -132,7 +131,6 @@ PLATFORMS
 DEPENDENCIES
   bitclust-core!
   bitclust-dev!
-  pathname
   rake
   refe2!
   steep (~> 1.9.0)
@@ -172,7 +170,6 @@ CHECKSUMS
   minitest (6.0.2) sha256=db6e57956f6ecc6134683b4c87467d6dd792323c7f0eea7b93f66bd284adbc3d
   nkf (0.2.0) sha256=fbc151bda025451f627fafdfcb3f4f13d0b22ae11f58c6d3a2939c76c5f5f126
   parser (3.3.10.2) sha256=6f60c84aa4bdcedb6d1a2434b738fe8a8136807b6adc8f7f53b97da9bc4e9357
-  pathname (0.4.0) sha256=d8bef9d54dd35667f057708ee4f8ed91818e493091f86788fd5ef21a7cbeee89
   power_assert (3.0.1) sha256=8ce9876716cc74e863fcd4cdcdc52d792bd983598d1af3447083a3a9a4d34103
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   progressbar (1.13.0) sha256=18c921d1c527dbe7eba3c5a07a1e3bcdd5e42fc18276f5711187a7489448be78
