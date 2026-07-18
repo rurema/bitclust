@@ -123,6 +123,8 @@ module BitClust
         @stop_on_syntax_error = true
         @eol_warning = false
         @run_ruby_wasm = nil
+        @sitemap_baseurl = nil
+        @sitemap_paths = []
         @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
         @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
@@ -165,6 +167,9 @@ module BitClust
         @parser.on('--run-ruby-wasm=WASM_URL', 'Add a RUN button to Ruby sample code, executing it in-browser with the given ruby.wasm') do |url|
           @run_ruby_wasm = url
         end
+        @parser.on('--sitemap-baseurl=URL', 'Generate sitemap.xml under the output directory, with <loc> built from this base URL (e.g. https://docs.ruby-lang.org/ja/3.4/). Omit to skip sitemap.xml generation (default)') do |url|
+          @sitemap_baseurl = url
+        end
         @parser.on('--no-stop-on-syntax-error', 'Do not stop on syntax error') do |boolean|
           @stop_on_syntax_error = boolean
         end
@@ -202,17 +207,26 @@ module BitClust
         end
 
         @urlmapper.bitclust_html_base = '..'
-        create_file(@outputdir + "library/#{html_filename("index", @suffix)}",
+        library_index_path = @outputdir + "library/#{html_filename("index", @suffix)}"
+        create_file(library_index_path,
                     manager.library_index_screen(db.libraries.sort, {:database => db}).body,
                     :verbose => @verbose)
-        create_file(@outputdir + "class/#{html_filename("index", @suffix)}",
+        record_sitemap_path(library_index_path)
+        class_index_path = @outputdir + "class/#{html_filename("index", @suffix)}"
+        create_file(class_index_path,
                     manager.class_index_screen(db.classes.sort, {:database => db}).body,
                     :verbose => @verbose)
-        create_file(@outputdir + "function/#{html_filename("index", @suffix)}",
+        record_sitemap_path(class_index_path)
+        function_index_path = @outputdir + "function/#{html_filename("index", @suffix)}"
+        create_file(function_index_path,
                     manager.function_index_screen(fdb.functions.sort, { :database => fdb }).body,
                     :verbose => @verbose)
+        record_sitemap_path(function_index_path)
         create_index_html(@outputdir)
         create_search_index(@outputdir, db, fdb)
+        if baseurl = @sitemap_baseurl
+          create_sitemap(@outputdir, baseurl)
+        end
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:css_url],
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         FileUtils.cp(@manager_config[:themedir] + "syntax-highlight.css",
@@ -327,6 +341,55 @@ HERE
                      :verbose => @verbose, :preserve => true)
       end
 
+      # A single sitemap.xml file supports at most 50,000 URLs
+      # (https://www.sitemaps.org/protocol.html#index). Splitting into a
+      # sitemap index is out of scope for now (small start); if the site
+      # grows past this, only the first MAX_SITEMAP_URLS pages are listed
+      # and a warning is printed.
+      MAX_SITEMAP_URLS = 50_000
+
+      # The 5 characters that need escaping to embed arbitrary text as XML
+      # character data (used for the <loc> contents below).
+      XML_ESCAPES = {
+        '&' => '&amp;',
+        '<' => '&lt;',
+        '>' => '&gt;',
+        '"' => '&quot;',
+        "'" => '&apos;',
+      }.freeze
+
+      def escape_xml(str)
+        str.gsub(/[&<>"']/) {|c| XML_ESCAPES.fetch(c) }
+      end
+
+      # Remember +path+ (an HTML page actually written under @outputdir) so
+      # that create_sitemap can list it later. A no-op unless
+      # --sitemap-baseurl was given, so sitemap generation has no effect on
+      # the rest of the run when the option is not used.
+      def record_sitemap_path(path)
+        return unless @sitemap_baseurl
+        @sitemap_paths << path.relative_path_from(@outputdir).to_s
+      end
+
+      # Generate outputdir/sitemap.xml: a plain XML sitemap
+      # (https://www.sitemaps.org/protocol.html) listing every page
+      # recorded via record_sitemap_path, as baseurl + relative path.
+      def create_sitemap(outputdir, baseurl)
+        paths = @sitemap_paths
+        if paths.size > MAX_SITEMAP_URLS
+          $stderr.puts "warning: #{paths.size} pages found, but a single sitemap.xml supports at most #{MAX_SITEMAP_URLS} URLs; only the first #{MAX_SITEMAP_URLS} are included. Consider a sitemap index if you need the rest."
+          paths = paths.first(MAX_SITEMAP_URLS)
+        end
+        base = baseurl.end_with?('/') ? baseurl : "#{baseurl}/"
+        xml = +%(<?xml version="1.0" encoding="UTF-8"?>\n)
+        xml << %(<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n)
+        paths.each do |path|
+          xml << "<url><loc>#{escape_xml(base + path)}</loc></url>\n"
+        end
+        xml << "</urlset>\n"
+        create_file(outputdir + "sitemap.xml", xml, :verbose => @verbose)
+      end
+
       # Scripts for the RUN-button feature (statichtml --run-ruby-wasm):
       # run.js sets up the button and compiles the wasm module on the main
       # thread; run-worker.js is the module Worker it spawns per execution
@@ -387,6 +450,7 @@ HERE
         path.open('w') do |f|
           f.write(html)
         end
+        record_sitemap_path(path)
       end
 
       def create_file(path, str, options = {})
