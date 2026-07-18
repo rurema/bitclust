@@ -138,6 +138,15 @@ module BitClust
       names().map {|name| "#{c}#{t}#{name}" }
     end
 
+    # Every name of this entry, formatted the same way as #label (i.e.
+    # without the redundant class prefix on special variables such as $!,
+    # unlike #labels). Used where all aliases of a method need to be listed
+    # together, e.g. the <title> of its page.
+    def title_labels
+      c, t, _m, _lib = methodid2specparts(@id)
+      names().map {|name| "#{t == '$' ? '' : c}#{t}#{name}" }
+    end
+
     def name?(name)
       names().include?(name)
     end
