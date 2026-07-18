@@ -359,10 +359,10 @@ module BitClust
     def code_fence
       open_line = @f.gets or raise
       fence = open_line[/\A`+/] or raise
-      lang, caption = parse_fence_info(open_line[fence.size..].to_s.strip)
+      lang, caption, invalid = parse_fence_info(open_line[fence.size..].to_s.strip)
       terminator = /\A`{#{fence.size}}\s*$/
       if lang
-        highlighted_fence_body(lang, caption, terminator)
+        highlighted_fence_body(lang, caption, terminator, invalid: invalid)
       elsif fence.size == 3
         line '<pre>'
         @f.until_terminator(terminator) do |code_line|
@@ -415,18 +415,25 @@ module BitClust
       lines
     end
 
-    # info string（lang と title="cap"）のパース
+    # info string のパース。文法: lang [invalid] [title="cap"]
+    # invalid は「構文として完全でないコード」の印で、ruby では Ripper の
+    # 構文チェックをせず Rouge の lexer で色付けする(issue #251)
     def parse_fence_info(rest)
-      if rest =~ /\A(\w+)?(?:\s+title="((?:[^"\\]|\\.)*)")?\z/
-        [$1, $2&.gsub(/\\(["\\])/, '\1')]
+      if rest =~ /\A(\w+)?(\s+invalid)?(?:\s+title="((?:[^"\\]|\\.)*)")?\z/
+        # title の gsub(別の正規表現マッチ)が $~ を上書きするため、
+        # $1〜$3 は gsub より前に読み切る
+        lang = $1
+        invalid = !$2.nil?
+        title = $3
+        [lang, title&.gsub(/\\(["\\])/, '\1'), invalid]
       else
-        [nil, nil]
+        [nil, nil, false]
       end
     end
 
     # ハイライト付き <pre> の本体。caption はタブとして pre の前に置く
     # (rd 側と同期)。strip_re はインデントフェンスのデデント用
-    def highlighted_fence_body(lang, caption, terminator, strip_re = nil)
+    def highlighted_fence_body(lang, caption, terminator, strip_re = nil, invalid: false)
       line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
       line "<pre class=\"highlight #{lang}\">"
       line "<code>"
@@ -434,7 +441,7 @@ module BitClust
       @f.until_terminator(terminator) do |code_line|
         src << (strip_re ? code_line.sub(strip_re, '') : code_line)
       end
-      string highlight_source(src, lang, caption)
+      string highlight_source(src, lang, caption, invalid: invalid)
       line '</code></pre>'
     end
 
@@ -446,11 +453,11 @@ module BitClust
       INDENTED_FENCE_RE =~ open_line or raise
       indent = ($1 || raise)
       fence = ($2 || raise)
-      lang, caption = parse_fence_info(open_line[(indent.size + fence.size)..].to_s.strip)
+      lang, caption, invalid = parse_fence_info(open_line[(indent.size + fence.size)..].to_s.strip)
       terminator = /\A[ \t]{0,#{indent.size}}`{#{fence.size}}\s*$/
       strip_re = /\A[ \t]{1,#{indent.size}}/
       if lang
-        highlighted_fence_body(lang, caption, terminator, strip_re)
+        highlighted_fence_body(lang, caption, terminator, strip_re, invalid: invalid)
       else
         line '<pre>'
         @f.until_terminator(terminator) do |code_line|
