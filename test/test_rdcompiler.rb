@@ -937,6 +937,16 @@ HERE
           :method_id => "ARGF.class/i.binmode.argf._builtin",
           :version   => "2.0.0",
           :expected  => "https://docs.ruby-lang.org/en/2.0.0/ARGF.html#method-i-binmode"
+       },
+       "Kernel.#trace_var" => {
+          :method_id => "Kernel/m.trace_var._builtin",
+          :version   => "2.0.0",
+          :expected  => "https://docs.ruby-lang.org/en/2.0.0/Kernel.html#method-i-trace_var"
+       },
+       "Math.#sqrt" => {
+          :method_id => "Math/m.sqrt._builtin",
+          :version   => "2.0.0",
+          :expected  => "https://docs.ruby-lang.org/en/2.0.0/Math.html#method-c-sqrt"
        })
   def test_rdoc_url(data)
     assert_equal(data[:expected], @c.rdoc_url(data[:method_id], data[:version]))
