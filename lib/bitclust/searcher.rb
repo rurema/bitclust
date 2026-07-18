@@ -40,8 +40,18 @@ module BitClust
         parser.banner = "Usage: #{@name} <pattern>"
         unless cmd == 'bitclust'
           parser.on('-d', '--database=URL', "Database location (default: #{dblocation_name()})") {|loc|
-            url = (/:/ =~ loc) ? loc : "file://#{File.expand_path(loc)}"
-            @dblocation = URI.parse(url)
+            @dblocation =
+              if windows_drive_path?(loc)
+                # "G:/Users/foo/.bitclust/db-2.2.0" のような Windows の
+                # ドライブレター付きパスは "/:/ =~ loc" が真になってしまい
+                # (":" がドライブレターの区切りに含まれるため)、既に URL
+                # 形式だと誤認されて file:// を付けずに URI.parse に渡って
+                # しまう。drive_path_uri で組み立てる
+                drive_path_uri(loc)
+              else
+                url = (/:/ =~ loc) ? loc : "file://#{File.expand_path(loc)}"
+                URI.parse(url)
+              end
           }
           parser.on('--server=URL', 'Spawns BitClust database server and listen URL.  Requires --database option with local path.') {|url|
             require 'bitclust/server'   # require here for speed
@@ -183,10 +193,33 @@ module BitClust
         return URI.parse(ENV.fetch(key)) if ENV[key]
       end
       if path = dbpath()
-        URI.parse("file://#{path}")
+        # Windows で "G:/Users/foo/.bitclust/db-2.2.0" のようなドライブ
+        # レター付きの絶対パスを URI.parse("file://#{path}") に渡すと、
+        # "G" が URI のホスト部分として解釈されてしまい、path からドライブ
+        # レターが失われる(URI.parse("file://G:/foo").path は "/foo" に
+        # なってしまう)。ドライブレター付きパスのときは URI 化せず、
+        # drive_path_uri でドライブレターを保持したまま file: URI を作る
+        windows_drive_path?(path) ? drive_path_uri(path) : URI.parse("file://#{path}")
       else
         nil
       end
+    end
+
+    # "G:/foo" や "C:\\foo" のような、Windows のドライブレターで始まる
+    # 絶対パスかどうかを判定する
+    def windows_drive_path?(path)
+      /\A[A-Za-z]:/.match?(path)
+    end
+
+    # ドライブレター付きの絶対パスを、ドライブレターを失わずに保持した
+    # ままの file: URI (URI::File) にする。通常の URI.parse("file://...")
+    # はホスト部分を認識してしまい先頭のドライブレターを取りこぼすため、
+    # ここでは URI::Generic#initialize の arg_check を無効にして、
+    # "先頭は / から始まる絶対パスであること" という通常の URI のパス
+    # 検証を素通りさせ、path にドライブレターを含む文字列をそのまま保持
+    # させる
+    def drive_path_uri(path)
+      URI::File.new('file', nil, '', nil, nil, path, nil, nil, nil, nil, false)
     end
 
     def dbpath

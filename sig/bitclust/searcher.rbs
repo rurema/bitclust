@@ -49,6 +49,10 @@ module BitClust
 
     def find_dblocation: () -> (URI::File | URI::Generic)?
 
+    def windows_drive_path?: (String path) -> bool
+
+    def drive_path_uri: (String path) -> URI::File
+
     def dbpath: () -> String?
 
     def env_dbpath: () -> String?
