@@ -67,9 +67,9 @@ module BitClust
     def extract(entry)
       entry.source.each_line{|l|
         anchor, label =
-          if /\A={1,6}\[a:(\w+)\] *(.*)/ =~ l
+          if /\A={1,6}\[a:([-\w]+)\] *(.*)/ =~ l
             [$1, $2]
-          elsif /\A\#{1,6} +(.*?) *\{#(\w+)\}\s*\z/ =~ l
+          elsif /\A\#{1,6} +(.*?) *\{#([-\w]+)\}\s*\z/ =~ l
             # md ソース: 「### 見出し {#anchor}」形式（M3 ネイティブパース）。
             # ラベルは rd 表示形へ戻す（\` エスケープ解除等。pattern_matching）
             Kernel.require 'bitclust/markdown_to_rrd'

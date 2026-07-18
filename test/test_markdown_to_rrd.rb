@@ -281,6 +281,12 @@ class TestMarkdownToRRD < Test::Unit::TestCase
       convert("### 破壊的な変更 {#mutable}\n")
   end
 
+  def test_h3_with_hyphenated_anchor
+    # doctree/manual の glossary.md 等、用語アンカーはハイフン区切り
+    assert_equal "===[a:thread-safe] スレッドセーフ\n",
+      convert("### スレッドセーフ {#thread-safe}\n")
+  end
+
   def test_h4_heading
     assert_equal "==== 小見出し\n",
       convert("#### 小見出し\n")
@@ -682,6 +688,10 @@ class TestMarkdownToRRD < Test::Unit::TestCase
       BitClust::MarkdownToRRD.restore_description("### 記号の説明")
     assert_equal "===[a:str] 特別な文字列に対するマッチ",
       BitClust::MarkdownToRRD.restore_description("### 特別な文字列に対するマッチ {#str}")
+    # ハイフン入りアンカー（doctree/manual の glossary.md 用語アンカー等）も
+    # プレースホルダ往復（\x00...\x00 → [a:...]）を経て正しく復元される
+    assert_equal "===[a:thread-safe] スレッドセーフ",
+      BitClust::MarkdownToRRD.restore_description("### スレッドセーフ {#thread-safe}")
   end
 
   def test_restore_description_metadata

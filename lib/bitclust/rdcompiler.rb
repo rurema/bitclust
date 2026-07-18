@@ -537,7 +537,7 @@ module BitClust
 
     def reference_link(arg)
       case arg
-      when /(\w+):(.*)\#(\w+)\z/
+      when /(\w+):(.*)\#([-\w]+)\z/
         # @type var type: String
         # @type var name: String
         # @type var frag: String
@@ -560,7 +560,7 @@ module BitClust
         label = @option[:database].refs[t, id, frag]
         label = title + '/' + label if label and name
         bracket_link("#{type}:#{name}", label, frag)
-      when /\A(\w+)\z/
+      when /\A([-\w]+)\z/
         e = @option[:entry]
         frag = $1 || raise
         type = e.type_id.to_s
