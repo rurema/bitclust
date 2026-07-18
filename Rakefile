@@ -20,6 +20,7 @@ namespace :test do
   task :js do
     sh 'qjs', 'test/js/test_run.mjs'
     sh 'qjs', 'test/js/test_script.mjs'
+    sh 'qjs', 'test/js/test_search.mjs'
   end
 end
 

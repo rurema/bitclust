@@ -2,6 +2,7 @@
 require 'test/unit'
 require 'json'
 require 'fileutils'
+require 'tmpdir'
 require 'bitclust'
 require 'bitclust/methoddatabase'
 require 'bitclust/search_index_generator'
@@ -125,6 +126,116 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     assert_not_nil e
     assert_equal 'Ruby用語集 (glossary)', e[:full_name]
     assert_equal 'Ruby用語集 (glossary)', e[:name]
+  end
+
+  # {#id}-anchored doc headings (rurema/doctree#2352: keywords like
+  # defined?/undef/alias aren't methods, so they never show up in the
+  # class/method-derived index -- they only show up via their doc page
+  # heading). These need a native md doc tree (copy_doc_md), which is a
+  # different ingestion path than the RD @root fixture set up in #setup, so
+  # they build their own tiny db per case (mirrors test_copy_doc_md.rb).
+
+  def build_md_doc_index(files)
+    Dir.mktmpdir do |dir|
+      files.each do |relpath, content|
+        path = File.join(dir, 'manual', 'doc', relpath)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, content)
+      end
+      FileUtils.mkdir_p(File.join(dir, 'manual', 'api'))
+
+      prefix = File.join(dir, 'db')
+      db = BitClust::MethodDatabase.new(prefix)
+      db.init
+      db.transaction do
+        db.propset('version', '3.4')
+        db.propset('encoding', 'utf-8')
+      end
+      db.transaction do
+        db.instance_variable_set(:@md_root, File.join(dir, 'manual', 'api'))
+        db.__send__(:copy_doc_md)
+      end
+      # Reopen (like test_copy_doc_md.rb) rather than reuse the writer db,
+      # so the index is built from what was actually persisted.
+      db2 = BitClust::MethodDatabase.new(prefix)
+      BitClust::SearchIndexGenerator.new.build_index(db2)
+    end
+  end
+
+  def test_document_heading_entry_for_anchored_heading
+    index = build_md_doc_index(
+      'spec/def.md' => <<~MD
+        # クラス／メソッドの定義
+
+        本文。
+
+        #### alias {#alias}
+
+        alias の説明。
+
+        #### undef {#undef}
+
+        undef の説明。
+      MD
+    )
+    e = index.find { |x| x[:type] == 'heading' && x[:name] == 'alias' }
+    assert_not_nil e
+    assert_equal 'alias (クラス／メソッドの定義)', e[:full_name]
+    assert_equal 'doc/spec=2fdef.html#alias', e[:path]
+
+    e2 = index.find { |x| x[:type] == 'heading' && x[:name] == 'undef' }
+    assert_not_nil e2
+    assert_equal 'doc/spec=2fdef.html#undef', e2[:path]
+  end
+
+  def test_heading_without_anchor_is_not_indexed
+    index = build_md_doc_index(
+      'spec/def.md' => <<~MD
+        # クラス／メソッドの定義
+
+        #### 見出し
+
+        本文。
+      MD
+    )
+    assert_nil index.find { |x| x[:type] == 'heading' }
+  end
+
+  def test_heading_inside_fenced_code_is_not_mistaken_for_a_heading
+    # A "# ..." line at column 0 inside a ```ruby sample must not be
+    # misdetected as an h1 just because it starts with "#".
+    index = build_md_doc_index(
+      'spec/control.md' => <<~MD
+        # 制御構造
+
+        #### if {#if}
+
+        ```ruby
+        # this is not a heading
+        if true
+          1
+        end
+        ```
+      MD
+    )
+    headings = index.select { |x| x[:type] == 'heading' }
+    assert_equal 1, headings.size
+    assert_equal 'if', headings[0][:name]
+  end
+
+  def test_heading_label_strips_inline_code_span_backticks
+    index = build_md_doc_index(
+      'spec/comment.md' => <<~MD
+        # コメント
+
+        ### 文字列リテラルの凍結(`frozen_string_literal`) {#frozen_string_literal}
+
+        本文。
+      MD
+    )
+    e = index.find { |x| x[:type] == 'heading' }
+    assert_not_nil e
+    assert_equal '文字列リテラルの凍結(frozen_string_literal)', e[:name]
   end
 
   def test_to_js_format

@@ -9,6 +9,10 @@ module BitClust
 
     TYPENAME_TO_SEARCH_TYPE: Hash[Symbol, String]
 
+    ANCHORED_HEADING_RE: Regexp
+
+    FENCE_START_RE: Regexp
+
     type entry = Hash[Symbol, String]
 
     def initialize: (?suffix: String, ?fs_casesensitive: bool) -> void
@@ -32,6 +36,12 @@ module BitClust
     def library_entries: (MethodDatabase db) -> Array[entry]
 
     def document_entries: (MethodDatabase db) -> Array[entry]
+
+    def document_heading_entries: (MethodDatabase db) -> Array[entry]
+
+    def each_anchored_heading: (String source) { (String, String) -> void } -> void
+
+    def clean_heading_label: (String label) -> String
 
     def function_entries: (FunctionDatabase fdb) -> Array[entry]
 
