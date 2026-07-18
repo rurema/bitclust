@@ -37,6 +37,20 @@ module BitClust
       special_variable: 'variable',
     }.freeze
 
+    # Doc pages (manual/doc/**/*.md) are prose, so language keywords such as
+    # "defined?", "undef" or "alias" (see rurema/doctree#2352) are never
+    # indexed as a class/method/library. They do, however, live at their own
+    # {#id}-anchored heading within a doc page (e.g. spec/def.md's "defined?"
+    # section). Rather than hardcoding a keyword list, scan every doc page for
+    # ATX headings carrying an explicit {#id} anchor -- the same anchors
+    # [ref:d:...] cross references already rely on -- and index each one
+    # individually so a keyword search can jump straight to its section.
+    # Headings without an explicit anchor aren't linkable, so they are
+    # skipped; a "# comment" that happens to open a line inside a fenced code
+    # block is not a heading at all, so fenced regions are skipped wholesale.
+    ANCHORED_HEADING_RE = /\A(\#{1,6})[ \t]+(.*?)(?:[ \t]+\{#([\w-]+)\})?[ \t]*\z/.freeze
+    FENCE_START_RE = /\A`{3,}/.freeze
+
     def initialize(suffix: '.html', fs_casesensitive: false)
       @suffix = suffix
       @fs_casesensitive = fs_casesensitive
@@ -50,6 +64,7 @@ module BitClust
       index.concat(method_entries(db))
       index.concat(library_entries(db))
       index.concat(document_entries(db))
+      index.concat(document_heading_entries(db))
       index.concat(function_entries(fdb)) if fdb
       index
     end
@@ -154,6 +169,66 @@ module BitClust
           path:      "doc/#{encode(slug)}#{@suffix}",
         }
       end
+    end
+
+    # One entry per {#id}-anchored heading found in a doc page's body, so
+    # that e.g. "defined?" or "alias" (headings inside spec/def.md) surface
+    # directly instead of only the whole "クラス／メソッドの定義" page. See
+    # ANCHORED_HEADING_RE above for why this only looks at doc pages (prose,
+    # not method/class references) and only at explicitly anchored headings.
+    def document_heading_entries(db)
+      seen = {} #: Hash[String, bool]
+      result = [] #: Array[entry]
+      db.docs.each do |doc|
+        source = doc.source
+        next unless source
+        page_title = (doc.title && !doc.title.empty?) ? doc.title : doc.name
+        base_path = "doc/#{encode(doc.name)}#{@suffix}"
+        each_anchored_heading(source) do |label, id|
+          path = "#{base_path}##{id}"
+          next if seen[path]
+
+          seen[path] = true
+          result << {
+            name:      label,
+            full_name: "#{label} (#{page_title})",
+            type:      'heading',
+            path:      path,
+          }
+        end
+      end
+      result
+    end
+
+    # Yields [label, id] for each ATX heading in +source+ that carries an
+    # explicit {#id} anchor, skipping the contents of fenced code blocks
+    # (```lang ... ```) so an in-sample "# comment" line can never be
+    # mistaken for a heading.
+    def each_anchored_heading(source)
+      fence = nil #: Integer?
+      source.each_line do |raw|
+        line = raw.chomp
+        if fence
+          # Matches MDCompiler#code_fence's own terminator: the closing fence
+          # must be exactly as long as the opening one.
+          fence = nil if /\A`{#{fence}}[ \t]*\z/ =~ line
+          next
+        end
+        if m = FENCE_START_RE.match(line)
+          fence = (m[0] || raise).size
+          next
+        end
+        next unless m = ANCHORED_HEADING_RE.match(line)
+
+        id = m[3] or next
+        yield clean_heading_label(m[2] || raise), id
+      end
+    end
+
+    # Headings may carry inline Markdown (code spans, escaped punctuation);
+    # strip that down to plain text for the index entry.
+    def clean_heading_label(label)
+      label.gsub(/`([^`]*)`/, '\1').gsub(/\\(.)/, '\1')
     end
 
     def function_entries(fdb)

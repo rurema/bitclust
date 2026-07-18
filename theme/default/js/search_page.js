@@ -124,7 +124,8 @@
       var labels = {
         'class': 'class', 'module': 'module', 'object': 'object',
         'constant': 'const', 'instance_method': 'method', 'class_method': 'method',
-        'variable': 'var', 'library': 'lib', 'document': 'doc', 'function': 'func'
+        'variable': 'var', 'library': 'lib', 'document': 'doc', 'function': 'func',
+        'heading': 'section'
       };
       return labels[type] || type;
     };
