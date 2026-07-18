@@ -360,9 +360,7 @@ HERE
 <dd>
 dsc1
 <span class="caption">This is caption</span>
-<pre class="highlight ruby">
-<code>
-dsc2
+<pre class="highlight ruby"><code>dsc2
 dsc3
 </code></pre>
 </dd>
@@ -388,9 +386,7 @@ HERE
 abs
 </p>
 <span class="caption">description</span>
-<pre class="highlight ruby">
-<code>
-<span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
+<pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
 </code></pre>
 </dd>
 HERE
@@ -412,9 +408,7 @@ HERE
 <p>
 abs
 </p>
-<pre class="highlight ruby">
-<code>
-<span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
+<pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"</span><span class="s2">text</span><span class="s2">"</span>
 </code></pre>
 </dd>
 HERE
@@ -443,9 +437,7 @@ HERE
   expected = <<'HERE'
 <dt class="method-heading" id="dummy"><code>singleton_method(name) -&gt; Method</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
 <dd class="method-description">
-<pre class="highlight ruby">
-<code>
-<span class="k">class</span> <span class="o">&lt;&lt;</span>obj
+<pre class="highlight ruby"><code><span class="k">class</span> <span class="o">&lt;&lt;</span>obj
   <span class="k">def</span> <span class="nf">foo</span>
     <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
   <span class="k">end</span>

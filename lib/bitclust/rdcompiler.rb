@@ -315,8 +315,10 @@ module BitClust
         # caption は pre 内の absolute 配置ではなく、pre の上に密着した
         # タブとして描画する(pre 内だと編集・貼り付けで先頭行と重なる)
         line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
-        line "<pre class=\"highlight #{lang}\">"
-        line "<code>"
+        # <code> の直後に改行を入れると pre の内容の先頭に余計な空行として
+        # 表示される(pre 開始タグ直後の改行と違いブラウザは無視しない)
+        # ため、コード本体は <code> に直接続ける(#254)
+        string "<pre class=\"highlight #{lang}\"><code>"
         src = +""
         @f.until_terminator(%r<\A//\}>) do |line|
           src << line

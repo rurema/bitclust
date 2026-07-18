@@ -435,8 +435,9 @@ module BitClust
     # (rd 側と同期)。strip_re はインデントフェンスのデデント用
     def highlighted_fence_body(lang, caption, terminator, strip_re = nil, invalid: false)
       line "<span class=\"caption\">#{escape_html(caption)}</span>" if caption
-      line "<pre class=\"highlight #{lang}\">"
-      line "<code>"
+      # <code> の直後に改行を入れると pre の内容の先頭に余計な空行として
+      # 表示されるため、コード本体は <code> に直接続ける(#254、rd 側と同期)
+      string "<pre class=\"highlight #{lang}\"><code>"
       src = +""
       @f.until_terminator(terminator) do |code_line|
         src << (strip_re ? code_line.sub(strip_re, '') : code_line)
