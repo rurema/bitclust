@@ -420,7 +420,12 @@ module BitClust
     # 構文チェックをせず Rouge の lexer で色付けする(issue #251)
     def parse_fence_info(rest)
       if rest =~ /\A(\w+)?(\s+invalid)?(?:\s+title="((?:[^"\\]|\\.)*)")?\z/
-        [$1, $3&.gsub(/\\(["\\])/, '\1'), !$2.nil?]
+        # title の gsub(別の正規表現マッチ)が $~ を上書きするため、
+        # $1〜$3 は gsub より前に読み切る
+        lang = $1
+        invalid = !$2.nil?
+        title = $3
+        [lang, title&.gsub(/\\(["\\])/, '\1'), invalid]
       else
         [nil, nil, false]
       end

@@ -826,6 +826,24 @@ class TestMDCompilerRougeHighlight < Test::Unit::TestCase
     assert_not_match(/<b>plain/, html)
   end
 
+  # info string パースの直接テスト。ハイライト出力経由の検証は Ruby の
+  # パーサ版差(同じ断片でもエラー報告の有無が変わる)で不具合がマスク
+  # されうるため、返り値そのものを固定する
+  class BitClust::MDCompiler; public :parse_fence_info; end
+  data("lang のみ"       => ["ruby", ["ruby", nil, false]],
+       "invalid 付き"    => ["ruby invalid", ["ruby", nil, true]],
+       "title 付き"      => ['ruby title="例"', ["ruby", "例", false]],
+       "invalid + title" => ['ruby invalid title="SyntaxError の例"',
+                             ["ruby", "SyntaxError の例", true]],
+       "title 内エスケープ + invalid" => ['ruby invalid title="a\"b"',
+                             ["ruby", 'a"b', true]],
+       "未知の余分な語"  => ["ruby foo", [nil, nil, false]],
+       "空"              => ["", [nil, nil, false]])
+  def test_parse_fence_info(data)
+    rest, expected = data
+    assert_equal(expected, @md.parse_fence_info(rest))
+  end
+
   # ```ruby invalid: 構文として完全でないコード(SyntaxError の例・文法断片)を
   # Ripper の構文チェックなしで Rouge の Ruby lexer により色付けする(issue #251)
   def test_ruby_invalid_fence_uses_rouge_without_syntax_check
