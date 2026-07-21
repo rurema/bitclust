@@ -13,6 +13,7 @@ require 'bitclust/methodsignature'
 require 'bitclust/htmlutils'
 require 'bitclust/nameutils'
 require 'bitclust/messagecatalog'
+require 'bitclust/version_badges'
 require 'erb'
 require 'json'
 require 'stringio'
@@ -265,6 +266,7 @@ module BitClust
   class TemplateScreen < Screen
     include Translatable
     include HTMLUtils
+    include VersionBadges
 
     def initialize(h)
       @urlmapper = h[:urlmapper]
@@ -489,6 +491,17 @@ module BitClust
       else
         RDCompiler.new(@urlmapper, @hlevel, opt)
       end
+    end
+
+    # bitclust#132 P3: data/bitclust/template/class の署名欄で使う。この
+    # テンプレートは compile_method(RDCompiler)を経由せず自前でシグネチャを
+    # 描画するので、別名(alias)ごとに自分の since/until バッジを付けた
+    # <a><code>...</code></a> を1行ずつ組み立て、<br> で連結する
+    def method_row_signature_html(m, sigs)
+      sigs.map {|sig|
+        %Q(<a href="#{h(method_url(m.spec_string))}"><code>#{h(sig.friendly_string)}</code></a>) +
+          row_version_badges(m, sig.name)
+      }.join('<br>')
     end
 
     def foreach_method_chunk(src)

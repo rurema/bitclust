@@ -88,3 +88,36 @@ HERE
     assert_not_match(/<h1>[^<]*Enumerable2#map/, html)
   end
 end
+
+# bitclust#132 P3: since/until バージョンバッジが method ページ(template.offline、
+# statichtml/chm が使う経路)の <dt> に実際に描画されることのエンドツーエンド確認
+class TestMethodScreenVersionBadges < Test::Unit::TestCase
+  SRC = <<'HERE'
+= class Enumerable2 < Object
+enumerable class
+== Instance Methods
+--- select -> Array
+
+説明
+HERE
+
+  def setup
+    @lib, @db = BitClust::RRDParser.parse(SRC, 'testlib')
+    datadir = File.expand_path('../data/bitclust', __dir__)
+    @manager = BitClust::ScreenManager.new(
+      :templatedir => "#{datadir}/template.offline",
+      :catalogdir => "#{datadir}/catalog",
+      :encoding => 'utf-8',
+      :default_encoding => 'utf-8',
+      :base_url => '',
+      :target_version => '3.4'
+    )
+  end
+
+  def test_since_badge_is_rendered_after_fill_since
+    entry = @db.get_method(BitClust::MethodSpec.parse('Enumerable2#select'))
+    entry.fill_since('select', '3.2')
+    html = @manager.method_screen([entry], :database => @db).body
+    assert_include(html, '<span class="method-since-badge">Ruby 3.2 から</span>')
+  end
+end

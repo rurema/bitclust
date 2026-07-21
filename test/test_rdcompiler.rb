@@ -19,13 +19,25 @@ class TestRDCompiler < Test::Unit::TestCase
     assert_equal(expected, @c.compile(src))
   end
 
-  def assert_compiled_method_source(expected, src)
+  def assert_compiled_method_source(expected, src, names: [], since_map: {}, until_map: {})
     method_entry = Object.new
     mock(method_entry).source{ src }
     mock(method_entry).index_id.any_times{ "dummy" }
     mock(method_entry).defined?.any_times{ true }
     mock(method_entry).id.any_times{ "String/i.index._builtin" }
+    mock(method_entry).names.any_times{ names }
+    mock(method_entry).since_map.any_times{ since_map }
+    mock(method_entry).until_map.any_times{ until_map }
     assert_equal(expected, @c.compile_method(method_entry))
+  end
+
+  # badge のカタログ訳(「Ruby %s から」等)を検証するテストで使う、
+  # 日本語カタログを読み込んだ compiler を作る(setup の @c はカタログ無しの
+  # C ロケールなので、_() はキーそのまま(英語)を返してしまう)
+  def ja_catalog_compiler
+    prefix = File.expand_path('../data/bitclust/catalog', __dir__)
+    catalog = BitClust::MessageCatalog.load_with_locales(prefix, ['ja_JP.UTF-8'])
+    BitClust::RDCompiler.new(@u, 1, {:database => @db, :catalog => catalog})
   end
 
   def test_dlist
@@ -479,6 +491,113 @@ HERE
     assert_compiled_method_source(expected, src)
   end
 
+  # bitclust#132 P3: since/until バージョンバッジ。名前ごとの since_map/
+  # until_map が空なら(既存の全テストがそう)何も出ない = 従来どおりの
+  # 出力(このケースは assert_compiled_method_source のデフォルト引数で
+  # 既存テストとして担保済み)。以下は非空の場合の描画を確認する
+
+  def test_method_signature_since_badge_uniform_single_name
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge
+foo
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge</code><span class="method-since-badge">Ruby 2.0.0 から</span><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<p>
+foo
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge'], since_map: {'hoge' => '2.0.0'})
+  end
+
+  # 別名(alias)の全名が同じバージョンを持つ「一様」なケースでは、
+  # バッジは最初の dt にだけ出す(2つ目以降の dt では繰り返さない)
+  def test_method_signature_since_badge_uniform_alias
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge1
+--- hoge2
+bar
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge1</code><span class="method-since-badge">Ruby 2.0.0 から</span><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dt class="method-heading"><code>hoge2</code></dt>
+<dd class="method-description">
+<p>
+bar
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge1', 'hoge2'], since_map: {'hoge1' => '2.0.0', 'hoge2' => '2.0.0'})
+  end
+
+  # 別名の一部にしか値が無い「混在」なケースでは、一様とはみなさず名前ごとに
+  # 判定する。ここでは最初の名前(hoge1)ではなく2番目(hoge2)にだけ値がある
+  # ケースで、バッジが正しく hoge2 の dt にだけ付くことを確認する(2番目
+  # だから、ではなく「最初の dt だから」で誤って出ていないことの確認)
+  def test_method_signature_since_badge_mixed_alias
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge1
+--- hoge2
+bar
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge1</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dt class="method-heading"><code>hoge2</code><span class="method-since-badge">Ruby 2.0.0 から</span></dt>
+<dd class="method-description">
+<p>
+bar
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge1', 'hoge2'], since_map: {'hoge2' => '2.0.0'})
+  end
+
+  def test_method_signature_until_badge
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge
+foo
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge</code><span class="method-until-badge">Ruby 4.0 で削除</span><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<p>
+foo
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge'], until_map: {'hoge' => '4.0'})
+  end
+
+  # 同じ dt に since と until の両方が付く場合、since→until の順で
+  # 半角スペース1つ区切りで並ぶ
+  def test_method_signature_since_and_until_badges_on_same_dt
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge
+foo
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge</code><span class="method-since-badge">Ruby 2.0.0 から</span> <span class="method-until-badge">Ruby 4.0 で削除</span><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<p>
+foo
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge'], since_map: {'hoge' => '2.0.0'}, until_map: {'hoge' => '4.0'})
+  end
+
   def test_ulist_simple
     src =  <<'HERE'
  * hoge1
@@ -764,6 +883,9 @@ HERE
     mock(method_entry).index_id.any_times { "dummy" }
     mock(method_entry).defined?.any_times { true }
     mock(method_entry).id.any_times { "String/i.index._builtin" }
+    mock(method_entry).names.any_times { [] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
     html = @c.compile_method(method_entry)
     assert_not_include(html, 'UNKNOWN_META_INFO')
     assert_not_include(html, '{:')
@@ -784,6 +906,9 @@ HERE
     mock(method_entry).index_id.any_times { "dummy" }
     mock(method_entry).defined?.any_times { true }
     mock(method_entry).id.any_times { "String/i.index._builtin" }
+    mock(method_entry).names.any_times { [] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
     html = @c.compile_method(method_entry)
     assert_not_include(html, '{:')
     assert_include(html, 'to_a2')
@@ -803,6 +928,9 @@ HERE
     mock(method_entry).index_id.any_times { "dummy" }
     mock(method_entry).defined?.any_times { true }
     mock(method_entry).id.any_times { "String/i.index._builtin" }
+    mock(method_entry).names.any_times { [] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
     html = @c.compile_method(method_entry)
     assert_not_include(html, '{:')
     assert_include(html, 'このメソッドは定義されていません。')

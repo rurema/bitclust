@@ -232,6 +232,8 @@ module BitClust
 
     include HTMLUtils
 
+    include VersionBadges
+
     # この階層では定義されていないので undef の代わりに bot にしておく。
     def body: () -> bot
 
@@ -324,6 +326,8 @@ module BitClust
     def markdown_source?: () -> bool
 
     def rdcompiler: () -> RDCompiler
+
+    def method_row_signature_html: (MethodEntry m, Array[MethodSignature] sigs) -> String
 
     def foreach_method_chunk: (String src) { (Array[MethodSignature], String) -> void } -> void
 

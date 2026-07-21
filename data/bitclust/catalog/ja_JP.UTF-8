@@ -126,3 +126,7 @@ module %s
 %sモジュール
 object %s
 %sオブジェクト
+since Ruby %s
+Ruby %s から
+removed in Ruby %s
+Ruby %s で削除

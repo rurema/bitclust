@@ -300,6 +300,20 @@ hr {
   float: right;
 }
 
+/* since/until バージョンバッジ(bitclust#132 P3)。他の配色(リンク #33a)
+   から浮かないよう抑えた配色にする */
+span.method-since-badge,
+span.method-until-badge {
+  display: inline-block;
+  margin-left: 0.6em;
+  padding: 0 0.6em;
+  border-radius: 1em;
+  font-size: 75%;
+  font-weight: normal;
+}
+span.method-since-badge { background-color: #e6f2e6; color: #2d6a2d; }
+span.method-until-badge { background-color: #f7e6e6; color: #aa3333; }
+
 .method-description{
   padding-bottom: 10px;
   margin-bottom: 90px ; 
