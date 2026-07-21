@@ -19,6 +19,9 @@ body {
     margin-left: 2%;
     margin-right: 2%;
     line-height: 1.3;
+    /* 和文と欧文の間に自動で空きを入れる。プログレッシブエンハンスメント
+       (未対応ブラウザでは無視される) */
+    text-autospace: normal;
 }
 
 /*
@@ -124,6 +127,8 @@ span.compileerror {
 code, pre, tt {
     font-size: 90%;
     font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    /* コード内では和欧文間の自動スペースを入れない */
+    text-autospace: no-autospace;
 }
 
 /* 地の文中のインラインコード(<code>, <tt>)に淡い背景を敷いて、地の文との
