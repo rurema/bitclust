@@ -32,6 +32,13 @@ module BitClust
 
     DLIST_RE: ::Regexp
 
+    # dlist の dt は常に「- 」マーカー（幅2）。CommonMark の項目内容カラム:
+    # 空行を挟んだ継続はこの幅以上のインデントが無いと dd に属さない
+    DLIST_CONTENT_WIDTH: Integer
+
+    # CommonMark のインデントコードブロック相当の桁数（検知して警告するのみ）
+    INDENTED_CODE_BLOCK_WIDTH: Integer
+
     INFO_RE: ::Regexp
 
     SEE_RE: ::Regexp
@@ -73,6 +80,22 @@ module BitClust
 
     # - **`term`**: / - **term**: の定義リスト（説明はインデント行）
     def dlist: () -> void
+
+    # 行頭の空白の桁数（タブも1文字として数える）
+    def indent_width: (String line) -> Integer
+
+    # 空行の直後を先読みし、リスト項目・dd の内容読み取りをどう終えるか判定する。
+    # :continue（十分インデントされ継続）/ :boundary（次の dt・項目マーカー
+    # 等の区切り。空行は消費する）/ :stop（どちらでもない。空行は消費しない）
+    def blank_run_lookahead: (Integer width) { (String) -> bool } -> (:continue | :boundary | :stop)
+
+    # item_list の空行境界判定用: 次の項目マーカー行か（dlist の dt や
+    # SEE/param 等、別ディスパッチ経路の行は除く）
+    def item_marker_line?: (String line) -> bool
+
+    # リスト外・フェンス外の4桁以上インデントブロック（CommonMark のインデント
+    # コードブロック相当）を検知して stderr に警告する（非対応・描画は変更しない）
+    def warn_if_indented_code_block: (String line) -> void
 
     def strip_code_span: (String text) -> String
 

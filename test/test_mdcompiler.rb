@@ -8,6 +8,7 @@ require 'bitclust/methoddatabase'
 require 'bitclust/screen'
 require 'test/unit'
 require 'test/unit/rr'
+require 'stringio'
 
 # MDCompiler: Markdown ソース → HTML のネイティブコンパイラ（フェーズ3 M1）。
 # M1 の不変条件: 変換器が生成する md に対して、対応する rd を RDCompiler に
@@ -41,6 +42,15 @@ class TestMDCompiler < Test::Unit::TestCase
   def assert_equivalent_doc(rd_src)
     md_src = BitClust::RRDToMarkdown.convert(rd_src)
     assert_equal @rd.compile(rd_src), @md.compile(md_src), "md source:\n#{md_src}"
+  end
+
+  def capture_stderr
+    orig = $stderr
+    $stderr = StringIO.new
+    yield
+    $stderr.string
+  ensure
+    $stderr = orig
   end
 
   # ---- メソッドエントリ ----
@@ -380,7 +390,11 @@ class TestMDCompiler < Test::Unit::TestCase
   end
 
   def test_dlist_description_with_interleaved_emlist
-    # String#% 型: dd は「インデント段落 + emlist」を交互に何個でも受ける
+    # String#% 型: dd は「インデント段落 + emlist」を交互に何個でも受ける。
+    # 1つ目の継続（プレフィックスを…）は dt の直後（空行なし）なので
+    # lazy continuation としてインデント1でも dd に入るが、2つ目
+    # （浮動小数点数…）は emlist の後の空行を挟むため、CommonMark 準拠の
+    # ためマーカー幅(2)と同じインデントにしている（#3232 対応）
     assert_equivalent_method <<~RD
       --- m(v) -> String
 
@@ -391,7 +405,7 @@ class TestMDCompiler < Test::Unit::TestCase
       p 1
       //}
 
-       浮動小数点数に対しては必ず付けます。
+        浮動小数点数に対しては必ず付けます。
 
       //emlist[][ruby]{
       p 2
@@ -809,6 +823,126 @@ class TestMDCompiler < Test::Unit::TestCase
         定義文。
     RD
   end
+
+  # ---- CommonMark 準拠のリスト継続インデント (doctree#3232, znz レビュー) ----
+  # https://spec.commonmark.org/0.31.2/#list-items Example 255-258, 264 相当。
+  # マーカーの内容カラム幅（「- 」なら2、dlist の dt も常に「- 」なので2）
+  # 未満のインデントは、空行を挿むと項目に属さない。ただし空行を挿まない
+  # 直接継続（lazy continuation）は CommonMark 同様、幅を問わず許容する。
+
+  def test_dlist_direct_continuation_allows_shallow_indent
+    # 空行なしの直接継続（lazy）はマーカー幅(2)未満でも dd に含まれる
+    # （symref.md の実例の大半はこの形）
+    html = @md.compile("- **term**:\n description.\n")
+    assert_match(%r{<dd>\s*<p>\s*description\.\s*</p>\s*</dd>}m, html)
+  end
+
+  def test_dlist_blank_continuation_with_marker_width_indent_stays_in_dd
+    # CommonMark Example 256 相当: マーカー幅(2)以上のインデントなら
+    # 空行を挟んだ2段落目も dd に含まれる
+    html = @md.compile("- **term**:\n  one\n\n  two\n")
+    assert_include(html, 'one')
+    assert_include(html, 'two')
+    assert_operator(html.index('two'), :<, html.index('</dd>'))
+  end
+
+  def test_dlist_blank_continuation_with_shallow_indent_breaks_out
+    # CommonMark Example 255 相当（symref.md の実例と同型）:
+    # 空行を挟んだ1スペースだけの継続はマーカー幅(2)未満のため dd に
+    # 属さず、dl の外のトップレベル段落になる
+    html = @md.compile("- **`2 + 3`**:\n\n 足し算です。\n")
+    assert_operator(html.index('</dd>'), :<, html.index('足し算'))
+    assert_operator(html.index('</dl>'), :<, html.index('足し算'))
+  end
+
+  def test_dlist_multiple_blank_lines_between_paragraphs
+    # CommonMark Example 262 相当: 2行以上の空行を挟んでも
+    # インデントが十分なら dd の続きとして扱う
+    html = @md.compile("- **term**:\n  one\n\n\n  two\n")
+    assert_operator(html.index('two'), :<, html.index('</dd>'))
+  end
+
+  def test_dlist_fence_after_blank_requires_marker_width
+    # フェンスは lazy continuation できない（空行の有無に関わらず
+    # マーカー幅以上のインデントが必要）。幅未満なら dd の外の
+    # トップレベルフェンスになる
+    html = @md.compile("- **term**:\n\n ```\n code\n ```\n")
+    assert_operator(html.index('</dd>'), :<, html.index('<pre>'))
+  end
+
+  def test_item_list_blank_continuation_with_sufficient_indent_stays_nested
+    # CommonMark Example 256 相当・doctree news/*.md の実例型:
+    # 現行実装は空行に当たった時点で項目の外に「脱走」していたが、
+    # マーカー幅以上のインデントなら項目（li）の中に留まる
+    html = @md.compile("- one\n\n  two\n")
+    assert_operator(html.index('two'), :<, html.index('</li>'))
+  end
+
+  def test_item_list_blank_continuation_with_insufficient_indent_breaks_out
+    # CommonMark Example 255 相当: マーカー幅未満なら項目の外になる
+    html = @md.compile("- one\n\n two\n")
+    assert_operator(html.index('</li>'), :<, html.index('two'))
+  end
+
+  def test_item_list_fence_after_blank_with_sufficient_indent_stays_nested
+    # news/2_7_0.md 等の実例型:「- 説明文\n\n    ```ruby\n...\n    ```」の
+    # ようにフェンス例が項目に属したまま描画される（従来は脱走していた）
+    html = @md.compile("- one\n\n  ```ruby\n  code\n  ```\n")
+    assert_operator(html.index('<pre'), :<, html.index('</li>'))
+  end
+
+  def test_item_list_shallow_direct_continuation_still_works
+    # news/2_6_0 型（既存の RD 由来コンテンツ）: 空行なしの直接継続は
+    # 項目マーカーより浅いインデントでも項目の継続のまま（回帰確認）
+    assert_equivalent_doc <<~RD
+      = タイトル
+
+        * 項目の一行目が長くて
+       折り返した継続行。
+
+      本文。
+    RD
+  end
+
+  def test_ordered_item_list_blank_continuation_requires_marker_width
+    # 番号付きリストはマーカー文字列の幅がマーカーごとに変わる
+    # （「1. 」なら3）。幅未満は空行を挟むと項目の外になる
+    html = @md.compile("1. one\n\n  two\n")
+    assert_operator(html.index('</li>'), :<, html.index('two'))
+    wide = @md.compile("1. one\n\n   two\n")
+    assert_operator(wide.index('two'), :<, wide.index('</li>'))
+  end
+
+  # ---- インデントコードブロックの検知・警告 (CommonMark Example 264 相当) ----
+  # 言語指定を推奨するため実装は非対応のまま。互換性を壊さず、検知したら
+  # stderr に警告のみ出す
+
+  def test_warns_on_top_level_indented_code_block
+    err = capture_stderr { @md.compile("説明。\n\n    code like text\n") }
+    assert_match(/warning/i, err)
+    assert_match(/:\d+/, err) # ファイル名(または識別子):行番号
+    # 描画そのものは変更しない(非互換のまま、警告のみ)
+    html = @md.compile("説明。\n\n    code like text\n")
+    assert_match(%r{<p>\s*code like text\s*</p>}m, html)
+    assert_not_match(/<pre>/, html)
+  end
+
+  def test_no_warning_for_shallow_indent_paragraph
+    err = capture_stderr { @md.compile("説明。\n\n  two spaces only\n") }
+    assert_equal('', err)
+  end
+
+  def test_no_warning_for_indented_content_consumed_by_list_item
+    # リストの中に正しく取り込まれるインデントは警告対象外
+    # （リスト外・フェンス外のみが対象）
+    err = capture_stderr { @md.compile("- one\n\n      four space continuation\n") }
+    assert_equal('', err)
+  end
+
+  def test_no_warning_for_fenced_code_block
+    err = capture_stderr { @md.compile("```ruby\n    x = 1\n```\n") }
+    assert_equal('', err)
+  end
 end
 
 # lang 指定付きコードブロックのハイライト（ruby は Ripper ベースの
@@ -906,4 +1040,5 @@ class TestMDCompilerRougeHighlight < Test::Unit::TestCase
     assert_equal(@rd.compile(rd_src), @md.compile(md_src), "md source:\n#{md_src}")
     assert_match(%r{<span class="kt">int</span>}, @rd.compile(rd_src))
   end
+
 end

@@ -43,7 +43,10 @@ module BitClust
       @type == :function ? /\A### / : METHOD_SIGNATURE_RE
     end
 
-    MD_ITEM_RE = /\A(\s*)(?:- |\d+\. )/
+    # $1: 行頭の空白（ネストレベル判定用）、$2: マーカー文字列そのもの
+    # （"- " や "12. " 等。CommonMark の項目内容カラム幅の算出に使う。
+    # spec 0.31.2 #list-items）
+    MD_ITEM_RE = /\A(\s*)(- |\d+\. )/
     FENCE_RE = /\A`{3,}/
     # インデントされたフェンス（リスト項目・dlist 説明内のコードブロック）
     INDENTED_FENCE_RE = /\A([ \t]+)(`{3,})/
@@ -52,6 +55,13 @@ module BitClust
     # 用語の後ろに {#id} があればアンカー id として扱う（用語集の各用語への
     # リンク用。rurema/doctree#2634）。id は $2 に入る。
     DLIST_RE = /\A- \*\*(.+?)\*\*:(?:[ \t]*\{#([\w-]+)\})?(?:\s|$)/
+    # dlist の dt は常に「- 」マーカー（幅2）。CommonMark の項目内容カラム
+    # （spec 0.31.2 Example 255-258）: 空行を挟んだ継続はこの幅以上の
+    # インデントが無いと dd に属さない（#3232, znz レビュー）
+    DLIST_CONTENT_WIDTH = 2
+    # CommonMark のインデントコードブロック相当の桁数（言語指定が付けられる
+    # フェンスを推奨するため、この実装では検知して警告するのみで非対応）
+    INDENTED_CODE_BLOCK_WIDTH = 4
     INFO_RE = /\A- \*\*(?:param|arg|return|raise)\*\*/
     SEE_RE = /\A- \*\*SEE\*\*/
     # @undef など変換器が生のまま渡す未知メタデータ
@@ -94,6 +104,7 @@ module BitClust
           if @f.peek&.strip&.empty?
             @f.gets
           else
+            warn_if_indented_code_block(@f.peek || raise)
             paragraph
           end
         end
@@ -158,6 +169,7 @@ module BitClust
           if @f.peek&.strip&.empty?
             @f.gets
           else
+            warn_if_indented_code_block(@f.peek || raise)
             entry_paragraph
           end
         end
@@ -287,6 +299,64 @@ module BitClust
         dd_with_p
       end
       line '</dl>'
+    end
+
+    # 行頭の空白の桁数（タブも1文字として数える。MD_ITEM_RE のネスト
+    # レベル判定と同じ単純な文字数カウント。CommonMark 本来のタブ展開は
+    # 行わない — このコンパイラの他の桁数判定と揃えるため）
+    def indent_width(line)
+      (line[/\A[ \t]*/] || '').size
+    end
+
+    # 空行（1行以上）の直後を先読みし、リスト項目・dd の内容読み取りを
+    # どう終えるか判定する。CommonMark のリスト項目/dd は、空行を挟んだ
+    # 継続ブロックがマーカーの内容カラム幅以上インデントされていなければ
+    # 項目に属さない（spec 0.31.2 Example 255-258・262）。
+    #
+    # 戻り値:
+    # :continue … 空行の後も width 桁以上インデントされた内容が続く。
+    #             このブロックの一部として続く（空行は消費する）
+    # :boundary … 空行の後は boundary_pred が真になる行（次の dt・次の
+    #             項目マーカーなど、外側のループがそのまま続けられる
+    #             区切り）。このブロックの内容としては終わるが、空行は
+    #             消費する（そうしないと外側のループが空行で止まってしまい、
+    #             本来1つの <dl>/<ul> であるべきものが分裂する）
+    # :stop     … どちらでもない。空行は消費しない（トップレベルの段落へ
+    #             「逃がす」。spec 0.31.2 Example 255）
+    def blank_run_lookahead(width)
+      blanks = [] #: Array[String]
+      blanks << (@f.gets || raise) while @f.peek&.strip&.empty?
+      next_line = @f.peek
+      if next_line && indent_width(next_line) >= width
+        :continue
+      elsif next_line && yield(next_line)
+        :boundary
+      else
+        blanks.reverse_each { |b| @f.ungets(b) }
+        :stop
+      end
+    end
+
+    # item_list の空行境界判定用: 次の項目マーカー行か（dlist の dt や
+    # SEE/param 等、別ディスパッチ経路の行は除く。real_item_marker? と
+    # 同じ除外基準）
+    def item_marker_line?(line)
+      !!(MD_ITEM_RE =~ line && !(DLIST_RE =~ line) && !(SEE_RE =~ line) && !(INFO_RE =~ line))
+    end
+
+    # リスト外・フェンス外で 4 桁以上インデントされたブロックは CommonMark
+    # ではインデントコードブロックになるが、このコンパイラは非対応
+    # （言語指定できるフェンスへの書き換えを推奨するため。spec 0.31.2
+    # Example 264）。互換性を壊さないよう描画は変更せず、検知したら
+    # stderr に警告のみ出す(#3232)。将来エラー化する場合は
+    # stop_on_syntax_error? に倣ったオプションを追加する
+    def warn_if_indented_code_block(line)
+      return if indent_width(line) < INDENTED_CODE_BLOCK_WIDTH
+      loc = line.location || "#{@f.name}:#{@f.lineno}"
+      $stderr.puts "#{loc}: warning: 4+ spaces indented block is not " \
+        "rendered as a code block (CommonMark would treat this as an " \
+        "indented code block; use a fenced ```lang block instead): " \
+        "#{line.strip.inspect}"
     end
 
     def strip_code_span(text)
@@ -486,9 +556,26 @@ module BitClust
         string "<li>"
         @item_stack.push("</li>")
         string compile_text(item_line.sub(/\A\s*(?:-|\d+\.)\s?/, '').strip)
-        # 継続行（折り返しテキスト）とインデントフェンス（項目内コードブロック）
+        item_line =~ MD_ITEM_RE or raise
+        # この項目の内容カラム幅（マーカー前の空白 + マーカー自身。
+        # "- " なら2、"12. " なら4）。空行を挟んだ継続がこの項目に
+        # 属するかどうかの判定に使う
+        content_width = ($1 || raise).size + ($2 || raise).size
+        # 継続行（折り返しテキスト）とインデントフェンス（項目内コードブロック）。
+        # CommonMark に合わせ、空行を挟まない直接継続（lazy continuation）は
+        # インデント幅を問わず許容するが、フェンスや空行を挟んだ継続は
+        # content_width 以上のインデントが無ければ項目に属さない
+        # （spec 0.31.2 Example 255-258・262-263、doctree#3232 znz レビュー。
+        # 従来はここで空行に当たると即座に項目の外へ「脱走」していた）
         while @f.peek
-          if INDENTED_FENCE_RE =~ @f.peek
+          if @f.peek&.strip&.empty?
+            if blank_run_lookahead(content_width) { |l| item_marker_line?(l) } == :continue
+              next
+            else
+              break
+            end
+          elsif INDENTED_FENCE_RE =~ @f.peek
+            break if indent_width(@f.peek || raise) < content_width
             nl
             indented_code_fence
           elsif /\A\s+(?!- |\d+\. )\S/ =~ @f.peek
@@ -517,20 +604,30 @@ module BitClust
     # RD の //emlist は桁0で書いても dd に取り込まれたが、Markdown では
     # CommonMark に合わせて「項目の内容カラムにインデントされたフェンス」だけを
     # 説明（dd）の一部として取り込む。桁0のフェンスは dd の外（トップレベル）。
+    #
+    # CommonMark に合わせ、空行を挟まない直接継続（lazy continuation）は
+    # インデント幅を問わず許容するが、フェンスや空行を挟んだ継続は
+    # DLIST_CONTENT_WIDTH(2) 以上のインデントが無ければ dd に属さない
+    # （spec 0.31.2 Example 255-258、doctree#3232 znz レビュー。symref.md
+    # の「半角スペース1個だけの継続」はこのため dd の外の段落になる）
     def dd_with_p
       line '<dd>'
-      while /\A(?:\s|\z)/ =~ @f.peek
-        case @f.peek
-        when /\A$/
-          @f.gets
-        when INDENTED_FENCE_RE
+      while @f.peek
+        if @f.peek&.strip&.empty?
+          if blank_run_lookahead(DLIST_CONTENT_WIDTH) { |l| !!(DLIST_RE =~ l) } == :continue
+            next
+          else
+            break
+          end
+        elsif INDENTED_FENCE_RE =~ @f.peek
+          break if indent_width(@f.peek || raise) < DLIST_CONTENT_WIDTH
           indented_code_fence
-        when /\A[ \t]/
+        elsif /\A[ \t]/ =~ @f.peek
           line '<p>'
           line compile_text(text_node_from_lines(@f.span(DD_TEXT_RE)))
           line '</p>'
         else
-          raise 'must not happen'
+          break
         end
       end
       line '</dd>'
