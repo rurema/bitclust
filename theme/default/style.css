@@ -555,3 +555,17 @@ hr {
         overflow-wrap: break-word;
     }
 }
+
+/* CC BY ロゴ画像はデフォルトの vertical-align: baseline だと下に文字の
+   ディセンダ分の隙間ができ、横のリンクより浮いて見える上、リンクの
+   ホバー背景がその隙間ぶん右・下にはみ出して見える。画像を a 要素の
+   下端に揃えて解消する */
+#footer img {
+    vertical-align: bottom;
+}
+
+/* CC BY ロゴと無関係な「フィードバックを送る」リンクが近すぎるので、
+   ひと呼吸あける */
+#feedback-link {
+    margin-left: 0.5em;
+}
