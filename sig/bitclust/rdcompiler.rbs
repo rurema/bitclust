@@ -47,6 +47,8 @@ module BitClust
 
     include Translatable
 
+    include VersionBadges
+
     def initialize: (URLMapper urlmapper, ?::Integer hlevel, ?option opt) -> void
 
     def compile: (String src) -> String

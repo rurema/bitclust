@@ -14,6 +14,7 @@ require 'bitclust/htmlutils'
 require 'bitclust/textutils'
 require 'bitclust/messagecatalog'
 require 'bitclust/syntax_highlighter'
+require 'bitclust/version_badges'
 require 'rouge'
 require 'stringio'
 
@@ -25,6 +26,7 @@ module BitClust
     include HTMLUtils
     include TextUtils
     include Translatable
+    include VersionBadges
 
     def initialize(urlmapper, hlevel = 1, opt = {})
       @urlmapper = urlmapper
@@ -435,6 +437,7 @@ module BitClust
       string @method.klass.name + @method.typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
+      string heading_version_badges(@method, sig.name, first) if @method
       if first
         string '<span class="permalink">['
         string a_href(@urlmapper.method_url(methodid2specstring(@method.id)), "permalink")

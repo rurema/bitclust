@@ -29,6 +29,9 @@ class TestMDCompiler < Test::Unit::TestCase
     mock(method_entry).index_id.any_times { "dummy" }
     mock(method_entry).defined?.any_times { true }
     mock(method_entry).id.any_times { "String/i.index._builtin" }
+    mock(method_entry).names.any_times { [] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
     compiler.compile_method(method_entry)
   end
 

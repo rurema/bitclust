@@ -1,0 +1,25 @@
+module BitClust
+  module VersionBadges : Translatable, HTMLUtils
+    SINCE_CSS_CLASS: "method-since-badge"
+
+    UNTIL_CSS_CLASS: "method-until-badge"
+
+    SINCE_CATALOG_KEY: "since Ruby %s"
+
+    UNTIL_CATALOG_KEY: "removed in Ruby %s"
+
+    def heading_version_badges: (MethodEntry entry, String name, bool first) -> String
+
+    def row_version_badges: (MethodEntry entry, String name) -> String
+
+    private
+
+    def heading_badge_span: (MethodEntry entry, String name, bool first, Hash[String, String] map, String css_class, String catalog_key) -> String?
+
+    def uniform_map?: (MethodEntry entry, Hash[String, String] map) -> bool
+
+    def badge_span: (String? version, String css_class, String catalog_key) -> String?
+
+    def join_badge_spans: (*String? spans) -> String
+  end
+end

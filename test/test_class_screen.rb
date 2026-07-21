@@ -1,6 +1,8 @@
 require 'test/unit'
 require 'bitclust'
 require 'bitclust/screen'
+require 'tmpdir'
+require 'fileutils'
 
 class TestClassScreen < Test::Unit::TestCase
   SRC = <<'HERE'
@@ -207,5 +209,121 @@ PLAIN
     db = BitClust::MethodDatabase.dummy('version' => '3.4')
     html = @manager.class_screen(plain.fetch_class('Plain'), :database => db).body
     assert_not_include(html, '追加されるメソッド')
+  end
+end
+
+# bitclust#132 P3: since/until バージョンバッジが class ページ(template.offline、
+# 各メソッドをインライン(compile_method 経由)で描画する側)にも出ることの確認
+class TestClassScreenVersionBadges < Test::Unit::TestCase
+  SRC = <<'HERE'
+= class Target < Object
+target class
+== Instance Methods
+--- own_method
+own method
+HERE
+
+  def setup
+    @lib, = BitClust::RRDParser.parse(SRC, 'extlib')
+    datadir = File.expand_path('../data/bitclust', __dir__)
+    @manager = BitClust::ScreenManager.new(
+      :templatedir => "#{datadir}/template.offline",
+      :catalogdir => "#{datadir}/catalog",
+      :encoding => 'utf-8',
+      :default_encoding => 'utf-8',
+      :base_url => '',
+      :target_version => '3.4'
+    )
+    @db = BitClust::MethodDatabase.dummy('version' => '3.4')
+  end
+
+  def test_since_badge_is_rendered_in_inlined_entry
+    entry = @lib.fetch_class('Target').fetch_method(BitClust::MethodSpec.parse('Target#own_method'))
+    entry.fill_since('own_method', '3.2')
+    html = @manager.class_screen(@lib.fetch_class('Target'), :database => @db).body
+    assert_include(html, '<span class="method-since-badge">Ruby 3.2 から</span>')
+  end
+end
+
+# bitclust#132 P3: default(サーバー動的配信用)テンプレートは compiler を経由せず
+# 独自に署名行を描画するので、別名(alias)ごとの署名行にそれぞれ対応する
+# バッジが付く(一様化はしない)ことを個別に確認する。
+#
+# この template/class は @entry.inherited_method_specs を呼び、これは
+# ClassEntry#_index 経由でディスク上の永続化された索引ファイルを読む。
+# 他のテストのような RRDParser.parse + MethodDatabase.dummy のインメモリ
+# 組では索引が存在せず ENOENT になるので、ここだけは init/update で実際に
+# ディスクへコミットした本物の MethodDatabase を使う
+class TestClassScreenDefaultTemplateVersionBadges < Test::Unit::TestCase
+  SRC = <<'HERE'
+= class Target < Object
+target class
+== Instance Methods
+--- alias_one
+--- alias_two
+shared body
+HERE
+
+  def setup
+    @datadir = File.expand_path('../data/bitclust', __dir__)
+    @dbdir = Dir.mktmpdir('bitclust-version-badges-db')
+    srcdir = Dir.mktmpdir('bitclust-version-badges-src')
+    src_path = File.join(srcdir, 'testlib.rd')
+    File.write(src_path, SRC)
+
+    @db = BitClust::MethodDatabase.new(@dbdir)
+    @db.init
+    @db.transaction do
+      @db.propset('version', '3.4')
+      @db.propset('encoding', 'utf-8')
+    end
+    @db.transaction do
+      @db.update_by_file(src_path, 'testlib')
+    end
+    FileUtils.rm_r(srcdir, :force => true)
+  end
+
+  def teardown
+    FileUtils.rm_r(@dbdir, :force => true)
+  end
+
+  def test_per_signature_badges_attach_to_their_own_alias_line
+    entry = @db.get_method(BitClust::MethodSpec.parse('Target#alias_one'))
+    entry.fill_since('alias_one', '3.0')
+    entry.fill_until('alias_two', '4.0')
+
+    manager = BitClust::ScreenManager.new(
+      :templatedir => "#{@datadir}/template",
+      :catalogdir => "#{@datadir}/catalog",
+      :encoding => 'utf-8',
+      :default_encoding => 'utf-8',
+      :base_url => '',
+      :target_version => '3.4'
+    )
+    # Screen#run_template は互換 ERB を self.class にキャッシュするので、同一
+    # プロセス内の他のテスト(template.offline を使う ClassScreen)と
+    # templatedir が混線しないよう、この検証専用のサブクラスを介して描画する
+    # (テストファイル上部のコメント、および test_method_screen.rb の同種の
+    # 注記を参照。ClassScreen 本体には触れない)
+    screen_class = Class.new(BitClust::ClassScreen)
+    html = manager.send(:new_screen, screen_class, @db.get_class('Target'), :database => @db).body
+
+    since_badge = '<span class="method-since-badge">Ruby 3.0 から</span>'
+    until_badge = '<span class="method-until-badge">Ruby 4.0 で削除</span>'
+    assert_include(html, since_badge)
+    assert_include(html, until_badge)
+
+    alias_one_pos = html.index('<code>alias_one</code>')
+    alias_two_pos = html.index('<code>alias_two</code>')
+    since_pos = html.index(since_badge)
+    until_pos = html.index(until_badge)
+    assert(alias_one_pos && alias_two_pos && since_pos && until_pos,
+           'expected both signature lines and both badges to be present')
+    # since は alias_one の行に付き、alias_two の行より前に来る
+    assert(alias_one_pos < since_pos && since_pos < alias_two_pos,
+           'the since badge must attach right after alias_one, not alias_two')
+    # until は alias_two の行に付き、alias_two より後に来る
+    assert(alias_two_pos < until_pos,
+           'the until badge must attach after alias_two')
   end
 end

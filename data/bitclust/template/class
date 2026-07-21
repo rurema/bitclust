@@ -79,9 +79,7 @@
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
 <td class="signature">
-  <a href="<%=h method_url(m.spec_string) %>"><code>
-  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
-  </code></a>
+  <%= method_row_signature_html(m, sigs) %>
 </td>
 <%          if m.redefined? %>
 <td class="description"><%= compile_rd(src) %></td>
@@ -131,9 +129,7 @@
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
 <td class="signature">
-  <a href="<%=h method_url(m.spec_string) %>"><code>
-  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
-  </code></a>
+  <%= method_row_signature_html(m, sigs) %>
 </td>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
@@ -166,9 +162,7 @@
           foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
 <td class="signature">
-  <a href="<%=h method_url(m.spec_string) %>"><code>
-  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
-  </code></a>
+  <%= method_row_signature_html(m, sigs) %>
 </td>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= library_link(m.library.name) %></td>
@@ -200,9 +194,7 @@
         foreach_method_chunk(m.source) do |sigs, src| %>
 <tr>
 <td class="signature">
-  <a href="<%=h method_url(m.spec_string) %>"><code>
-  <%= sigs.map {|sig| h(sig.friendly_string) }.join("<br>") %>
-  </code></a>
+  <%= method_row_signature_html(m, sigs) %>
 </td>
 <td class="description"><%= compile_rd(src) %></td>
 <td class="library"><%= class_link(m.klass.name) + " (by " + library_link(m.library.name) + ")" %></td>
