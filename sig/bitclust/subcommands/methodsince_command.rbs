@@ -1,0 +1,23 @@
+module BitClust
+  module Subcommands
+    # 複数バージョンの DB(ラダー)からメソッド名別 since/until を算出し、
+    # --update で指定した対象 DB に書き込む(bitclust#132 P2)
+    class MethodsinceCommand < Subcommand
+      @updates: Array[String]
+
+      @dry_run: bool
+
+      def initialize: () -> void
+
+      def needs_database?: () -> bool
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def apply_and_save: (MethodSinceCalculator calculator, String path) -> [MethodSinceCalculator::stats, String]
+
+      def apply_dry_run: (MethodSinceCalculator calculator, String path) -> [MethodSinceCalculator::stats, String]
+    end
+  end
+end

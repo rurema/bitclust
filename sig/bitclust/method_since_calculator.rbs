@@ -1,0 +1,30 @@
+module BitClust
+  class MethodSinceCalculator
+    type key = [String, NameUtils::typechar, String]
+
+    type stats = {
+      entries_updated: Integer,
+      since_filled: Integer,
+      until_filled: Integer,
+      floor_skipped: Integer,
+    }
+
+    @ladder: Array[MethodDatabase]?
+
+    @versions: Array[String]
+
+    @first: Hash[key, String]
+
+    @last: Hash[key, String]
+
+    def initialize: (Array[MethodDatabase] dbs) -> void
+
+    def scan: () -> self
+
+    def since_for: (key key) -> String?
+
+    def until_for: (key key) -> String?
+
+    def apply: (MethodDatabase target_db) -> stats
+  end
+end
