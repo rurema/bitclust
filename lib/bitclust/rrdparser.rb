@@ -563,7 +563,9 @@ module BitClust
                         "#{chunk.source.location}: duplicate method attribute #{key.inspect} on the same signature"
                 end
                 keys[key] = true
-                name = current_name or raise "must not happen: kv attribute without a preceding signature name"
+                name = current_name or
+                  raise ParseError,
+                        "#{chunk.source.location}: cannot determine the signature name to bind method attribute #{token.inspect} to"
                 (since_until[name] ||= {})[key] = value
               end
             end
@@ -576,6 +578,14 @@ module BitClust
         unless sets.uniq.size == 1
           raise ParseError,
                 "#{chunk.source.location}: method attributes must be the same on every signature of an entry: #{sets.inspect}"
+        end
+        # 紐付け先の名前がエントリの names と食い違ったら黙って捨てずに
+        # エラーにする(名前導出の規約ずれを CI で検出するための安全網)
+        since_until.each_key do |name|
+          unless chunk.names.include?(name)
+            raise ParseError,
+                  "#{chunk.source.location}: since/until attribute bound to unknown signature name #{name.inspect} (entry names: #{chunk.names.join(', ')})"
+          end
         end
         MethodAttributes.new(sets.first || raise, since_until)
       end
@@ -601,10 +611,14 @@ module BitClust
       private :parse_kv_method_attribute
 
       # シグネチャ行(rd の `--- ...` / md の `### def ...` 等)から、
-      # 属性の紐付け先となるメソッド名を取り出す
+      # 属性の紐付け先となるメソッド名を取り出す。
+      # 特殊変数のシグネチャ名は "$SAFE" のように $ 付きだが、エントリの
+      # names は先頭の $ を除いた形("SAFE"。"$$" なら "$")で格納される
+      # (method_signature の Signature.new(nil, '$', name[1..-1]) と同じ規約)
+      # ため、since_by_name のキーも names に合わせて $ を1つ剥がす
       def method_attribute_target_name(line)
         normalized = line.sub(MD_METHOD_SIG_PREFIX_RE, '--- ')
-        MethodSignature.parse(normalized).name
+        MethodSignature.parse(normalized).name.sub(/\A\$/, '')
       rescue ParseError
         nil
       end

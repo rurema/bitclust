@@ -14,6 +14,8 @@ module BitClust
 
     private
 
+    def badge_lookup_name: (String name) -> String
+
     def heading_badge_span: (MethodEntry entry, String name, bool first, Hash[String, String] map, String css_class, String catalog_key) -> String?
 
     def uniform_map?: (MethodEntry entry, Hash[String, String] map) -> bool

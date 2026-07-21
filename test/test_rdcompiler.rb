@@ -598,6 +598,29 @@ HERE
       names: ['hoge'], since_map: {'hoge' => '2.0.0'}, until_map: {'hoge' => '4.0'})
   end
 
+  # bitclust#132: 特殊変数のシグネチャ名($ 付き)はエントリの names
+  # ($ なし)へ正規化して since_map を引く。正規化が無いと mixed 経路で
+  # 該当 dt にバッジが出ない
+  def test_method_signature_since_badge_special_variable_alias
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- $0
+--- $PROGRAM_NAME
+bar
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>$0</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dt class="method-heading"><code>$PROGRAM_NAME</code><span class="method-since-badge">Ruby 1.9.1 から</span></dt>
+<dd class="method-description">
+<p>
+bar
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['0', 'PROGRAM_NAME'], since_map: {'PROGRAM_NAME' => '1.9.1'})
+  end
+
   def test_ulist_simple
     src =  <<'HERE'
  * hoge1

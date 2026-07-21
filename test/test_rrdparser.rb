@@ -98,6 +98,26 @@ HERE
     assert_nil(entry.since_of('test_until'))
   end
 
+  # bitclust#132: 特殊変数のシグネチャ名は "$PROGRAM_NAME" のように $ 付き
+  # だが、エントリの names は $ を剥がした形で格納される。since_by_name の
+  # キーは names に合わせる(正規化しないと黙って参照されない値になる)
+  def test_since_attribute_on_special_variable_uses_entry_name
+    _library, db = BitClust::RRDParser.parse(<<HERE, 'dummy')
+= module Kernel
+== Special Variables
+--- $0
+--- $PROGRAM_NAME
+{: since="1.9.1"}
+
+説明
+
+HERE
+    entry = db.get_class('Kernel').entries.first || raise
+    assert_equal(['0', 'PROGRAM_NAME'], entry.names.sort)
+    assert_equal('1.9.1', entry.since_of('PROGRAM_NAME'))
+    assert_nil(entry.since_of('0'))
+  end
+
   def test_malformed_since_attribute_is_rejected
     ['since=2.5', 'since=""', 'since="3,2"', 'since="abc"', 'foo="1"'].each do |token|
       assert_raise(BitClust::ParseError, token) do
