@@ -61,6 +61,7 @@ Subcommands(for developers):
     extract     Extract method entries from source file.
     classes     Display defined classes for all ruby.
     methods     Display defined methods for all ruby.
+    methodsince Fill per-name since/until from a version ladder of DBs.
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
@@ -107,6 +108,7 @@ Global Options:
         'extract'     => BitClust::Subcommands::ExtractCommand.new,
         'classes'     => BitClust::Subcommands::ClassesCommand.new,
         'methods'     => BitClust::Subcommands::MethodsCommand.new,
+        'methodsince' => BitClust::Subcommands::MethodsinceCommand.new,
       }
     end
 
