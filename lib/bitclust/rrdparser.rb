@@ -513,10 +513,14 @@ module BitClust
       # - since="X"/until="X"(bitclust#132 P4): シグネチャ単位で束縛され、
       #   そのシグネチャの名前だけに適用される。nomethod/undef と違い、
       #   別名ごとに異なる値を持てる(全シグネチャ一致は要求しない)のが
-      #   本来の用途。X は "3.2" のように数字とドットのみ
+      #   本来の用途。X は "3.2" のように数字とドットのみ。
+      #   空値(since="")は「明示的に不明」= バッジ非表示の指定で、メソッド
+      #   自体は昔からあるのにドキュメント追加が遅れ、バージョンラダーからの
+      #   自動算出が誤った版を出す場合の抑止に使う(空文字が記録されるため
+      #   算出値で上書きされず、表示側も空はバッジを出さない)
       METHOD_ATTRIBUTES = %w[nomethod undef]
       KV_METHOD_ATTRIBUTES = %w[since until]
-      KV_METHOD_ATTRIBUTE_VALUE_RE = /\A\d+(?:\.\d+)*\z/
+      KV_METHOD_ATTRIBUTE_VALUE_RE = /\A(?:\d+(?:\.\d+)*)?\z/
 
       # md の `### def name ...`/`### module_function def name ...`/
       # `### const name`/`### gvar $name` シグネチャ行を rd 形式
@@ -606,7 +610,8 @@ module BitClust
         raise ParseError,
               "#{chunk.source.location}: invalid method attribute #{token.inspect} " \
               "(supported: #{METHOD_ATTRIBUTES.join(', ')}, " \
-              "#{KV_METHOD_ATTRIBUTES.map {|k| %Q(#{k}="X") }.join('/')} where X is digits and dots, e.g. since=\"3.2\")"
+              "#{KV_METHOD_ATTRIBUTES.map {|k| %Q(#{k}="X") }.join('/')} where X is digits and dots, e.g. since=\"3.2\", " \
+              "or empty for explicitly-unknown, e.g. since=\"\")"
       end
       private :parse_kv_method_attribute
 

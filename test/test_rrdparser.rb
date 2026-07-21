@@ -83,6 +83,38 @@ HERE
     assert_nil(entry.until_of('test_since'))
   end
 
+  # {: since=""}(空値)は「明示的に不明」の指定(bitclust#132)。メソッド自体は
+  # 昔からあるのにドキュメント追加が遅れ、ラダー算出が誤った版を出す場合に
+  # バッジを抑止する(空文字が記録され、算出値で上書きされず、表示もされない)
+  def test_empty_since_attribute_means_explicitly_unknown
+    _library, db = BitClust::RRDParser.parse(<<HERE, 'dummy')
+= module Dummy
+== Instance Methods
+--- test_unknown
+{: since=""}
+
+説明
+
+HERE
+    entry = db.get_method(BitClust::MethodSpec.parse('Dummy#test_unknown'))
+    assert_equal('', entry.since_of('test_unknown'))
+    assert_nil(entry.until_of('test_unknown'))
+  end
+
+  def test_empty_until_attribute_is_also_accepted
+    _library, db = BitClust::RRDParser.parse(<<HERE, 'dummy')
+= module Dummy
+== Instance Methods
+--- test_unknown_until
+{: until=""}
+
+説明
+
+HERE
+    entry = db.get_method(BitClust::MethodSpec.parse('Dummy#test_unknown_until'))
+    assert_equal('', entry.until_of('test_unknown_until'))
+  end
+
   def test_until_attribute_sets_until_of_name
     _library, db = BitClust::RRDParser.parse(<<HERE, 'dummy')
 = module Dummy
@@ -119,7 +151,7 @@ HERE
   end
 
   def test_malformed_since_attribute_is_rejected
-    ['since=2.5', 'since=""', 'since="3,2"', 'since="abc"', 'foo="1"'].each do |token|
+    ['since=2.5', 'since="3,2"', 'since="abc"', 'foo="1"'].each do |token|
       assert_raise(BitClust::ParseError, token) do
         BitClust::RRDParser.parse(<<HERE, 'dummy')
 = module Dummy

@@ -621,6 +621,46 @@ HERE
       names: ['0', 'PROGRAM_NAME'], since_map: {'PROGRAM_NAME' => '1.9.1'})
   end
 
+  # since_map の空文字値は「明示的に不明」(著者が {: since=""} で指定)。
+  # バッジは表示しない(bitclust#132: ドキュメント追加が遅れて算出が誤る場合の抑止)
+  def test_method_signature_empty_since_suppresses_badge
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge
+foo
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dd class="method-description">
+<p>
+foo
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge'], since_map: {'hoge' => ''})
+  end
+
+  def test_method_signature_empty_since_mixed_alias
+    @c = ja_catalog_compiler
+    src = <<'HERE'
+--- hoge1
+--- hoge2
+bar
+HERE
+    expected = <<'HERE'
+<dt class="method-heading" id="dummy"><code>hoge1</code><span class="permalink">[<a href="dummy/method/String/i/index">permalink</a>][<a href="https://docs.ruby-lang.org/en/2.0.0/String.html#method-i-index">rdoc</a>]</span></dt>
+<dt class="method-heading"><code>hoge2</code><span class="method-since-badge">Ruby 2.0.0 から</span></dt>
+<dd class="method-description">
+<p>
+bar
+</p>
+</dd>
+HERE
+    assert_compiled_method_source(expected, src,
+      names: ['hoge1', 'hoge2'], since_map: {'hoge1' => '', 'hoge2' => '2.0.0'})
+  end
+
   def test_ulist_simple
     src =  <<'HERE'
  * hoge1
