@@ -12,6 +12,7 @@ require 'bitclust/compat'
 require 'bitclust/preprocessor'
 require 'bitclust/methodid'
 require 'bitclust/methoddatabase'
+require 'bitclust/methodsignature'
 require 'bitclust/lineinput'
 require 'bitclust/parseutils'
 require 'bitclust/nameutils'
@@ -482,9 +483,9 @@ module BitClust
         attrs = method_attributes(chunk)
         @db.open_method(id) {|m|
           m.names           = chunk.names.sort
-          m.kind            = if attrs.include?('undef')
+          m.kind            = if attrs.flags.include?('undef')
                                 :undefined
-                              elsif attrs.include?('nomethod')
+                              elsif attrs.flags.include?('nomethod')
                                 :nomethod
                               else
                                 @kind
@@ -494,6 +495,10 @@ module BitClust
           # steep:ignore:end
           m.source          = chunk.source
           m.source_location = chunk.source.location
+          attrs.since_until.each do |name, kv|
+            m.fill_since(name, kv['since'] || raise) if kv['since']
+            m.fill_until(name, kv['until'] || raise) if kv['until']
+          end
           case @kind
           when :added, :redefined
             @library.add_method m
@@ -502,42 +507,108 @@ module BitClust
       end
 
       # 現在サポートするメソッド属性({: ...} 属性行のトークン)。
-      # since/until は将来のバージョン情報表示(#132)用に予約
+      # - nomethod/undef: 裸語。kind はエントリ単位でしか持てないので、
+      #   別名(複数シグネチャ)のエントリでは全シグネチャに同じ属性が
+      #   付いていることを要求する
+      # - since="X"/until="X"(bitclust#132 P4): シグネチャ単位で束縛され、
+      #   そのシグネチャの名前だけに適用される。nomethod/undef と違い、
+      #   別名ごとに異なる値を持てる(全シグネチャ一致は要求しない)のが
+      #   本来の用途。X は "3.2" のように数字とドットのみ
       METHOD_ATTRIBUTES = %w[nomethod undef]
+      KV_METHOD_ATTRIBUTES = %w[since until]
+      KV_METHOD_ATTRIBUTE_VALUE_RE = /\A\d+(?:\.\d+)*\z/
+
+      # md の `### def name ...`/`### module_function def name ...`/
+      # `### const name`/`### gvar $name` シグネチャ行を rd 形式
+      # (`--- name ...`)へ正規化するための接頭辞(MDParser::SIG_RE と
+      # 同じパターン)。属性の紐付け先となるメソッド名を
+      # MethodSignature.parse で取り出すために使う
+      MD_METHOD_SIG_PREFIX_RE = /\A### (?:module_function def |def |const |gvar )/
+
+      # method_attributes の返り値。
+      # - flags: 裸語トークン(nomethod/undef)の集合。エントリ単位の属性
+      #   なので全シグネチャで同一であることを method_attributes が保証済み
+      # - since_until: シグネチャ単位で束縛された since="X"/until="X" を
+      #   { メソッド名 => { "since" => "X", "until" => "X" } } の形で保持する
+      MethodAttributes = Struct.new(:flags, :since_until)
 
       # kramdown Block IAL 風の {: ...} 属性行からメタデータを集める。
       # 属性行は「直前のシグネチャ行のみ」に束縛される(kramdown と同じ解釈)。
-      # kind はエントリ単位でしか持てないので、別名(複数シグネチャ)の
-      # エントリでは全シグネチャに同じ属性が付いていることを要求する。
+      # 裸語トークン(nomethod/undef)は kind がエントリ単位でしか持てないため
+      # 全シグネチャで同じであることを要求するが、since=/until= はシグネチャ
+      # 単位でそのままの名前に適用するため、この一致要求からは除外する。
       # 本文に入ったら探索を打ち切る(コード例中の {: ...} を誤検出しないため)
       def method_attributes(chunk)
         per_sig = [] #: Array[Array[String]]
+        since_until = {} #: Hash[String, Hash[String, String]]
+        current_name = nil #: String?
+        current_keys = nil #: Hash[String, bool]?
         chunk.source.each_line do |line_|
           line = line_.chomp
           case line
           when /\A---\s/, /\A\#\#\#\s/
             per_sig.push []
+            current_name = method_attribute_target_name(line)
+            current_keys = {}
           when /\A\{:(.*)\}[ \t]*\z/
             break if per_sig.empty?
             ($1 || raise).strip.split(/\s+/).each do |token|
-              unless METHOD_ATTRIBUTES.include?(token)
-                raise ParseError,
-                      "#{chunk.source.location}: unknown method attribute #{token.inspect} (supported: #{METHOD_ATTRIBUTES.join(', ')})"
+              if METHOD_ATTRIBUTES.include?(token)
+                per_sig.last&.push token
+              else
+                key, value = parse_kv_method_attribute(token, chunk)
+                keys = current_keys or raise
+                if keys.key?(key)
+                  raise ParseError,
+                        "#{chunk.source.location}: duplicate method attribute #{key.inspect} on the same signature"
+                end
+                keys[key] = true
+                name = current_name or raise "must not happen: kv attribute without a preceding signature name"
+                (since_until[name] ||= {})[key] = value
               end
-              per_sig.last&.push token
             end
           else
             break
           end
         end
-        return [] if per_sig.empty?
+        return MethodAttributes.new([], {}) if per_sig.empty?
         sets = per_sig.map {|a| a.uniq.sort }
         unless sets.uniq.size == 1
           raise ParseError,
                 "#{chunk.source.location}: method attributes must be the same on every signature of an entry: #{sets.inspect}"
         end
-        sets.first || raise
+        MethodAttributes.new(sets.first || raise, since_until)
       end
+
+      # since="X"/until="X" 形式のトークンを解析して [key, value] を返す。
+      # 受理する形式以外(キーが不明・値が非引用・値が数字とドット以外を
+      # 含む等)はすべて ParseError にする
+      def parse_kv_method_attribute(token, chunk)
+        m = /\A(\w+)=(.*)\z/.match(token)
+        if m
+          key = m[1] || raise
+          raw_value = m[2] || raise
+          quoted = /\A"(.*)"\z/.match(raw_value)
+          if quoted && KV_METHOD_ATTRIBUTES.include?(key) && KV_METHOD_ATTRIBUTE_VALUE_RE.match?(quoted[1] || raise)
+            return [key, (quoted[1] || raise)]
+          end
+        end
+        raise ParseError,
+              "#{chunk.source.location}: invalid method attribute #{token.inspect} " \
+              "(supported: #{METHOD_ATTRIBUTES.join(', ')}, " \
+              "#{KV_METHOD_ATTRIBUTES.map {|k| %Q(#{k}="X") }.join('/')} where X is digits and dots, e.g. since=\"3.2\")"
+      end
+      private :parse_kv_method_attribute
+
+      # シグネチャ行(rd の `--- ...` / md の `### def ...` 等)から、
+      # 属性の紐付け先となるメソッド名を取り出す
+      def method_attribute_target_name(line)
+        normalized = line.sub(MD_METHOD_SIG_PREFIX_RE, '--- ')
+        MethodSignature.parse(normalized).name
+      rescue ParseError
+        nil
+      end
+      private :method_attribute_target_name
 
       def method_id(chunk)
         id = MethodID.new
