@@ -78,7 +78,8 @@ module BitClust
     end
 
     def badge_span(version, css_class, catalog_key)
-      return nil unless version
+      # 空文字は「明示的に不明」({: since=""})= バッジ非表示(bitclust#132)
+      return nil if version.nil? || version.empty?
       %Q(<span class="#{css_class}">#{escape_html(_(catalog_key, version))}</span>)
     end
 

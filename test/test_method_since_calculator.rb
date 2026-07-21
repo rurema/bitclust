@@ -52,6 +52,13 @@ class TestMethodSinceCalculator < Test::Unit::TestCase
     #@end
 
     #@since 2.0.0
+    --- suppressed
+    {: since=""}
+
+    説明
+    #@end
+
+    #@since 2.0.0
     --- -@
     #@since 3.0
     --- dedup
@@ -222,6 +229,15 @@ class TestMethodSinceCalculator < Test::Unit::TestCase
 
     assert_nil find_entry('2.0.0', 'i', 'overridden')
     assert_equal '2.5', find_entry('3.0', 'i', 'overridden').since_of('overridden')
+  end
+
+  def test_explicit_empty_since_suppresses_computed_value
+    # suppressed は #@since 2.0.0 ゲートによりラダー上は 2.0.0 と算出されるが、
+    # {: since=""}(明示的に不明=バッジ非表示)がパース時に記録されているため
+    # apply は上書きしない(bitclust#132: ドキュメント追加がメソッド追加より
+    # 遅れて算出が誤る場合の抑止)
+    run_calculator('3.0')
+    assert_equal '', find_entry('3.0', 'i', 'suppressed').since_of('suppressed')
   end
 
   def test_apply_rejects_target_whose_version_is_not_in_ladder
