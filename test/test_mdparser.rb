@@ -490,4 +490,49 @@ class TestMDParser < Test::Unit::TestCase
     assert_equal(:nomethod, fuga.kind)
     assert_equal(['fuga', 'fuga2'], fuga.names)
   end
+
+  def test_method_attribute_since_is_recorded
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Hoge
+
+      クラスの説明。
+
+      ## Instance Methods
+
+      ### def fuga -> nil
+      {: since="3.1"}
+
+      説明のためのエントリです。
+    MD
+    db, = parse_md(md)
+    entry = db.get_method(BitClust::MethodSpec.parse('Hoge#fuga'))
+    assert_equal('3.1', entry.since_of('fuga'))
+  end
+
+  def test_method_attribute_since_differs_per_alias_signature
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Hoge
+
+      クラスの説明。
+
+      ## Instance Methods
+
+      ### def fuga -> nil
+      {: since="2.0.0"}
+      ### def fuga2 -> nil
+      {: since="3.0"}
+
+      説明のためのエントリです。
+    MD
+    db, = parse_md(md)
+    entry = db.get_method(BitClust::MethodSpec.parse('Hoge#fuga'))
+    assert_equal('2.0.0', entry.since_of('fuga'))
+    assert_equal('3.0', entry.since_of('fuga2'))
+  end
 end

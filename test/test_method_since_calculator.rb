@@ -26,6 +26,8 @@ require 'fileutils'
 # [x] apply は冪等: 2回目は floor_skipped 以外すべて0
 # [x] 既に値がある名前は上書きしない(著者値が算出値より優先)
 # [x] 対象DBのバージョンがラダーに無ければ apply は UserError
+# [x] 統合: `{: since="X"}` 属性行(#132 P4)でパース時に記録された値は
+#     算出結果で上書きされない(RD ソース上の明示注記が算出値より優先)
 class TestMethodSinceCalculator < Test::Unit::TestCase
   RD = <<~'RD'
     description
@@ -38,6 +40,13 @@ class TestMethodSinceCalculator < Test::Unit::TestCase
 
     #@since 2.0.0
     --- newmeth
+
+    説明
+    #@end
+
+    #@since 3.0
+    --- overridden
+    {: since="2.5"}
 
     説明
     #@end
@@ -201,6 +210,18 @@ class TestMethodSinceCalculator < Test::Unit::TestCase
     calc.apply(fresh_db('3.0'))
 
     assert_equal '1.9.9', find_entry('3.0', 'i', 'newmeth').since_of('newmeth')
+  end
+
+  def test_author_since_attribute_parsed_from_source_survives_apply
+    # overridden は #@since 3.0 でゲートされているのでラダー上は 3.0 と算出
+    # されるが、RD ソースの {: since="2.5"} がパース時点(update_by_stdlibtree)
+    # で既に記録されているため、apply(fill_since は未設定時のみ書く)では
+    # 上書きされずそのまま残る
+    run_calculator('2.0.0')
+    run_calculator('3.0')
+
+    assert_nil find_entry('2.0.0', 'i', 'overridden')
+    assert_equal '2.5', find_entry('3.0', 'i', 'overridden').since_of('overridden')
   end
 
   def test_apply_rejects_target_whose_version_is_not_in_ladder

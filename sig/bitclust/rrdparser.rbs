@@ -127,9 +127,33 @@ module BitClust
 
       METHOD_ATTRIBUTES: Array[String]
 
-      def method_attributes: (Chunk chunk) -> Array[String]
+      KV_METHOD_ATTRIBUTES: Array[String]
+
+      KV_METHOD_ATTRIBUTE_VALUE_RE: ::Regexp
+
+      MD_METHOD_SIG_PREFIX_RE: ::Regexp
+
+      def method_attributes: (Chunk chunk) -> MethodAttributes
+
+      private
+
+      def parse_kv_method_attribute: (String token, Chunk chunk) -> [String, String]
+
+      def method_attribute_target_name: (String line) -> String?
+
+      public
 
       def method_id: (Chunk chunk) -> MethodID
+
+      # method_attributes の返り値
+      class MethodAttributes < Struct[untyped]
+        attr_accessor flags: Array[String]
+
+        attr_accessor since_until: Hash[String, Hash[String, String]]
+
+        def self.new: (Array[String] flags, Hash[String, Hash[String, String]] since_until) -> instance
+                    | ...
+      end
     end
 
     class Chunk
