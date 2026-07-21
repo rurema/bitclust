@@ -558,25 +558,101 @@ module BitClust
     end
 
     # GFM モードのテキストコンパイル:
-    # コードスパン `x` → <code>（中身は参照解決しない・HTML エスケープのみ）、
-    # 行頭 **N.** → <strong>、Markdown リンク（<url> 自動リンク・
-    # [テキスト](URL)・[テキスト](#アンカー)）→ <a>。
-    # エスケープ済み \` はリテラルのバッククォート
+    # コードスパン（CommonMark 6.1、N 連バッククォート）→ <code>（中身は
+    # 参照解決しない・HTML エスケープのみ）、行頭 **N.** → <strong>、
+    # Markdown リンク（<url> 自動リンク・[テキスト](URL)・
+    # [テキスト](#アンカー)）→ <a>。
+    # コードスパンの抽出はリンク抽出より先に行う（CommonMark のインライン
+    # 優先順位どおり。コードスパン内は他の記法を解決しない・
+    # extract_md_links 側で改めて分割する必要がない）。
+    # エスケープ済み \` はコードスパンの外だけリテラルのバッククォートに
+    # 復元される（restore_inline の convert_bare_refs が \[ \] \` の復元を
+    # 担う。コードスパン内ではバックスラッシュエスケープが無効という
+    # CommonMark のルールどおり、中身は素通しでバックスラッシュごと残す）
     def compile_gfm_text(str)
-      hidden = str.gsub(/\\`/, "\x00")
-      hidden.split(/(`[^`\n]+`)/, -1).map { |seg|
-        if seg =~ /\A`([^`\n]+)`\z/
-          "<code>#{escape_html(($1 || raise).gsub("\x00", '`'))}</code>"
-        else
-          links = [] #: Array[String]
-          seg = extract_md_links(seg, links)
-          seg = seg.gsub(/^\*\*(\d+\.)\*\* /, "\x01\\1\x02 ")
-          rd_compile_text(MarkdownToRRD.restore_inline(seg))
-            .gsub("\x01", '<strong>').gsub("\x02", '</strong>')
-            .gsub("\x00", '`')
-            .gsub(/\x03(\d+)\x03/) { links[($1 || raise).to_i] || raise }
+      code_spans = [] #: Array[String]
+      str = extract_code_spans(str, code_spans)
+      links = [] #: Array[String]
+      str = extract_md_links(str, links)
+      str = str.gsub(/^\*\*(\d+\.)\*\* /, "\x01\\1\x02 ")
+      rd_compile_text(MarkdownToRRD.restore_inline(str))
+        .gsub("\x01", '<strong>').gsub("\x02", '</strong>')
+        .gsub(/\x03(\d+)\x03/) { links[($1 || raise).to_i] || raise }
+        .gsub(/\x04(\d+)\x04/) { code_spans[($1 || raise).to_i] || raise }
+    end
+
+    # CommonMark 6.1 のインラインコードスパンを描画済み <code> へ退避し
+    # \x04idx\x04 プレースホルダに置き換える（extract_md_links と同じ流儀）。
+    # 開始と同じ長さのバッククォート列で閉じる（最長一致ではなく同長
+    # ペアリング）。閉じる相手が見つからない開始列はコードスパンにせず、
+    # そのまま次の候補から探索を続ける（非対称の開始列＝リテラル）。
+    # 改行はまたがない（テキストノードの行区切りを保持する既存の制約を
+    # 維持する）。
+    # \` は開始候補にしない（CommonMark: バックスラッシュエスケープされた
+    # バッククォートはコードスパンを開始しない。2.4 の \`not code\` 例）。
+    # 閉じ側の探索はエスケープを見ない（コードスパン内ではバックスラッシュ
+    # エスケープが無効なため、開いた後は同じ長さのバッククォート列が
+    # 来れば必ず閉じる。`foo\`bar` → <code>foo\</code>bar` という
+    # GitHub の実描画と同じ）
+    def extract_code_spans(str, saved)
+      result = +''
+      i = 0
+      len = str.length
+      while i < len
+        c = str[i] or raise
+        if c == '`' && (i.zero? || str[i - 1] != '\\')
+          run_len = 1
+          run_len += 1 while str[i + run_len] == '`'
+          close = find_code_span_close(str, i + run_len, run_len)
+          if close
+            content = str[(i + run_len)...close] || raise
+            saved << "<code>#{escape_html(normalize_code_span(content))}</code>"
+            result << "\x04#{saved.size - 1}\x04"
+            i = close + run_len
+            next
+          else
+            result << ('`' * run_len)
+            i += run_len
+            next
+          end
         end
-      }.join
+        result << c
+        i += 1
+      end
+      result
+    end
+
+    # from 位置以降で、run_len と同じ長さのバッククォート列（開始位置）を
+    # 探す。改行をまたいだら諦める（見つからないのと同じ扱い）
+    def find_code_span_close(str, from, run_len)
+      i = from
+      len = str.length
+      while i < len
+        c = str[i] or raise
+        case c
+        when "\n"
+          return nil
+        when '`'
+          j = i
+          j += 1 while str[j] == '`'
+          return i if j - i == run_len
+          i = j
+        else
+          i += 1
+        end
+      end
+      nil
+    end
+
+    # CommonMark 6.1: 前後が両方スペースで、かつ内容が全部スペースでは
+    # ない場合に前後を1個ずつ剥ぐ（`` `a` `` の内容を `a` として書ける
+    # ようにするための規則）
+    def normalize_code_span(content)
+      if content.start_with?(' ') && content.end_with?(' ') && content.match?(/[^ ]/)
+        content[1..-2] || ''
+      else
+        content
+      end
     end
 
     AUTOLINK_RE = %r{<(https?://[^<>\s]+)>}
@@ -645,7 +721,7 @@ module BitClust
     # （リンク内リンクは HTML として成立しないため）。外部 URL は rd の
     # [[url:]] と同じ external クラス、#アンカーはページ内リンク
     def md_link(text, dest)
-      label = escape_html(unescape_md_brackets(text).gsub("\x00", '`'))
+      label = escape_html(unescape_md_brackets(text))
       href = escape_html(unescape_md_brackets(dest))
       if dest.start_with?('#')
         %Q(<a href="#{href}">#{label}</a>)

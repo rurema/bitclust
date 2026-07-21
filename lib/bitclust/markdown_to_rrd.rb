@@ -794,8 +794,14 @@ module BitClust
     end
 
     def convert_md_ref_to_rrd(ref)
-      # Markdown の \[ \] \\ → RD の [ ] \
-      unescaped = ref.gsub('\\[', '[').gsub('\\]', ']').gsub('\\\\', '\\')
+      # Markdown の \[ \] \` \\ → RD の [ ] ` \ 。
+      # \` の復元は convert_bare_refs のトップレベル分岐（[...] の外）と
+      # 対称: [m:$\`]（バッククォートをエスケープした参照）も
+      # [m:$`]（素のバッククォート）と同じ [[m:$`]] へ復元する
+      # （rurema/doctree#3232 レビュー、MDCompiler#extract_code_spans が
+      # コードスパンの開始候補から \` を除外するのと同じ理由で、
+      # ブラケット内の \` もコードスパンの巻き添えにならない）
+      unescaped = ref.gsub('\\[', '[').gsub('\\]', ']').gsub('\\`', '`').gsub('\\\\', '\\')
       # ? → .# (モジュール関数参照)
       unescaped = unescaped.sub(/\?\./, '.#')
       # RD で [] で終わるメソッド名のみ末尾スペースが必要 ([[m:Hash#[] ]])
