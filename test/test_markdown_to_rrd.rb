@@ -654,6 +654,14 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     assert_equal "[[m:Array#each]] を参照。\n", convert("[m:Array#each] を参照。\n")
   end
 
+  def test_escaped_backtick_bare_ref_resolves_same_as_unescaped
+    # znz さん提示の書き方(doctree#3232): [m:$\`]（バッククォートを
+    # エスケープした参照）は [m:$`]（素のバッククォート、既存の後方互換）
+    # と同じ [[m:$`]] へ復元される
+    assert_equal "[[m:$`]] を参照。\n", convert("[m:$\\`] を参照。\n")
+    assert_equal "[[m:$`]] を参照。\n", convert("[m:$`] を参照。\n")
+  end
+
   def test_escaped_leading_hash_is_unescaped
     assert_equal "# : 2002-08-01 IO#read\n#    本文。\n",
       convert("\\# : 2002-08-01 IO#read\n\\#    本文。\n")

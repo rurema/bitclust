@@ -144,6 +144,16 @@ module BitClust
     # GFM モードのテキストコンパイル
     def compile_gfm_text: (String str) -> String
 
+    # CommonMark 6.1 のインラインコードスパンを描画済み <code> へ退避し
+    # プレースホルダに置き換える
+    def extract_code_spans: (String str, Array[String] saved) -> String
+
+    # run_len と同じ長さのバッククォート列（開始位置）を探す
+    def find_code_span_close: (String str, Integer from, Integer run_len) -> Integer?
+
+    # 前後が両方スペースで、かつ全部スペースではない場合に前後を1個ずつ剥ぐ
+    def normalize_code_span: (String content) -> String
+
     AUTOLINK_RE: ::Regexp
 
     # インラインリンクの宛先として受ける形（URL と #フラグメントのみ）

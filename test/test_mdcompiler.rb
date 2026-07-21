@@ -562,6 +562,74 @@ class TestMDCompiler < Test::Unit::TestCase
     assert_include html, "<code>a&lt;b&gt;</code> です。"
   end
 
+  # ---- CommonMark 6.1: N 連バッククォートのコードスパン(doctree#3232) ----
+
+  def test_gfm_double_backtick_span_contains_single_backtick
+    # 開始と同じ長さ(2連)のバッククォート列で閉じ、前後の空白を1個ずつ剥ぐ
+    html = gfm_compiler.compile("# T\n\n`` foo ` bar `` です。\n")
+    assert_include html, "<code>foo ` bar</code> です。"
+  end
+
+  def test_gfm_triple_backtick_span
+    # 行頭 ``` はブロックレベルのフェンスと解釈されるため、文中に置く
+    html = gfm_compiler.compile("# T\n\n見よ ``` code ``` です。\n")
+    assert_include html, "<code>code</code> です。"
+  end
+
+  def test_gfm_unbalanced_backtick_run_stays_literal
+    # 閉じる相手のいない開始列はコードスパンにせずリテラルのまま
+    html = gfm_compiler.compile("# T\n\n``foo` です。\n")
+    assert_include html, "``foo` です。"
+    assert_not_include html, "<code>"
+  end
+
+  def test_gfm_escaped_backtick_inside_span_keeps_backslash
+    # コードスパン内ではバックスラッシュエスケープが無効(CommonMark 6.1)。
+    # \` はバックスラッシュごとリテラルに残る(GitHub の実描画と同一)
+    html = gfm_compiler.compile("# T\n\n`` \\` `` は変換されません。\n")
+    assert_include html, "<code>\\`</code> は変換されません。"
+  end
+
+  def test_gfm_bare_backtick_in_bracket_ref_still_resolves
+    # 既存の [m:$`](素のバッククォート)の後方互換
+    html = gfm_compiler.compile("# T\n\n[m:$`] を参照。\n")
+    assert_include html, ">$`</a>"
+    assert_not_include html, "[[m:$"
+  end
+
+  def test_gfm_escaped_backtick_in_bracket_ref_resolves
+    # znz さん提示の書き方(doctree#3232 レビュー): [m:$\`] は
+    # [m:$`](素のバッククォート)と同じ参照へ解決される
+    escaped = gfm_compiler.compile("# T\n\n[m:$\\`] を参照。\n")
+    bare = gfm_compiler.compile("# T\n\n[m:$`] を参照。\n")
+    assert_equal bare, escaped
+    assert_include escaped, ">$`</a>"
+    assert_not_include escaped, "[[m:$"
+    assert_not_include escaped, "\\`"
+  end
+
+  def test_gfm_znz_gsub_paragraph_golden
+    # doctree PR #3232 レビューで znz さんが提示した段落そのもの
+    # (String#gsub の説明)。GitHub 上の実描画(gh api -X POST /markdown で
+    # 確認済み)と同等の構造 — \`・\'・\+ がコードスパンに、
+    # 3つの参照がすべて解決されること — をまとめて確認する
+    md = <<~MD
+      # T
+
+      置換文字列内では `` \\` ``、`\\'`、`\\+` も使えます。
+      これらは [m:$\\`]、[m:$']、[m:$+] に対応します。
+    MD
+    html = gfm_compiler.compile(md)
+    assert_include html, "<code>\\`</code>"
+    assert_include html, "<code>\\'</code>"
+    assert_include html, "<code>\\+</code>"
+    assert_include html, ">$`</a>"
+    assert_include html, ">$'</a>"
+    assert_include html, ">$+</a>"
+    assert_not_include html, "[[m:$"
+    assert_not_include html, "[m:$"
+  end
+
   def test_gfm_ref_and_span_coexist
     html = gfm_compiler.compile("# タイトル\n\n[c:String] と `x` を参照。\n")
     assert_include html, "</a> と <code>x</code> を参照。"
