@@ -103,6 +103,13 @@ module BitClust
       property :kind,            'Symbol'   ## :defined | :added | :redefined | :undefined | :nomethod
       property :source,          'String'
       property :source_location, 'Location'
+      # 名前別の since/until（bitclust#132）。トークンは
+      # "#{エンコード名}=#{バージョン}" の配列（[String] 型を再利用）で、
+      # 生名の ',' '=' は encodename_url でエスケープ済みなので最後の '='
+      # がバージョンとの区切りになる（バージョン文字列には '=' も ',' も
+      # 現れない前提。fill_since/fill_until で検査する）
+      property :since_by_name,   '[String]'
+      property :until_by_name,   '[String]'
     }
 
     def inspect
@@ -150,6 +157,60 @@ module BitClust
     def name?(name)
       names().include?(name)
     end
+
+    # 名前別 since/until（bitclust#132）。名前ごとに別バージョンで
+    # 追加/削除されうる別名（例: alias）を区別して記録する
+
+    def since_of(name)
+      since_map[name]
+    end
+
+    def until_of(name)
+      until_map[name]
+    end
+
+    def since_map
+      decode_version_tokens(since_by_name)
+    end
+
+    def until_map
+      decode_version_tokens(until_by_name)
+    end
+
+    # name の since が未設定の場合のみ version を追加する。追加したら true、
+    # 既に値があって何もしなければ false を返す
+    def fill_since(name, version)
+      fill_version_token(:since_by_name, :since_of, name, version)
+    end
+
+    # fill_since の until 版
+    def fill_until(name, version)
+      fill_version_token(:until_by_name, :until_of, name, version)
+    end
+
+    private
+
+    def decode_version_tokens(tokens)
+      h = {} #: Hash[String, String]
+      tokens.each do |token|
+        i = token.rindex('=') or raise "must not happen: malformed version token #{token.inspect}"
+        raw_name = decodename_url(token[0...i] || raise)
+        h[raw_name] = token[(i + 1)..] || raise
+      end
+      h
+    end
+
+    def fill_version_token(prop, reader, name, version)
+      if version.include?('=') || version.include?(',')
+        raise ArgumentError, "version must not contain '=' or ',': #{version.inspect}"
+      end
+      return false if __send__(reader, name)
+      token = "#{encodename_url(name)}=#{version}"
+      __send__("#{prop}=", __send__(prop) + [token])
+      true
+    end
+
+    public
 
     def name_match?(re)
       names().any? {|n| re =~ n }

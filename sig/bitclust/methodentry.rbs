@@ -43,6 +43,8 @@ module BitClust
     attr_accessor kind: (:defined | :added | :redefined | :undefined | :nomethod)
     attr_accessor source: String
     attr_accessor source_location: Location
+    attr_accessor since_by_name: Array[String]
+    attr_accessor until_by_name: Array[String]
 
     def inspect: () -> String
 
@@ -61,6 +63,18 @@ module BitClust
     def title_labels: () -> Array[String]
 
     def name?: (String name) -> bool
+
+    def since_of: (String name) -> String?
+
+    def until_of: (String name) -> String?
+
+    def since_map: () -> Hash[String, String]
+
+    def until_map: () -> Hash[String, String]
+
+    def fill_since: (String name, String version) -> bool
+
+    def fill_until: (String name, String version) -> bool
 
     def name_match?: (Regexp re) -> bool
 
@@ -101,5 +115,11 @@ module BitClust
     def nomethod?: () -> bool
 
     def description: () -> String?
+
+    private
+
+    def decode_version_tokens: (Array[String] tokens) -> Hash[String, String]
+
+    def fill_version_token: (Symbol prop, Symbol reader, String name, String version) -> bool
   end
 end
