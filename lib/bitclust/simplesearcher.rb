@@ -73,10 +73,18 @@ module BitClust
       end
       return pat, nil, nil if /\A[A-Z]\w*\z/ =~ pat
       return nil, '$', $1  if /\$(\S*)/ =~ pat
-      _m, _t, _c = pat.reverse.split(/(::|[\#,]\.|\.[\#,]|[\#\.\,])/, 2)
+      # bitclust#250: "?." is an alternate spelling of the module-function
+      # separator ".#" (Ruby >=4.0 docs display it that way since #277; see
+      # NameUtils.display_typemark). Accept it here regardless of which
+      # Ruby version the query is about -- this is query *input*, not
+      # display, so both notations are always accepted. "?" is added to the
+      # same reversed-pattern alternative that already matches "#." and ",."
+      # (a marker character immediately followed by ".", read in the
+      # reversed pattern), so "?." matches the same way "#." already does.
+      _m, _t, _c = pat.reverse.split(/(::|[\#,]\.|\.[\#,\?]|[\#\.\,])/, 2)
       _m || raise
       c = _c.reverse if _c
-      t = _t.tr(',', '#').sub(/\#\./, '.#') if _t
+      t = _t.tr(',?', '##').sub(/\#\./, '.#') if _t
       m = _m.reverse
       return c, t, m
     end
