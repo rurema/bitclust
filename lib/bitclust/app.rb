@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'bitclust'
 require 'bitclust/interface'
+require 'bitclust/reloadable_request_handler'
 
 module BitClust
 
@@ -28,10 +29,6 @@ module BitClust
       when String
         # @type var viewpath: String
         dbpath = File.expand_path(dbpath)
-        db = BitClust::MethodDatabase.new(dbpath)
-        if capi
-          db = [db, BitClust::FunctionDatabase.new(dbpath)] #: [MethodDatabase, FunctionDatabase]
-        end
         manager = BitClust::ScreenManager.new(
           :base_url => baseurl,
           :cgi_url => File.join(baseurl, viewpath),
@@ -40,7 +37,7 @@ module BitClust
           :theme => options[:theme],
           :encoding => encoding
           )
-        handler = request_handler_class.new(db, manager)
+        handler = BitClust::ReloadableRequestHandler.new(dbpath, capi, manager, request_handler_class)
         @interfaces[viewpath] = BitClust::Interface.new { handler }
       when Array
         # @type var viewpath: String?
@@ -56,10 +53,6 @@ module BitClust
           else
             version_viewpath = version
           end
-          db = BitClust::MethodDatabase.new(dbpath)
-          if capi
-            db = [db, BitClust::FunctionDatabase.new(dbpath)] #: [MethodDatabase, FunctionDatabase]
-          end
           manager = BitClust::ScreenManager.new(
             :base_url => baseurl,
             :cgi_url => File.join(baseurl, version_viewpath),
@@ -68,7 +61,7 @@ module BitClust
             :theme => options[:theme],
             :encoding => encoding
             )
-          handler = request_handler_class.new(db, manager)
+          handler = BitClust::ReloadableRequestHandler.new(dbpath, capi, manager, request_handler_class)
           @interfaces[version_viewpath] = BitClust::Interface.new { handler }
           $bitclust_context_cache = nil # clear cache
         end
