@@ -166,6 +166,30 @@ const index = [
          'search("each") still finds the ordinary method entry')
 }
 
+// --- wire up search_page.js (the cross-version /ja/search/ page) ---------
+// Like setupSearchBox, but for search_page.js: fresh (unwrapped) ranker
+// globals first, then the page script's own globals (a merged index whose
+// entries carry `versions`, the version list, and the path prefix), plus
+// the window shims search_page.js touches (location/history/focus).
+function setupSearchPage(index) {
+  loadRankerScripts()
+  const input = makeElement('input')
+  input.focus = function() {}
+  const result = makeElement('ul')
+  result.parentNode = makeElement('div')
+  globalThis.document = makeDocument({ 'search-field': input, 'search-results': result })
+  globalThis.search_data = { index }
+  globalThis.search_versions = ['3.4', '4.0']
+  globalThis.search_version_base = '../'
+  globalThis.window = {
+    location: { search: '', pathname: '/ja/search/' },
+    history: { replaceState() {} },
+  }
+  ;(0, eval)(std.loadFile(jsdir + 'search_page.js'))
+  document.dispatch('DOMContentLoaded')
+  return { input, result }
+}
+
 // End-to-end through search_init.js's DOM wiring: typing "defined?" and
 // dispatching keyup renders a result item carrying the new search-type-
 // heading badge, labeled via the formatType map added in this change.
@@ -237,9 +261,8 @@ const index = [
 // End-to-end through the DOM, same as the "defined?" test above: typing a
 // dot-qualified query renders a result whose *displayed* title is the
 // original "File.open" -- proving the match_name substitution never reaches
-// the page (highlightMatch degrades to no inline <em> marks for this query
-// shape, a known/documented limitation -- see the #279 report -- but the
-// text itself must still be exactly right and HTML-escaped normally).
+// the page -- highlighted whole by the highlightMatch wrap (see the
+// dedicated section below) and HTML-escaped normally.
 {
   const { input, result } = setupSearchBox(qualifiedIndex)
   input.value = 'File.open'
@@ -250,6 +273,88 @@ const index = [
          'the rendered result displays the literal "File.open" full_name')
   assert(!html.includes('File::open'), 'the rendered result never shows the "::" match_name form')
   assert(html.includes('method/-file/s/open.html'), 'the result links to the right path')
+  assert(html.includes('<em>File.open</em>'),
+         'the qualified query is highlighted as one contiguous <em> run (bitclust#279 comment)')
+}
+
+// --- bitclust#279 (comment): highlightMatch on qualified queries ---------
+// The vendored highlightMatch() compares q.normalized (with "." already
+// rewritten to "::", e.g. "file::open") against the literal-dot full_name
+// ("File.open"), so a dot-qualified query never earned an <em> highlight --
+// at best the fuzzy fallback gave up at the first ":". search_init.js wraps
+// it: whenever the vendored code found nothing to mark, retry with the
+// user's original query text, treating ".#" and "?." as the same
+// module-function spelling. Both marks are two characters long, so indexes
+// into the folded strings map 1:1 onto the displayed text.
+{
+  const q = parseQuery('File.open')
+  assert(highlightMatch('File.open', q) === '\u0001File.open\u0002',
+         'highlightMatch marks the whole contiguous match for "File.open"')
+}
+{
+  const q = parseQuery('file.o')
+  assert(highlightMatch('File.open', q) === '\u0001File.o\u0002pen',
+         'a partial qualified query highlights just its prefix, case-insensitively')
+}
+{
+  const q = parseQuery('Kernel?.open')
+  assert(highlightMatch('Kernel.#open', q) === '\u0001Kernel.#open\u0002',
+         'a "?."-spelled query highlights a ".#"-spelled entry (cross-notation)')
+  assert(highlightMatch('Kernel?.open', q) === '\u0001Kernel?.open\u0002',
+         'a "?."-spelled query highlights a "?."-spelled entry')
+}
+{
+  const q = parseQuery('Kernel.#open')
+  assert(highlightMatch('Kernel?.open', q) === '\u0001Kernel?.open\u0002',
+         'a ".#"-spelled query highlights a "?."-spelled entry (cross-notation)')
+}
+// Vendored behavior is preserved wherever it already worked: unqualified
+// queries keep the vendored contiguous highlight...
+{
+  const q = parseQuery('open')
+  assert(highlightMatch('File.open', q) === 'File.\u0001open\u0002',
+         'unqualified queries keep the vendored contiguous highlight')
+}
+// ...fuzzy scattered highlights pass through untouched...
+{
+  const q = parseQuery('fopen')
+  const r = highlightMatch('File.open', q)
+  assert(r.indexOf('\u0001') !== -1 && r.replace(/[\u0001\u0002]/g, '') === 'File.open',
+         'fuzzy highlights from the vendored code pass through unchanged')
+}
+// ...and a query that matches nothing still returns the text verbatim.
+{
+  const q = parseQuery('Dir.open')
+  assert(highlightMatch('File.open', q) === 'File.open',
+         'a non-matching qualified query leaves the text unhighlighted')
+}
+
+// --- bitclust#279 (comment): the cross-version page (search_page.js) -----
+// Same wraps as search_init.js, exercised end-to-end. The merged index only
+// carries the "?." spelling (SearchIndexGenerator.merge folds ".#" away);
+// an old-notation query must still find that entry, and the rendered row
+// shows the "?."-spelled title highlighted, linking to the newest version
+// with the full version list underneath.
+{
+  const mergedIndex = [
+    { name: 'open', full_name: 'Kernel?.open', match_name: 'Kernel::#open',
+      type: 'class_method', path: 'method/-kernel/m/open.html',
+      versions: ['3.4', '4.0'] },
+    { name: 'open', full_name: 'File.open', match_name: 'File::open',
+      type: 'class_method', path: 'method/-file/s/open.html',
+      versions: ['3.4', '4.0'] },
+  ]
+  const { input, result } = setupSearchPage(mergedIndex)
+  input.value = 'Kernel.#open'
+  input.dispatch('keyup', { key: 'n' })
+  assert(result.children.length === 1,
+         'a ".#"-spelled query finds the "?."-only merged entry on the cross-version page')
+  const html = result.children.length ? result.children[0].innerHTML : ''
+  assert(html.includes('<em>Kernel?.open</em>'),
+         '...rendered with the whole "?."-spelled title highlighted')
+  assert(html.includes('../4.0/method/-kernel/m/open.html'),
+         '...linking to the newest version')
+  assert(html.includes('>3.4<'), '...with the older version listed too')
 }
 
 // --- bitclust#279: defensive fallback ------------------------------------
@@ -266,8 +371,10 @@ const index = [
 {
   parseQuery = undefined
   computeScore = undefined
-  assert(typeof parseQuery !== 'function' && typeof computeScore !== 'function',
-         '(fallback setup) parseQuery/computeScore are hidden, simulating a future closure-based ranker')
+  highlightMatch = undefined
+  assert(typeof parseQuery !== 'function' && typeof computeScore !== 'function' &&
+         typeof highlightMatch !== 'function',
+         '(fallback setup) parseQuery/computeScore/highlightMatch are hidden, simulating a future closure-based ranker')
 
   // A closure-hiding stand-in ranker: same public shape as SearchRanker, but
   // its matching logic never touches globalThis.

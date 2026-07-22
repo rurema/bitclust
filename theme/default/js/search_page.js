@@ -57,6 +57,33 @@
     };
   }
 
+  // Same highlightMatch wrap as search_init.js: when the vendored code
+  // found nothing to mark (dot-qualified queries never contiguous-match a
+  // literal-dot full_name once "." has been rewritten to "::"), retry with
+  // the user's original query text, treating ".#" and "?." as the same
+  // module-function spelling. On this page the merged index only carries
+  // the "?." spelling (SearchIndexGenerator.merge folds ".#" away), so
+  // this is what lets a query typed in the pre-4.0 ".#" notation still
+  // light up the "?."-spelled row it matched. Both marks are two
+  // characters, so indexes into the folded strings map 1:1 onto the text.
+  if (typeof highlightMatch === 'function') {
+    var alikiHighlightMatch = highlightMatch;
+    highlightMatch = function(text, q) {
+      var marked = alikiHighlightMatch(text, q);
+      if (marked !== text) return marked;         // the vendored code managed
+      if (!text || !q || !q.original) return marked;
+      var canonText = text.toLowerCase().replace(/\.#/g, '?.');
+      var canonQuery = q.original.toLowerCase().replace(/\.#/g, '?.');
+      if (!canonQuery) return marked;
+      var start = canonText.indexOf(canonQuery);
+      if (start === -1) return marked;
+      var end = start + canonQuery.length;
+      return text.substring(0, start) +
+        '\u0001' + text.substring(start, end) + '\u0002' +
+        text.substring(end);
+    };
+  }
+
   function versionHref(version, path) {
     return search_version_base + version + '/' + path;
   }

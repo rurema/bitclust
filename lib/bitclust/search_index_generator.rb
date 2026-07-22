@@ -92,11 +92,25 @@ module BitClust
     # sorts after "3.4"), and entry order is the first appearance while
     # scanning versions in ascending order — independent of the caller's
     # argument order, so the generated file diffs stay stable.
+    #
+    # A module function's full_name is spelled ".#" by pre-4.0 databases and
+    # "?." by 4.0+ ones (bitclust#250), which would split it into two rows —
+    # confusing on a page that lists every version side by side. Fold the
+    # display to the current "?." spelling here, so both spellings collapse
+    # into one row with a unified versions list (name/type/path/match_name
+    # are spelling-independent already). Only entries carrying a match_name
+    # (dot-qualified methods) are folded: a prose heading whose *text*
+    # happens to contain ".#" must keep matching its page verbatim. The
+    # single-version in-page search keeps each version's own spelling —
+    # build_index is not affected. See the report in bitclust#279.
     def self.merge(version_indexes)
       merged = {} #: Hash[Array[String?], merged_entry]
       sorted = version_indexes.sort_by { |version, _| Gem::Version.new(version) }
       sorted.each do |version, index|
         index.each do |e|
+          if e[:match_name] && e[:full_name].include?('.#')
+            e = e.merge(full_name: e[:full_name].gsub('.#', '?.'))
+          end
           key = e.values_at(:name, :full_name, :type, :path)
           entry = (merged[key] ||= e.merge(versions: []))
           entry[:versions] << version

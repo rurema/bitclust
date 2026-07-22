@@ -86,6 +86,35 @@ class TestSearchpageCommand < Test::Unit::TestCase
     assert_equal %w[3.4 4.1], klass['versions']
   end
 
+  def test_merged_index_shows_module_functions_as_question_dot_only
+    # bitclust#279 コメント対応: 版によって表示が ".#"(4.0 より前)と
+    # "?."(4.0 以降)に割れる module function は、統合ページでは "?."
+    # 表記の1エントリに合流させる(両表記が併記されるとわかりにくい)
+    db33 = build_db('3.3', <<~'RD')
+      description
+
+      = module Kernel
+      == Module Functions
+      --- at_exit{ ... } -> Proc
+      aaa
+    RD
+    db40 = build_db('4.0', <<~'RD')
+      description
+
+      = module Kernel
+      == Module Functions
+      --- at_exit{ ... } -> Proc
+      aaa
+    RD
+    run_command(["--outputdir=#{@out}", db40, db33])
+    js = File.read("#{@out}/js/search_data.js")
+    data = JSON.parse(js.sub(/\Avar search_data = /, '').sub(/;\z/, ''))
+    entries = data['index'].select { |e| e['name'] == 'at_exit' }
+    assert_equal ['Kernel?.at_exit'], entries.map { |e| e['full_name'] }
+    assert_equal %w[3.3 4.0], entries[0]['versions']
+    assert_not_match(/Kernel\.#/, js)
+  end
+
   def test_index_html_embeds_versions_and_ui
     run_command(["--outputdir=#{@out}", @db41, @db34])
     html = File.read("#{@out}/index.html")

@@ -416,6 +416,44 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     assert_equal %w[B A], merged.map { |e| e[:full_name] }
   end
 
+  def test_merge_folds_module_function_display_to_question_dot
+    # bitclust#279 コメント対応: 統合ページ(/ja/search/)で同じ module
+    # function が "Kernel.#open"(4.0 より前の版)と "Kernel?.open"
+    # (4.0 以降)の2行に分かれて出るのはわかりにくい。表示は現行表記の
+    # "?." に畳んで1エントリに合流させる(name/type/path/match_name は
+    # 表記に依らず同一なので、full_name さえ畳めばキーが一致する)。
+    # 単一版ページの表示はその版の表記のまま(build_index 側は触らない)。
+    pre40  = { name: 'open', full_name: 'Kernel.#open', type: 'class_method',
+               path: 'method/-kernel/m/open.html', match_name: 'Kernel::#open' }
+    post40 = { name: 'open', full_name: 'Kernel?.open', type: 'class_method',
+               path: 'method/-kernel/m/open.html', match_name: 'Kernel::#open' }
+    merged = BitClust::SearchIndexGenerator.merge(
+      [['3.4', [pre40]], ['4.0', [post40]]])
+    assert_equal 1, merged.size
+    assert_equal 'Kernel?.open', merged[0][:full_name]
+    assert_equal %w[3.4 4.0], merged[0][:versions]
+    assert_equal 'Kernel::#open', merged[0][:match_name]
+  end
+
+  def test_merge_folds_display_even_when_only_old_notation_exists
+    # 4.0 以降に存在しないまま消えたメソッドでも、統合ページの表示は
+    # "?." に揃える(znz さんの依頼は「?. だけ出てくるように」)
+    pre40 = { name: 'gone', full_name: 'Kernel.#gone', type: 'class_method',
+              path: 'method/-kernel/m/gone.html', match_name: 'Kernel::#gone' }
+    merged = BitClust::SearchIndexGenerator.merge([['3.4', [pre40]]])
+    assert_equal 'Kernel?.gone', merged[0][:full_name]
+  end
+
+  def test_merge_keeps_dot_hash_in_entries_without_match_name
+    # ".#" を字面に含んでいても match_name を持たないエントリ(散文
+    # 見出しなど)は表示を畳まない — 見出しはページ本文の字面と一致
+    # していることに意味がある
+    heading = { name: '.#', full_name: '.# (プログラム・文・式)', type: 'heading',
+                path: 'doc/symref.html#dot-hash' }
+    merged = BitClust::SearchIndexGenerator.merge([['3.4', [heading]]])
+    assert_equal '.# (プログラム・文・式)', merged[0][:full_name]
+  end
+
   def test_merged_js_format
     js = BitClust::SearchIndexGenerator.merged_js([['3.4', [entry]]])
     assert_match(/\Avar search_data = \{/, js)
