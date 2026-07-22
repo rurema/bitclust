@@ -67,6 +67,35 @@
     };
   }
 
+  // bitclust#279 (continued): highlightMatch() compares q.normalized (with
+  // "." already rewritten to "::" and "?." folded to ".#" by the wrap
+  // above) against the displayed full_name, which keeps its literal
+  // "."/".#"/"?." — so the dot-qualified queries fixed above matched their
+  // entry but never earned an <em> highlight (at best the vendored fuzzy
+  // fallback gave up at the first ":"). Whenever the vendored code found
+  // nothing to mark, retry a contiguous match with the user's *original*
+  // query text (q.original, restored by the parseQuery wrap), treating
+  // ".#" and "?." as the same module-function spelling. Both marks are two
+  // characters long, so indexes into the folded strings map 1:1 onto the
+  // displayed text and the markers can be spliced straight into it.
+  if (typeof highlightMatch === 'function') {
+    var alikiHighlightMatch = highlightMatch;
+    highlightMatch = function(text, q) {
+      var marked = alikiHighlightMatch(text, q);
+      if (marked !== text) return marked;         // the vendored code managed
+      if (!text || !q || !q.original) return marked;
+      var canonText = text.toLowerCase().replace(/\.#/g, '?.');
+      var canonQuery = q.original.toLowerCase().replace(/\.#/g, '?.');
+      if (!canonQuery) return marked;
+      var start = canonText.indexOf(canonQuery);
+      if (start === -1) return marked;
+      var end = start + canonQuery.length;
+      return text.substring(0, start) +
+        '\u0001' + text.substring(start, end) + '\u0002' +
+        text.substring(end);
+    };
+  }
+
   function createSearchInstance(input, result) {
     if (!input || !result) return null;
 
