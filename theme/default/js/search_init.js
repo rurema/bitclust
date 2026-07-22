@@ -22,15 +22,48 @@
   // never match. Wrap parseQuery so that any "$"-prefixed (special variable)
   // query keeps its literal text and is matched against full_name.
   // See https://github.com/rurema/bitclust/issues/194
+  //
+  // Separately (bitclust#279): BitClust keeps a literal "." in full_name for
+  // singleton methods ("File.open") and ".#"/"?." for module functions
+  // ("Kernel.#open" pre-4.0, "Kernel?.open" 4.0+ — see #250), instead of
+  // RDoc's "::" convention. The same "." -> "::" rewrite above then makes
+  // every one of those dot-qualified queries miss its own entry. Fold "?."
+  // to ".#" here so both module-function spellings collapse to the same
+  // query text before the "." -> "::" rewrite runs; the other half of the
+  // fix (matching against SearchIndexGenerator's match_name instead of
+  // full_name) is the computeScore wrap below.
   if (typeof parseQuery === 'function') {
     var alikiParseQuery = parseQuery;
     parseQuery = function(query) {
-      var q = alikiParseQuery(query);
+      var folded = query.indexOf('?.') === -1 ? query : query.replace(/\?\./g, '.#');
+      var q = alikiParseQuery(folded);
       if (query.charAt(0) === '$') {
         q.normalized = query.toLowerCase();  // undo the "." -> "::" rewrite
         q.matchesFullName = true;            // the "$" sigil lives in full_name
       }
+      q.original = query;  // keep the real original text, not the folded one
       return q;
+    };
+  }
+
+  // bitclust#279 (continued): computeScore() scores a query against
+  // entry.full_name, which — per the comment above — doesn't use "::" the
+  // way parseQuery's rewrite expects. SearchIndexGenerator adds a
+  // match_name to affected entries (full_name with "?." folded to ".#" and
+  // then every "." turned into "::", mirroring parseQuery's own rewrite —
+  // see search_index_generator.rb's header comment). When an entry carries
+  // one, score a shallow clone with full_name swapped to match_name instead
+  // — the original entry object (and its displayed full_name) is never
+  // touched, so this only affects which entries match, not what is shown.
+  // Entries without a match_name (instance methods, constants, classes,
+  // special variables, ...) are scored exactly as before.
+  if (typeof computeScore === 'function') {
+    var alikiComputeScore = computeScore;
+    computeScore = function(entry, q) {
+      if (entry && entry.match_name) {
+        return alikiComputeScore({ name: entry.name, full_name: entry.match_name, type: entry.type }, q);
+      }
+      return alikiComputeScore(entry, q);
     };
   }
 

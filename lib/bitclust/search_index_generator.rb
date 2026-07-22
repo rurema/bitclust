@@ -8,6 +8,17 @@
 #
 #   { name:, full_name:, type:, path: }
 #
+# Singleton methods and module functions (full_name holding a literal "."/
+# ".#"/"?.", e.g. "File.open", "Kernel.#open", "Kernel?.open" -- see #250)
+# additionally carry a +match_name+: full_name with "?." folded to ".#" and
+# every "." turned into "::". This mirrors the "." -> "::" rewrite the
+# vendored Aliki ranker's parseQuery() applies to the *query* text (RDoc's
+# own full_names use "::" for class methods), so search_init.js/search_page.js
+# can feature-detect-wrap computeScore() to compare like-for-like without
+# ever touching the displayed full_name. See bitclust#279.
+#
+#   { name:, full_name:, type:, path:, match_name: }
+#
 # serialized as a JavaScript assignment so it can be loaded over file://
 # without tripping the browser's CORS check on JSON files:
 #
@@ -137,11 +148,22 @@ module BitClust
             # sigil is the only thing distinguishing it, so keep it in +name+
             # too (not just +full_name+) or a "$;"-style query can't match it.
             name = full_name = tmark + mname
+            result << { name: name, full_name: full_name, type: type, path: path }
           else
             name = mname
             full_name = cname + tmark + mname
+            item = { name: name, full_name: full_name, type: type, path: path } #: entry
+            if tmark.include?('.')
+              # bitclust#279: singleton methods (".") and module functions
+              # (".#"/"?.") keep a literal "." in full_name for display, but
+              # the vendored ranker's parseQuery() rewrites every "." in the
+              # *query* to "::". match_name is the same rewrite applied to
+              # this entry, so the search_init.js/search_page.js computeScore
+              # wrap can compare like-for-like. See the file header comment.
+              item[:match_name] = full_name.gsub('?.', '.#').gsub('.', '::')
+            end
+            result << item
           end
-          result << { name: name, full_name: full_name, type: type, path: path }
         end
       end
       result
