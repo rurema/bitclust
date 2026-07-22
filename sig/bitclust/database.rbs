@@ -68,6 +68,8 @@ module BitClust
 
     private
 
+    def touch_properties: () -> void
+
     def realpath: (::String rel) -> ::String
   end
 end

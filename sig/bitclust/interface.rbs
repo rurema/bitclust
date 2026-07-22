@@ -4,11 +4,11 @@ module BitClust
     type webrick_conf = {}
     @webrick_conf: webrick_conf
 
-    @handler: BitClust::RequestHandler
+    @handler: BitClust::ReloadableRequestHandler
 
-    $bitclust_context_cache: ::BitClust::RequestHandler?
+    $bitclust_context_cache: ::BitClust::ReloadableRequestHandler?
 
-    def initialize: (?webrick_conf webrick_conf) { () -> BitClust::RequestHandler } -> void
+    def initialize: (?webrick_conf webrick_conf) { () -> BitClust::ReloadableRequestHandler } -> void
 
     # for WEBrick servlet
     def get_instance: (WEBrick::HTTPServer server) -> WEBrickServlet
@@ -25,9 +25,9 @@ module BitClust
     def mod_ruby?: () -> false
 
     class CGI < ::WEBrick::CGI
-      @handler: BitClust::RequestHandler
+      @handler: BitClust::ReloadableRequestHandler
 
-      def main: (BitClust::RequestHandler handler) -> void
+      def main: (BitClust::ReloadableRequestHandler handler) -> void
 
       def do_GET: (WEBrick::HTTPRequest wreq, WEBrick::HTTPResponse wres) -> void
 
@@ -35,13 +35,13 @@ module BitClust
     end
 
     class FCGI < CGI
-      @handler: BitClust::RequestHandler
+      @handler: BitClust::ReloadableRequestHandler
 
-      def main: (BitClust::RequestHandler handler) -> void
+      def main: (BitClust::ReloadableRequestHandler handler) -> void
     end
 
     class WEBrickServlet < ::WEBrick::HTTPServlet::AbstractServlet
-      @options: [BitClust::RequestHandler]
+      @options: [BitClust::ReloadableRequestHandler]
 
       def do_GET: (WEBrick::HTTPRequest wreq, WEBrick::HTTPResponse wres) -> void
 

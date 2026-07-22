@@ -66,10 +66,28 @@ module BitClust
         save_properties 'properties', (@properties || raise)
         @properties_dirty = false
       end
-      commit if dirty?
+      if dirty?
+        commit
+        # 更新完了の合図として properties の mtime を進める(bitclust#275)。
+        # server の自動リロード(ReloadableRequestHandler)は properties の
+        # mtime で新鮮さを判定するため、init 直後〜update 完了前の途中状態を
+        # 読んでしまったプロセスも、ここで mtime が進むことで次のリクエスト
+        # から完成した DB を読み直して収束できる
+        touch_properties
+      end
     ensure
       @in_transaction = false
     end
+
+    # properties の内容は変えず mtime だけ現在時刻に進める。
+    # ファイルが無い場合(異常系)は何もしない
+    def touch_properties
+      path = realpath('properties')
+      now = Time.now
+      File.utime(now, now, path)
+    rescue Errno::ENOENT
+    end
+    private :touch_properties
 
     # abstract dirty?
     # abstract clear_dirty

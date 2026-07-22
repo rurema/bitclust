@@ -41,9 +41,7 @@ module BitClust
 
     # for rack
     def call(env)
-      # @type var handler: BitClust::RackRequestHandler
-      handler = _ = @handler
-      handler.handle(Rack::Request.new(env)).rack_finish
+      @handler.handle(Rack::Request.new(env)).rack_finish
     end
 
     private
