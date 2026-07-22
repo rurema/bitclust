@@ -214,6 +214,47 @@ HERE
     assert_compiled_method_source(expected, src)
   end
 
+  # bitclust#250: template.lillia/library だけが compile_method(m, true) で
+  # 第2引数(@opt)を渡し、見出し先頭に「クラス名+typemark」を付ける。4.0
+  # 以降のドキュメントではこの prefix も "?." 表示に切り替わる(識別子である
+  # typemark ではなく、表示専用の display_typemark を経由する)
+  def test_method_with_opt_prefixes_class_name_and_display_typemark
+    klass = Object.new
+    mock(klass).name { 'Kernel' }
+
+    method_entry = Object.new
+    mock(method_entry).source { "--- mf\n\nfoo\n" }
+    mock(method_entry).index_id.any_times { 'dummy' }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { 'Kernel/m.mf._builtin' }
+    mock(method_entry).names.any_times { ['mf'] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).klass.any_times { klass }
+    mock(method_entry).display_typemark.any_times { '?.' }
+
+    html = @c.compile_method(method_entry, true)
+    assert_include(html, '<code>Kernel?.mf</code>')
+  end
+
+  # opt を渡さない通常経路(class/method/function 各テンプレート)は
+  # klass/display_typemark に一切触れず、prefix なしのまま(回帰防止:
+  # klass/display_typemark をスタブしていないので、誤って参照すると
+  # 未定義呼び出しとして失敗する)
+  def test_method_without_opt_omits_the_class_and_typemark_prefix
+    method_entry = Object.new
+    mock(method_entry).source { "--- mf\n\nfoo\n" }
+    mock(method_entry).index_id.any_times { 'dummy' }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { 'Kernel/m.mf._builtin' }
+    mock(method_entry).names.any_times { ['mf'] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
+
+    html = @c.compile_method(method_entry)
+    assert_include(html, '<code>mf</code>')
+  end
+
   def test_method_with_emlist
     src = <<'HERE'
 --- <=>

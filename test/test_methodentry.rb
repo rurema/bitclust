@@ -69,6 +69,85 @@ HERE
   end
 end
 
+# bitclust#250: Ruby 4.0 以降のドキュメントでは module function の表記を
+# 独自の「.#」から「?.」に変える(表示のみ。識別子は変えない)。
+#
+# label/short_label/labels/title_labels 自身は refsdatabase.rb の
+# [[a:...]] アンカー解決キー(labels)や `bitclust methods --diff` の
+# expand_mf マッチング(labels)が literal ".#" を前提にしているため、
+# 一切変更しない。表示用には display_label/display_short_label/
+# display_title_labels/display_typemark を新設し、テンプレート側の
+# 実際の表示箇所だけがそちらを呼ぶようにする。
+class TestMethodEntryDisplayTypemark < Test::Unit::TestCase
+  SRC = <<HERE
+= module Kernel
+description
+== Module Functions
+--- mf
+--- mf2
+
+説明
+
+== Instance Methods
+--- im
+
+説明
+
+== Special Variables
+--- $stdout -> IO
+
+標準出力。
+HERE
+
+  def build(version)
+    _lib, db = BitClust::RRDParser.parse(SRC, 'testlib', {'version' => version})
+    db
+  end
+
+  def test_module_function_display_stays_dot_hash_before_4_0
+    db = build('3.4')
+    m = db.get_method(BitClust::MethodSpec.parse('Kernel.#mf'))
+    assert_equal('.#', m.display_typemark)
+    assert_equal('Kernel.#mf', m.display_label)
+    assert_equal('.#mf', m.display_short_label)
+    assert_equal(['Kernel.#mf', 'Kernel.#mf2'], m.display_title_labels)
+  end
+
+  def test_module_function_display_switches_to_question_dot_at_4_0
+    db = build('4.0')
+    m = db.get_method(BitClust::MethodSpec.parse('Kernel.#mf'))
+    assert_equal('?.', m.display_typemark)
+    assert_equal('Kernel?.mf', m.display_label)
+    assert_equal('?.mf', m.display_short_label)
+    assert_equal(['Kernel?.mf', 'Kernel?.mf2'], m.display_title_labels)
+  end
+
+  # 識別子として使われる label/labels/short_label/title_labels は、
+  # 表示版とは無関係に version が 4.0 以降でも従来どおり ".#" のまま
+  def test_identity_methods_are_unaffected_by_version
+    db = build('4.0')
+    m = db.get_method(BitClust::MethodSpec.parse('Kernel.#mf'))
+    assert_equal('.#', m.typemark)
+    assert_equal('Kernel.#mf', m.label)
+    assert_equal('.#mf', m.short_label)
+    assert_equal(['Kernel.#mf', 'Kernel.#mf2'], m.title_labels)
+    assert_equal(['Kernel.#mf', 'Kernel.#mf2'], m.labels)
+  end
+
+  def test_instance_method_and_special_variable_display_are_unaffected_by_version
+    db = build('4.0')
+    im = db.get_method(BitClust::MethodSpec.parse('Kernel#im'))
+    assert_equal('#', im.display_typemark)
+    assert_equal('Kernel#im', im.display_label)
+    assert_equal('im', im.display_short_label)
+
+    sv = db.get_method(BitClust::MethodSpec.parse('Kernel$stdout'))
+    assert_equal('$', sv.display_typemark)
+    assert_equal('$stdout', sv.display_label)
+    assert_equal('$stdout', sv.display_short_label)
+  end
+end
+
 # メソッド名別の since/until (bitclust#132 P1)。
 #
 # テストリスト:

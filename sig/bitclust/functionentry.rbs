@@ -20,6 +20,7 @@ module BitClust
     attr_accessor source_location: Location?
 
     alias label id
+    alias display_label label
     alias macro? macro
     alias private? private
 

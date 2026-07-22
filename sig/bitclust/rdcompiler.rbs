@@ -32,7 +32,7 @@ module BitClust
 
     type opt = bool?
 
-    # method_signature で `string @method.klass.name + @method.typemark` を実行するかどうか
+    # method_signature で `string @method.klass.name + @method.display_typemark` を実行するかどうか
     @opt: opt
 
     @f: LineInput

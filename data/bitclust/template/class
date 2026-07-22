@@ -107,7 +107,7 @@
 <%= headline(_('Inherited Methods')) %>
 <p><code>
 <%    specs.each do |s| %>
-<%=     method_link(s.to_s, (s.type == '#' ? s.method : s.type + s.method)) %>
+<%=     method_link(s.to_s, (s.type == '#' ? s.method : display_typemark(s.type, @target_version) + s.method)) %>
 <%    end %>
 </code></p>
 <%  end %>

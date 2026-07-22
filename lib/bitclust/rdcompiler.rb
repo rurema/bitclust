@@ -434,7 +434,7 @@ module BitClust
       string %Q(<dt class="method-heading")
       string %Q( id="#{@method.index_id}") if first
       string '><code>'
-      string @method.klass.name + @method.typemark if @opt
+      string @method.klass.name + @method.display_typemark if @opt
       string escape_html(sig.friendly_string)
       string '</code>'
       string heading_version_badges(@method, sig.name, first) if @method

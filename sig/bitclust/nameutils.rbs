@@ -97,6 +97,10 @@ module BitClust
 
     def self?.typemark2char: (typemark mark) -> typechar
 
+    # bitclust#250: 表示専用の変換。戻り値は '?.' も取り得るので typemark
+    # 型ではなく String にする(識別子として使ってはいけない)。
+    def self?.display_typemark: (typemark mark, String? version) -> String
+
     def self?.functionname?: (String n) -> bool
 
     # string -> case-sensitive ID

@@ -122,7 +122,10 @@ module BitClust
         next unless type
 
         cname = entry.klass.name
-        tmark = entry.typemark
+        # bitclust#250: 検索結果に出る表示ラベル(name/full_name)は 4.0
+        # 以降のドキュメントでは module function を "?." で表示する。path
+        # は識別子なので typechar(常に不変)のまま
+        tmark = entry.display_typemark
         tchar = entry.typechar
         entry.names.each do |mname|
           path = "method/#{encode(cname)}/#{tchar}/#{encode(mname)}#{@suffix}"

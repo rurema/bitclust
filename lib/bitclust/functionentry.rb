@@ -52,6 +52,10 @@ module BitClust
     remove_method :name
     alias name id
     alias label id
+    # bitclust#250: MethodEntry の display_label と同じインターフェースを
+    # 満たすためのエイリアス。関数には module function の概念(typemark)が
+    # ないので単に label と同じ(変換なし)
+    alias display_label label
 
     alias macro? macro
     alias private? private

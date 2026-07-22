@@ -28,6 +28,8 @@ module BitClust
 
     def typechar: () -> NameUtils::typechar
 
+    def display_typemark: () -> String
+
     def type_label: () -> String
 
     def library: () -> LibraryEntry
@@ -54,13 +56,19 @@ module BitClust
 
     def label: () -> String
 
+    def display_label: () -> String
+
     def short_label: () -> String
+
+    def display_short_label: () -> String
 
     def index_id: () -> String
 
     def labels: () -> Array[String]
 
     def title_labels: () -> Array[String]
+
+    def display_title_labels: () -> Array[String]
 
     def name?: (String name) -> bool
 
