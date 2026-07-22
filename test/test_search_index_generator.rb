@@ -69,6 +69,41 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     assert_equal 'method/-kernel/m/at_exit.html', e[:path]
   end
 
+  # bitclust#250: Ruby 4.0 以降のドキュメントでは module function の表記を
+  # 独自の「.#」から「?.」に変える(表示のみ)。full_name は検索結果に
+  # そのまま出る表示ラベルなので変換対象だが、path(識別子)は変えない
+  def test_module_function_full_name_switches_to_question_dot_at_4_0
+    prefix = 'db_si_40'
+    base = 'tree_si_40'
+    root = "#{base}/refm/api/src"
+    FileUtils.mkdir_p("#{root}/_builtin")
+    File.write("#{root}/LIBRARIES", "_builtin\n")
+    File.write("#{root}/_builtin.rd", <<~RD)
+      description
+
+      = module Kernel
+      description
+      == Module Functions
+      --- at_exit{ ... } -> Proc
+      aaa
+    RD
+    db = BitClust::MethodDatabase.new(prefix)
+    db.init
+    db.transaction do
+      [%w[version 4.0], %w[encoding utf-8]].each { |k, v| db.propset(k, v) }
+    end
+    db.transaction { db.update_by_stdlibtree(root) }
+
+    index = BitClust::SearchIndexGenerator.new.build_index(db)
+    e = index.find { |x| x[:path] == 'method/-kernel/m/at_exit.html' }
+    assert_not_nil e
+    assert_equal 'at_exit', e[:name]
+    assert_equal 'class_method', e[:type]
+    assert_equal 'Kernel?.at_exit', e[:full_name]
+  ensure
+    FileUtils.rm_r([prefix, base], :force => true)
+  end
+
   def test_constant_entry
     index = @gen.build_index(@db)
     e = find_entry(index, 'Foo::AAA')

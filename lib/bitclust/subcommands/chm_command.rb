@@ -207,8 +207,10 @@ EOS
                 name = e.typename == :special_variable ? "$#{e_name}" : e_name
                 @index_contents <<
                   Sitemap::Content.new("#{name} (#{e.library.name} - #{e.klass.name})", filename)
+                # bitclust#250: CHM の索引(.hhk)に出る表示ラベル。4.0 以降の
+                # ドキュメントでは module function を "?." で表示する
                 @index_contents <<
-                  Sitemap::Content.new("#{e.klass.name}#{e.typemark}#{name} (#{e.library.name})", filename)
+                  Sitemap::Content.new("#{e.klass.name}#{e.display_typemark}#{name} (#{e.library.name})", filename)
               end
             end
             pb.title = align_progress_bar_title(e.name)

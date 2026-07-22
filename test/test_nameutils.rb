@@ -306,6 +306,28 @@ class TestNameUtils < Test::Unit::TestCase
     assert_equal(expected, typemark2char(target))
   end
 
+  # bitclust#250: Ruby 4.0 以降のドキュメントでは module function の表記を
+  # 独自の「.#」から「?.」に変える。表示だけの変換であり、識別子(typemark
+  # そのもの・typemark2char 等)は一切変えないので、対象は '.#' のみ。
+  # バージョン比較は文字列比較ではなく Gem::Version で行う(例: "10.0" を
+  # 文字列比較すると "4.0" より小さく見えてしまう)。
+  data("module function before 4.0 stays as-is"       => ['.#', '.#', '3.4'],
+       "module function at exactly 4.0 switches"      => ['?.', '.#', '4.0'],
+       "module function after 4.0 switches"           => ['?.', '.#', '4.1'],
+       "module function 4.0.0 counts as 4.0"          => ['?.', '.#', '4.0.0'],
+       "module function double-digit major (10.0)"    => ['?.', '.#', '10.0'],
+       "module function just under 4.0 stays as-is"   => ['.#', '.#', '3.99'],
+       "module function with nil version stays as-is" => ['.#', '.#', nil],
+       "module function with empty version stays"     => ['.#', '.#', ''],
+       "singleton method mark is never rewritten"     => ['.',  '.',  '4.0'],
+       "instance method mark is never rewritten"      => ['#',  '#',  '4.0'],
+       "constant mark is never rewritten"             => ['::', '::', '4.0'],
+       "special variable mark is never rewritten"     => ['$',  '$',  '4.0'])
+  def test_display_typemark(data)
+    expected, mark, version = data
+    assert_equal(expected, display_typemark(mark, version))
+  end
+
   data("s" => [".",  "s"],
        "i" => ["#",  "i"],
        "m" => [".#", "m"],

@@ -207,6 +207,21 @@ module BitClust
           raise "must not happen: #{mark.inspect}"
     end
 
+    # bitclust#250: Ruby 4.0 以降のドキュメントでは module function の表記を
+    # るりま独自の "." から "?." に変える(表示のみ。ソース側は既に "?."
+    # 記法に対応済みで、内部的には従来どおり ".#" に変換される)。
+    #
+    # これは見た目だけの変換であり、method id・URL・spec 文字列など識別子と
+    # して使う ".#" 自体は一切変えない。typemark が '.#' 以外、または version
+    # が不明(nil/空)な場合はそのまま返す。バージョン比較は文字列比較では
+    # なく Gem::Version で行う("10.0" を文字列比較すると "4.0" より小さく
+    # 見えてしまうため)。
+    def display_typemark(mark, version)
+      return mark unless mark == '.#'
+      return mark unless version && !version.empty?
+      Gem::Version.new(version) >= Gem::Version.new('4.0') ? '?.' : mark
+    end
+
     def functionname?(n)
       /\A\w+\z/ =~ n ? true : false
     end

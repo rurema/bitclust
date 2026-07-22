@@ -39,7 +39,7 @@
               else
                 sigs.map {|sig|
                   method_link(e.spec_string,
-                              e.klass.name + e.typemark + sig.to_s)
+                              e.klass.name + e.display_typemark + sig.to_s)
                 }
               end.join("<br>\n") %></td>
 <td class="description"><%= compile_rd(src) %></td>

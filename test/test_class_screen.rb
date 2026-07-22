@@ -327,3 +327,87 @@ HERE
            'the until badge must attach after alias_two')
   end
 end
+
+# bitclust#250: Ruby 4.0 以降のドキュメントでは module function の表記を
+# 独自の「.#」から「?.」に変える(表示のみ、識別子は変えない)。
+#
+# data/bitclust/template/class の「継承しているメソッド」一覧は
+# @entry.inherited_method_specs(MethodSpec、@db を持たない値オブジェクト)を
+# 直接文字列化する数少ない箇所なので、上の TestClassScreenDefaultTemplateVersionBadges
+# と同じ理由で実ディスク DB を使う
+class TestClassScreenModuleFunctionDisplay < Test::Unit::TestCase
+  SRC = <<'HERE'
+= module Mixin
+mixin module
+== Module Functions
+--- mf
+mixin module function
+= class Host < Object
+include Mixin
+host class
+== Instance Methods
+--- own_method
+own method
+HERE
+
+  def render(version)
+    datadir = File.expand_path('../data/bitclust', __dir__)
+    dbdir = Dir.mktmpdir('bitclust-module-function-display-db')
+    srcdir = Dir.mktmpdir('bitclust-module-function-display-src')
+    begin
+      src_path = File.join(srcdir, 'testlib.rd')
+      File.write(src_path, SRC)
+
+      db = BitClust::MethodDatabase.new(dbdir)
+      db.init
+      db.transaction do
+        db.propset('version', version)
+        db.propset('encoding', 'utf-8')
+      end
+      db.transaction do
+        db.update_by_file(src_path, 'testlib')
+      end
+
+      manager = BitClust::ScreenManager.new(
+        :templatedir => "#{datadir}/template",
+        :catalogdir => "#{datadir}/catalog",
+        :encoding => 'utf-8',
+        :default_encoding => 'utf-8',
+        :base_url => '',
+        :target_version => version
+      )
+      # See TestClassScreenDefaultTemplateVersionBadges above for the general
+      # background: Screen#run_template caches the compiled ERB body on the
+      # *class*, keyed only by method name. A plain anonymous subclass is not
+      # sufficient isolation here, though: if BitClust::ClassScreen itself
+      # was already compiled for a different templatedir (offline) by some
+      # other test earlier in this same process -- order-dependent, since
+      # TestClassScreen above uses BitClust::ClassScreen directly, with no
+      # subclass -- then `respond_to?(:class_template)` is already true via
+      # *inheritance*, and the subclass would silently reuse that stale
+      # compiled method instead of compiling its own. So compile directly
+      # onto screen_class ourselves, before Screen#run_template ever gets a
+      # chance to check: our own method then always wins by normal Ruby
+      # method resolution, regardless of what BitClust::ClassScreen has.
+      screen_class = Class.new(BitClust::ClassScreen)
+      repo = BitClust::TemplateRepository.new("#{datadir}/template")
+      ERB.new(repo.load('class')).def_method(screen_class, 'class_template', 'class.erb')
+      manager.send(:new_screen, screen_class, db.get_class('Host'), :database => db).body
+    ensure
+      FileUtils.rm_r(srcdir, :force => true)
+      FileUtils.rm_r(dbdir, :force => true)
+    end
+  end
+
+  def test_inherited_module_function_shows_dot_hash_before_4_0
+    html = render('3.4')
+    assert_include(html, '.#mf')
+    assert_not_include(html, '?.mf')
+  end
+
+  def test_inherited_module_function_switches_to_question_dot_at_4_0
+    html = render('4.0')
+    assert_include(html, '?.mf')
+    assert_not_include(html, '.#mf')
+  end
+end

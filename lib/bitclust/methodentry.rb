@@ -74,6 +74,14 @@ module BitClust
       methodid2typechar(@id)
     end
 
+    # bitclust#250: 表示専用の typemark。DB のバージョンが 4.0 以降なら
+    # module function の "." を "?." にする(それ以外の typemark は不変)。
+    # typemark 自体(識別子として使う方)は変えない -- URL・spec 文字列・
+    # refsdatabase のアンカーキー等はすべて typemark() 経由のまま
+    def display_typemark
+      NameUtils.display_typemark(typemark(), @db.propget('version'))
+    end
+
     def type_label
       case typemark()
       when '.'  then 'singleton method'
@@ -131,9 +139,27 @@ module BitClust
       "#{t == '$' ? '' : c}#{t}#{m}"
     end
 
+    # bitclust#250: label の表示専用版(module function は 4.0 以降 "?." で
+    # 表示)。label 自身は refsdatabase.rb の [[a:...]] アンカーキーや
+    # `bitclust methods --diff` の突き合わせが literal ".#" 前提で使うので
+    # 変えない -- テンプレート側の実際の表示箇所だけがこちらを呼ぶ
+    def display_label
+      c, t, m, _lib = methodid2specparts(@id)
+      "#{t == '$' ? '' : c}#{display_typemark}#{m}"
+    end
+
     def short_label
       _c, t, m, _lib = methodid2specparts(@id)
       "#{t == '#' ? '' : t}#{m}"
+    end
+
+    # bitclust#250: short_label の表示専用版。short_label 自身の唯一の
+    # 呼び出し元(htmlutils.rb の link_to_method)は display_short_label に
+    # 切り替え済みだが、short_label 自体は同じ理由(識別子的な使い方をする
+    # 将来のコードのため)で変えない
+    def display_short_label
+      _c, t, m, _lib = methodid2specparts(@id)
+      "#{t == '#' ? '' : display_typemark}#{m}"
     end
 
     def index_id
@@ -152,6 +178,12 @@ module BitClust
     def title_labels
       c, t, _m, _lib = methodid2specparts(@id)
       names().map {|name| "#{t == '$' ? '' : c}#{t}#{name}" }
+    end
+
+    # bitclust#250: title_labels の表示専用版(<title> タグ・見出しで使う)
+    def display_title_labels
+      c, t, _m, _lib = methodid2specparts(@id)
+      names().map {|name| "#{t == '$' ? '' : c}#{display_typemark}#{name}" }
     end
 
     def name?(name)

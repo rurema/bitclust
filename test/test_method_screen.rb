@@ -121,3 +121,46 @@ HERE
     assert_include(html, '<span class="method-since-badge">Ruby 3.2 から</span>')
   end
 end
+
+# bitclust#250: Ruby 4.0 以降のドキュメントでは module function の表記を
+# 独自の「.#」から「?.」に変える(表示のみ、識別子は変えない)。この
+# メソッドページの見出し・<title> がまさに issue に挙がっている
+# 「module function Kernel.#open」の例そのもの
+class TestMethodScreenModuleFunctionDisplay < Test::Unit::TestCase
+  SRC = <<'HERE'
+= module Kernel
+description
+== Module Functions
+--- mf
+
+説明
+HERE
+
+  def render(version)
+    _lib, db = BitClust::RRDParser.parse(SRC, 'testlib', {'version' => version})
+    entry = db.get_method(BitClust::MethodSpec.parse('Kernel.#mf'))
+    datadir = File.expand_path('../data/bitclust', __dir__)
+    manager = BitClust::ScreenManager.new(
+      :templatedir => "#{datadir}/template.offline",
+      :catalogdir => "#{datadir}/catalog",
+      :encoding => 'utf-8',
+      :default_encoding => 'utf-8',
+      :base_url => '',
+      :target_version => version
+    )
+    manager.method_screen([entry], :database => db).body
+  end
+
+  def test_headline_and_title_show_dot_hash_before_4_0
+    html = render('3.4')
+    assert_match(%r{<h1>module function Kernel\.#mf</h1>}, html)
+    assert_include(html, '<title>Kernel.#mf')
+  end
+
+  def test_headline_and_title_switch_to_question_dot_at_4_0
+    html = render('4.0')
+    assert_match(%r{<h1>module function Kernel\?\.mf</h1>}, html)
+    assert_include(html, '<title>Kernel?.mf')
+    assert_not_include(html, 'Kernel.#mf')
+  end
+end

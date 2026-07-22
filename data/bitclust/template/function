@@ -1,5 +1,5 @@
 <%
-   @title = "#{@entry.type_label} #{@entry.label}"
+   @title = "#{@entry.type_label} #{@entry.display_label}"
    @description = @entry.description
 %>
 <p>
@@ -11,7 +11,7 @@
 <%= search_form() %>
 
 <% headline_init %>
-<%= headline("#{@entry.type_label} #{@entry.label}") %>
+<%= headline("#{@entry.type_label} #{@entry.display_label}") %>
 <dl class="functionlist">
 <dt>
   <code><%=h @entry.header %></code>
