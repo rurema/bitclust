@@ -24,15 +24,36 @@
   // queries literal (no "." -> "::" rewrite) and match them against
   // full_name, where the "$" sigil lives.
   // See https://github.com/rurema/bitclust/issues/194
+  //
+  // Same bitclust#279 handling as search_init.js too: fold "?." to ".#" so
+  // both module-function spellings ("Kernel.#open" pre-4.0, "Kernel?.open"
+  // 4.0+ — see #250) normalize the same way, and score dot-qualified
+  // entries via their match_name (added by SearchIndexGenerator) instead of
+  // full_name, since BitClust keeps a literal "." there for display while
+  // parseQuery's rewrite expects "::". See search_init.js for the full
+  // rationale; SearchIndexGenerator.merge keeps match_name on merged
+  // cross-version entries same as any other field.
   if (typeof parseQuery === 'function') {
     var alikiParseQuery = parseQuery;
     parseQuery = function(query) {
-      var q = alikiParseQuery(query);
+      var folded = query.indexOf('?.') === -1 ? query : query.replace(/\?\./g, '.#');
+      var q = alikiParseQuery(folded);
       if (query.charAt(0) === '$') {
         q.normalized = query.toLowerCase();
         q.matchesFullName = true;
       }
+      q.original = query;
       return q;
+    };
+  }
+
+  if (typeof computeScore === 'function') {
+    var alikiComputeScore = computeScore;
+    computeScore = function(entry, q) {
+      if (entry && entry.match_name) {
+        return alikiComputeScore({ name: entry.name, full_name: entry.match_name, type: entry.type }, q);
+      }
+      return alikiComputeScore(entry, q);
     };
   }
 

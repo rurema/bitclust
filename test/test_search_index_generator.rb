@@ -104,6 +104,98 @@ class TestSearchIndexGenerator < Test::Unit::TestCase
     FileUtils.rm_r([prefix, base], :force => true)
   end
 
+  # bitclust#279: the vendored Aliki search ranker's parseQuery() rewrites
+  # every "." in the *query* to "::" (RDoc's own full_names use "::" for
+  # class methods), but BitClust keeps a literal "."/".#"/"?." in full_name
+  # for singleton methods and module functions. match_name mirrors that same
+  # rewrite on the entry side (folding "?." to ".#" first) so a
+  # search_init.js computeScore wrap can compare like-for-like without ever
+  # touching the displayed full_name. See search_index_generator.rb's header
+  # comment and theme/default/js/search_init.js.
+
+  def test_singleton_method_gets_match_name_with_double_colon
+    index = @gen.build_index(@db)
+    e = find_entry(index, 'Foo.bar')
+    assert_not_nil e
+    assert_equal 'class_method', e[:type]
+    assert_equal 'Foo::bar', e[:match_name]
+  end
+
+  def test_module_function_gets_match_name_with_hash_folded
+    index = @gen.build_index(@db)
+    e = find_entry(index, 'Kernel.#at_exit')
+    assert_not_nil e
+    assert_equal 'Kernel::#at_exit', e[:match_name]
+  end
+
+  def test_module_function_at_4_0_gets_match_name_folding_question_dot
+    # The "?." (4.0+) and ".#" (pre-4.0) spellings of the same module
+    # function must fold to the *same* match_name, so a query typed in
+    # either notation can find an index built from either notation
+    # (bitclust#250's cross-notation case).
+    prefix = 'db_si_40_match'
+    base = 'tree_si_40_match'
+    root = "#{base}/refm/api/src"
+    FileUtils.mkdir_p("#{root}/_builtin")
+    File.write("#{root}/LIBRARIES", "_builtin\n")
+    File.write("#{root}/_builtin.rd", <<~RD)
+      description
+
+      = module Kernel
+      description
+      == Module Functions
+      --- at_exit{ ... } -> Proc
+      aaa
+    RD
+    db = BitClust::MethodDatabase.new(prefix)
+    db.init
+    db.transaction do
+      [%w[version 4.0], %w[encoding utf-8]].each { |k, v| db.propset(k, v) }
+    end
+    db.transaction { db.update_by_stdlibtree(root) }
+
+    index = BitClust::SearchIndexGenerator.new.build_index(db)
+    e = index.find { |x| x[:path] == 'method/-kernel/m/at_exit.html' }
+    assert_not_nil e
+    assert_equal 'Kernel?.at_exit', e[:full_name]
+    assert_equal 'Kernel::#at_exit', e[:match_name]
+  ensure
+    FileUtils.rm_r([prefix, base], :force => true)
+  end
+
+  def test_instance_method_entry_has_no_match_name
+    index = @gen.build_index(@db)
+    e = find_entry(index, 'Foo#foo')
+    assert_not_nil e
+    assert_nil e[:match_name]
+  end
+
+  def test_constant_entry_has_no_match_name
+    index = @gen.build_index(@db)
+    e = find_entry(index, 'Foo::AAA')
+    assert_not_nil e
+    assert_nil e[:match_name]
+  end
+
+  def test_special_variable_entry_has_no_match_name
+    # Guards against a regression of issue #194: "$." already contains a
+    # literal "." (from the sigil-less variable name), so if it picked up a
+    # match_name too, it would collide with the "$"-prefix handling
+    # search_init.js already has (which keeps "$"-queries literal and never
+    # goes through the "." -> "::" rewrite at all).
+    index = @gen.build_index(@db)
+    e = find_entry(index, '$;')
+    assert_not_nil e
+    assert_nil e[:match_name]
+  end
+
+  def test_merge_preserves_match_name
+    e = { name: 'bar', full_name: 'Foo.bar', match_name: 'Foo::bar',
+          type: 'class_method', path: 'method/-foo/s/bar.html' }
+    merged = BitClust::SearchIndexGenerator.merge([['3.4', [e]]])
+    assert_equal 'Foo::bar', merged[0][:match_name]
+  end
+
   def test_constant_entry
     index = @gen.build_index(@db)
     e = find_entry(index, 'Foo::AAA')
@@ -348,6 +440,8 @@ description
 
 = class Foo < Object
 description
+== Singleton Methods
+--- bar
 == Instance Methods
 --- foo
 == Constants
