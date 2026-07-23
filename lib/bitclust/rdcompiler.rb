@@ -500,7 +500,7 @@ module BitClust
       when 'c'
         protect(link) { class_link(arg, label, frag) }
       when 'm'
-        protect(link) { method_link(complete_spec(arg), label || arg, frag) }
+        protect(link) { method_link(complete_spec(arg), label || display_spec(arg), frag) }
       when 'f'
         protect(link) {
           case arg
@@ -554,7 +554,9 @@ module BitClust
         when 'c'
           title, t, id = name, ClassEntry.type_id.to_s,   name
         when 'm'
-          title, t, id = name, MethodEntry.type_id.to_s,  name
+          # 表示側(title)のみ display_spec で畳む。id は refs テーブルの
+          # キーなので記載どおり(bitclust#282)
+          title, t, id = display_spec(name), MethodEntry.type_id.to_s, name
         when 'd'
           title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
         else
@@ -652,6 +654,19 @@ module BitClust
       else
         spec0
       end
+    end
+
+    # bitclust#282: [[m:...]] のデフォルトラベル(参照の記載文字列)は表示
+    # 専用なので、module function の ".#" は DB バージョンが 4.0 以降なら
+    # "?." で表示する(#250/#277 の display_typemark と同じ選択規則。
+    # Markdown ソースの [m:Kernel?.x] も inline 復元時に ".#" へ正規化されて
+    # ここに来るため、どちらの表記で書かれていても見出し表記と一致する)。
+    # spec・URL・アンカーキーは不変。明示ラベル(label 引数)には触れない
+    def display_spec(spec)
+      return spec unless spec.include?('.#')
+      db = @option[:database]
+      version = db ? db.propget('version') : nil
+      spec.sub('.#', NameUtils.display_typemark('.#', version))
     end
 
     def seems_code(text)
