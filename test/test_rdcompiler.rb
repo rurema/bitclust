@@ -938,6 +938,45 @@ HERE
     assert_equal(expected, @c.send(:compile_text, target), target)
   end
 
+  # bitclust#282: 参照のデフォルトラベル(記載どおりの spec 文字列)も
+  # 表示専用なので、module function の ".#" は DB バージョンが 4.0 以降
+  # なら "?." で表示する(#250/#277 の display_typemark と同じ選択規則)。
+  # URL・アンカー(識別子)は変えない。
+  data("pre-4.0 keeps .#" => ['3.4', 'Kernel.#at_exit'],
+       "4.0 shows ?."     => ['4.0', 'Kernel?.at_exit'],
+       "4.1 shows ?."     => ['4.1', 'Kernel?.at_exit'])
+  def test_bracket_link_module_function_display(data)
+    version, label = data
+    db = BitClust::MethodDatabase.dummy("version" => version)
+    c = BitClust::RDCompiler.new(@u, 1, {:database => db})
+    assert_equal(%Q(<a href="dummy/method/Kernel/m/at_exit">#{label}</a>),
+                 c.send(:compile_text, '[[m:Kernel.#at_exit]]'))
+  end
+
+  def test_reference_link_module_function_title_display
+    # refs テーブルに見出しがある場合の「spec/見出し」ラベルの spec 側も
+    # 4.0 以降は "?." 表示にする(doctree に現時点で用例は無い理論エッジ
+    # だが、デフォルトラベルと同じ選択規則で一貫させる)
+    refs = Object.new
+    def refs.[](type, id, frag) = '深掘り'
+    db = BitClust::MethodDatabase.dummy("version" => "4.0")
+    stub(db).refs { refs }
+    c = BitClust::RDCompiler.new(@u, 1, {:database => db})
+    assert_equal(%Q(<a href="dummy/method/Kernel/m/at_exit#frag">Kernel?.at_exit/深掘り</a>),
+                 c.send(:compile_text, '[[ref:m:Kernel.#at_exit#frag]]'))
+  end
+
+  def test_bracket_link_other_typemarks_unchanged_at_4_0
+    db = BitClust::MethodDatabase.dummy("version" => "4.0")
+    c = BitClust::RDCompiler.new(@u, 1, {:database => db})
+    assert_equal('<a href="dummy/method/String/s/new">String.new</a>',
+                 c.send(:compile_text, '[[m:String.new]]'))
+    assert_equal('<a href="dummy/method/String/i/dump">String#dump</a>',
+                 c.send(:compile_text, '[[m:String#dump]]'))
+    assert_equal('<a href="dummy/method/Kernel/v/=7e">$~</a>',
+                 c.send(:compile_text, '[[m:$~]]'))
+  end
+
   data("library root"    => ['[[lib:/]]',        '<a href="dummy/library/">ライブラリ一覧</a>'],
        "builtin library" => ['[[lib:_builtin]]', '<a href="dummy/library/_builtin">組み込みライブラリ</a>'],
        "C API root"      => ['[[f:/]]',          '<a href="dummy/function/">関数一覧</a>'])

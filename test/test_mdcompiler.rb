@@ -1014,6 +1014,23 @@ class TestMDCompiler < Test::Unit::TestCase
     err = capture_stderr { @md.compile("```ruby\n    x = 1\n```\n") }
     assert_equal('', err)
   end
+
+  def test_md_ref_module_function_display_typemark
+    # bitclust#282: Markdown ソースの [m:Kernel?.at_exit] は inline 復元時に
+    # ".#" へ正規化される(RRD の MethodSpec 互換)が、表示ラベルは DB
+    # バージョンが 4.0 以降なら "?." に戻す。3.4 以前は ".#" のまま。
+    # どちらの表記で書かれていても、ページの見出し表記と常に一致する
+    src = "### def m(v) -> String\n\n" \
+          "[m:Kernel?.at_exit] と [m:Kernel.#at_exit] を参照。\n"
+    { '3.4' => 'Kernel.#at_exit', '4.0' => 'Kernel?.at_exit' }.each do |version, label|
+      db = BitClust::MethodDatabase.dummy("version" => version)
+      md = BitClust::MDCompiler.new(@u, 1, { :database => db })
+      html = compile_method(md, src)
+      assert_equal(2, html.scan(">#{label}</a>").size,
+                   "version=#{version}\n#{html}")
+    end
+  end
+
 end
 
 # lang 指定付きコードブロックのハイライト（ruby は Ripper ベースの

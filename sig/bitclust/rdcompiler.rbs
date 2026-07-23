@@ -168,6 +168,8 @@ module BitClust
 
     def complete_spec: (String spec0) -> String
 
+    def display_spec: (String spec) -> String
+
     def seems_code: (String text) -> String
 
     def string: (String str) -> void
