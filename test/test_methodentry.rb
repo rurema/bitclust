@@ -148,6 +148,39 @@ HERE
   end
 end
 
+# meta description（コンパイラを通さない表示テキスト）内の module function
+# 参照 [[m:Kernel.#mf2]] のラベルも、可視ページの bracket_link と同様に
+# DB バージョン 4.0 以降では "?." で表示する（bitclust#282/#283 の続き。
+# 従来この経路だけ ".#" のまま残っていた）
+class TestMethodEntryDescriptionQdot < Test::Unit::TestCase
+  SRC = <<HERE
+= module Kernel
+
+== Module Functions
+
+--- mf
+
+[[m:Kernel.#mf2]] を参照してください。
+
+--- mf2
+
+説明。
+HERE
+
+  def description(version)
+    _lib, db = BitClust::RRDParser.parse(SRC, 'testlib', {'version' => version})
+    db.get_method(BitClust::MethodSpec.parse('Kernel.#mf')).description
+  end
+
+  def test_meta_description_keeps_dot_hash_before_4_0
+    assert_equal('Kernel.#mf2 を参照してください。', description('3.4'))
+  end
+
+  def test_meta_description_uses_question_dot_at_4_0
+    assert_equal('Kernel?.mf2 を参照してください。', description('4.0'))
+  end
+end
+
 # メソッド名別の since/until (bitclust#132 P1)。
 #
 # テストリスト:
