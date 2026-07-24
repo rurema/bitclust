@@ -175,11 +175,17 @@ module BitClust
     def description_text(text)
       text = display_text(text)
       return text unless text
+      # module function の ".#" は表示専用なので、DB バージョンが 4.0 以降なら
+      # "?." で表示する(RDCompiler#display_spec と同じ #250/#282 の規則。
+      # ここは可視ページを通さない meta description 用の経路なので、bracket_link
+      # と同じ変換を独立に適用する必要がある。spec・URL・アンカーキーは不変)
+      version = @db&.propget('version')
       text = text.split("\n").map(&:strip).join("\n")
         .gsub(/(\P{ascii})\n(?=\P{ascii})/) { $1 || raise }
         .tr("\n", ' ')
       text.gsub(BracketLink) {|link|
-        ((link[2..-3] || raise).split(':', 2).last || raise).rstrip
+        label = ((link[2..-3] || raise).split(':', 2).last || raise).rstrip
+        label.include?('.#') ? label.sub('.#', NameUtils.display_typemark('.#', version)) : label
       }
     end
     private :description_text
