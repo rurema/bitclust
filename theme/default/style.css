@@ -369,8 +369,11 @@ td.signature {
 td.signature a {
     display: block;
     padding: 0.3em;
-    height: 100%;
     box-sizing: border-box;
+}
+
+td.signature a:only-child {
+    height: 100%;
 }
 
 td.description {

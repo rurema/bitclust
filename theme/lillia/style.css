@@ -160,6 +160,9 @@ td.signature a {
     display: block;
     padding: 0.3em;
     width: 95%;
+}
+
+td.signature a:only-child {
     height: 100%;
 }
 
