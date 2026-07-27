@@ -350,4 +350,20 @@ class TestMarkdownTree < Test::Unit::TestCase
       "gated H1 relations must not be flagged (nil or false)"
     assert_equal [], tree.warnings
   end
+
+  def test_version_range_gated_h1_relations_do_not_lint
+    # #%version A...B(#285 の版範囲記法)も版ゲートとして深度に数える
+    tree = scan(
+      "foo.md" => LIB,
+      "foo/Bar.md" =>
+        "---\nlibrary: foo\n---\n" \
+        "#%version 3.0...4.0\n" \
+        "# class Bar < Object\n" \
+        "include Enumerable\n" \
+        "#%end\n"
+    )
+    refute tree.entities["foo/Bar.md"][:body_relations],
+      "version-range-gated H1 relations must not be flagged"
+    assert_equal [], tree.warnings
+  end
 end

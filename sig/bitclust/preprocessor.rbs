@@ -38,6 +38,10 @@ module BitClust
 
     def cond_stmt_begin: (String line, String cond) -> void
 
+    VERSION_LITERAL: Regexp
+
+    def build_cond_by_range: (String line) -> String
+
     def build_cond_by_value: (String line, String left) -> String
 
     def current_cond: () -> State

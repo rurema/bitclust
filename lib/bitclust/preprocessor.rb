@@ -119,6 +119,8 @@ module BitClust
           cond_stmt_begin line, build_cond_by_value(line, 'version >=')
         when /\A\#[@%]until\b/
           cond_stmt_begin line, build_cond_by_value(line, 'version <')
+        when /\A\#[@%]version\b/
+          cond_stmt_begin line, build_cond_by_range(line)
         when /\A\#[@%]samplecode\b/
           samplecode_begin(line, samplecode_description_by_value(line))
         when /\A\#[@%]if\b/
@@ -151,6 +153,25 @@ module BitClust
         cond_push eval_cond(cond)
       rescue ScanError => err
         parse_error err.message, line
+      end
+    end
+
+    # 版範囲の省略記法(#285): #%version A...B は半開区間 [A, B)。
+    # Ruby の終端排他 Range リテラルに合わせて3点ドット(.. は終端を含むと
+    # 誤解しやすいため受け付けない)。A... は A 以上、...B は B 未満。
+    # 版はダブルクォート付きでもよい
+    VERSION_LITERAL = /"(\d+(?:\.\d+)*)"|(\d+(?:\.\d+)*)/
+    def build_cond_by_range(line)
+      raw = line.sub(/\A\#[@%]version\b/, '').strip
+      case raw
+      when /\A#{VERSION_LITERAL}\.\.\.#{VERSION_LITERAL}\z/o
+        %Q(version >= "#{$1 || $2}" and version < "#{$3 || $4}")
+      when /\A#{VERSION_LITERAL}\.\.\.\z/o
+        %Q(version >= "#{$1 || $2}")
+      when /\A\.\.\.#{VERSION_LITERAL}\z/o
+        %Q(version < "#{$1 || $2}")
+      else
+        parse_error "wrong version range (expected A...B / A... / ...B)", line
       end
     end
 
