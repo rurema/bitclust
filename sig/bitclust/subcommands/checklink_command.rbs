@@ -1,0 +1,12 @@
+module BitClust
+  module Subcommands
+    # DB 中の全ソースの参照リンク切れを報告する。1件でもあれば exit 1
+    class ChecklinkCommand < Subcommand
+      @capi_prefix: String?
+
+      def initialize: () -> void
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+    end
+  end
+end

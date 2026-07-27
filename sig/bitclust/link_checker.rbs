@@ -1,0 +1,44 @@
+module BitClust
+  # DB 全体を走査して参照リンク切れを検出する(RDCompiler#bracket_link の
+  # @option[:link_checker] フック経由で抽出するため、コードスパン・
+  # フェンス内の参照風テキストは対象外になる)
+  class LinkChecker
+    class Finding < Struct[untyped]
+      attr_accessor location(): String?
+      attr_accessor ref(): String
+      attr_accessor message(): String
+
+      def self.new: (String? location, String ref, String message) -> instance
+    end
+
+    EXTERNAL_TYPES: Array[String]
+
+    @db: MethodDatabase
+    @fdb: FunctionDatabase?
+    @findings: Array[Finding]
+    @current_location: String?
+    @skipped_function_refs: Integer
+
+    def initialize: (MethodDatabase db, ?function_database: FunctionDatabase?) -> void
+
+    attr_reader findings: Array[Finding]
+    attr_reader skipped_function_refs: Integer
+    attr_accessor current_location: String?
+
+    def broken_count: () -> Integer
+    def check_all: () -> Array[Finding]
+    def note_ref: (String type, String arg) -> nil
+
+    private
+
+    def check_source: (untyped location) { (RDCompiler) -> untyped } -> void
+    def new_compiler: () -> RDCompiler
+    def check_class: (String name) -> untyped
+    def check_method: (String spec_str) -> untyped
+    def check_library: (String name) -> untyped
+    def check_doc: (String name) -> untyped
+    def check_function: (String name) -> untyped
+    def check_ref: (String arg) -> untyped
+    def record: (String type, String arg, String message) -> void
+  end
+end
