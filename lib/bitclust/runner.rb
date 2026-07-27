@@ -62,6 +62,7 @@ Subcommands(for developers):
     classes     Display defined classes for all ruby.
     methods     Display defined methods for all ruby.
     methodsince Fill per-name since/until from a version ladder of DBs.
+    checklink   Report broken [[c:]]/[[m:]]/[[lib:]]/[[d:]]/[[f:]] links.
 
 Subcommands(for packagers):
     statichtml  Generate static HTML files.
@@ -109,6 +110,7 @@ Global Options:
         'classes'     => BitClust::Subcommands::ClassesCommand.new,
         'methods'     => BitClust::Subcommands::MethodsCommand.new,
         'methodsince' => BitClust::Subcommands::MethodsinceCommand.new,
+        'checklink'   => BitClust::Subcommands::ChecklinkCommand.new,
       }
     end
 

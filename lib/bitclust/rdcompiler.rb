@@ -486,6 +486,9 @@ module BitClust
     def bracket_link(link, label = nil, frag = nil)
       type, _arg = link.split(':', 2)
       arg = _arg&.rstrip or raise
+      # link_checker(bitclust/link_checker.rb)が指定されているときは
+      # 参照を検証用に記録する。描画には影響しない
+      @option[:link_checker]&.note_ref(type || raise, arg)
       case type
       when 'lib'
         protect(link) {

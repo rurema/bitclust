@@ -17,6 +17,7 @@ module BitClust
       :force => bool,
       :stop_on_syntax_error => bool,
       ?:gfm => bool,
+      ?:link_checker => LinkChecker,
     }
     # :catalog は実装上省略可（無ければ MessageCatalog.new({}, 'C') が使われる）
     type option = {
@@ -26,6 +27,7 @@ module BitClust
       ?:force => bool,
       ?:stop_on_syntax_error => bool,
       ?:gfm => bool,
+      ?:link_checker => LinkChecker,
     }
 
     @option: option_internal
