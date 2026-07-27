@@ -577,6 +577,8 @@ RRD の `[[type:target]]` から角括弧を1段減らし `[type:target]` とす
 | メソッド | `[m:Class#method]` | `[m:Array#each]` |
 | クラスメソッド | `[m:Class.method]` | `[m:CGI.accept_charset]` |
 | モジュール関数 | `[m:Class?.method]` | `[m:Kernel?.open]` |
+| 定数 | `[m:Class::CONST]` | `[m:Math::PI]` |
+| 特殊変数 | `[m:$name]` | `[m:$~]` |
 | ライブラリ | `[lib:name]` | `[lib:json]` |
 | C 関数 | `[f:name]` | `[f:rb_str_new]` |
 | ドキュメント | `[d:path]` | `[d:spec/m17n]` |
@@ -587,6 +589,10 @@ RRD の `[[type:target]]` から角括弧を1段減らし `[type:target]` とす
 | bugs.ruby-lang.org | `[feature:number]` | `[feature:12345]` |
 
 モジュール関数の `?.` は RRD の `.#` typemark に対応する（`?` は RBS の `self?` に由来）。
+
+定数はクラスの仲間ではなくメソッドエントリの一種として扱われるため、
+`[c:Math::PI]` ではなく `[m:Math::PI]` と書く（`[c:]` はクラス/モジュール/
+オブジェクトのページ専用。ネストしたクラス `[c:File::Stat]` とは区別すること）。
 
 ### 7.2 メソッド名のエスケープ
 
