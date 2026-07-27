@@ -301,4 +301,53 @@ class TestMarkdownTree < Test::Unit::TestCase
       w.include?("case-insensitive") && w.include?("x/Foo.md") && w.include?("x/foo.md")
     }, tree.warnings.inspect
   end
+
+  # bitclust#285: 新 prefix #% でも構造発見(所属ゲート・include・版ゲート深度)
+  # が同一に動くこと。旧 #@ との混在も許す
+  def test_percent_prefix_gated_memberships
+    tree = scan(
+      "builtin.md" => LIB,
+      "thread.md" => LIB,
+      "thread/Mutex.md" =>
+        "---\n" \
+        "library:\n" \
+        "  - builtin\n" \
+        "#%until 1.9.1\n" \
+        "  - thread\n" \
+        "#%end\n" \
+        "---\n" \
+        "# class Mutex < Object\n\n説明。\n"
+    )
+    e = tree.entities["thread/Mutex.md"]
+    assert_equal [
+      { library: "builtin" },
+      { library: "thread", until: "1.9.1" },
+    ], e[:memberships]
+    assert_equal [], tree.warnings
+  end
+
+  def test_percent_prefix_include
+    tree = scan(
+      "foo.md" => LIB + "#%include(frag)\n\#@include(other)\n",
+      "frag.md" => "断片1。\n",
+      "other.md" => "断片2。\n"
+    )
+    assert_equal ["frag.md", "other.md"], tree.fragments.sort
+    assert_equal [], tree.warnings
+  end
+
+  def test_percent_prefix_gated_h1_relations_do_not_lint
+    tree = scan(
+      "foo.md" => LIB,
+      "foo/Bar.md" =>
+        "---\nlibrary: foo\n---\n" \
+        "#%since 3.0\n" \
+        "# class Bar < Object\n" \
+        "include Enumerable\n" \
+        "#%end\n"
+    )
+    refute tree.entities["foo/Bar.md"][:body_relations],
+      "gated H1 relations must not be flagged (nil or false)"
+    assert_equal [], tree.warnings
+  end
 end

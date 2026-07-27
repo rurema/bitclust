@@ -102,8 +102,8 @@ module BitClust
 
     # front matter（--- ... ---）を読む。YAML のサブセット:
     # スカラー（type/library/category/since/until）とリスト
-    # （include/extend/alias/require/sublibrary）のみ。#@ 行は
-    # Preprocessor で版解決済みの残り（#@# コメント等）なので読み飛ばす
+    # （include/extend/alias/require/sublibrary）のみ。#@/#% 行は
+    # Preprocessor で版解決済みの残り（#@#/#%# コメント等）なので読み飛ばす
     def read_front_matter(f)
       fm = {} #: front_matter
       return fm unless f.peek && f.peek =~ /\A---\s*$/
@@ -112,7 +112,7 @@ module BitClust
       while (line = f.gets)
         break if line =~ /\A---\s*$/
         case line
-        when /\A\#@/
+        when /\A\#[@%]/
           next
         when /\A(\w+):\s*$/
           key = $1

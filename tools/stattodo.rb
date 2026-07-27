@@ -85,7 +85,7 @@ def count_todo_in_file(path)
   n = 0
   File.open(path) {|f|
     pp = BitClust::LineCollector.wrap(f)
-    pp.grep(/\A\#@todo/) { n += 1 }
+    pp.grep(/\A\#[@%]todo/) { n += 1 }
   }
   n
 end

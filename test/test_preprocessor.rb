@@ -1,6 +1,7 @@
 require 'test/unit'
 require 'bitclust/preprocessor'
 require 'stringio'
+require 'tmpdir'
 
 class TestPreprocessor < Test::Unit::TestCase
   include BitClust
@@ -311,6 +312,142 @@ puts("zzz")
 HERE
       ret = Preprocessor.wrap(StringIO.new(src), params).to_a
       assert_equal(expected, ret.join)
+    end
+  end
+
+  # bitclust#285: GitHub が #@since 等をユーザー mention として解釈してしまう
+  # 問題への対応で、@ を含まない新 prefix #% を導入する。旧 #@ も凍結タグの
+  # 旧ソース再取込のため引き続き受け付ける(両対応)
+  sub_test_case("percent prefix (#285)") do
+
+    def test_percent_eval_cond
+      params = { 'version' => '1.8.7' }
+
+      [
+       ['#%if( version > "1.8.0")',  true ],
+       ['#%if( version < "1.8.0")',  false],
+       ['#%since 1.8.0', true ],
+       ['#%since 1.8.7', true ],
+       ['#%until 1.8.7', false],
+       ['#%until 1.9.0', true ],
+      ].each{|cond, expected_result|
+        s = <<HERE
+#{cond}
+a
+#%else
+b
+#%end
+HERE
+        ret = Preprocessor.wrap(StringIO.new(s), params).to_a
+        if expected_result
+          assert_equal(["a\n"], ret)
+        else
+          assert_equal(["b\n"], ret)
+        end
+      }
+    end
+
+    def test_percent_comment
+      params = { 'version' => '1.8.7' }
+      src = <<HERE
+a
+#%# preprocessor comment
+b
+HERE
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(["a\n", "b\n"], ret)
+    end
+
+    def test_percent_todo_normalized
+      params = { 'version' => '1.8.7' }
+      src = <<HERE
+--- puts(str) -> String
+#%todo
+description
+HERE
+      expected = <<HERE
+--- puts(str) -> String
+@todo
+description
+HERE
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
+
+    def test_percent_samplecode
+      params = { 'version' => '1.9.2' }
+      src = <<HERE
+#%samplecode description
+puts("xxx")
+#%since 1.9.2
+puts("zzz")
+#%end
+#%end
+HERE
+      expected = <<HERE
+//emlist[description][ruby]{
+puts("xxx")
+puts("zzz")
+//}
+HERE
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
+
+    def test_mixed_prefixes
+      # 移行期は同一ファイル内で新旧 prefix が混在しうる
+      params = { 'version' => '2.0.0' }
+      src = <<HERE
+#%since 1.9.3
+a
+\#@since 2.4.0
+b
+#%end
+\#@end
+c
+HERE
+      expected = <<HERE
+a
+c
+HERE
+      ret = Preprocessor.wrap(StringIO.new(src), params).to_a
+      assert_equal(expected, ret.join)
+    end
+
+    def test_percent_unknown_directive
+      params = { 'version' => '1.8.7' }
+      src = <<HERE
+#%nosuch
+HERE
+      assert_raise(BitClust::ParseError) do
+        Preprocessor.wrap(StringIO.new(src), params).to_a
+      end
+    end
+
+    def test_percent_include
+      Dir.mktmpdir do |dir|
+        File.write("#{dir}/inc.rd", "included\n")
+        File.write("#{dir}/main.rd", <<~HERE)
+          before
+          #%include(inc.rd)
+          after
+        HERE
+        ret = Preprocessor.process("#{dir}/main.rd", { 'version' => '1.8.7' })
+        assert_equal("before\nincluded\nafter\n", ret.join)
+      end
+    end
+
+    def test_at_include_still_works
+      Dir.mktmpdir do |dir|
+        File.write("#{dir}/inc.rd", "included\n")
+        File.write("#{dir}/main.rd", <<~HERE)
+          before
+          \#@include(inc.rd)
+          after
+        HERE
+        ret = Preprocessor.process("#{dir}/main.rd", { 'version' => '1.8.7' })
+        assert_equal("before\nincluded\nafter\n", ret.join)
+      end
     end
   end
 end

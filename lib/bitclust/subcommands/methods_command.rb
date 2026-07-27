@@ -78,7 +78,7 @@ module BitClust
                 puts fmt.method_info(mthd.entry)
               else
                 name = name.sub(/\A\w+#/, '')
-                puts "--- #{name}\n\#@todo\n\n"
+                puts "--- #{name}\n#%todo\n\n"
               end
             end
           else

@@ -62,7 +62,7 @@ if src_root
   # (3) ソース孤児（グラフ到達不能の旧世代ファイル）
   out_members = (graph.groupings.keys - fm.keys).map { |r| md_path.call(r) }
   all_lib_roots = File.foreach(File.join(src_root, 'LIBRARIES'))
-                      .map(&:chomp).reject { |l| l.empty? || l.start_with?('#@') }
+                      .map(&:chomp).reject { |l| l.empty? || l.start_with?('#@', '#%') }
                       .map { |n| "#{n}.rd" }.uniq
   out_lib_mds = (all_lib_roots - lib_fm.keys).map { |r| md_path.call(r) }
   reachable = graph.groupings.keys + graph.fragments + all_lib_roots

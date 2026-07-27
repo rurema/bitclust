@@ -21,7 +21,7 @@ module BitClust
     ENTITY_H1_RE = /\A#(?!#)\s*(class|module|object|reopen|redefine)\s+(\S+)/
     RELATION_LINE_RE = /\A(?:include|extend|alias)\s+\S/
     RELATION_KEY_RE = /\A(?:include|extend|alias):\s*\z/
-    INCLUDE_RE = /\A\#@include\s*\((.*?)\)/
+    INCLUDE_RE = /\A\#[@%]include\s*\((.*?)\)/
     FENCE_RE = /\A`{3,}/
     BLANK_RE = /\A\s*\z/
 
@@ -128,9 +128,9 @@ module BitClust
               gate_stack.each { |kind, ver| m[kind] = ver }
               info[:memberships] << m
               i += 1; next
-            when /\A\#@since\s+(\S+)/ then gate_stack.push([:since, $1]); i += 1; next
-            when /\A\#@until\s+(\S+)/ then gate_stack.push([:until, $1]); i += 1; next
-            when /\A\#@end\s*\z/ then gate_stack.pop; i += 1; next
+            when /\A\#[@%]since\s+(\S+)/ then gate_stack.push([:since, $1]); i += 1; next
+            when /\A\#[@%]until\s+(\S+)/ then gate_stack.push([:until, $1]); i += 1; next
+            when /\A\#[@%]end\s*\z/ then gate_stack.pop; i += 1; next
             else
               in_library_block = false  # ブロック終端。この行は通常キーとして処理
             end
@@ -162,11 +162,11 @@ module BitClust
         end
         next if in_fence
 
-        # 版ゲートの深度。#@ ブロック内のヘッダ関係行は body 残置が正しい
+        # 版ゲートの深度。#@/#% ブロック内のヘッダ関係行は body 残置が正しい
         # （H1 自体が版分岐する rbconfig 等）ので lint 対象から外す
         case line
-        when /\A\#@(?:since|until|if)\b/ then gate_depth += 1
-        when /\A\#@end\b/ then gate_depth -= 1 if gate_depth > 0
+        when /\A\#[@%](?:since|until|if)\b/ then gate_depth += 1
+        when /\A\#[@%]end\b/ then gate_depth -= 1 if gate_depth > 0
         end
 
         if line =~ ENTITY_H1_RE
@@ -182,7 +182,7 @@ module BitClust
             # 版分岐 H1（ゲート内の H1）のヘッダ領域は、ゲート直後の
             # 共通関係行も含めて body 残置が正しいので lint しない
             info[:body_relations] = true if gate_depth.zero? && !h1_gated
-          when /\A\#@/, BLANK_RE then nil
+          when /\A\#[@%]/, BLANK_RE then nil
           else in_header = false
           end
         end
