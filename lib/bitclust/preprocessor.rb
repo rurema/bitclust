@@ -8,6 +8,7 @@
 # You can distribute/modify this program under the Ruby License.
 #
 
+require 'bitclust/compat'
 require 'bitclust/parseutils'
 require 'strscan'
 
@@ -40,6 +41,10 @@ module BitClust
 
 
   # Handle pragmas like #@todo, #@include, #@since, etc.
+  #
+  # bitclust#285: prefix は #% が正式(GitHub が #@since 等の @英字 を
+  # ユーザー mention として解釈してしまうため)。旧 prefix #@ も、凍結タグ
+  # (frozen-*)の旧ソースを再取込する場合に備えて引き続き受け付ける。
   class Preprocessor < LineFilter
 
     def self.read(path, params = {})
@@ -82,16 +87,18 @@ module BitClust
     def next_line(f)
       while line = f.gets
         case line
-        when /\A(?!\#@)/
+        when /\A(?!\#[@%])/
           if current_cond.processing?
             @buf.push line
             break
           end
-        when /\A\#@\#/   # preprocessor comment
+        when /\A\#[@%]\#/   # preprocessor comment
           ;
-        when /\A\#@todo/i
-          @buf.push line.gsub(/\A\#/, '') if current_cond.processing?
-        when /\A\#@include\s*\((.*?)\)/
+        when /\A\#[@%]todo/i
+          # 出力は prefix によらず @todo に正規化する(下流の表示処理は
+          # 従来どおり @todo だけを見ればよい)
+          @buf.push line.sub(/\A\#[@%]/, '@') if current_cond.processing?
+        when /\A\#[@%]include\s*\((.*?)\)/
           next unless current_cond.processing?
           begin
             file = ($1 || raise).strip
@@ -108,18 +115,18 @@ module BitClust
           rescue Errno::ENOENT => _err
             raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
           end
-        when /\A\#@since\b/
+        when /\A\#[@%]since\b/
           cond_stmt_begin line, build_cond_by_value(line, 'version >=')
-        when /\A\#@until\b/
+        when /\A\#[@%]until\b/
           cond_stmt_begin line, build_cond_by_value(line, 'version <')
-        when /\A\#@samplecode\b/
+        when /\A\#[@%]samplecode\b/
           samplecode_begin(line, samplecode_description_by_value(line))
-        when /\A\#@if\b/
-          cond_stmt_begin line, line.sub(/\A\#@if/, '').strip
-        when /\A\#@else\s*\z/
+        when /\A\#[@%]if\b/
+          cond_stmt_begin line, line.sub(/\A\#[@%]if/, '').strip
+        when /\A\#[@%]else\s*\z/
           parse_error "no matching \#@if", line  if cond_toplevel?
           cond_invert
-        when /\A\#@end\s*\z/
+        when /\A\#[@%]end\s*\z/
           if samplecode_processing?
             samplecode_end
           else
@@ -148,7 +155,7 @@ module BitClust
     end
 
     def build_cond_by_value(line, left)
-      case ver = line.sub(/\A\#@\w+/, '').strip
+      case ver = line.sub(/\A\#[@%]\w+/, '').strip
       when /\A[\d\.]+\z/
         %Q(#{left} "#{ver}")
       when /\A"[\d\.]+"\z/
@@ -280,7 +287,7 @@ module BitClust
     end
 
     def samplecode_description_by_value(line)
-      line.sub(/\A\#@samplecode/, "")
+      line.sub(/\A\#[@%]samplecode/, "")
     end
 
     def scan_error(msg)
@@ -330,7 +337,7 @@ module BitClust
 
     def next_line(f)
       while line = f.gets
-        if /\A\#@include\s*\((.*?)\)/ =~ line
+        if /\A\#[@%]include\s*\((.*?)\)/ =~ line
           begin
             file = ($1 || raise).strip
             basedir = File.dirname(line.location.file || raise)

@@ -237,7 +237,7 @@ class Formatter
       line "--- #{m.full_name}#{trim_space(m.params)}"
     else
       m.params.lines.each do |sig|
-        line "--- #{trim_sig(sig)}\#@todo\n"
+        line "--- #{trim_sig(sig)}#%todo\n"
       end
     end
     unless m.aliases.empty?

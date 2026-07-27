@@ -51,8 +51,8 @@ if capi
       end
     end
     converted = BitClust::MarkdownToRRD.convert(n.source.to_s, capi: true)
-                  .gsub(/^\#@samplecode(?: (.*))?$/) { "//emlist[#{$1&.strip}][ruby]{" }
-                  .gsub(/^\#@end[ \t]*$/, '//}')
+                  .gsub(/^\#[@%]samplecode(?: (.*))?$/) { "//emlist[#{$1&.strip}][ruby]{" }
+                  .gsub(/^\#[@%]end[ \t]*$/, '//}')
     if converted.rstrip != b.source.to_s.rstrip
       src_diffs += 1
       puts "SRC-DIFF #{name}" if src_diffs <= 5
@@ -91,8 +91,8 @@ report = ->(msg) { diffs += 1; puts "DIFF #{msg}" if diffs <= 30 }
 # native md → rd 変換の生形式を同じ形へ正規化して比較する
 to_rd = lambda do |md_src|
   BitClust::MarkdownToRRD.convert(md_src)
-    .gsub(/^\#@samplecode(?: (.*))?$/) { "//emlist[#{$1&.strip}][ruby]{" }
-    .gsub(/^\#@end[ \t]*$/, '//}')
+    .gsub(/^\#[@%]samplecode(?: (.*))?$/) { "//emlist[#{$1&.strip}][ruby]{" }
+    .gsub(/^\#[@%]end[ \t]*$/, '//}')
     .rstrip
 end
 

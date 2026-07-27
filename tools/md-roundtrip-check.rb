@@ -75,7 +75,7 @@ def body_relations?(md)
     elsif in_header
       case line
       when /\A(?:include|extend|alias)\s+\S/ then return true
-      when /\A\#@/, /\A\s*\z/ then nil
+      when /\A\#[@%]/, /\A\s*\z/ then nil
       else in_header = false
       end
     end
@@ -106,7 +106,7 @@ targets.sort_by(&:last).each do |full, label|
     units += 1
     ulabel = outs.size > 1 ? "#{label} -> #{path}" : label
     if (sites = prune_sites[label])
-      remaining = md.lines.filter_map { |l| $1 if l =~ /\A\#@include\s*\((.*?)\)/ }
+      remaining = md.lines.filter_map { |l| $1 if l =~ /\A\#[@%]include\s*\((.*?)\)/ }
       leftover << ulabel unless (remaining & sites).empty?
     end
     # body 関係の不変条件は in-scope（front matter 注入あり）のみ。

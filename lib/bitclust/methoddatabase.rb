@@ -260,7 +260,7 @@ module BitClust
       files = Dir.glob("#{doc_root}/**/*.md").sort
       referenced = files.flat_map { |f|
         base = File.dirname(f)
-        File.read(f).scan(/^\#@include\((.*?)\)/).map { |t|
+        File.read(f).scan(/^\#[@%]include\((.*?)\)/).map { |t|
           p = File.expand_path(t[0] || raise, base)
           [p, "#{p}.md", p.sub(/\.rd\z/, '.md')]
         }.flatten
