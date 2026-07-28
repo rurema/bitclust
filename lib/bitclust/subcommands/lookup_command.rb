@@ -100,7 +100,7 @@ module BitClust
            <dt>classes</dt><dd><%= entry.classes.map {|c| c.name }.sort.join(', ') %></dd>
            <dt>methods</dt><dd><%= entry.methods.map {|m| m.name }.sort.join(', ') %></dd>
            </dl>
-           <%= compile_rd(entry.source) %>
+           <%= compile_rd(entry) %>
            End
         },
         :class   => {
@@ -123,7 +123,7 @@ module BitClust
            <dt>singleton_methods</dt><dd><%= entry.singleton_methods.map {|m| m.name }.sort.join(', ') %></dd>
            <dt>instance_methods</dt><dd><%= entry.instance_methods.map {|m| m.name }.sort.join(', ') %></dd>
            </dl>
-           <%= compile_rd(entry.source) %>
+           <%= compile_rd(entry) %>
            End
         },
         :method  => {
@@ -146,7 +146,7 @@ module BitClust
            <dt>kind</dt><dd><%= entry.kind %></dd>
            <dt>library</dt><dd><%= entry.library.name %></dd>
            </dl>
-           <%= compile_rd(entry.source) %>
+           <%= compile_rd(entry) %>
            End
         },
         :function => {
@@ -163,20 +163,30 @@ module BitClust
            <dt>header</dt><dd><%= entry.header %></dd>
            <dt>filename</dt><dd><%= entry.filename %></dd>
            </dl>
-           <%= compile_rd(entry.source) %>
+           <%= compile_rd(entry) %>
            End
         }
       }
 
-      def compile_rd(src)
+      def compile_rd(entry)
         umap = URLMapper.new(:base_url => 'http://example.com',
                              :cgi_url  => 'http://example.com/view')
         if @db.properties['source_format'] == 'markdown'
           # md ソースの DB は screen.rb と同じく MDCompiler（GFM）で描画する
           Kernel.require 'bitclust/mdcompiler'
-          MDCompiler.new(umap, 2, { :gfm => true, :database => @db }).compile(src)
+          compiler = MDCompiler.new(umap, 2, { :gfm => true, :database => @db })
         else
-          RDCompiler.new(umap, 2).compile(src)
+          compiler = RDCompiler.new(umap, 2, { :database => @db })
+        end
+        # シグネチャ行の描画（permalink の id 等）はエントリ文脈を要求する
+        # ので、compile ではなくエントリ種別ごとの compile_* を使う
+        case entry
+        when MethodEntry
+          compiler.compile_method(entry)
+        when FunctionEntry
+          compiler.compile_function(entry)
+        else
+          compiler.compile(entry.source)
         end
       end
     end
