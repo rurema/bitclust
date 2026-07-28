@@ -136,7 +136,7 @@ module BitClust
 
     def direct_url: (String url) -> String
 
-    def reference_link: (String arg) -> String
+    def reference_link: (String arg, ?String? label) -> String
 
     BLADE_URL: "https://blade.ruby-lang.org/%s/%s"
 

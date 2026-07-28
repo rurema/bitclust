@@ -515,7 +515,7 @@ module BitClust
       when 'd'
         protect(link) { document_link(arg, label, frag) }
       when 'ref'
-        protect(link) { reference_link(arg) }
+        protect(link) { reference_link(arg, label) }
       when 'url'
         direct_url(arg)
       when 'man'
@@ -541,38 +541,44 @@ module BitClust
       %Q(<a class="external" href="#{escape_html(url)}">#{escape_html(url)}</a>)
     end
 
-    def reference_link(arg)
+    # label はラベル付き参照(MDCompiler#ref_md_link)からの表示テキスト
+    # 上書き。指定時は refs テーブルからのセクションラベル計算を行わない
+    def reference_link(arg, label = nil)
       case arg
       when /(\w+):(.*)\#([-\w]+)\z/
         # @type var type: String
         # @type var name: String
         # @type var frag: String
         type, name, frag = $1, $2, $3
-        # @type var title: String
-        # @type var t: String
-        # @type var id: String
-        case type
-        when 'lib'
-          title, t, id = name, LibraryEntry.type_id.to_s, name
-        when 'c'
-          title, t, id = name, ClassEntry.type_id.to_s,   name
-        when 'm'
-          # 表示側(title)のみ display_spec で畳む。id は refs テーブルの
-          # キーなので記載どおり(bitclust#282)
-          title, t, id = display_spec(name), MethodEntry.type_id.to_s, name
-        when 'd'
-          title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
-        else
-          raise "must not happen"
+        unless label
+          # @type var title: String
+          # @type var t: String
+          # @type var id: String
+          case type
+          when 'lib'
+            title, t, id = name, LibraryEntry.type_id.to_s, name
+          when 'c'
+            title, t, id = name, ClassEntry.type_id.to_s,   name
+          when 'm'
+            # 表示側(title)のみ display_spec で畳む。id は refs テーブルの
+            # キーなので記載どおり(bitclust#282)
+            title, t, id = display_spec(name), MethodEntry.type_id.to_s, name
+          when 'd'
+            title, t, id = @option[:database].get_doc(name).title, DocEntry.type_id.to_s, name
+          else
+            raise "must not happen"
+          end
+          label = @option[:database].refs[t, id, frag]
+          label = title + '/' + label if label and name
         end
-        label = @option[:database].refs[t, id, frag]
-        label = title + '/' + label if label and name
         bracket_link("#{type}:#{name}", label, frag)
       when /\A([-\w]+)\z/
-        e = @option[:entry]
         frag = $1 || raise
-        type = e.type_id.to_s
-        label = @option[:database].refs[type, e.name, frag] || frag
+        unless label
+          e = @option[:entry]
+          type = e.type_id.to_s
+          label = @option[:database].refs[type, e.name, frag] || frag
+        end
         a_href('#' + frag, label)
       else
         raise "must not happen"

@@ -756,7 +756,9 @@ module BitClust
     # インラインリンクの宛先として受ける形。散文の「[c:String](を参照)」の
     # ような括弧書きをリンクと誤認しないため URL と #フラグメントに限る
     # （MARKUP_SPEC §7.4/§7.5）
-    MD_LINK_DEST_RE = %r{\A(?:https?://|\#)}
+    # リンク宛先として受け付けるもの: 外部 URL・ページ内アンカー・
+    # rurema 参照 scheme(c:/m:/lib:/d:/f:。ラベル付きで参照したいとき用)
+    MD_LINK_DEST_RE = %r{\A(?:https?://|\#|(?:c|m|lib|d|f|ref):)}
 
     # Markdown のリンクを描画済み <a> へ退避し \x03idx\x03 プレースホルダに
     # 置き換える。後段の rd_compile_text（HTML エスケープ・参照解決）を
@@ -816,14 +818,45 @@ module BitClust
 
     # 表示テキスト付きリンクの描画。テキストは参照解決しないプレーン表示
     # （リンク内リンクは HTML として成立しないため）。外部 URL は rd の
-    # [[url:]] と同じ external クラス、#アンカーはページ内リンク
+    # [[url:]] と同じ external クラス、#アンカーはページ内リンク。
+    # 宛先が rurema 参照 scheme(c:/m:/lib:/d:/f:)のときは内部リンクとして
+    # 解決する([`egd_bytes(filename, 255)`](m:OpenSSL::Random?.egd_bytes)
+    # のように、呼び出し形をラベルにしてメソッドへリンクできる)
     def md_link(text, dest)
+      if (m = /\A(c|m|lib|d|f|ref):(.+)\z/m.match(dest))
+        return ref_md_link(m[1] || raise, m[2] || raise, text)
+      end
       label = escape_html(unescape_md_brackets(text))
       href = escape_html(unescape_md_brackets(dest))
       if dest.start_with?('#')
         %Q(<a href="#{href}">#{label}</a>)
       else
         %Q(<a class="external" href="#{href}">#{label}</a>)
+      end
+    end
+
+    # 参照 scheme 宛先のリンク。解決・compileerror 表示・link_checker への
+    # 通知は bracket_link にそのまま乗せ、ラベルだけ後から差し替える
+    # (a_href がラベルを HTML エスケープするため、コードスパンを含む
+    # ラベル HTML はプレースホルダ経由で入れる)
+    MD_REF_LABEL_PLACEHOLDER = "\x05L\x05"
+    def ref_md_link(type, arg, text)
+      arg = unescape_md_brackets(arg)
+      # md ソースの module function 表記 ?. を内部表記 .# へ正規化する
+      # (単一ブラケット参照の restore_inline と同じ規則。bitclust#282)
+      arg = arg.sub('?.', '.#') if type == 'm'
+      html = bracket_link("#{type}:#{arg}", MD_REF_LABEL_PLACEHOLDER)
+      html.gsub(MD_REF_LABEL_PLACEHOLDER, md_ref_link_label(text))
+    end
+
+    # ラベルの描画: 全体がコードスパン(`...`)ならば <code>、それ以外は
+    # プレーン表示。ラベル内のその他のインライン記法は解釈しない
+    def md_ref_link_label(text)
+      text = unescape_md_brackets(text)
+      if (m = /\A`(.+)`\z/m.match(text))
+        "<code>#{escape_html(m[1] || raise)}</code>"
+      else
+        escape_html(text)
       end
     end
 

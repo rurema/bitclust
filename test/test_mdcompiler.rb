@@ -1031,6 +1031,81 @@ class TestMDCompiler < Test::Unit::TestCase
     end
   end
 
+  # ---- Markdown リンク記法での rurema 参照(ラベル付きリンク) ----
+  # [ラベル](m:spec) のように、リンク宛先へ参照 scheme を書けるようにする。
+  # 呼び出し形を表示しつつメソッドへリンクする用途:
+  #   [`OpenSSL::Random.egd_bytes(filename, 255)`](m:OpenSSL::Random?.egd_bytes)
+
+  sub_test_case("md link with rurema reference destination") do
+    def test_ref_link_with_code_span_label
+      html = gfm_compiler.compile("# t\n\n[`Foo#bar(x, y)`](m:Foo#bar) を参照。\n")
+      assert_include html, '<code>Foo#bar(x, y)</code>'
+      assert_include html, 'href="dummy/method/'
+      assert_not_include html, 'class="external"'
+    end
+
+    def test_ref_link_plain_label
+      html = gfm_compiler.compile("# t\n\n[文字列クラス](c:String) を参照。\n")
+      assert_include html, '>文字列クラス</a>'
+      assert_include html, 'href="dummy/class/'
+    end
+
+    def test_ref_link_module_function_spec
+      html = gfm_compiler.compile("# t\n\n[`open(name)`](m:Kernel?.open)\n")
+      assert_include html, '<code>open(name)</code>'
+      assert_include html, 'href="dummy/method/'
+    end
+
+    def test_ref_link_doc_with_fragment_via_ref_scheme
+      html = gfm_compiler.compile("# t\n\n[仕様](ref:d:spec/m17n#anc)\n")
+      assert_include html, '#anc"'
+      assert_include html, '>仕様</a>'
+    end
+
+    def test_ref_link_method_with_fragment_via_ref_scheme
+      html = gfm_compiler.compile("# t\n\n[フォーマット](ref:m:Foo#bar#fmt)\n")
+      assert_include html, '#fmt"'
+      assert_include html, '>フォーマット</a>'
+      assert_include html, 'href="dummy/method/'
+    end
+
+    def test_ref_link_same_page_anchor
+      html = gfm_compiler.compile("# t\n\n[別名](ref:anc)\n")
+      assert_include html, '<a href="#anc">別名</a>'
+    end
+
+    def test_ref_link_lib
+      html = gfm_compiler.compile("# t\n\n[JSON ライブラリ](lib:json)\n")
+      assert_include html, '>JSON ライブラリ</a>'
+      assert_include html, 'href="dummy/library/'
+    end
+
+    def test_unknown_scheme_stays_plain_text
+      html = gfm_compiler.compile("# t\n\n[x](zzz:y)\n")
+      assert_include html, '[x](zzz:y)'
+      assert_not_include html, '<a '
+    end
+
+    def test_label_is_escaped
+      html = gfm_compiler.compile("# t\n\n[a<b](c:String)\n")
+      assert_include html, '>a&lt;b</a>'
+    end
+
+    def test_ref_link_fires_link_checker
+      recorder = Class.new do
+        attr_reader :refs
+        def initialize; @refs = []; end
+        def note_ref(type, arg); @refs << "#{type}:#{arg}"; end
+      end.new
+      md = BitClust::MDCompiler.new(@u, 1,
+        { :database => @db, :gfm => true, :link_checker => recorder })
+      md.compile("# t\n\n[`bar`](m:Foo#bar) と [s](c:String) と [仕様](ref:d:spec/m17n#anc)\n")
+      assert_include recorder.refs, "m:Foo#bar"
+      assert_include recorder.refs, "c:String"
+      assert_include recorder.refs, "ref:d:spec/m17n#anc"
+    end
+  end
+
 end
 
 # lang 指定付きコードブロックのハイライト（ruby は Ripper ベースの
