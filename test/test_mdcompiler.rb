@@ -1056,10 +1056,22 @@ class TestMDCompiler < Test::Unit::TestCase
       assert_include html, 'href="dummy/method/'
     end
 
-    def test_ref_link_doc_with_fragment
-      html = gfm_compiler.compile("# t\n\n[仕様](d:spec/m17n#anc)\n")
+    def test_ref_link_doc_with_fragment_via_ref_scheme
+      html = gfm_compiler.compile("# t\n\n[仕様](ref:d:spec/m17n#anc)\n")
       assert_include html, '#anc"'
       assert_include html, '>仕様</a>'
+    end
+
+    def test_ref_link_method_with_fragment_via_ref_scheme
+      html = gfm_compiler.compile("# t\n\n[フォーマット](ref:m:Foo#bar#fmt)\n")
+      assert_include html, '#fmt"'
+      assert_include html, '>フォーマット</a>'
+      assert_include html, 'href="dummy/method/'
+    end
+
+    def test_ref_link_same_page_anchor
+      html = gfm_compiler.compile("# t\n\n[別名](ref:anc)\n")
+      assert_include html, '<a href="#anc">別名</a>'
     end
 
     def test_ref_link_lib
@@ -1087,9 +1099,10 @@ class TestMDCompiler < Test::Unit::TestCase
       end.new
       md = BitClust::MDCompiler.new(@u, 1,
         { :database => @db, :gfm => true, :link_checker => recorder })
-      md.compile("# t\n\n[`bar`](m:Foo#bar) と [s](c:String)\n")
+      md.compile("# t\n\n[`bar`](m:Foo#bar) と [s](c:String) と [仕様](ref:d:spec/m17n#anc)\n")
       assert_include recorder.refs, "m:Foo#bar"
       assert_include recorder.refs, "c:String"
+      assert_include recorder.refs, "ref:d:spec/m17n#anc"
     end
   end
 

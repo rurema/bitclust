@@ -758,7 +758,7 @@ module BitClust
     # （MARKUP_SPEC §7.4/§7.5）
     # リンク宛先として受け付けるもの: 外部 URL・ページ内アンカー・
     # rurema 参照 scheme(c:/m:/lib:/d:/f:。ラベル付きで参照したいとき用)
-    MD_LINK_DEST_RE = %r{\A(?:https?://|\#|(?:c|m|lib|d|f):)}
+    MD_LINK_DEST_RE = %r{\A(?:https?://|\#|(?:c|m|lib|d|f|ref):)}
 
     # Markdown のリンクを描画済み <a> へ退避し \x03idx\x03 プレースホルダに
     # 置き換える。後段の rd_compile_text（HTML エスケープ・参照解決）を
@@ -823,7 +823,7 @@ module BitClust
     # 解決する([`egd_bytes(filename, 255)`](m:OpenSSL::Random?.egd_bytes)
     # のように、呼び出し形をラベルにしてメソッドへリンクできる)
     def md_link(text, dest)
-      if (m = /\A(c|m|lib|d|f):(.+)\z/m.match(dest))
+      if (m = /\A(c|m|lib|d|f|ref):(.+)\z/m.match(dest))
         return ref_md_link(m[1] || raise, m[2] || raise, text)
       end
       label = escape_html(unescape_md_brackets(text))
@@ -845,11 +845,7 @@ module BitClust
       # md ソースの module function 表記 ?. を内部表記 .# へ正規化する
       # (単一ブラケット参照の restore_inline と同じ規則。bitclust#282)
       arg = arg.sub('?.', '.#') if type == 'm'
-      frag = nil
-      if type == 'd' && arg.include?('#')
-        arg, frag = (arg.split('#', 2) + [nil]).first(2)
-      end
-      html = bracket_link("#{type}:#{arg}", MD_REF_LABEL_PLACEHOLDER, frag)
+      html = bracket_link("#{type}:#{arg}", MD_REF_LABEL_PLACEHOLDER)
       html.gsub(MD_REF_LABEL_PLACEHOLDER, md_ref_link_label(text))
     end
 

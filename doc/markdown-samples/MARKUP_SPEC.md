@@ -597,18 +597,20 @@ RRD の `[[type:target]]` から角括弧を1段減らし `[type:target]` とす
 ### 7.1.1 ラベル付き参照(Markdown リンク記法)
 
 表示テキストを変えて参照したいときは、Markdown 標準のリンク記法の宛先に
-参照 scheme(`c:` / `m:` / `lib:` / `d:` / `f:`)を書く。
+参照 scheme(`c:` / `m:` / `lib:` / `d:` / `f:` / `ref:`)を書く。
 呼び出し形を表示しながらメソッドへリンクする用途に使える:
 
 ```markdown
 [`OpenSSL::Random.egd_bytes(filename, 255)`](m:OpenSSL::Random?.egd_bytes)
 [文字列クラス](c:String)
-[多言語化の仕様](d:spec/m17n#charset)
+[多言語化の仕様](ref:d:spec/m17n#charset)
 ```
 
 - ラベル全体をコードスパン(`` ` ``)で囲むと `<code>` で描画される。
   それ以外のインライン記法はラベル内では解釈されない(リンク内リンク不可)
-- `d:` はアンカー(`#…`)を付けられる
+- アンカー(`#…`)付きの参照は bare 記法(§7.1)と同じく `ref:` を使う
+  (`ref:d:spec/m17n#charset`・`ref:m:String#scanf#format`、
+  同一ページ内のアンカーは `ref:anchor`)
 - 参照先の存在は checklink の検証対象になる(通常の `[m:...]` と同じ)
 - 参照 `]` の直後に地の文の `(` を置くとこの記法として解釈されてしまうため、
   括弧書きを続けたい場合は間に語を挟むこと
