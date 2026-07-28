@@ -21,7 +21,7 @@ module BitClust
 
       TEMPLATE: Hash[(:library | :class | :method | :function), Hash[(:text | :html), String]]
 
-      def compile_rd: (String src) -> String
+      def compile_rd: (any_entry entry) -> String
     end
   end
 end

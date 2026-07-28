@@ -73,9 +73,11 @@ This is public function.
 <dt>header</dt><dd>VALUE public_func()</dd>
 <dt>filename</dt><dd>test.c</dd>
 </dl>
+<dd class="function-description">
 <p>
 This is public function.
 </p>
+</dd>
     EOS
   end
 end
