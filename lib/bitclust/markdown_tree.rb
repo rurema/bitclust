@@ -165,7 +165,7 @@ module BitClust
         # 版ゲートの深度。#@/#% ブロック内のヘッダ関係行は body 残置が正しい
         # （H1 自体が版分岐する rbconfig 等）ので lint 対象から外す
         case line
-        when /\A\#[@%](?:since|until|if)\b/ then gate_depth += 1
+        when /\A\#[@%](?:since|until|if|version)\b/ then gate_depth += 1
         when /\A\#[@%]end\b/ then gate_depth -= 1 if gate_depth > 0
         end
 

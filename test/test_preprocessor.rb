@@ -450,4 +450,82 @@ HERE
       end
     end
   end
+
+  # bitclust#285: 版範囲の省略記法 #%version A...B(半開区間 [A, B))。
+  # Ruby の終端排他 Range リテラルに合わせて3点ドット。
+  # A... は A 以上(#%since 相当)、...B は B 未満(#%until 相当)
+  sub_test_case("version range (#285)") do
+
+    def process(src, version)
+      Preprocessor.wrap(StringIO.new(src), { 'version' => version }).to_a.join
+    end
+
+    def gated(cond)
+      <<HERE
+#{cond}
+in
+#%else
+out
+#%end
+HERE
+    end
+
+    def test_bounded_range
+      src = gated('#%version 3.1...3.4')
+      assert_equal "out\n", process(src, '3.0')
+      assert_equal "in\n",  process(src, '3.1')   # 始端は含む
+      assert_equal "in\n",  process(src, '3.2')
+      assert_equal "out\n", process(src, '3.4')   # 終端は含まない
+      assert_equal "out\n", process(src, '4.0')
+    end
+
+    def test_endless_range
+      src = gated('#%version 3.1...')
+      assert_equal "out\n", process(src, '3.0')
+      assert_equal "in\n",  process(src, '3.1')
+      assert_equal "in\n",  process(src, '4.1')
+    end
+
+    def test_beginless_range
+      src = gated('#%version ...3.1')
+      assert_equal "in\n",  process(src, '3.0')
+      assert_equal "out\n", process(src, '3.1')
+    end
+
+    def test_quoted_versions
+      src = gated('#%version "3.1"..."3.4"')
+      assert_equal "in\n",  process(src, '3.1')
+      assert_equal "out\n", process(src, '3.4')
+    end
+
+    def test_old_prefix
+      src = gated("\#@version 3.1...3.4")
+      assert_equal "in\n", process(src, '3.2')
+    end
+
+    def test_nesting_with_since
+      src = <<HERE
+#%version 3.1...4.0
+#%since 3.3
+both
+#%end
+#%end
+HERE
+      assert_equal "both\n", process(src, '3.3')
+      assert_equal "",       process(src, '3.2')
+      assert_equal "",       process(src, '4.0')
+    end
+
+    def test_two_dot_range_is_error
+      # .. (終端を含む Range)は誤解を招くため受け付けない(#285)
+      assert_raise(BitClust::ParseError) { process(gated('#%version 3.1..3.4'), '3.2') }
+    end
+
+    def test_malformed_ranges_are_error
+      assert_raise(BitClust::ParseError) { process(gated('#%version'), '3.2') }
+      assert_raise(BitClust::ParseError) { process(gated('#%version ...'), '3.2') }
+      assert_raise(BitClust::ParseError) { process(gated('#%version 3.1....3.4'), '3.2') }
+      assert_raise(BitClust::ParseError) { process(gated('#%version 3.1...3.4...4.0'), '3.2') }
+    end
+  end
 end
