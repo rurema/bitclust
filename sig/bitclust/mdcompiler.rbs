@@ -168,6 +168,12 @@ module BitClust
     # 表示テキスト付きリンクの描画
     def md_link: (String text, String dest) -> String
 
+    MD_REF_LABEL_PLACEHOLDER: String
+
+    def ref_md_link: (String type, String arg, String text) -> String
+
+    def md_ref_link_label: (String text) -> String
+
     def unescape_md_brackets: (String str) -> String
 
     def restore_rd_text: (String str) -> String
