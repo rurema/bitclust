@@ -643,6 +643,62 @@ class TestMDCompiler < Test::Unit::TestCase
     assert_include html, "<strong>1.</strong> 最初の説明。"
   end
 
+  def test_gfm_inline_strong
+    html = gfm_compiler.compile("# タイトル\n\nこの **重要** な点。\n")
+    assert_include html, "この <strong>重要</strong> な点。"
+  end
+
+  def test_gfm_inline_strong_no_space_boundary
+    # 和文は空白なしで隣接する
+    html = gfm_compiler.compile("# タイトル\n\nこれは**とても重要**です。\n")
+    assert_include html, "これは<strong>とても重要</strong>です。"
+  end
+
+  def test_gfm_inline_strong_multiple
+    html = gfm_compiler.compile("# タイトル\n\n**a** と **b** の話。\n")
+    assert_include html, "<strong>a</strong> と <strong>b</strong> の話。"
+  end
+
+  def test_gfm_inline_strong_wraps_ref
+    html = gfm_compiler.compile("# タイトル\n\n**[c:String]** を参照。\n")
+    assert_include html, "<strong><a href="
+    assert_include html, "</a></strong> を参照。"
+  end
+
+  def test_gfm_inline_strong_wraps_code_span
+    html = gfm_compiler.compile("# タイトル\n\n**`freeze` される**ので注意。\n")
+    assert_include html, "<strong><code>freeze</code> される</strong>ので注意。"
+  end
+
+  def test_gfm_inline_strong_in_code_span_stays_literal
+    html = gfm_compiler.compile("# タイトル\n\n`**not strong**` と書く。\n")
+    assert_include html, "<code>**not strong**</code> と書く。"
+    assert_not_include html, "<strong>"
+  end
+
+  def test_gfm_inline_strong_exponent_stays_literal
+    # 単語内の ** は冪乗演算子とみなして適用しない
+    html = gfm_compiler.compile("# タイトル\n\n値は 2**32 と 2**64 です。\n")
+    assert_not_include html, "<strong>"
+    assert_include html, "2**32 と 2**64"
+  end
+
+  def test_gfm_inline_strong_space_boundary_stays_literal
+    html = gfm_compiler.compile("# タイトル\n\na ** b ** c の形。\n")
+    assert_not_include html, "<strong>"
+  end
+
+  def test_gfm_inline_strong_spans_soft_break
+    # 段落内の改行は行結合で除去されるので、GFM と同じく soft break をまたげる
+    html = gfm_compiler.compile("# タイトル\n\n**改行を\nまたぐ**形。\n")
+    assert_include html, "<strong>改行をまたぐ</strong>形。"
+  end
+
+  def test_gfm_inline_strong_triple_asterisk_stays_literal
+    html = gfm_compiler.compile("# タイトル\n\n***em strong*** は対象外。\n")
+    assert_not_include html, "<strong>"
+  end
+
   def test_gfm_param_name_code
     md = "### def m(v) -> String\n\n説明。\n\n- **param** `v` -- 値。\n"
     html = compile_method(gfm_compiler, md)
