@@ -190,7 +190,7 @@ bitclust htmlfile --ruby=3.4 --target=Array ../doctree/refm/api/src/_builtin/Arr
 bitclust htmlfile --capi ../doctree/refm/capi/src/array.c.rd --target=rb_ary_new3 # C API では現状 --target 必須
 ```
 
-htmlfile が処理できるのは旧 RRD ソース（refm）のみで、Markdown ソース
+htmlfile が処理できるのは旧 RD ソース（refm）のみで、Markdown ソース
 （manual/）には未対応です。manual/ の編集内容の確認は doctree の
 `rake generate:X.Y` と `bitclust server`（または `rake statichtml:X.Y`）で
 行ってください。
@@ -235,7 +235,7 @@ bitclust methods -rstringio --ruby=3.4 --diff=../doctree/refm/api/src/stringio S
 bitclust methods --ruby=3.4 --diff=../doctree/refm/api/src/_builtin/Object Object -c
 ```
 
---diff に渡せるのは旧 RRD ソース(refm)のみで、Markdown ソース(manual/)には
+--diff に渡せるのは旧 RD ソース(refm)のみで、Markdown ソース(manual/)には
 未対応です(htmlfile と同じ)。
 
 ### パッケージ作成者向け
@@ -273,7 +273,7 @@ bitclust chm -d ./db -o ~/tmp/chm    #-o省略時は ./chm に出力される
 <dt>bc-convert</dt>
 <dd>旧リファレンスマニュアルのファイルを BitClustフォーマットに変換します。今はもう使われていません。</dd>
 <dt>rrd2md (bin/rrd2md)</dt>
-<dd>旧 RRD ソースを Markdown へ一括変換する。2026年7月の Markdown 移行に使ったもので、refm 凍結後は旧版のサルベージ用。</dd>
+<dd>旧 RD ソースを Markdown へ一括変換する。2026年7月の Markdown 移行に使ったもので、refm 凍結後は旧版のサルベージ用。</dd>
 </dl>
 
 ## 実装の詳細
