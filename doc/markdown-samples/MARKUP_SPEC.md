@@ -597,13 +597,14 @@ RRD の `[[type:target]]` から角括弧を1段減らし `[type:target]` とす
 ### 7.1.1 ラベル付き参照(Markdown リンク記法)
 
 表示テキストを変えて参照したいときは、Markdown 標準のリンク記法の宛先に
-参照 scheme(`c:` / `m:` / `lib:` / `d:` / `f:` / `ref:`)を書く。
+参照 scheme(`c:` / `m:` / `lib:` / `d:` / `f:` / `ref:` / `man:`)を書く。
 呼び出し形を表示しながらメソッドへリンクする用途に使える:
 
 ```markdown
 [`OpenSSL::Random.egd_bytes(filename, 255)`](m:OpenSSL::Random?.egd_bytes)
 [文字列クラス](c:String)
 [多言語化の仕様](ref:d:spec/m17n#charset)
+[statx システムコール](man:statx(2linux))
 ```
 
 - ラベル全体をコードスパン(`` ` ``)で囲むと `<code>` で描画される。

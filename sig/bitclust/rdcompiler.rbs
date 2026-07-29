@@ -158,7 +158,7 @@ module BitClust
 
     def man_url: (String? section, String? page) -> String?
 
-    def man_link: (String spec) -> String
+    def man_link: (String spec, ?String? label) -> String
 
     BUGS_URL: String
 

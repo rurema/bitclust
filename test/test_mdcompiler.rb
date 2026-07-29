@@ -1080,6 +1080,19 @@ class TestMDCompiler < Test::Unit::TestCase
       assert_include html, 'href="dummy/library/'
     end
 
+    def test_ref_link_man
+      html = gfm_compiler.compile("# t\n\n[statx システムコール](man:statx(2linux))\n")
+      assert_include html, 'href="http://man7.org/linux/man-pages/man2/statx.2.html"'
+      assert_include html, '>statx システムコール</a>'
+      assert_include html, 'class="external"'
+    end
+
+    def test_ref_link_man_unresolvable_section_falls_back_to_label
+      html = gfm_compiler.compile("# t\n\n[謎のマニュアル](man:foo(9zzz))\n")
+      assert_include html, '謎のマニュアル'
+      assert_not_include html, '<a '
+    end
+
     def test_unknown_scheme_stays_plain_text
       html = gfm_compiler.compile("# t\n\n[x](zzz:y)\n")
       assert_include html, '[x](zzz:y)'
