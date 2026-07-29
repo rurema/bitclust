@@ -352,10 +352,12 @@ module BitClust
       find_method db, cnames.join('::'), '::', name
     end
 
+    # 区切りは反転文字列上で探す。"?." は 4.0 以降の module function の
+    # 表示形式(反転すると ".?")で、内部表記の ".#" に正規化する
     def parse_method_spec_pattern(pat)
-      _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|[\#\.\,])/, 2)
+      _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|\.\?|[\#\.\,])/, 2)
       c = (_c || raise).reverse
-      t = (_t || raise).tr(',', '#').sub(/\#\./, '.#')
+      t = (_t || raise).tr(',', '#').sub(/\#\.|\.\?/, '.#')
       m = (_m || raise).reverse
       return c, t, m
     end

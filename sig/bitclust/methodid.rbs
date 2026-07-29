@@ -49,7 +49,7 @@ module BitClust
 
     def to_s: () -> ::String
 
-    def display_name: () -> ::String
+    def display_name: (?::String? version) -> ::String
 
     def ==: (untyped other) -> bool
 

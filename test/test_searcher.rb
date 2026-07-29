@@ -103,3 +103,51 @@ class TestSearcherWindowsDrivePath < Test::Unit::TestCase
     end
   end
 end
+
+# refe の module_function 表示(bitclust#297)。
+# HTML 側(#282)と同じく、DB のバージョンが 4.0 以降なら
+# "Foo.#baz" ではなく "Foo?.baz" と表示する。
+class TestSearcherModuleFunctionDisplay < Test::Unit::TestCase
+  include BitClust
+
+  def record_for(version)
+    db = MethodDatabase.dummy("version" => version)
+    spec = MethodSpec.parse("Foo.#baz")
+    SearchResult::Record.new(db, spec, spec)
+  end
+
+  def test_names_folds_module_function_typemark_for_40
+    assert_equal ["Foo?.baz"], record_for("4.0").names
+  end
+
+  def test_names_keeps_typemark_before_40
+    assert_equal ["Foo.#baz"], record_for("3.4").names
+  end
+
+  def test_names_without_db_version_keeps_typemark
+    spec = MethodSpec.parse("Foo.#baz")
+    assert_equal ["Foo.#baz"], SearchResult::Record.new(nil, spec, spec).names
+  end
+end
+
+# refe のクエリ側も 4.0 以降の表示形式 "Foo?.baz" を受け付ける(bitclust#297)
+class TestSearcherModuleFunctionQuery < Test::Unit::TestCase
+  include BitClust
+
+  def parse(pat)
+    Searcher.new.send(:parse_method_spec_pattern, pat)
+  end
+
+  def test_question_dot_pattern
+    assert_equal ["Foo", ".#", "baz"], parse("Foo?.baz")
+  end
+
+  def test_dot_hash_pattern_still_works
+    assert_equal ["Foo", ".#", "baz"], parse("Foo.#baz")
+  end
+
+  def test_predicate_method_names_unaffected
+    assert_equal ["Foo", "#", "empty?"], parse("Foo#empty?")
+    assert_equal ["Foo", ".", "b?"], parse("Foo.b?")
+  end
+end
