@@ -90,8 +90,13 @@ module BitClust
       "#{@klass}#{@type}#{@method}"
     end
 
-    def display_name
-      @type == '$' ? "$#{@method}" : to_s()
+    # version はドキュメント対象の Ruby バージョン(DB の version プロパティ)。
+    # 指定すると module function の typemark を表示用に畳む
+    # (4.0 以降は "?."。NameUtils#display_typemark と同じ規則)
+    def display_name(version = nil)
+      return "$#{@method}" if @type == '$'
+      return "#{@klass}#{NameUtils.display_typemark(_ = @type, version)}#{@method}" if version
+      to_s()
     end
 
     def ==(other)

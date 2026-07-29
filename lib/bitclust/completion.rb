@@ -514,7 +514,8 @@ $cm_comb_m += 1
       end
 
       def names
-        @specs.map {|spec| spec.display_name }
+        version = @db && @db.properties["version"]
+        @specs.map {|spec| spec.display_name(version) }
       end
 
       def class_name
