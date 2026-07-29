@@ -20,7 +20,7 @@ module BitClust
         @prepare = nil
         @cleanup = nil
         @purge = nil
-        @versions = ["2.6.0", "2.7.0", "3.0.0", "3.1.0"]
+        @versions = ["3.3.0", "3.4.0", "4.0.0"]
         @update = true
         @parser.banner = "Usage: #{File.basename($0, '.*')} setup [options]"
         @parser.on('--prepare', 'Prepare config file and checkout repository. Do not create database.') {
@@ -57,9 +57,8 @@ module BitClust
           # @type var init_options: Subcommand::options
           init_options = { :prefix => prefix, :capi => false }
           InitCommand.new.exec(init_argv, init_options)
-          update_method_database(prefix, ["--stdlibtree=#{@config[:stdlibtree]}"])
-          update_argv = Pathname(@config[:capi_src]).children.select(&:file?).map{|v| v.realpath.to_s }
-          update_function_database(prefix, update_argv)
+          update_method_database(prefix, ["--markdowntree=#{@config[:mdtree]}"])
+          update_function_database(prefix, ["--markdowntree=#{@config[:capi_mdtree]}"])
         end
       end
 
@@ -85,14 +84,21 @@ module BitClust
           :encoding        => "utf-8",
           :versions        => @versions,
           :default_version => @versions.max,
-          :stdlibtree      => (rubydoc_dir + "refm/api/src").to_s,
-          :capi_src        => (rubydoc_dir + "refm/capi/src/").to_s,
+          :mdtree          => (rubydoc_dir + "manual/api").to_s,
+          :capi_mdtree     => (rubydoc_dir + "manual/capi").to_s,
           :baseurl         => "http://localhost:10080",
           :port            => "10080",
           :pid_file        => "/tmp/bitclust.pid",
         }
         if config_path.exist?
           @config = YAML.load_file(config_path)
+          unless @config[:mdtree]
+            # Markdown 移行(2026-07)前の設定ファイル。ソースの取得形態が
+            # 変わっているため、作り直しを案内する
+            warn "Old config file (before the Markdown migration) found: #{config_path}"
+            warn "Run `#{File.basename($0, '.*')} setup --purge` and setup again."
+            exit 1
+          end
           unless @config[:versions].sort == @versions.sort
             print("overwrite config file? > [y/N]")
             if /\Ay\z/i =~ $stdin.gets&.chomp

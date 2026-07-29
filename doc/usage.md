@@ -14,13 +14,12 @@ BitClust は Git リポジトリと Gem パッケージで公開されていま�
 
 - [rurema/bitclust](https://github.com/rurema/bitclust)
 
-**注意**: リリース済みの gem は 2026年7月の Markdown 移行より前のものです。
-現行のドキュメントソース（doctree の `manual/` ツリー）を処理するには gem
-ではなく Git リポジトリ版を使ってください。doctree リポジトリで
+**注意**: 1.5.0 以前の gem は 2026年7月の Markdown 移行より前のものです。
+現行のドキュメントソース（doctree の `manual/` ツリー）を処理するには、
+Markdown 対応版（1.5.0 より後のリリース）の gem か Git リポジトリ版を
+使ってください。Git リポジトリ版は doctree リポジトリで
 `bundle install` すれば入ります
 （[doctree のチュートリアル](https://github.com/rurema/doctree/blob/master/docs/Tutorial.md) 参照）。
-Markdown 対応版 gem のリリースは今後の課題です
-（[HowToRelease](https://github.com/rurema/doctree/blob/master/docs/HowToRelease.md) 参照）。
 
 ## インストール
 
@@ -65,19 +64,25 @@ $HOME/.bitclust/config がある場合は、```-d```オプションは省略可�
 <dl>
 <dt>bitclust setup</dt>
 <dd>
-設定ファイルの初期化と BitClust データベースの初期化・生成を実行します。
-今のところ git コマンドに PATH が通っている必要があります。
-現状は凍結された旧 refm ツリーから DB を構築します（Markdown ツリーには
-未対応）。最新のリファレンスをビルドするには doctree の rake タスクを
-使ってください（<a href="https://github.com/rurema/doctree/blob/master/docs/Tutorial.md">チュートリアル</a>参照）。
+設定ファイルの初期化・doctree の取得（git clone）・BitClust データベースの
+生成までを一括で実行します。refe を使うための最短の入り口です。
+git コマンドに PATH が通っている必要があります。
+doctree の Markdown ツリー（manual/）から DB を構築します。
+生成物は $HOME/.bitclust 以下に置かれます。
 </dd>
 </dl>
 
 例
 
 ```
-bitclust setup
+bitclust setup                       # 既定のバージョン群の DB を作る
+bitclust setup --versions=3.4.0,4.0.0
+bitclust setup --purge               # 生成物と設定をすべて消す
 ```
+
+Markdown 移行（2026年7月）より前に setup を実行したことがある場合は、
+ソースの取得形態が変わっているため、一度 `bitclust setup --purge` してから
+setup し直してください（DB はキャッシュなので消して問題ありません）。
 
 <dl>
 <dt>bitclust server</dt>
@@ -185,7 +190,7 @@ bitclust htmlfile --ruby=3.4 --target=Array ../doctree/refm/api/src/_builtin/Arr
 bitclust htmlfile --capi ../doctree/refm/capi/src/array.c.rd --target=rb_ary_new3 # C API では現状 --target 必須
 ```
 
-htmlfile が処理できるのは旧 RRD ソース（refm）のみで、Markdown ソース
+htmlfile が処理できるのは旧 RD ソース（refm）のみで、Markdown ソース
 （manual/）には未対応です。manual/ の編集内容の確認は doctree の
 `rake generate:X.Y` と `bitclust server`（または `rake statichtml:X.Y`）で
 行ってください。
@@ -230,6 +235,9 @@ bitclust methods -rstringio --ruby=3.4 --diff=../doctree/refm/api/src/stringio S
 bitclust methods --ruby=3.4 --diff=../doctree/refm/api/src/_builtin/Object Object -c
 ```
 
+--diff に渡せるのは旧 RD ソース(refm)のみで、Markdown ソース(manual/)には
+未対応です(htmlfile と同じ)。
+
 ### パッケージ作成者向け
 
 <dl>
@@ -265,7 +273,7 @@ bitclust chm -d ./db -o ~/tmp/chm    #-o省略時は ./chm に出力される
 <dt>bc-convert</dt>
 <dd>旧リファレンスマニュアルのファイルを BitClustフォーマットに変換します。今はもう使われていません。</dd>
 <dt>rrd2md (bin/rrd2md)</dt>
-<dd>旧 RRD ソースを Markdown へ一括変換する。2026年7月の Markdown 移行に使ったもので、refm 凍結後は旧版のサルベージ用。</dd>
+<dd>旧 RD ソースを Markdown へ一括変換する。2026年7月の Markdown 移行に使ったもので、refm 凍結後は旧版のサルベージ用。</dd>
 </dl>
 
 ## 実装の詳細
