@@ -654,6 +654,15 @@ module BitClust
       super(restore_rd_text(str))
     end
 
+    # GFM モードの地の文 `**strong**`。保守的サブセット: 同一テキスト
+    # ノード内で閉じる(段落は行結合済みなので GFM と同じく soft break は
+    # またげる)・
+    # 開閉の内側が空白でない・内容に `*` を含まない(入れ子なし)・
+    # 単語内には適用しない(`2**32` のような冪乗演算子を巻き込まないため。
+    # 開きの直前と閉じの直後が英数字・`_`・`*` なら対象外)。
+    # `*em*`/`_em_` は多義性が高いため対象外(bitclust#301)
+    INLINE_STRONG_RE = /(?<![0-9A-Za-z_*])\*\*(?=\S)([^*\n]+?)(?<=\S)\*\*(?![0-9A-Za-z_*])/
+
     # GFM モードのテキストコンパイル:
     # コードスパン（CommonMark 6.1、N 連バッククォート）→ <code>（中身は
     # 参照解決しない・HTML エスケープのみ）、行頭 **N.** → <strong>、
@@ -672,6 +681,7 @@ module BitClust
       links = [] #: Array[String]
       str = extract_md_links(str, links)
       str = str.gsub(/^\*\*(\d+\.)\*\* /, "\x01\\1\x02 ")
+      str = str.gsub(INLINE_STRONG_RE, "\x01\\1\x02")
       rd_compile_text(MarkdownToRRD.restore_inline(str))
         .gsub("\x01", '<strong>').gsub("\x02", '</strong>')
         .gsub(/\x03(\d+)\x03/) { links[($1 || raise).to_i] || raise }

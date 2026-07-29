@@ -49,6 +49,9 @@ module BitClust
     # 生のまま残った #@samplecode が前処理で //emlist になったもの
     EMLIST_LEFTOVER_RE: ::Regexp
 
+    # GFM モードの地の文 `**strong**`(保守的サブセット)
+    INLINE_STRONG_RE: ::Regexp
+
     def library_file: () -> void
 
     def entry_chunk: () -> void
