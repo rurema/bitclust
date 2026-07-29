@@ -519,7 +519,7 @@ module BitClust
       when 'url'
         direct_url(arg)
       when 'man'
-        man_link(arg)
+        man_link(arg, label)
       when 'rfc', 'RFC'
         rfc_link(arg)
       when 'ruby-list', 'ruby-dev', 'ruby-ext', 'ruby-talk', 'ruby-core'
@@ -623,10 +623,12 @@ module BitClust
       end
     end
 
-    def man_link(spec)
-      m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(spec)
-      url = man_url(m[2], escape_html(m[1] || raise)) or return escape_html(spec)
-      %Q(<a class="external" href="#{escape_html(url)}">#{escape_html("#{m[1]}(#{m[2]})")}</a>)
+    # label はラベル付き参照(MDCompiler#ref_md_link)からの表示テキスト
+    # 上書き。リンクにできない spec ではラベルをプレーン表示に使う
+    def man_link(spec, label = nil)
+      m = /([\w\.\/]+)\((\w+)\)/.match(spec) or return escape_html(label || spec)
+      url = man_url(m[2], escape_html(m[1] || raise)) or return escape_html(label || spec)
+      %Q(<a class="external" href="#{escape_html(url)}">#{escape_html(label || "#{m[1]}(#{m[2]})")}</a>)
     end
 
     BUGS_URL = "https://bugs.ruby-lang.org/issues/%s"
