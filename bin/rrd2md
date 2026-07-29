@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# RRD → Markdown バッチ変換スクリプト
+# RD → Markdown バッチ変換スクリプト
 #
 # Usage:
 #   ruby bin/rrd2md <input_dir> <output_dir>

@@ -7,7 +7,7 @@ require 'fileutils'
 require 'bitclust/markdown_orchestrator'
 require 'bitclust/markdown_to_rrd'
 
-# MarkdownOrchestrator: RRD ツリー → Markdown ツリー変換のクロスファイル方針を
+# MarkdownOrchestrator: RD ツリー → Markdown ツリー変換のクロスファイル方針を
 # 1か所に束ねる（グラフ解析 → prune → 全体ゲート解除 → front matter 注入）。
 # bin/rrd2md --graph と tools/md-roundtrip-check.rb --inject の共通実装。
 #

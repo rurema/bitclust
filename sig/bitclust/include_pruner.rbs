@@ -1,5 +1,5 @@
 module BitClust
-  # RRD テキストから指定 target の #@include 行を除去する純変換（rd→rd）
+  # RD テキストから指定 target の #@include 行を除去する純変換（rd→rd）
   module IncludePruner
     INCLUDE_RE: ::Regexp
 

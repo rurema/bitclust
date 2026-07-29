@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module BitClust
-  # RRD テキストから指定 target の #@include 行を除去する純変換（rd→rd）。
+  # RD テキストから指定 target の #@include 行を除去する純変換（rd→rd）。
   #
   # 新パイプラインでは grouping include（エンティティの取り込み）は
   # glob + front matter による発見に置き換わるため、ライブラリ概要ファイル等から

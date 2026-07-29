@@ -713,7 +713,7 @@ class TestRRDToMarkdown < Test::Unit::TestCase
 
   def test_extra_front_matter_roundtrip_drops_injected_keys
     # 注入キーはオーケストレータ由来の横断情報なので、md→rd では body に現れず
-    # 元の RRD がそのまま復元される
+    # 元の RD がそのまま復元される
     require 'bitclust/markdown_to_rrd'
     rrd = "= class Bar < Object\ninclude Enumerable\n\n説明\n"
     md = BitClust::RRDToMarkdown.convert(rrd,
@@ -947,7 +947,7 @@ class TestRRDToMarkdown < Test::Unit::TestCase
     db1 = BitClust::MethodDatabase.dummy(params)
     lib1 = BitClust::RRDParser.new(db1).parse_file(rrd_path, "_builtin", params)
 
-    # RRD → MD → RRD → parse
+    # RD → MD → RD → parse
     rrd = File.read(rrd_path)
     md = BitClust::RRDToMarkdown.convert(rrd)
     rrd2 = BitClust::MarkdownToRRD.convert(md)

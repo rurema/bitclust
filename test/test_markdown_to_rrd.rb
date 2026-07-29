@@ -348,7 +348,7 @@ class TestMarkdownToRRD < Test::Unit::TestCase
   end
 
   def test_front_matter_relations_grammar_order
-    # RRD 文法順（alias → extend → include）で body に復元する
+    # RD 文法順（alias → extend → include）で body に復元する
     md = "---\ninclude:\n  - I\nextend:\n  - E\nalias:\n  - A\n---\n# class Foo < Object\n"
     expected = "= class Foo < Object\nalias A\nextend E\ninclude I\n"
     assert_equal expected, convert(md)
@@ -490,7 +490,7 @@ class TestMarkdownToRRD < Test::Unit::TestCase
     md = File.read(md_path)
     result = convert(md)
 
-    # 構造的に正しい RRD が生成されていることを検証
+    # 構造的に正しい RD が生成されていることを検証
     assert_match(/\A= module Comparable\n/, result)
     assert_match(/^== Instance Methods\n/, result)
     assert_match(/^--- ==\(other\) -> bool$/, result)

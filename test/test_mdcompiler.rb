@@ -1017,7 +1017,7 @@ class TestMDCompiler < Test::Unit::TestCase
 
   def test_md_ref_module_function_display_typemark
     # bitclust#282: Markdown ソースの [m:Kernel?.at_exit] は inline 復元時に
-    # ".#" へ正規化される(RRD の MethodSpec 互換)が、表示ラベルは DB
+    # ".#" へ正規化される(RD の MethodSpec 互換)が、表示ラベルは DB
     # バージョンが 4.0 以降なら "?." に戻す。3.4 以前は ".#" のまま。
     # どちらの表記で書かれていても、ページの見出し表記と常に一致する
     src = "### def m(v) -> String\n\n" \
