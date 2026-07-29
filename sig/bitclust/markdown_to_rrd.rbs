@@ -1,5 +1,5 @@
 module BitClust
-  # Markdown（MARKUP_SPEC 形式）のドキュメントを RRD 形式へ復元する変換器
+  # Markdown（MARKUP_SPEC 形式）のドキュメントを RD 形式へ復元する変換器
   class MarkdownToRRD
     @src: String
 
@@ -13,7 +13,7 @@ module BitClust
 
     @front_matter: Hash[String, untyped]
 
-    # クラス関係（H1 直後、RRD 文法順 alias → extend → include）。
+    # クラス関係（H1 直後、RD 文法順 alias → extend → include）。
     # front matter が無いソースでは未設定（nil）だが、参照側は常に
     # 真偽ガード付きなので実用上 non-nil として扱う
     @class_relations: Array[String]

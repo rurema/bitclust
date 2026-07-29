@@ -4,7 +4,7 @@ require 'test/unit'
 
 require 'bitclust/include_pruner'
 
-# IncludePruner: RRD テキストから指定 target の #@include 行を除去する純変換（rd→rd）。
+# IncludePruner: RD テキストから指定 target の #@include 行を除去する純変換（rd→rd）。
 # 新パイプラインでは grouping include（エンティティの取り込み）は glob + front matter の
 # 発見に置き換わるため、ライブラリ概要ファイルから除去する。fragment include は温存。
 #

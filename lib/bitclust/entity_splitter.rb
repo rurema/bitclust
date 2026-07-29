@@ -4,7 +4,7 @@ require 'bitclust/include_graph'
 require 'bitclust/whole_file_gate'
 
 module BitClust
-  # マルチエンティティ RRD のエンティティ単位分割（O3）。
+  # マルチエンティティ RD のエンティティ単位分割（O3）。
   #
   # 「ヘッダ関係（include/extend/alias）を持つエンティティは自分のファイルを持ち、
   # 関係は front matter に一元化する」ため、関係を持つマルチエンティティファイルを

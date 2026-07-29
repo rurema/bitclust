@@ -211,7 +211,7 @@ module BitClust
         end
       end
       leading.concat(pending)   # category に消費されなかった #@ 行（通常は無い）
-      # クラス関係（H1 直後、RRD 文法順 alias → extend → include）
+      # クラス関係（H1 直後、RD 文法順 alias → extend → include）
       @class_relations = []
       %w[alias extend include].each do |k|
         next unless blocks[k]
@@ -604,7 +604,7 @@ module BitClust
     end
 
     def convert_bold_number(line)
-      # **N.** text → N. text (太字番号テキスト → RRD のテキスト)
+      # **N.** text → N. text (太字番号テキスト → RD のテキスト)
       @out << convert_inline_refs(line.sub(/\A\*\*(\d+\.)\*\*\s/, '\\1 '))
       advance
     end

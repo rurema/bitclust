@@ -102,7 +102,7 @@ LIBRARIES → roots（各 <lib>.rd）
   - `lib/bitclust/include_graph.rb` — `IncludeGraph`（faithful 解析）+ `Scope`（範囲パラメータ化）+
     `front_matter_map(scope)`（注入値の計算。多重所属は警告スキップ、同一ライブラリ複数サイトは区間 hull）
   - `RRDToMarkdown` に `extra_front_matter:`（type/library/since/until、§1.7 順で emit、
-    since/until は常にクォート）。`MarkdownToRRD` は注入キーを無視するので md→rd で元 RRD が復元される
+    since/until は常にクォート）。`MarkdownToRRD` は注入キーを無視するので md→rd で元 RD が復元される
   - `bin/rrd2md --graph [--scope LO,HI]` — バッチ変換に注入を配線
   - `tools/md-roundtrip-check.rb [--inject]` — ラウンドトリップ検証（都度 /tmp に再作成していたものを恒久化）
   - 検証: 全 828 ファイル中 823 byte-exact（残5は既知の空白差のみ・注入の有無で不変）、

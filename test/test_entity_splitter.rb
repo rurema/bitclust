@@ -5,7 +5,7 @@ require 'test/unit'
 require 'bitclust/entity_splitter'
 require 'bitclust/include_graph'
 
-# EntitySplitter: マルチエンティティ RRD をエンティティ単位に分割する（O3）。
+# EntitySplitter: マルチエンティティ RD をエンティティ単位に分割する（O3）。
 # 2段階:
 # 1. resolve_header_gates — スコープ定数（常に真/偽）の版ゲートのうち、最初の内容行が
 #    エンティティ H1 のブロックを解決する（活きている枝を残しゲートを外す）。

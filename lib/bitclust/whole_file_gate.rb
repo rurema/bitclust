@@ -5,7 +5,7 @@ require 'bitclust/include_graph'
 module BitClust
   # ファイル全体を包む単一の版ゲート（#@else 無し）の検出と解除（O4）。
   #
-  # 旧 RRD ではライブラリ/エンティティ自体の版ゲートをファイル全体の
+  # 旧 RD ではライブラリ/エンティティ自体の版ゲートをファイル全体の
   # #@since/#@until/#@if ラップで表現していた。新パイプラインでは
   # front matter の since/until（構造ゲート）で表現するため、
   # スコープの下で「常に真」または「since/until で表現できる」ラップは外す。

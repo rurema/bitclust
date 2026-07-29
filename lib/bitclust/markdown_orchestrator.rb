@@ -10,7 +10,7 @@ require 'bitclust/entity_splitter'
 require 'bitclust/rrd_to_markdown'
 
 module BitClust
-  # RRD ツリー → Markdown ツリー変換のクロスファイル方針を束ねるオーケストレータ。
+  # RD ツリー → Markdown ツリー変換のクロスファイル方針を束ねるオーケストレータ。
   #
   # 単一ファイル記法変換（RRDToMarkdown）はそのままに、include グラフの解析結果から
   # 各ファイルへ次を適用する:
@@ -46,7 +46,7 @@ module BitClust
     # front_matter = 注入する front matter
     Unit = Struct.new(:path, :rrd, :front_matter)
 
-    # relpath の RRD を出力単位の列に還元する。
+    # relpath の RD を出力単位の列に還元する。
     # ヘッダ関係（include/extend/alias）を持つマルチエンティティファイルは
     # エンティティ単位に分割する（関係の front matter 一元化のため）。
     # 関係を持たない束ね（Errno 族等）と lib+単一エンティティ兼用ファイルは
@@ -95,15 +95,15 @@ module BitClust
       RRDToMarkdown.convert(unit.rrd, extra_front_matter: unit.front_matter)
     end
 
-    # relpath の RRD を新パイプライン形の Markdown へ変換する（分割なしファイル用）
+    # relpath の RD を新パイプライン形の Markdown へ変換する（分割なしファイル用）
     def convert(relpath, rrd)
       us = units(relpath, rrd)
       raise ArgumentError, "#{relpath} splits into #{us.size} files, use units" if us.size > 1
       convert_unit(us.first)
     end
 
-    # 変換の rd 側到達点（prune + 全体ゲート解除 + 定数 H1 ゲート解決後の RRD）と
-    # front matter。MarkdownToRRD.convert(convert(...)) はこの RRD と一致する
+    # 変換の rd 側到達点（prune + 全体ゲート解除 + 定数 H1 ゲート解決後の RD）と
+    # front matter。MarkdownToRRD.convert(convert(...)) はこの RD と一致する
     def reduce(relpath, rrd)
       front_matter = (@extra[relpath] || {}).dup
       rrd = IncludePruner.prune(rrd, @prune_sites[relpath] || [])

@@ -825,7 +825,7 @@ module BitClust
     end
 
     def convert_text_number(line)
-      # RRD の "N. text" → MD の "**N.** text" (太字番号テキスト)
+      # RD の "N. text" → MD の "**N.** text" (太字番号テキスト)
       converted = line.sub(/\A(\d+\.)\s/, '**\\1** ')
       @out << convert_inline_refs(converted)
       advance
