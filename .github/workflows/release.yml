@@ -1,0 +1,54 @@
+name: Release
+
+# タグ push で起動し、RubyGems.org への公開に成功してから GitHub release を
+# 作成する(immutable releases 対応のため、release 作成をトリガーにしない)。
+# 認証は rubygems.org の trusted publishing(OIDC)。事前に rubygems.org 側で
+# bitclust-core / bitclust-dev / refe2 の 3 gem それぞれに、このリポジトリの
+# release.yml(environment: release)を trusted publisher として登録しておくこと。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write   # GitHub release の作成
+      id-token: write   # trusted publishing (OIDC)
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+
+      - name: Build gems
+        run: |
+          set -x
+          for gemspec in *.gemspec; do
+            gem build "$gemspec"
+          done
+
+      - name: Configure trusted publishing credentials
+        uses: rubygems/configure-rubygems-credentials@v2.1.0
+
+      - name: Push gems to RubyGems.org
+        run: |
+          set -x
+          for gem in *.gem; do
+            gem push "$gem"
+          done
+
+      # gem push がすべて成功した後にのみ GitHub release を作る
+      # (immutable releases では release 資産を後から差し替えられないため)
+      - name: Create GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes *.gem
+        env:
+          GH_TOKEN: ${{ github.token }}
