@@ -341,6 +341,41 @@ class TestMDParser < Test::Unit::TestCase
     end
   end
 
+  def test_update_by_markdowntree_parse_error_suggests_gem_update
+    # manual/ が新しい bitclust を必要とする記法を含むとき、古い gem では
+    # パースエラーになる。原因へたどり着けるよう gem 更新の案内を添える
+    require 'tmpdir'
+    Dir.mktmpdir do |root|
+      write = ->(rel, s) {
+        path = File.join(root, rel)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, s)
+      }
+      write.call('mylib.md', "---\ntype: library\n---\nmylib。\n")
+      write.call('mylib/Foo.md', <<~MD)
+        ---
+        library: mylib
+        ---
+        # class Foo < Object
+
+        クラス。
+
+        ## Instance Methods
+
+        ### def bar: (Integer) -> String
+
+        RBS 形式のシグネチャ(未対応)。
+      MD
+
+      db = BitClust::MethodDatabase.dummy(PARAMS)
+      error = assert_raise(BitClust::ParseError) do
+        db.update_by_markdowntree(root)
+      end
+      assert_include error.message, "unsupported method signature"
+      assert_include error.message, "bitclust の gem を更新すると解決するかもしれません"
+    end
+  end
+
   def test_copy_doc_md_keeps_relative_location
     # Windows CI 対応: doc エントリの source_location は md_root と同じ形
     # （相対で渡せば相対 manual/doc/...）で格納する。絶対パス化すると
