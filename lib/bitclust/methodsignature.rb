@@ -21,7 +21,7 @@ module BitClust
 
     METHOD_SIGNATURE_RE = /\A
         --- \s*
-          (?: (?:#{CLASS_PATH_RE} #{TYPEMARK_RE})? (#{METHOD_NAME_RE})
+          (?: (?:#{CLASS_PATH_RE} #{TYPEMARK_RE} | self\.)? (#{METHOD_NAME_RE})
           | (#{GVAR_RE})
           )                 \s*         # method name ($1) or gvar name ($2)
         (?: \( (.*?) \)     \s* )?      # parameters (optional); $3=parameter_list

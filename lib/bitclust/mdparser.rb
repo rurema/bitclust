@@ -348,6 +348,10 @@ module BitClust
       end
     end
 
+    # `def self.name` 形式。type は singleton に確定し、klass は
+    # 見出しコンテキスト（H1/H2）から補完される
+    SELF_SIGNATURE = /\A---\s*self\.(#{METHOD_NAME_RE})/
+
     # md シグネチャ行を rd 形式（--- ...）へ落とし、既存の
     # Signature パースを継承する。エラー時は元の行を報告する
     def method_signature(line)
@@ -355,12 +359,14 @@ module BitClust
       begin
         # 描画（MethodSignature.parse）が受理できないシグネチャは
         # statichtml まで進んでから落ちる（か、誤った名前で DB に入る）ので
-        # パース時に拒否する。RBS 形式（def name:）や self. プレフィクスが該当
+        # パース時に拒否する。RBS 形式（def name:）が該当
         MethodSignature.parse(rd_line)
       rescue ParseError
         parse_error "unsupported method signature", line
       end
       case
+      when m = SELF_SIGNATURE.match(rd_line)
+        Signature.new(nil, '.', m[1])
       when m = SIGNATURE.match(rd_line)
         klass, typemark_, name = m.captures
         typemark = _ = typemark_
