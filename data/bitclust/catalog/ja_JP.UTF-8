@@ -7,7 +7,7 @@ Added/Redefined Methods
 All Classes
 クラス一覧
 All Functions
-関数一覧
+C API 関数一覧
 All Libraries
 ライブラリ一覧
 Ancestor Methods
@@ -51,7 +51,7 @@ File
 FileFormat
 ファイルフォーマット
 Function Index
-関数一覧
+C API 関数一覧
 Index
 目次
 I/O
@@ -112,6 +112,8 @@ Text
 テキスト
 Thread
 スレッド
+This is a list of functions provided by the Ruby C API for developing Ruby itself and C extension libraries. These functions cannot be called directly from Ruby programs.
+Ruby の C API(C 言語 API)の関数の一覧です。Ruby 本体や拡張ライブラリの開発に使うもので、Ruby プログラムから直接呼び出す関数ではありません。
 This reference manual is for a version of Ruby that is no longer maintained.
 このマニュアルは既にメンテナンスが終了したバージョンの Ruby を対象としています。
 Undefined Methods for Explanation

@@ -979,7 +979,7 @@ HERE
 
   data("library root"    => ['[[lib:/]]',        '<a href="dummy/library/">ライブラリ一覧</a>'],
        "builtin library" => ['[[lib:_builtin]]', '<a href="dummy/library/_builtin">組み込みライブラリ</a>'],
-       "C API root"      => ['[[f:/]]',          '<a href="dummy/function/">関数一覧</a>'])
+       "C API root"      => ['[[f:/]]',          '<a href="dummy/function/">C API 関数一覧</a>'])
   def test_bracket_link_with_catalog(data)
     target, expected = data
     prefix = File.expand_path('../data/bitclust/catalog', __dir__)
