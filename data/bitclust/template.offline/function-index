@@ -36,6 +36,7 @@
 </header>
 
 <main>
+<p><%= _('This is a list of functions provided by the Ruby C API for developing Ruby itself and C extension libraries. These functions cannot be called directly from Ruby programs.') %></p>
 <table class="entries functions">
 <%
     headline_push
