@@ -202,6 +202,10 @@ module BitClust
         # lib ファイルの値へ戻す
         lib_entry.source_location = lib_location
       end
+    rescue ParseError => e
+      # manual/ には今後もより新しい bitclust を必要とする記法が入りうる。
+      # 古い gem でパースに失敗したとき原因へたどり着けるよう案内を添える
+      raise ParseError, "#{e.message} (ヒント: マニュアルがより新しい bitclust を必要とする記法を含んでいる可能性があります。bitclust の gem を更新すると解決するかもしれません)", e.backtrace
     end
 
     # since は「その版以降」、until は「その版未満」（ブリッジの
