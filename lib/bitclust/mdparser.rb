@@ -316,7 +316,7 @@ module BitClust
       sigs = sig_lines.map {|line| method_signature(line) }
       # キーワード不一致はより具体的なメッセージになるよう
       # check_chunk_signatures(signature crash)より先に検査する
-      check_entry_style(sig_lines)
+      check_entry_style(sig_lines, sigs)
       mainsig = check_chunk_signatures(sigs, sig_lines[0])
       names = sigs.map {|s| s.name }.compact.uniq.sort
       Chunk.new(mainsig, names, src)
@@ -335,15 +335,21 @@ module BitClust
       '$'  => 'gvar',
     }.freeze
 
-    # エントリキーワードがセクションの種別と一致することの検査
-    def check_entry_style(sig_lines)
+    # エントリの書式とセクションの一致検査。
+    # - キーワードがセクションの種別と一致すること
+    # - 特異メソッドは `def Klass.name` / `def self.name` のプレフィクス
+    #   必須（MARKUP_SPEC §3.1。def 行だけでメソッド種別が分かるようにする）
+    def check_entry_style(sig_lines, sigs)
       cxt = @context.signature
       return unless cxt && cxt.type
       expected = EXPECTED_ENTRY_KEYWORD[cxt.type] or return
-      sig_lines.each do |line|
-        keyword = line[ENTRY_KEYWORD_RE, 1]
+      sig_lines.zip(sigs).each do |line, sig|
+        keyword = (line || raise)[ENTRY_KEYWORD_RE, 1]
         unless keyword == expected
           parse_error "entry keyword `#{keyword}' does not match this section (expected `#{expected}')", line
+        end
+        if cxt.type == '.' && sig && sig.type.nil?
+          parse_error "singleton method entry must be written as `def #{cxt.klass || 'Klass'}.name' or `def self.name'", line
         end
       end
     end

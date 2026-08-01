@@ -82,7 +82,7 @@ class TestMDParser < Test::Unit::TestCase
 
       ## Class Methods
 
-      ### def new -> Comparable
+      ### def Comparable.new -> Comparable
 
       生成。
     MD
@@ -619,6 +619,27 @@ class TestMDParser < Test::Unit::TestCase
     assert_equal('3.0', entry.since_of('fuga2'))
   end
 
+  def test_entry_style_bare_def_in_singleton_section_is_rejected
+    # MARKUP_SPEC §3.1: 特異メソッドはプレフィクス必須（def 行だけで
+    # メソッド種別が分かるようにする）
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## Class Methods
+
+      ### def build(x) -> Foo
+
+      プレフィクスなし。
+    MD
+    error = assert_raise(BitClust::ParseError) { parse_md(md) }
+    assert_include error.message, "singleton method entry must be written as `def Foo.name' or `def self.name'"
+  end
+
   def test_entry_style_keyword_section_mismatch_is_rejected
     # rurema/doctree#3291 型の分類間違い: キーワードとセクションの不一致
     base = <<~MD
@@ -684,9 +705,9 @@ class TestMDParser < Test::Unit::TestCase
 
       Klass 形式。
 
-      ### def create(x) -> Foo
+      ### def self.create(x) -> Foo
 
-      プレフィクスなし（型はセクションで決まる。§3.1 の推奨は Klass 形式）。
+      self 形式。
 
       ## Instance Methods
 
