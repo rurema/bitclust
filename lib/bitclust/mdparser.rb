@@ -314,9 +314,38 @@ module BitClust
       src = (header + body).join('')
       src.location = sig_lines[0].location
       sigs = sig_lines.map {|line| method_signature(line) }
+      # キーワード不一致はより具体的なメッセージになるよう
+      # check_chunk_signatures(signature crash)より先に検査する
+      check_entry_style(sig_lines)
       mainsig = check_chunk_signatures(sigs, sig_lines[0])
       names = sigs.map {|s| s.name }.compact.uniq.sort
       Chunk.new(mainsig, names, src)
+    end
+
+    # セクション（h2）の型ごとに期待するエントリキーワード。
+    # キーワードは型決定には使われない（型はセクションで決まる）ため、
+    # 食い違ったまま書けてしまう分類間違い（rurema/doctree#3291 の
+    # 「Class Methods 配下の const」等）をパース時に検出する
+    ENTRY_KEYWORD_RE = /\A### (module_function def|def|const|gvar) /
+    EXPECTED_ENTRY_KEYWORD = {
+      '#'  => 'def',
+      '.'  => 'def',
+      '.#' => 'module_function def',
+      '::' => 'const',
+      '$'  => 'gvar',
+    }.freeze
+
+    # エントリキーワードがセクションの種別と一致することの検査
+    def check_entry_style(sig_lines)
+      cxt = @context.signature
+      return unless cxt && cxt.type
+      expected = EXPECTED_ENTRY_KEYWORD[cxt.type] or return
+      sig_lines.each do |line|
+        keyword = line[ENTRY_KEYWORD_RE, 1]
+        unless keyword == expected
+          parse_error "entry keyword `#{keyword}' does not match this section (expected `#{expected}')", line
+        end
+      end
     end
 
     # md シグネチャ行を rd 形式（--- ...）へ落とし、既存の

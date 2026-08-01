@@ -23,6 +23,11 @@ module BitClust
     # メソッド系シグネチャ（キーワード付き h3）
     SIG_RE: ::Regexp
 
+    # エントリキーワード検査（セクション種別との一致）
+    ENTRY_KEYWORD_RE: ::Regexp
+
+    EXPECTED_ENTRY_KEYWORD: ::Hash[::String, ::String]
+
     # H1（エンティティ見出し）。エスケープされた行頭リテラル \# は除外
     H1_RE: ::Regexp
 
@@ -76,5 +81,8 @@ module BitClust
     def read_chunk: (LineInput f) -> Chunk
 
     def method_signature: (String line) -> RRDParser::Signature
+
+    # エントリキーワードがセクションの種別と一致することの検査
+    def check_entry_style: (Array[String] sig_lines) -> void
   end
 end
