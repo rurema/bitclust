@@ -570,4 +570,92 @@ class TestMDParser < Test::Unit::TestCase
     assert_equal('2.0.0', entry.since_of('fuga'))
     assert_equal('3.0', entry.since_of('fuga2'))
   end
+
+  def test_entry_style_keyword_section_mismatch_is_rejected
+    # rurema/doctree#3291 型の分類間違い: キーワードとセクションの不一致
+    base = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## %s
+
+      ### %s
+
+      不一致。
+    MD
+    [
+      # Class Methods 配下の const（#3291 の実例）
+      ['Class Methods', 'const CURRENT -> Foo', "entry keyword `const' does not match this section (expected `def')"],
+      # Constants 配下の gvar
+      ['Constants', 'gvar $foo -> Foo', "entry keyword `gvar' does not match this section (expected `const')"],
+      # Instance Methods 配下の const
+      ['Instance Methods', 'const BAR -> Integer', "entry keyword `const' does not match this section (expected `def')"],
+    ].each do |section, sig, message|
+      error = assert_raise(BitClust::ParseError, "#{section} / #{sig}") do
+        parse_md(base % [section, sig])
+      end
+      assert_include error.message, message
+    end
+  end
+
+  def test_entry_style_module_functions_require_keyword
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # module Foo
+
+      テスト。
+
+      ## Module Functions
+
+      ### def bar -> nil
+
+      module_function キーワードなし。
+    MD
+    error = assert_raise(BitClust::ParseError) { parse_md(md) }
+    assert_include error.message, "entry keyword `def' does not match this section (expected `module_function def')"
+  end
+
+  def test_entry_style_accepts_consistent_forms
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## Class Methods
+
+      ### def Foo.build(x) -> Foo
+
+      Klass 形式。
+
+      ### def create(x) -> Foo
+
+      プレフィクスなし（型はセクションで決まる。§3.1 の推奨は Klass 形式）。
+
+      ## Instance Methods
+
+      ### def each {|x| ... } -> self
+
+      素の def。
+
+      ## Constants
+
+      ### const BAR -> Integer
+
+      定数。
+    MD
+    _, lib = parse_md(md)
+    entries = lib.classes.first.entries
+    assert_equal [["build"], ["create"], ["each"], ["BAR"]], entries.map(&:names)
+    assert_equal [:singleton_method, :singleton_method, :instance_method, :constant],
+                 entries.map(&:type)
+  end
 end
