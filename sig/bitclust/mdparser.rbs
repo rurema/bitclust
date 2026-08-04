@@ -28,6 +28,9 @@ module BitClust
 
     EXPECTED_ENTRY_KEYWORD: ::Hash[::String, ::String]
 
+    # `def self.name` 形式（type は singleton に確定）
+    SELF_SIGNATURE: ::Regexp
+
     # H1（エンティティ見出し）。エスケープされた行頭リテラル \# は除外
     H1_RE: ::Regexp
 

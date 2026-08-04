@@ -181,7 +181,7 @@ class TestMDParser < Test::Unit::TestCase
   end
 
   def test_unsupported_signature_forms_are_rejected
-    # RBS 形式（MARKUP_SPEC §3.2 で構想）と self. プレフィクスは描画側
+    # RBS 形式（MARKUP_SPEC §3.2 で構想）は描画側
     # （MethodSignature.parse）が受理できないため、パース時に拒否する
     base = <<~MD
       ---
@@ -197,10 +197,58 @@ class TestMDParser < Test::Unit::TestCase
 
       説明。
     MD
-    ['### def each: () { (untyped) -> void } -> self',
-     '### def self.new(size = 0) -> Foo'].each do |sig|
+    ['### def each: () { (untyped) -> void } -> self'].each do |sig|
       assert_raise(BitClust::ParseError, sig) { parse_md(base % sig) }
     end
+  end
+
+  def test_self_and_class_name_prefixed_signatures
+    # クラスメソッドは `def self.name` / `def Klass.name` 形式でも書ける。
+    # どちらも singleton method として登録され、名前にプレフィクスは含まない
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## Class Methods
+
+      ### def self.build(x) -> Foo
+
+      self. 形式。
+
+      ### def Foo.create(x) -> Foo
+
+      Klass. 形式。
+    MD
+    _, lib = parse_md(md)
+    entries = lib.classes.first.entries
+    assert_equal [["build"], ["create"]], entries.map(&:names)
+    assert_equal [:singleton_method, :singleton_method], entries.map(&:type)
+    # source には書かれたままの md が入る
+    assert_include entries[0].source, "### def self.build(x) -> Foo"
+  end
+
+  def test_self_prefixed_signature_in_instance_methods_section_is_rejected
+    # self. は singleton 確定なので Instance Methods セクションとは矛盾する
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## Instance Methods
+
+      ### def self.bar -> nil
+
+      矛盾。
+    MD
+    error = assert_raise(BitClust::ParseError) { parse_md(md) }
+    assert_include error.message, "signature crash"
   end
 
   def test_library_file_with_category
