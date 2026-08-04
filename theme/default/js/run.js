@@ -134,6 +134,20 @@ function setupBlock(pre, runner) {
   }
   group.prepend(button)
 
+  // RUN の使い方と制限(ruby.wasm で動かないサンプルがあること等)を
+  // 説明するヘルプページの RUN 節への動線。リンク先はページごとに相対
+  // URL が変わるため、サーバー側が layout の meta で埋め込んだ値を使う
+  const helpUrl = document.querySelector('meta[name="rurema-run-help"]')?.content
+  if (helpUrl) {
+    const help = document.createElement('a')
+    help.className = 'highlight__help-link'
+    help.href = helpUrl
+    help.textContent = '?'
+    help.title = 'RUN ボタンのヘルプ'
+    help.setAttribute('aria-label', 'RUN ボタンのヘルプ')
+    group.append(help)
+  }
+
   let output
   let outputTextNode
   const ensureOutput = () => {
