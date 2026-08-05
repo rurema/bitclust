@@ -276,11 +276,20 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
 /* for ?(RUN のヘルプページへのリンク。highlight__button-group の中で
    COPY の右に入る)。ボタン(RUN・COPY)と違いページ遷移するリンクなので、
    色・ホバーはサイト共通のリンクの見た目(a のスタイル)に任せて、
-   ここでは配置とクリック領域だけ整える */
+   ここでは丸囲みの形と配置だけ整える */
 .highlight__help-link {
   display: inline-block;
+  box-sizing: border-box;
+  width: 1.5em;
+  height: 1.5em;
+  line-height: calc(1.5em - 2px);
+  text-align: center;
+  /* ただの ? だとクリックできると気付きにくいので、丸囲みはてなにして
+     ヘルプアイコンらしくする。枠は currentColor なので、リンク色にも
+     ホバーの反転(白文字+#33a 背景)にもそのまま追従する */
+  border: 1px solid currentColor;
+  border-radius: 50%;
   margin: 0 0.25em 0.25em 0.5em;
-  padding: 0.25em;
 }
 
 /* サンプルコードのキャプション。pre の上に密着したタブとして表示する
