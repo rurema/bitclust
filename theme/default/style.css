@@ -274,20 +274,13 @@ pre.highlight.ruby[data-editing="true"] > code:focus {
 }
 
 /* for ?(RUN のヘルプページへのリンク。highlight__button-group の中で
-   COPY の右に入る)。RUN・COPY と同じ見た目のリンク */
+   COPY の右に入る)。ボタン(RUN・COPY)と違いページ遷移するリンクなので、
+   色・ホバーはサイト共通のリンクの見た目(a のスタイル)に任せて、
+   ここでは配置とクリック領域だけ整える */
 .highlight__help-link {
   display: inline-block;
-  margin: 0 0 0.25em 0.5em;
-  padding: 0.25em 0.5em;
-  background: #fff;
-  cursor: pointer;
-  border: 1px solid #999;
-  border-radius: 4px;
-  color: inherit;
-  text-decoration: none;
-}
-.highlight__help-link:hover {
-  background: #EE8;
+  margin: 0 0.25em 0.25em 0.5em;
+  padding: 0.25em;
 }
 
 /* サンプルコードのキャプション。pre の上に密着したタブとして表示する
