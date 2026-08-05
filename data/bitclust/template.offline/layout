@@ -23,6 +23,7 @@
 <script src="<%=h custom_js_url('js/search_init.js') %>"></script>
 <% if run_ruby_wasm_url %>
 <meta name="rurema-run-ruby-wasm" content="<%=h run_ruby_wasm_url %>">
+<meta name="rurema-run-help" content="<%=h document_url('help') %>#run">
 <script type="module" src="<%=h custom_js_url('js/run.js') %>"></script>
 <% end %>
 </head>

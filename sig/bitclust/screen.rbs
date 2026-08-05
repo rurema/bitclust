@@ -291,6 +291,8 @@ module BitClust
 
     def search_url: () -> String
 
+    def document_url: (String name) -> String
+
     def library_index_url: () -> String
 
     def function_index_url: () -> String

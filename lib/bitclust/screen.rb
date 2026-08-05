@@ -403,6 +403,10 @@ module BitClust
       @urlmapper.search_url
     end
 
+    def document_url(name)
+      @urlmapper.document_url(name)
+    end
+
     def library_index_url
       @urlmapper.library_index_url
     end
