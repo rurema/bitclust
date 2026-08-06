@@ -516,6 +516,32 @@ HERE
       assert_equal "",       process(src, '4.0')
     end
 
+    def test_single_version
+      # 単一版のみの省略記法(#%if (version == "V") と同義)
+      src = gated('#%version 3.1')
+      assert_equal "out\n", process(src, '3.0')
+      assert_equal "in\n",  process(src, '3.1')
+      assert_equal "out\n", process(src, '3.2')
+    end
+
+    def test_single_version_quoted
+      src = gated('#%version "3.1"')
+      assert_equal "in\n",  process(src, '3.1')
+      assert_equal "out\n", process(src, '3.2')
+    end
+
+    def test_single_version_old_prefix
+      src = gated("\#@version 3.1")
+      assert_equal "in\n", process(src, '3.1')
+    end
+
+    def test_single_version_teeny
+      # 版名は文字列一致(teeny 付き版名は teeny まで一致したときのみ)
+      src = gated('#%version 2.7.0')
+      assert_equal "in\n",  process(src, '2.7.0')
+      assert_equal "out\n", process(src, '2.7')
+    end
+
     def test_two_dot_range_is_error
       # .. (終端を含む Range)は誤解を招くため受け付けない(#285)
       assert_raise(BitClust::ParseError) { process(gated('#%version 3.1..3.4'), '3.2') }
