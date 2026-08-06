@@ -159,7 +159,7 @@ module BitClust
     # 版範囲の省略記法(#285): #%version A...B は半開区間 [A, B)。
     # Ruby の終端排他 Range リテラルに合わせて3点ドット(.. は終端を含むと
     # 誤解しやすいため受け付けない)。A... は A 以上、...B は B 未満。
-    # ドットなしの単一版 V はその版のみ(version == "V"。#314)。
+    # ドットなしの単一版 V はその版のみ(version == "V")。
     # 版はダブルクォート付きでもよい
     VERSION_LITERAL = /"(\d+(?:\.\d+)*)"|(\d+(?:\.\d+)*)/
     def build_cond_by_range(line)

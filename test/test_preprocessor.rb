@@ -517,7 +517,7 @@ HERE
     end
 
     def test_single_version
-      # bitclust#314: 単一版のみの省略記法(#%if (version == "V") と同義)
+      # 単一版のみの省略記法(#%if (version == "V") と同義)
       src = gated('#%version 3.1')
       assert_equal "out\n", process(src, '3.0')
       assert_equal "in\n",  process(src, '3.1')
