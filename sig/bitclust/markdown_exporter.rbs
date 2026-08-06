@@ -1,0 +1,53 @@
+module BitClust
+  # statichtml の --markdown-output 用に、HTML の各ページと対になる Markdown を
+  # エントリの前処理済みソース(Markdown ツリー由来の md)から組み立てる
+  class MarkdownExporter
+    CLASS_SECTIONS: Array[[String, Symbol, Symbol]]
+
+    REF_SCHEME_RE: Regexp
+
+    @urlmapper: Subcommands::StatichtmlCommand::URLMapperEx
+
+    @html_suffix: String
+
+    def initialize: (Subcommands::StatichtmlCommand::URLMapperEx urlmapper, String html_suffix) -> void
+
+    def library_page: (LibraryEntry entry) -> String
+
+    def class_page: (ClassEntry entry) -> String
+
+    def method_page: (String method_name, Array[MethodEntry] entries) -> String
+
+    def doc_page: (DocEntry entry) -> String
+
+    def function_page: (FunctionEntry entry) -> String
+
+    def convert_text: (String str) -> String
+
+    private
+
+    def page: (String heading, String source, ?String trailer) -> String
+
+    def class_heading: (ClassEntry entry) -> String
+
+    def convert_line: (String line) -> String
+
+    def extract_code_spans: (String str, Array[String] saved) -> String
+
+    def find_code_span_close: (String str, Integer from, Integer run_len) -> Integer?
+
+    def convert_refs: (String str) -> String
+
+    def matching_delimiter: (String str, Integer open, String open_char, String close_char, ?space_ends: bool) -> Integer?
+
+    def bare_ref: (String type, String arg, String written) -> String?
+
+    def ref_url: (String type, String arg) -> String?
+
+    def md_suffix: (String html_url) -> String
+
+    def unescape_md_brackets: (String str) -> String
+
+    def escape_label: (String text) -> String
+  end
+end
