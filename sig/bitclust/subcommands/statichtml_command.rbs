@@ -31,6 +31,10 @@ module BitClust
 
       @sitemap_paths: Array[String]
 
+      @markdown_output: bool
+
+      @markdown_exporter: MarkdownExporter
+
       @outputdir: Pathname
 
       type manager_config = {
@@ -142,6 +146,14 @@ module BitClust
       def record_sitemap_path: (Pathname path) -> void
 
       def create_sitemap: (Pathname outputdir, String baseurl) -> void
+
+      def markdown_export?: (Database db) -> bool
+
+      def warn_markdown_output_skipped: (Database db, String label) -> void
+
+      def create_markdown_file_p: (any_entry entry, Pathname html_path, Database db) -> void
+
+      def markdown_path: (Pathname html_path) -> Pathname
 
       def create_html_file: (any_entry entry, ScreenManager manager, Pathname outputdir, Database db) -> void
 

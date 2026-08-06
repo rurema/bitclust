@@ -202,3 +202,98 @@ class TestStatichtmlSitemap < Test::Unit::TestCase
     end
   end
 end
+
+class TestStatichtmlMarkdownOutput < Test::Unit::TestCase
+  def build_command(markdown_output: true)
+    cmd = BitClust::Subcommands::StatichtmlCommand.new
+    argv = ["--fs-casesensitive"]
+    argv.unshift("--markdown-output") if markdown_output
+    cmd.parse(argv)
+    cmd.instance_variable_set(:@verbose, false)
+    cmd.send(:create_manager_config)
+    urlmapper = cmd.instance_variable_get(:@urlmapper)
+    urlmapper.bitclust_html_base = '..'
+    cmd.instance_variable_set(:@markdown_exporter,
+                              BitClust::MarkdownExporter.new(urlmapper, '.html'))
+    cmd
+  end
+
+  def markdown_db
+    db = BitClust::MethodDatabase.dummy({ "version" => "3.4" })
+    def db.properties = { 'source_format' => 'markdown' }
+    db
+  end
+
+  def test_option_defaults_to_false
+    cmd = BitClust::Subcommands::StatichtmlCommand.new
+    assert_false(cmd.instance_variable_get(:@markdown_output))
+  end
+
+  def test_option_is_parsed
+    cmd = BitClust::Subcommands::StatichtmlCommand.new
+    cmd.parse(["--markdown-output"])
+    assert_true(cmd.instance_variable_get(:@markdown_output))
+  end
+
+  def test_markdown_path_replaces_html_suffix
+    cmd = BitClust::Subcommands::StatichtmlCommand.new
+    assert_equal("out/class/ARGF.class.md",
+                 cmd.send(:markdown_path, Pathname.new("out/class/ARGF.class.html")).to_s)
+  end
+
+  def test_writes_md_next_to_html_for_markdown_db
+    Dir.mktmpdir do |dir|
+      cmd = build_command
+      db = markdown_db
+      entry = BitClust::DocEntry.new(db, "help")
+      entry.title = "ヘルプ"
+      entry.source = "\n[c:String] を参照。\n"
+      path = Pathname.new(dir) + "doc/help.html"
+      FileUtils.mkdir_p(path.dirname)
+      cmd.send(:create_markdown_file_p, entry, path, db)
+      md = File.read(File.join(dir, "doc", "help.md"))
+      assert_equal("# ヘルプ\n\n[String](../class/String.md) を参照。\n", md)
+    end
+  end
+
+  def test_skips_md_for_non_markdown_db
+    Dir.mktmpdir do |dir|
+      cmd = build_command
+      db = BitClust::MethodDatabase.dummy({ "version" => "3.4" })
+      def db.properties = {}
+      entry = BitClust::DocEntry.new(db, "help")
+      entry.title = "ヘルプ"
+      entry.source = "\n本文\n"
+      path = Pathname.new(dir) + "doc/help.html"
+      FileUtils.mkdir_p(path.dirname)
+      cmd.send(:create_markdown_file_p, entry, path, db)
+      assert_false(File.exist?(File.join(dir, "doc", "help.md")))
+    end
+  end
+
+  def test_warns_when_db_is_not_markdown
+    cmd = build_command
+    db = BitClust::MethodDatabase.dummy({ "version" => "3.4" })
+    def db.properties = {}
+    orig_stderr, $stderr = $stderr, StringIO.new
+    begin
+      cmd.send(:warn_markdown_output_skipped, db, "the method database")
+      assert_match(/--markdown-output is ignored/, $stderr.string)
+    ensure
+      $stderr = orig_stderr
+    end
+  end
+
+  def test_no_warning_without_option
+    cmd = build_command(markdown_output: false)
+    db = BitClust::MethodDatabase.dummy({ "version" => "3.4" })
+    def db.properties = {}
+    orig_stderr, $stderr = $stderr, StringIO.new
+    begin
+      cmd.send(:warn_markdown_output_skipped, db, "the method database")
+      assert_equal("", $stderr.string)
+    ensure
+      $stderr = orig_stderr
+    end
+  end
+end

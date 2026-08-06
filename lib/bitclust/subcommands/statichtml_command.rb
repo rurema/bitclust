@@ -13,6 +13,7 @@ require 'bitclust/subcommand'
 require 'bitclust/progress_bar'
 require 'bitclust/silent_progress_bar'
 require 'bitclust/search_index_generator'
+require 'bitclust/markdown_exporter'
 
 module BitClust
   module Subcommands
@@ -125,6 +126,7 @@ module BitClust
         @run_ruby_wasm = nil
         @sitemap_baseurl = nil
         @sitemap_paths = []
+        @markdown_output = false
         @parser.banner = "Usage: #{File.basename($0, '.*')} statichtml [options]"
         @parser.on('-o', '--outputdir=PATH', 'Output directory') do |path|
           begin
@@ -170,6 +172,9 @@ module BitClust
         @parser.on('--sitemap-baseurl=URL', 'Generate sitemap.xml under the output directory, with <loc> built from this base URL (e.g. https://docs.ruby-lang.org/ja/3.4/). Omit to skip sitemap.xml generation (default)') do |url|
           @sitemap_baseurl = url
         end
+        @parser.on('--markdown-output', 'Also write each page as Markdown (.md next to the .html), assembled from the preprocessed Markdown sources. Ignored for databases not created from a Markdown tree') do
+          @markdown_output = true
+        end
         @parser.on('--no-stop-on-syntax-error', 'Do not stop on syntax error') do |boolean|
           @stop_on_syntax_error = boolean
         end
@@ -185,8 +190,10 @@ module BitClust
         db = MethodDatabase.new(prefix.to_s)
         fdb = FunctionDatabase.new(prefix.to_s)
         manager = ScreenManager.new(@manager_config)
+        @markdown_exporter = MarkdownExporter.new(@urlmapper, @suffix) if @markdown_output
 
         db.transaction do
+          warn_markdown_output_skipped(db, "the method database")
           methods = {} #: Hash[String, Array[MethodEntry]]
           db.methods.each_with_index do |entry, i|
             next if entry.undefined?
@@ -203,6 +210,7 @@ module BitClust
         end
 
         fdb.transaction do
+          warn_markdown_output_skipped(fdb, "the function database")
           create_html_entries("capi", fdb.functions, manager, fdb)
         end
 
@@ -419,6 +427,7 @@ HERE
           @urlmapper.bitclust_html_base = '..'
           path = outputdir + e.type_id.to_s + html_filename(encodename_package(e.name), @suffix)
           create_html_file_p(entry, manager, path, db)
+          create_markdown_file_p(e, path, db)
         when :function
           create_html_function_file(entry, manager, outputdir, db)
         else
@@ -435,6 +444,11 @@ HERE
         path = outputdir + e.type_id.to_s + encodename_package(e.klass.name) +
           e.typechar + html_filename(encodename_package(name), @suffix)
         create_html_file_p(entries, manager, path, db)
+        if markdown_export?(db)
+          create_file(markdown_path(path),
+                      @markdown_exporter.method_page(method_name, entries.sort),
+                      :verbose => @verbose)
+        end
       end
 
       def create_html_function_file(entry, manager, outputdir, db)
@@ -442,6 +456,7 @@ HERE
         @urlmapper.bitclust_html_base = '..'
         path = outputdir + entry.type_id.to_s + html_filename(entry.name, @suffix)
         create_html_file_p(entry, manager, path, db)
+        create_markdown_file_p(entry, path, db)
       end
 
       def create_html_file_p(entry, manager, path, db)
@@ -451,6 +466,36 @@ HERE
           f.write(html)
         end
         record_sitemap_path(path)
+      end
+
+      # --markdown-output は Markdown ツリー由来の DB でのみ有効。
+      # ソースが md でない(凍結版 RD など)DB では何も出力しない
+      def markdown_export?(db)
+        @markdown_output && db.properties['source_format'] == 'markdown'
+      end
+
+      def warn_markdown_output_skipped(db, label)
+        return if !@markdown_output || db.properties['source_format'] == 'markdown'
+        $stderr.puts "warning: --markdown-output is ignored for #{label}: it was not created from a Markdown tree"
+      end
+
+      def create_markdown_file_p(entry, html_path, db)
+        return unless markdown_export?(db)
+        content =
+          case entry.type_id
+          when :library then @markdown_exporter.library_page(_ = entry)
+          when :class then @markdown_exporter.class_page(_ = entry)
+          when :doc then @markdown_exporter.doc_page(_ = entry)
+          when :function then @markdown_exporter.function_page(_ = entry)
+          else return
+          end
+        create_file(markdown_path(html_path), content, :verbose => @verbose)
+      end
+
+      def markdown_path(html_path)
+        s = html_path.to_s
+        s = s.end_with?(@suffix) ? s[0, s.length - @suffix.length].to_s : s
+        Pathname.new("#{s}.md")
       end
 
       def create_file(path, str, options = {})
