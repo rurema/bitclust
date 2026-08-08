@@ -82,7 +82,7 @@ class TestMDParser < Test::Unit::TestCase
 
       ## Class Methods
 
-      ### def new -> Comparable
+      ### def Comparable.new -> Comparable
 
       生成。
     MD
@@ -229,6 +229,29 @@ class TestMDParser < Test::Unit::TestCase
     assert_equal [:singleton_method, :singleton_method], entries.map(&:type)
     # source には書かれたままの md が入る
     assert_include entries[0].source, "### def self.build(x) -> Foo"
+  end
+
+  def test_main_prefixed_signature_on_object_page
+    # object main のページでは main. プレフィクスで特異メソッドを書ける
+    # （main は fatal・ARGF.class と同様に文法上クラス名として扱われる）
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # object main
+
+      テスト。
+
+      ## Class Methods
+
+      ### def main.include(*modules) -> self
+
+      main. 形式。
+    MD
+    _, lib = parse_md(md)
+    entries = lib.classes.first.entries
+    assert_equal [["include"]], entries.map(&:names)
+    assert_equal [:singleton_method], entries.map(&:type)
   end
 
   def test_self_prefixed_signature_in_instance_methods_section_is_rejected
@@ -619,6 +642,27 @@ class TestMDParser < Test::Unit::TestCase
     assert_equal('3.0', entry.since_of('fuga2'))
   end
 
+  def test_entry_style_bare_def_in_singleton_section_is_rejected
+    # MARKUP_SPEC §3.1: 特異メソッドはプレフィクス必須（def 行だけで
+    # メソッド種別が分かるようにする）
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # class Foo < Object
+
+      テスト。
+
+      ## Class Methods
+
+      ### def build(x) -> Foo
+
+      プレフィクスなし。
+    MD
+    error = assert_raise(BitClust::ParseError) { parse_md(md) }
+    assert_include error.message, "singleton method entry must be written as `def Foo.name' or `def self.name'"
+  end
+
   def test_entry_style_keyword_section_mismatch_is_rejected
     # rurema/doctree#3291 型の分類間違い: キーワードとセクションの不一致
     base = <<~MD
@@ -684,9 +728,9 @@ class TestMDParser < Test::Unit::TestCase
 
       Klass 形式。
 
-      ### def create(x) -> Foo
+      ### def self.create(x) -> Foo
 
-      プレフィクスなし（型はセクションで決まる。§3.1 の推奨は Klass 形式）。
+      self 形式。
 
       ## Instance Methods
 

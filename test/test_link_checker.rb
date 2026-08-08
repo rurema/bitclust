@@ -38,7 +38,7 @@ class TestLinkChecker < Test::Unit::TestCase
 
     ## Class Methods
 
-    ### def baz -> nil
+    ### def Foo.baz -> nil
 
     baz です。
 

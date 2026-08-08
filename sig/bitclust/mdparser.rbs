@@ -23,7 +23,8 @@ module BitClust
     # メソッド系シグネチャ（キーワード付き h3）
     SIG_RE: ::Regexp
 
-    # エントリキーワード検査（セクション種別との一致）
+    # エントリキーワード検査（セクション種別との一致・特異メソッドの
+    # プレフィクス必須）
     ENTRY_KEYWORD_RE: ::Regexp
 
     EXPECTED_ENTRY_KEYWORD: ::Hash[::String, ::String]
@@ -85,7 +86,7 @@ module BitClust
 
     def method_signature: (String line) -> RRDParser::Signature
 
-    # エントリキーワードがセクションの種別と一致することの検査
-    def check_entry_style: (Array[String] sig_lines) -> void
+    # エントリの書式とセクションの一致検査
+    def check_entry_style: (Array[String] sig_lines, Array[RRDParser::Signature] sigs) -> void
   end
 end
