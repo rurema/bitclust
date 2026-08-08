@@ -231,6 +231,29 @@ class TestMDParser < Test::Unit::TestCase
     assert_include entries[0].source, "### def self.build(x) -> Foo"
   end
 
+  def test_main_prefixed_signature_on_object_page
+    # object main のページでは main. プレフィクスで特異メソッドを書ける
+    # （main は fatal・ARGF.class と同様に文法上クラス名として扱われる）
+    md = <<~MD
+      ---
+      library: _builtin
+      ---
+      # object main
+
+      テスト。
+
+      ## Class Methods
+
+      ### def main.include(*modules) -> self
+
+      main. 形式。
+    MD
+    _, lib = parse_md(md)
+    entries = lib.classes.first.entries
+    assert_equal [["include"]], entries.map(&:names)
+    assert_equal [:singleton_method], entries.map(&:type)
+  end
+
   def test_self_prefixed_signature_in_instance_methods_section_is_rejected
     # self. は singleton 確定なので Instance Methods セクションとは矛盾する
     md = <<~MD
