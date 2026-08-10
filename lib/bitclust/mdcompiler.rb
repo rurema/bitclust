@@ -405,11 +405,13 @@ module BitClust
       }
     end
 
+    # 列揃えはインラインスタイルで出す。align 属性は presentational hint
+    # としての扱いになり、テーマ CSS の text-align 指定に負けて効かない
     def table_row(row, tag, aligns)
       cells = split_table_row(row)
       string '<tr>'
       cells.each_with_index do |cell, i|
-        align = aligns[i] ? %Q( align="#{aligns[i]}") : ''
+        align = aligns[i] ? %Q( style="text-align:#{aligns[i]}") : ''
         string "<#{tag}#{align}>#{compile_text(cell)}</#{tag}>"
       end
       line '</tr>'
