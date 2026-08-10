@@ -348,48 +348,57 @@ dd {
     margin: 0.3em 0em 1em 4em;
 }
 
+/* 表の基本スタイルは本文中のコンテンツ表(Markdown のテーブル)向け:
+   セルに罫線と余白を付けて読みやすくする。text-align はセルの
+   インラインスタイル(列揃え指定)が上書きする。
+   メソッド一覧などのカード状レイアウト表は後続の .entries 系の
+   上書きで従来の見た目を維持する */
 table {
     border-collapse: collapse;
-}
-
-th {
-    text-align: left;
-    vertical-align: top;
-    background-color: #AAC;
-    border: 3px solid white;
-    padding: 0.3em;
-}
-
-td {
-    text-align: left;
-    vertical-align: top;
-}
-
-/* 本文中のコンテンツ表(Markdown のテーブル)。メソッド一覧などの
-   レイアウト表(table.entries)はカード状の現行スタイルのままとし、
-   ここではセルに罫線と余白を付けて読みやすくする。:not() 非対応の
-   古い環境(CHM ビューア等)では従来の見た目に落ちるだけで壊れない */
-table:not(.entries) {
     margin: 0.5em 0 1em;
 }
 
-table:not(.entries) th,
-table:not(.entries) td {
+th,
+td {
+    text-align: left;
+    vertical-align: top;
     border: 1px solid #bbb;
     padding: 0.3em 0.8em;
 }
 
-table:not(.entries) th {
+th {
     background-color: #dde;
 }
 
-table:not(.entries) tbody tr:nth-child(even) {
+tbody tr:nth-child(even) {
     background-color: #f5f5f5;
 }
 
 table.entries {
     width: 100%;
     height: 100%;
+    margin: 0;
+}
+
+/* セルの打ち消しは .entries 前置で書く。td.signature 等の個別ルール
+   (このファイルの後方)と同格の詳細度に抑えて、後勝ちでそちらを
+   優先させるため(table.entries td だと個別ルールより強くなる) */
+.entries th {
+    background-color: #AAC;
+    border: 3px solid white;
+    padding: 0.3em;
+}
+
+.entries td {
+    border: none;
+    padding: 0;
+}
+
+/* tbody はテンプレートでは書かれないがブラウザが補うため、
+   コンテンツ表向けの縞がここにも当たるのを打ち消す
+   (セル自身の背景で見えないが明示的に無効化しておく) */
+.entries tr:nth-child(even) {
+    background-color: transparent;
 }
 
 table.entries tr {

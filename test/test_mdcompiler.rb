@@ -752,10 +752,10 @@ class TestMDCompiler < Test::Unit::TestCase
   def test_gfm_table_alignment
     md = "# T\n\n| a | b | c |\n|:--|:-:|--:|\n| 1 | 2 | 3 |\n"
     html = gfm_compiler.compile(md)
-    assert_include html, '<th align="left">a</th>'
-    assert_include html, '<th align="center">b</th>'
-    assert_include html, '<th align="right">c</th>'
-    assert_include html, '<td align="right">3</td>'
+    assert_include html, '<th style="text-align:left">a</th>'
+    assert_include html, '<th style="text-align:center">b</th>'
+    assert_include html, '<th style="text-align:right">c</th>'
+    assert_include html, '<td style="text-align:right">3</td>'
   end
 
   def test_gfm_pipe_line_without_delimiter_is_paragraph
