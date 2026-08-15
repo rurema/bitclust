@@ -3,6 +3,7 @@ require 'bitclust'
 require 'bitclust/methoddatabase'
 require 'tmpdir'
 require 'fileutils'
+require 'json'
 
 class TestMethodEntryTitleLabels < Test::Unit::TestCase
   def test_title_labels_matches_label_when_no_alias
@@ -322,6 +323,100 @@ class TestMethodEntrySinceUntil < Test::Unit::TestCase
 
   def strip_property_line(id, key)
     path = property_file_path(id)
+    lines = File.readlines(path).reject {|l| l.start_with?("#{key}=") }
+    File.write(path, lines.join)
+  end
+end
+
+# rbs_sig property(RBS シグネチャ表示)。セグメント行列(行 = [種別, テキスト]
+# の配列)を JSON 1 行で 'String' 型 property に格納する。JSON は改行を含まず、
+# 値中の '=' や ',' も property ファイル(key=value 1 行形式)で安全。
+#
+# テストリスト:
+# [x] 既定は nil で rbs_signature_segments も nil
+# [x] JSON を入れて save → reload で round-trip する
+# [x] property 行が無い古い DB でも nil(後方互換)
+# [x] 空文字列(シグネチャ無しで save された値)も nil 扱い
+# [x] 壊れた JSON は nil 扱い(描画を落とさない)
+class TestMethodEntryRbsSig < Test::Unit::TestCase
+  SEGMENTS = [
+    [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']],
+    [['t', '() -> void']],
+  ]
+
+  def setup
+    @dir = Dir.mktmpdir
+    @db = BitClust::MethodDatabase.new(@dir)
+    @db.init
+    @db.transaction do
+      @db.propset('version', '4.0')
+      @db.propset('encoding', 'utf-8')
+    end
+  end
+
+  def teardown
+    FileUtils.rm_rf(@dir)
+  end
+
+  # 未保存エントリの String 型 property は "(uninitialized)" センチネル
+  # なので、rbs_sig そのものではなく segments が nil であることを見る
+  def test_default_has_no_segments
+    m = build_entry('sig')
+    assert_nil m.rbs_signature_segments
+  end
+
+  def test_roundtrip
+    m = build_entry('sig')
+    m.rbs_sig = JSON.generate(SEGMENTS)
+    m.save
+
+    reloaded = reload_entry(m.id)
+    assert_equal(SEGMENTS, reloaded.rbs_signature_segments)
+  end
+
+  def test_missing_property_is_backward_compatible
+    m = build_entry('sig')
+    m.save
+    strip_property_line(m.id, 'rbs_sig')
+
+    reloaded = reload_entry(m.id)
+    assert_nil reloaded.rbs_sig
+    assert_nil reloaded.rbs_signature_segments
+  end
+
+  def test_saved_without_signature_is_treated_as_absent
+    m = build_entry('sig')
+    m.save
+
+    reloaded = reload_entry(m.id)
+    assert_nil reloaded.rbs_signature_segments
+  end
+
+  def test_broken_json_is_treated_as_absent
+    m = build_entry('sig')
+    m.rbs_sig = '{broken'
+    assert_nil m.rbs_signature_segments
+  end
+
+  private
+
+  def build_entry(name)
+    id = BitClust::NameUtils.build_method_id('_builtin', 'Foo', :instance_method, name)
+    m = BitClust::MethodEntry.new(@db, id)
+    m.names = [name]
+    m.visibility = :public
+    m.kind = :defined
+    m.source = "説明\n"
+    m
+  end
+
+  def reload_entry(id)
+    fresh_db = BitClust::MethodDatabase.new(@dir)
+    BitClust::MethodEntry.new(fresh_db, id)
+  end
+
+  def strip_property_line(id, key)
+    path = File.join(@dir, BitClust::NameUtils.encodeid("method/#{id}"))
     lines = File.readlines(path).reject {|l| l.start_with?("#{key}=") }
     File.write(path, lines.join)
   end

@@ -126,6 +126,12 @@ module BitClust
           break
         end
       end
+      # RBS シグネチャは最後の <dt> の直後・説明 <dd> の直前に独立した
+      # <dd> として出す(rd 側 entry_chunk と同じ。rbs_sig property が
+      # 無ければ何も出ない)
+      if @method and (rbs_dd = rbs_signatures_dd(@method))
+        @out.puts rbs_dd
+      end
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
       undef_message if attrs.include?('undef')
       while @f.next?

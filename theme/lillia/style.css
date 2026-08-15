@@ -317,6 +317,22 @@ span.method-until-badge {
 span.method-since-badge { background-color: #e6f2e6; color: #2d6a2d; }
 span.method-until-badge { background-color: #f7e6e6; color: #aa3333; }
 
+/* RBS 型シグネチャ(rbssig サブコマンドが 4.0 以降の DB に書き込み、
+   メソッド見出しの直下に <dd class="rbs-signatures"> として出る)。
+   参考情報なので控えめな見た目にする */
+dd.rbs-signatures {
+  margin: 0.3em 0 0.5em 2em;
+}
+dd.rbs-signatures pre {
+  background-color: transparent;
+  padding: 0 0 0.2em 0;
+  border: none;
+  border-bottom: 1px dotted #ccc;
+  font-size: 85%;
+  color: #555;
+  line-height: 1.4;
+}
+
 .method-description{
   padding-bottom: 10px;
   margin-bottom: 90px ; 

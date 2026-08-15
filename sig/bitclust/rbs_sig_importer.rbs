@@ -1,0 +1,57 @@
+module BitClust
+  # RBS 型シグネチャ(.rbs)を "Class#method"/"Class.method" キーの
+  # セグメント行列にして MethodEntry の rbs_sig property に書き込む
+  class RbsSigImporter
+    # セグメント = [種別("t" は素のテキスト / "c" はクラス名), テキスト]
+    type segment = [String, String]
+
+    # 1 行 = 1 オーバーロードのシグネチャ
+    type segment_line = Array[segment]
+
+    type signatures = Hash[String, Array[segment_line]]
+
+    type stats = { entries_updated: Integer, sigs_matched: Integer, methods_missed: Integer }
+
+    @core_root: String?
+
+    @repository_root: String?
+
+    @sig_dirs: Array[String]
+
+    @signatures: signatures?
+
+    def initialize: (?core_root: String?, ?repository_root: String?, ?sig_dirs: Array[String]) -> void
+
+    def signatures: () -> signatures
+
+    def lookup: (String class_name, String typechar, Array[String] names) -> Array[segment_line]?
+
+    def apply: (MethodDatabase db) -> stats
+
+    private
+
+    def build_signatures: () -> signatures
+
+    def load_environment: () -> RBS::Environment
+
+    def each_decl: (untyped entry) { (untyped) -> void } -> void
+
+    def method_keys: (String class_name, Symbol name, Symbol kind) -> Array[String]
+
+    def attr_key: (String class_name, untyped member, Symbol | String name) -> String
+
+    def resolve_aliases: (signatures sigs, Array[[String, untyped]] aliases) -> void
+
+    def alias_key: (String class_name, untyped member, Symbol name) -> String
+
+    def method_type_segments: (String sig) -> segment_line
+
+    def type_segments: (String sig) -> segment_line
+
+    def collect_function_type_names: (untyped fun, Array[[String, Integer]] locs) -> void
+
+    def collect_type_names: (untyped type, Array[[String, Integer]] locs) -> void
+
+    def build_segments: (String sig, Array[[String, Integer]] locs) -> segment_line
+  end
+end

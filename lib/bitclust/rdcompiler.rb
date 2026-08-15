@@ -15,6 +15,7 @@ require 'bitclust/textutils'
 require 'bitclust/messagecatalog'
 require 'bitclust/syntax_highlighter'
 require 'bitclust/version_badges'
+require 'bitclust/rbs_signatures'
 require 'rouge'
 require 'stringio'
 
@@ -27,6 +28,7 @@ module BitClust
     include TextUtils
     include Translatable
     include VersionBadges
+    include RbsSignatures
 
     def initialize(urlmapper, hlevel = 1, opt = {})
       @urlmapper = urlmapper
@@ -135,6 +137,11 @@ module BitClust
         k, v = line.sub(/\A:/, '').split(':', 2)
         props[k&.strip] = v&.strip
       end if @type == :method
+      # RBS シグネチャは最後の <dt> の直後・説明 <dd> の直前に独立した
+      # <dd> として出す(rbs_sig property が無ければ何も出ない)
+      if @method and (rbs_dd = rbs_signatures_dd(@method))
+        @out.puts rbs_dd
+      end
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
       undef_message if attrs.include?('undef')
       while @f.next?

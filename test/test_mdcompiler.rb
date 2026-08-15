@@ -23,7 +23,7 @@ class TestMDCompiler < Test::Unit::TestCase
     @rd = BitClust::RDCompiler.new(@u, 1, { :database => @db })
   end
 
-  def compile_method(compiler, src)
+  def compile_method(compiler, src, rbs_signature_segments: nil)
     method_entry = Object.new
     mock(method_entry).source { src }
     mock(method_entry).index_id.any_times { "dummy" }
@@ -32,6 +32,7 @@ class TestMDCompiler < Test::Unit::TestCase
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { rbs_signature_segments }
     compiler.compile_method(method_entry)
   end
 
@@ -57,6 +58,19 @@ class TestMDCompiler < Test::Unit::TestCase
   end
 
   # ---- メソッドエントリ ----
+
+  # RBS シグネチャ表示: MDCompiler も entry_chunk をオーバーライドしている
+  # ので、rd 経路と同じ位置(説明 <dd> の直前)に同じ <dd> が出ること
+  def test_rbs_signatures_dd_matches_rd_output
+    rd_src = "--- index(val) -> Integer\n\n説明\n"
+    segments = [[['t', '() -> void']]]
+    md_src = BitClust::RRDToMarkdown.convert(rd_src)
+    rd_html = compile_method(@rd, rd_src, rbs_signature_segments: segments)
+    md_html = compile_method(@md, md_src, rbs_signature_segments: segments)
+    assert_include md_html,
+      '<dd class="rbs-signatures"><pre><code>() &rarr; void</code></pre></dd>'
+    assert_equal rd_html, md_html
+  end
 
   def test_method_signature_and_paragraph
     assert_equivalent_method <<~RD

@@ -1,0 +1,112 @@
+# rbs gem の最小 shim(rouge.rbs と同じ流儀)。rbs_collection.yaml は
+# rbs gem 自身の型定義を明示的にスキップしているので、RbsSigImporter が
+# 使う定数とメソッドだけをほぼ untyped で手書きしてある
+module RBS
+  class EnvironmentLoader
+    def initialize: (?core_root: Pathname?, ?repository: Repository) -> void
+
+    def add: (?path: Pathname, ?library: String, ?version: String?) -> void
+
+    def load: (env: Environment) -> untyped
+  end
+
+  class Repository
+    def initialize: (?no_stdlib: bool) -> void
+
+    def add: (Pathname dir) -> void
+  end
+
+  class Environment
+    def initialize: () -> void
+
+    def class_decls: () -> Hash[untyped, untyped]
+  end
+
+  class Parser
+    def self.parse_method_type: (String source, ?require_eof: bool) -> untyped
+
+    def self.parse_type: (String source, ?require_eof: bool) -> untyped
+  end
+
+  module AST
+    module Members
+      class MethodDefinition
+        def name: () -> Symbol
+
+        def kind: () -> Symbol
+
+        def overloads: () -> Array[untyped]
+      end
+
+      class AttrReader
+        def name: () -> Symbol
+
+        def kind: () -> Symbol
+
+        def type: () -> untyped
+      end
+
+      class AttrWriter
+        def name: () -> Symbol
+
+        def kind: () -> Symbol
+
+        def type: () -> untyped
+      end
+
+      class AttrAccessor
+        def name: () -> Symbol
+
+        def kind: () -> Symbol
+
+        def type: () -> untyped
+      end
+
+      class Alias
+        def new_name: () -> Symbol
+
+        def old_name: () -> Symbol
+
+        def kind: () -> Symbol
+      end
+    end
+  end
+
+  module Types
+    class ClassInstance
+      def name: () -> untyped
+
+      def location: () -> untyped
+
+      def args: () -> Array[untyped]
+    end
+
+    class Union
+      def types: () -> Array[untyped]
+    end
+
+    class Intersection
+      def types: () -> Array[untyped]
+    end
+
+    class Tuple
+      def types: () -> Array[untyped]
+    end
+
+    class Optional
+      def type: () -> untyped
+    end
+
+    class Record
+      def all_fields: () -> Hash[untyped, [untyped, bool]]
+    end
+
+    class Alias
+      def args: () -> Array[untyped]
+    end
+
+    class Proc
+      def type: () -> untyped
+    end
+  end
+end

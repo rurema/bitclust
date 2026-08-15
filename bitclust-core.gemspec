@@ -37,4 +37,7 @@ EOD
   s.add_runtime_dependency "drb"
   s.add_runtime_dependency "nkf"
   s.add_runtime_dependency "json"
+  # rbssig サブコマンド(RBS シグネチャの取り込み)が使う。描画側は
+  # 使わないので、閲覧だけなら無くても動くが依存としては通常どおり宣言する
+  s.add_runtime_dependency "rbs", ">= 3.10"
 end
