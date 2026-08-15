@@ -1,5 +1,7 @@
 module BitClust
   class RDCompiler
+    include RbsSignatures
+
     @urlmapper: URLMapper
 
     @catalog: MessageCatalog?

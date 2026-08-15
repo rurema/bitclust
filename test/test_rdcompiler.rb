@@ -28,7 +28,38 @@ class TestRDCompiler < Test::Unit::TestCase
     mock(method_entry).names.any_times{ names }
     mock(method_entry).since_map.any_times{ since_map }
     mock(method_entry).until_map.any_times{ until_map }
+    mock(method_entry).rbs_signature_segments.any_times{ nil }
     assert_equal(expected, @c.compile_method(method_entry))
+  end
+
+  # RBS シグネチャ表示: rbs_sig property を持つエントリだけが、最後の
+  # </dt> の直後・説明 <dd> の直前に独立した <dd class="rbs-signatures">
+  # ブロックを出す。型名セグメントは DB に存在するクラスだけリンク化し、
+  # テキストはエスケープした上で -> を &rarr; にする。
+  def test_method_with_rbs_signatures_renders_dd_block
+    stub(@db).fetch_class('String') { :exists }
+    stub(@db).fetch_class('Integer') { raise BitClust::ClassNotFound, 'Integer' }
+    segments = [
+      [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']],
+      [['t', '(String & Integer) -> void']],
+    ]
+    method_entry = Object.new
+    mock(method_entry).source { "--- index(val) -> Integer\n\n説明\n" }
+    mock(method_entry).index_id.any_times { 'dummy' }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { 'String/i.index._builtin' }
+    mock(method_entry).names.any_times { [] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { segments }
+
+    html = @c.compile_method(method_entry)
+    assert_include html,
+      %Q[(Integer) &rarr; <a href="dummy/class/String">String</a>]
+    assert_include html, '(String &amp; Integer) &rarr; void'
+    assert_match(
+      %r!</dt>\n<dd class="rbs-signatures"><pre><code>.+</code></pre></dd>\n<dd class="method-description">!m,
+      html)
   end
 
   # badge のカタログ訳(「Ruby %s から」等)を検証するテストで使う、
@@ -230,6 +261,7 @@ HERE
     mock(method_entry).names.any_times { ['mf'] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { nil }
     mock(method_entry).klass.any_times { klass }
     mock(method_entry).display_typemark.any_times { '?.' }
 
@@ -250,6 +282,7 @@ HERE
     mock(method_entry).names.any_times { ['mf'] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { nil }
 
     html = @c.compile_method(method_entry)
     assert_include(html, '<code>mf</code>')
@@ -1029,6 +1062,7 @@ HERE
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { nil }
     html = @c.compile_method(method_entry)
     assert_not_include(html, 'UNKNOWN_META_INFO')
     assert_not_include(html, '{:')
@@ -1052,6 +1086,7 @@ HERE
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { nil }
     html = @c.compile_method(method_entry)
     assert_not_include(html, '{:')
     assert_include(html, 'to_a2')
@@ -1074,6 +1109,7 @@ HERE
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_segments.any_times { nil }
     html = @c.compile_method(method_entry)
     assert_not_include(html, '{:')
     assert_include(html, 'このメソッドは定義されていません。')

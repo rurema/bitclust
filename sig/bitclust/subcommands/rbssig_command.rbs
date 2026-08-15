@@ -1,0 +1,27 @@
+module BitClust
+  module Subcommands
+    # RBS 型シグネチャを 4.0 以降の DB のメソッドエントリに書き込む
+    # (rbs_sig property)。DB 構築後・statichtml 前に実行する
+    class RbssigCommand < Subcommand
+      MINIMUM_VERSION: Gem::Version
+
+      @sig_root: String?
+
+      @sig_dirs: Array[String]
+
+      @dry_run: bool
+
+      def initialize: () -> void
+
+      def needs_database?: () -> bool
+
+      def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      private
+
+      def check_version: (String path) -> String
+
+      def apply_dry_run: (RbsSigImporter importer, String path) -> RbsSigImporter::stats
+    end
+  end
+end

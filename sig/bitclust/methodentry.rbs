@@ -47,6 +47,7 @@ module BitClust
     attr_accessor source_location: Location
     attr_accessor since_by_name: Array[String]
     attr_accessor until_by_name: Array[String]
+    attr_accessor rbs_sig: String?
 
     def inspect: () -> String
 
@@ -63,6 +64,10 @@ module BitClust
     def display_short_label: () -> String
 
     def index_id: () -> String
+
+    # rbs_sig(JSON)のデコード結果(RbsSigImporter::segment_line の配列)。
+    # 値が無い・壊れている場合は nil
+    def rbs_signature_segments: () -> Array[RbsSigImporter::segment_line]?
 
     def labels: () -> Array[String]
 
