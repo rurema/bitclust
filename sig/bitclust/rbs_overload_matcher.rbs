@@ -1,0 +1,24 @@
+module BitClust
+  # RBS のオーバーロードを、引数パターンごとに分かれた説明チャンクへ
+  # 「ブロック有無 → 引数名の一致 → アリティ範囲の重なり」のスコアで
+  # 振り分ける
+  module RbsOverloadMatcher
+    type chunk_features = { names: Array[String], min: Integer, max: Integer?, block: bool }
+
+    type overload_features = { names: Array[String], min: Integer?, max: Integer?, block: String? }
+
+    def self?.assign: (Array[RbsSigImporter::overload] overloads, Array[Array[String]] chunks) -> Array[Array[Integer]]
+
+    def self?.chunk_features: (Array[String] sig_lines) -> chunk_features?
+
+    def self?.overload_features: (RbsSigImporter::overload overload) -> overload_features?
+
+    def self?.best_chunk: (overload_features overload, Array[chunk_features?] features) -> Integer
+
+    def self?.score: (overload_features overload, chunk_features chunk) -> Integer
+
+    def self?.params_features: (String? params) -> [Integer, Integer?, Array[String], bool]
+
+    def self?.split_top_level: (String str) -> Array[String]
+  end
+end

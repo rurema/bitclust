@@ -28,7 +28,7 @@ class TestRDCompiler < Test::Unit::TestCase
     mock(method_entry).names.any_times{ names }
     mock(method_entry).since_map.any_times{ since_map }
     mock(method_entry).until_map.any_times{ until_map }
-    mock(method_entry).rbs_signature_segments.any_times{ nil }
+    mock(method_entry).rbs_signature_overloads.any_times { nil }
     assert_equal(expected, @c.compile_method(method_entry))
   end
 
@@ -41,19 +41,11 @@ class TestRDCompiler < Test::Unit::TestCase
   def test_method_with_rbs_signatures_renders_dt_lines
     stub(@db).fetch_class('String') { :exists }
     stub(@db).fetch_class('Integer') { raise BitClust::ClassNotFound, 'Integer' }
-    segments = [
-      [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']],
-      [['t', '(String & Integer) -> void']],
+    overloads = [
+      {'segments' => [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']]},
+      {'segments' => [['t', '(String & Integer) -> void']]},
     ]
-    method_entry = Object.new
-    mock(method_entry).source { "--- index(val) -> Integer\n\n説明\n" }
-    mock(method_entry).index_id.any_times { 'dummy' }
-    mock(method_entry).defined?.any_times { true }
-    mock(method_entry).id.any_times { 'String/i.index._builtin' }
-    mock(method_entry).names.any_times { [] }
-    mock(method_entry).since_map.any_times { {} }
-    mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { segments }
+    method_entry = rbs_method_entry("--- index(val) -> Integer\n\n説明\n", overloads)
 
     html = @c.compile_method(method_entry)
     assert_include html,
@@ -63,6 +55,73 @@ class TestRDCompiler < Test::Unit::TestCase
       %r!</dt>\n(<dt class="rbs-signature"><code>.+</code></dt>\n){2}<dd class="method-description">!,
       html)
     assert_not_match(/<pre|<dd class="rbs-/, html)
+  end
+
+  # 引数パターンでチャンクが分かれるメソッド(Array.new 型)では、各
+  # オーバーロードが引数名・アリティ・ブロック有無で最も近いチャンクの
+  # 見出し直下にだけ出る(全チャンクへの重複表示をしない)
+  def test_method_with_rbs_signatures_assigns_overloads_to_chunks
+    src = <<~RD
+      --- index(sub) -> Integer | nil
+
+      文字列で探す。
+
+      --- index(pattern) {|s| ... } -> Integer | nil
+
+      ブロックで探す。
+    RD
+    overloads = [
+      {'segments' => [['t', '(String sub) -> Integer?']],
+       'params' => ['sub'], 'arity' => [1, 1]},
+      {'segments' => [['t', '(Regexp pattern) { (String) -> bool } -> Integer?']],
+       'params' => ['pattern'], 'arity' => [1, 1], 'block' => 'req'},
+    ]
+    method_entry = rbs_method_entry(src, overloads)
+
+    html = @c.compile_method(method_entry)
+    assert_match(
+      %r!<code>index\(sub\).*?</dt>\n<dt class="rbs-signature"><code>\(String sub\) &rarr; Integer\?</code></dt>\n<dd!m,
+      html)
+    assert_match(
+      %r!<code>index\(pattern\).*?</dt>\n<dt class="rbs-signature"><code>\(Regexp pattern\) \{ \(String\) &rarr; bool \} &rarr; Integer\?</code></dt>\n<dd!m,
+      html)
+    assert_equal 2, html.scan('rbs-signature').size
+  end
+
+  # 旧形式の DB(メタ情報なし)ではチャンク振り分けができないので、
+  # 先頭チャンクにまとめて出す(重複はしない)
+  def test_method_with_rbs_signatures_without_meta_falls_back_to_first_chunk
+    src = <<~RD
+      --- index(sub) -> Integer | nil
+
+      文字列で探す。
+
+      --- index(pattern) {|s| ... } -> Integer | nil
+
+      ブロックで探す。
+    RD
+    overloads = [
+      {'segments' => [['t', '(String sub) -> Integer?']]},
+      {'segments' => [['t', '(Regexp pattern) { (String) -> bool } -> Integer?']]},
+    ]
+    html = @c.compile_method(rbs_method_entry(src, overloads))
+    assert_equal 2, html.scan('rbs-signature').size
+    assert_match(
+      %r!<code>index\(sub\).*?</dt>\n(<dt class="rbs-signature">.*\n){2}<dd!,
+      html)
+  end
+
+  def rbs_method_entry(src, overloads)
+    method_entry = Object.new
+    mock(method_entry).source { src }
+    mock(method_entry).index_id.any_times { 'dummy' }
+    mock(method_entry).defined?.any_times { true }
+    mock(method_entry).id.any_times { 'String/i.index._builtin' }
+    mock(method_entry).names.any_times { [] }
+    mock(method_entry).since_map.any_times { {} }
+    mock(method_entry).until_map.any_times { {} }
+    mock(method_entry).rbs_signature_overloads.any_times { overloads }
+    method_entry
   end
 
   # badge のカタログ訳(「Ruby %s から」等)を検証するテストで使う、
@@ -264,7 +323,7 @@ HERE
     mock(method_entry).names.any_times { ['mf'] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { nil }
+    mock(method_entry).rbs_signature_overloads.any_times { nil }
     mock(method_entry).klass.any_times { klass }
     mock(method_entry).display_typemark.any_times { '?.' }
 
@@ -285,7 +344,7 @@ HERE
     mock(method_entry).names.any_times { ['mf'] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { nil }
+    mock(method_entry).rbs_signature_overloads.any_times { nil }
 
     html = @c.compile_method(method_entry)
     assert_include(html, '<code>mf</code>')
@@ -1065,7 +1124,7 @@ HERE
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { nil }
+    mock(method_entry).rbs_signature_overloads.any_times { nil }
     html = @c.compile_method(method_entry)
     assert_not_include(html, 'UNKNOWN_META_INFO')
     assert_not_include(html, '{:')
@@ -1089,7 +1148,7 @@ HERE
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { nil }
+    mock(method_entry).rbs_signature_overloads.any_times { nil }
     html = @c.compile_method(method_entry)
     assert_not_include(html, '{:')
     assert_include(html, 'to_a2')
@@ -1112,7 +1171,7 @@ HERE
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { nil }
+    mock(method_entry).rbs_signature_overloads.any_times { nil }
     html = @c.compile_method(method_entry)
     assert_not_include(html, '{:')
     assert_include(html, 'このメソッドは定義されていません。')

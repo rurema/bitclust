@@ -59,6 +59,9 @@ module BitClust
     # md シグネチャ行を rd 形式（--- ...）へ落とし、既存のシグネチャ処理を継承する
     def method_signature: (String sig_line, bool first) -> void
 
+    # RBS シグネチャのチャンク走査用: md のシグネチャ行を rd の正規形にして返す
+    def rbs_signature_line: (String line) -> String?
+
     def headline: (String line) -> void
 
     def read_paragraph: (LineInput f) -> Array[String]

@@ -3,15 +3,17 @@
 # bitclust/rbs_sig_importer.rb
 #
 # RBS 型シグネチャ(.rbs)を読み込み、"Class#method"/"Class.method" キー →
-# セグメント行列の対応表を作って MethodEntry の rbs_sig property に書き込む
-# (rbssig サブコマンドが DB 構築後に呼ぶ)。
+# オーバーロード配列の対応表を作って MethodEntry の rbs_sig property に
+# 書き込む(rbssig サブコマンドが DB 構築後に呼ぶ)。
 #
-# セグメント行列は行(オーバーロードごと)の配列で、行は [種別, テキスト] の
-# 組の配列。種別 "t" は素のテキスト、"c" はクラス/モジュール名(描画側=
-# RbsSignatures が DB に存在するものだけリンク化する)。型名の位置は RBS
-# パーサの location で厳密に取り、行のテキストを連結すると元のシグネチャ
-# 文字列に戻る。rbs gem が必要なのは書き込み側のこのファイルだけで、描画側は
-# property を読むだけで動く。
+# オーバーロードは Hash 1 個: "segments" = [種別, テキスト] の組の配列
+# (種別 "t" は素のテキスト、"c" はクラス/モジュール名で、描画側=
+# RbsSignatures が DB に存在するものだけリンク化する。テキストを連結すると
+# 元のシグネチャ文字列に戻る)に加え、説明チャンクへの振り分け
+# (RbsOverloadMatcher)用のメタ情報 "params"(引数名)・"arity"
+# ([最小, 最大|nil])・"block"("req"/"opt")を持つ。型名の位置は RBS
+# パーサの location で厳密に取る。rbs gem が必要なのは書き込み側のこの
+# ファイルだけで、描画側は property を読むだけで動く。
 
 require 'rbs'
 require 'json'
@@ -32,7 +34,7 @@ module BitClust
       @signatures = nil
     end
 
-    # "Class#method"/"Class.method" → セグメント行列
+    # "Class#method"/"Class.method" → オーバーロード配列
     def signatures
       @signatures ||= build_signatures
     end
@@ -67,13 +69,13 @@ module BitClust
         c.entries.each do |m|
           next if m.kind == :undefined
           next unless %w[i s m].include?(m.typechar)
-          lines = lookup(c.name, m.typechar, m.names)
-          unless lines
+          overloads = lookup(c.name, m.typechar, m.names)
+          unless overloads
             stats[:methods_missed] += 1
             next
           end
           stats[:sigs_matched] += 1
-          json = JSON.generate(lines)
+          json = JSON.generate({'overloads' => overloads})
           next if m.rbs_sig == json
           m.rbs_sig = json
           m.save
@@ -95,18 +97,18 @@ module BitClust
           decl.members.each do |member|
             case member
             when RBS::AST::Members::MethodDefinition
-              lines = member.overloads.map {|o| method_type_segments(o.method_type.to_s) }
+              overloads = member.overloads.map {|o| method_type_overload(o.method_type.to_s) }
               method_keys(class_name, member.name, member.kind).each do |key|
-                sigs[key] ||= lines
+                sigs[key] ||= overloads
               end
             when RBS::AST::Members::AttrReader
-              sigs[attr_key(class_name, member, member.name)] ||= [type_segments(member.type.to_s)]
+              sigs[attr_key(class_name, member, member.name)] ||= [attr_overload(member.type.to_s)]
             when RBS::AST::Members::AttrWriter
-              sigs[attr_key(class_name, member, "#{member.name}=")] ||= [type_segments(member.type.to_s)]
+              sigs[attr_key(class_name, member, "#{member.name}=")] ||= [attr_overload(member.type.to_s)]
             when RBS::AST::Members::AttrAccessor
-              line = [type_segments(member.type.to_s)]
-              sigs[attr_key(class_name, member, member.name)] ||= line
-              sigs[attr_key(class_name, member, "#{member.name}=")] ||= line
+              overloads = [attr_overload(member.type.to_s)]
+              sigs[attr_key(class_name, member, member.name)] ||= overloads
+              sigs[attr_key(class_name, member, "#{member.name}=")] ||= overloads
             when RBS::AST::Members::Alias
               aliases << [class_name, member]
             end
@@ -177,21 +179,48 @@ module BitClust
       member.kind == :singleton ? "#{class_name}.#{name}" : "#{class_name}##{name}"
     end
 
-    # メソッド型シグネチャ 1 行をセグメント列にする
-    def method_type_segments(sig)
+    # メソッド型シグネチャ 1 行をオーバーロード(segments+メタ情報)にする
+    def method_type_overload(sig)
       method_type = RBS::Parser.parse_method_type(sig, require_eof: true)
       locs = [] #: Array[[String, Integer]]
       collect_function_type_names(method_type.type, locs)
       collect_function_type_names(method_type.block.type, locs) if method_type.block
-      build_segments(sig, locs)
+      overload = {'segments' => build_segments(sig, locs)} #: overload
+      add_overload_meta(overload, method_type)
+      overload
     end
 
-    # attr 用: 型だけの文字列をセグメント列にする
-    def type_segments(sig)
+    # attr 用: 型だけの文字列をオーバーロード(segments のみ)にする
+    def attr_overload(sig)
       type = RBS::Parser.parse_type(sig, require_eof: true)
       locs = [] #: Array[[String, Integer]]
       collect_type_names(type, locs)
-      build_segments(sig, locs)
+      {'segments' => build_segments(sig, locs)}
+    end
+
+    # チャンク振り分け(RbsOverloadMatcher)用のメタ情報。引数名は位置引数
+    # (rest 含む)+キーワード名。アリティは位置引数の [最小, 最大] で
+    # rest があれば最大 nil(無制限)。`(?)`(UntypedFunction)には位置引数の
+    # 概念が無いので params/arity は付けない
+    def add_overload_meta(overload, method_type)
+      fun = method_type.type
+      if fun.respond_to?(:required_positionals)
+        names = [] #: Array[String]
+        positionals = fun.required_positionals + fun.optional_positionals +
+                      fun.trailing_positionals
+        positionals.each {|p| names << p.name.to_s if p.name }
+        rest = fun.rest_positionals
+        names << rest.name.to_s if rest && rest.name
+        fun.required_keywords.each_key {|k| names << k.to_s }
+        fun.optional_keywords.each_key {|k| names << k.to_s }
+        required = fun.required_positionals.size + fun.trailing_positionals.size
+        overload['params'] = names
+        overload['arity'] =
+          [required, rest ? nil : required + fun.optional_positionals.size]
+      end
+      if (block = method_type.block)
+        overload['block'] = block.required ? 'req' : 'opt'
+      end
     end
 
     def collect_function_type_names(fun, locs)

@@ -23,7 +23,7 @@ class TestMDCompiler < Test::Unit::TestCase
     @rd = BitClust::RDCompiler.new(@u, 1, { :database => @db })
   end
 
-  def compile_method(compiler, src, rbs_signature_segments: nil)
+  def compile_method(compiler, src, rbs_signature_overloads: nil)
     method_entry = Object.new
     mock(method_entry).source { src }
     mock(method_entry).index_id.any_times { "dummy" }
@@ -32,7 +32,7 @@ class TestMDCompiler < Test::Unit::TestCase
     mock(method_entry).names.any_times { [] }
     mock(method_entry).since_map.any_times { {} }
     mock(method_entry).until_map.any_times { {} }
-    mock(method_entry).rbs_signature_segments.any_times { rbs_signature_segments }
+    mock(method_entry).rbs_signature_overloads.any_times { rbs_signature_overloads }
     compiler.compile_method(method_entry)
   end
 
@@ -63,12 +63,40 @@ class TestMDCompiler < Test::Unit::TestCase
   # ので、rd 経路と同じ位置(説明 <dd> の直前)に同じ <dt> が出ること
   def test_rbs_signatures_dt_matches_rd_output
     rd_src = "--- index(val) -> Integer\n\n説明\n"
-    segments = [[['t', '() -> void']]]
+    overloads = [{'segments' => [['t', '() -> void']]}]
     md_src = BitClust::RRDToMarkdown.convert(rd_src)
-    rd_html = compile_method(@rd, rd_src, rbs_signature_segments: segments)
-    md_html = compile_method(@md, md_src, rbs_signature_segments: segments)
+    rd_html = compile_method(@rd, rd_src, rbs_signature_overloads: overloads)
+    md_html = compile_method(@md, md_src, rbs_signature_overloads: overloads)
     assert_include md_html,
       '<dt class="rbs-signature"><code>() &rarr; void</code></dt>'
+    assert_equal rd_html, md_html
+  end
+
+  # チャンク振り分けは md 側のシグネチャ行(### def ...)でも rd と同じに
+  # 動くこと(MDCompiler は行を "--- " に正規化してから照合する)
+  def test_rbs_signatures_chunk_assignment_matches_rd_output
+    rd_src = <<~RD
+      --- index(sub) -> Integer | nil
+
+      文字列で探す。
+
+      --- index(pattern) {|s| ... } -> Integer | nil
+
+      ブロックで探す。
+    RD
+    overloads = [
+      {'segments' => [['t', '(String sub) -> Integer?']],
+       'params' => ['sub'], 'arity' => [1, 1]},
+      {'segments' => [['t', '(Regexp pattern) { (String) -> bool } -> Integer?']],
+       'params' => ['pattern'], 'arity' => [1, 1], 'block' => 'req'},
+    ]
+    md_src = BitClust::RRDToMarkdown.convert(rd_src)
+    rd_html = compile_method(@rd, rd_src, rbs_signature_overloads: overloads)
+    md_html = compile_method(@md, md_src, rbs_signature_overloads: overloads)
+    assert_match(
+      %r!<code>index\(pattern\).*?</dt>\n<dt class="rbs-signature"><code>\(Regexp pattern\) \{ \(String\) &rarr; bool \} &rarr; Integer\?</code></dt>\n<dd!m,
+      md_html)
+    assert_equal 2, md_html.scan('rbs-signature').size
     assert_equal rd_html, md_html
   end
 

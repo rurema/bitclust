@@ -1,13 +1,27 @@
 module BitClust
   # メソッドエントリの RBS 型シグネチャ(rbs_sig property)を
-  # <dt class="rbs-signature"> 行として描画する。RDCompiler(md は
-  # MDCompiler が継承)に include される
+  # <dt class="rbs-signature"> 行として描画する。オーバーロードは
+  # compile_method 冒頭で説明チャンクへ振り分けておき、entry_chunk が
+  # 自分の番のぶんだけ描画する。RDCompiler(md は MDCompiler が継承)に
+  # include される
   module RbsSignatures : HTMLUtils
     @rbs_known_classes: Hash[String, bool]
 
-    def rbs_signature_dts: (MethodEntry entry) -> String?
+    @rbs_sig_by_chunk: Array[Array[RbsSigImporter::segment_line]]?
+
+    @rbs_chunk_index: Integer
+
+    def reset_rbs_signatures: () -> void
+
+    def prepare_rbs_signatures: (MethodEntry entry, String source) -> void
+
+    def rbs_signature_dts_for_chunk: () -> String?
 
     private
+
+    def rbs_scan_signature_chunks: (String source) -> Array[Array[String]]
+
+    def rbs_signature_line: (String line) -> String?
 
     def rbs_segment_html: (String kind, String text) -> String
 

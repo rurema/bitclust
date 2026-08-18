@@ -61,7 +61,9 @@ module BitClust
       @opt = opt
       @type = :method
       @method = m
-      setup(m.source, m) {
+      source = m.source
+      setup(source, m) {
+        prepare_rbs_signatures(m, source)
         entry
       }
     ensure
@@ -73,6 +75,7 @@ module BitClust
     def setup(src, entry = nil)
       @f = LineInput.new(StringIO.new(src), entry)
       @out = StringIO.new
+      reset_rbs_signatures
       yield
       @out.string
     end
@@ -137,9 +140,10 @@ module BitClust
         k, v = line.sub(/\A:/, '').split(':', 2)
         props[k&.strip] = v&.strip
       end if @type == :method
-      # RBS シグネチャは見出し <dt> 群の直後・説明 <dd> の直前に <dt> 行と
-      # して出す(rbs_sig property が無ければ何も出ない)
-      if @method and (rbs_dts = rbs_signature_dts(@method))
+      # RBS シグネチャは見出し <dt> 群の直後・説明 <dd> の直前に、この
+      # チャンクへ振り分けられたぶんだけ <dt> 行として出す(rbs_sig
+      # property が無ければ何も出ない)
+      if (rbs_dts = rbs_signature_dts_for_chunk())
         @out.puts rbs_dts
       end
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
