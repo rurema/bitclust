@@ -24,11 +24,18 @@ module BitClust
 
   module RbsSignatures
 
+    # 振り分け状態はメソッドのコンパイル専用(compile_method が
+    # prepare_rbs_signatures で作り直す)なので、他のコンパイルへ
+    # 持ち越さないよう setup(全コンパイル共通)からリセットする
+    def reset_rbs_signatures
+      @rbs_sig_by_chunk = nil
+      @rbs_chunk_index = 0
+    end
+
     # compile_method 冒頭で呼ぶ。rbs_sig property があれば、source の
     # シグネチャ行からチャンク列を作りオーバーロードを振り分けておく
     def prepare_rbs_signatures(entry, source)
-      @rbs_sig_by_chunk = nil
-      @rbs_chunk_index = 0
+      reset_rbs_signatures
       overloads = entry.rbs_signature_overloads
       return unless overloads
       chunks = rbs_scan_signature_chunks(source)

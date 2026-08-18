@@ -75,11 +75,7 @@ module BitClust
     def setup(src, entry = nil)
       @f = LineInput.new(StringIO.new(src), entry)
       @out = StringIO.new
-      # RBS シグネチャの振り分け状態はメソッドのコンパイル専用
-      # (compile_method が prepare_rbs_signatures で作り直す)なので、
-      # 他のコンパイルへ持ち越さないようここでリセットする
-      @rbs_sig_by_chunk = nil
-      @rbs_chunk_index = 0
+      reset_rbs_signatures
       yield
       @out.string
     end

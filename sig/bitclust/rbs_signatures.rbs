@@ -11,6 +11,8 @@ module BitClust
 
     @rbs_chunk_index: Integer
 
+    def reset_rbs_signatures: () -> void
+
     def prepare_rbs_signatures: (MethodEntry entry, String source) -> void
 
     def rbs_signature_dts_for_chunk: () -> String?
