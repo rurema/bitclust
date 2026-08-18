@@ -1,11 +1,11 @@
 module BitClust
   # メソッドエントリの RBS 型シグネチャ(rbs_sig property)を
-  # <dd class="rbs-signatures"> として描画する。RDCompiler(md は
+  # <dt class="rbs-signature"> 行として描画する。RDCompiler(md は
   # MDCompiler が継承)に include される
   module RbsSignatures : HTMLUtils
     @rbs_known_classes: Hash[String, bool]
 
-    def rbs_signatures_dd: (MethodEntry entry) -> String?
+    def rbs_signature_dts: (MethodEntry entry) -> String?
 
     private
 

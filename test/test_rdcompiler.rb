@@ -32,11 +32,13 @@ class TestRDCompiler < Test::Unit::TestCase
     assert_equal(expected, @c.compile_method(method_entry))
   end
 
-  # RBS シグネチャ表示: rbs_sig property を持つエントリだけが、最後の
-  # </dt> の直後・説明 <dd> の直前に独立した <dd class="rbs-signatures">
-  # ブロックを出す。型名セグメントは DB に存在するクラスだけリンク化し、
-  # テキストはエスケープした上で -> を &rarr; にする。
-  def test_method_with_rbs_signatures_renders_dd_block
+  # RBS シグネチャ表示: rbs_sig property を持つエントリだけが、メソッド
+  # 見出しの <dt> 群の直後・説明 <dd> の直前に 1 オーバーロード 1 行の
+  # <dt class="rbs-signature"> を出す(dd だと説明の一部に見える。pre を
+  # 使うと script.js が COPY ボタンを付けてしまうので code のみ)。
+  # 型名セグメントは DB に存在するクラスだけリンク化し、テキストは
+  # エスケープした上で -> を &rarr; にする。
+  def test_method_with_rbs_signatures_renders_dt_lines
     stub(@db).fetch_class('String') { :exists }
     stub(@db).fetch_class('Integer') { raise BitClust::ClassNotFound, 'Integer' }
     segments = [
@@ -58,8 +60,9 @@ class TestRDCompiler < Test::Unit::TestCase
       %Q[(Integer) &rarr; <a href="dummy/class/String">String</a>]
     assert_include html, '(String &amp; Integer) &rarr; void'
     assert_match(
-      %r!</dt>\n<dd class="rbs-signatures"><pre><code>.+</code></pre></dd>\n<dd class="method-description">!m,
+      %r!</dt>\n(<dt class="rbs-signature"><code>.+</code></dt>\n){2}<dd class="method-description">!,
       html)
+    assert_not_match(/<pre|<dd class="rbs-/, html)
   end
 
   # badge のカタログ訳(「Ruby %s から」等)を検証するテストで使う、

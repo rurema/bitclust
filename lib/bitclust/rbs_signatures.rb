@@ -4,8 +4,10 @@
 #
 # メソッドエントリの RBS 型シグネチャ(rbs_sig property。RbsSigImporter が
 # DB 構築後に書き込む)を、シグネチャ見出し(<dt> 群)の直後・説明 <dd> の
-# 直前の独立した <dd class="rbs-signatures"> として描画する。property が
-# 無いエントリでは何も出さないので、出力は従来とバイト一致のまま。
+# 直前に 1 オーバーロード 1 行の <dt class="rbs-signature"> として描画する。
+# dd だと字下げで説明の一部に見え、pre だと theme/script.js が COPY ボタンを
+# 付けてしまうため、見出しと同じ dt+code の並びにする。property が無い
+# エントリでは何も出さないので、出力は従来とバイト一致のまま。
 #
 # RDCompiler(md は MDCompiler が継承)に include される。escape_html /
 # class_link(いずれも HTMLUtils)と @option[:database] にだけ依存し、
@@ -15,15 +17,15 @@ module BitClust
 
   module RbsSignatures
 
-    # entry の <dd class="rbs-signatures"> ブロック(1 行 = 1 オーバーロード)。
-    # シグネチャが無ければ nil
-    def rbs_signatures_dd(entry)
+    # entry の <dt class="rbs-signature"> 行(1 オーバーロード = 1 <dt>)を
+    # 改行で連結して返す。シグネチャが無ければ nil
+    def rbs_signature_dts(entry)
       segments = entry.rbs_signature_segments
       return nil unless segments
-      lines = segments.map {|line|
-        line.map {|kind, text| rbs_segment_html(kind, text) }.join
-      }
-      %Q(<dd class="rbs-signatures"><pre><code>#{lines.join("\n")}</code></pre></dd>)
+      segments.map {|line|
+        html = line.map {|kind, text| rbs_segment_html(kind, text) }.join
+        %Q(<dt class="rbs-signature"><code>#{html}</code></dt>)
+      }.join("\n")
     end
 
     private

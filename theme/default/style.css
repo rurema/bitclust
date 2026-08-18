@@ -638,17 +638,17 @@ span.method-since-badge { background-color: #e6f2e6; color: #2d6a2d; }
 span.method-until-badge { background-color: #f7e6e6; color: #aa3333; }
 
 /* RBS 型シグネチャ(rbssig サブコマンドが 4.0 以降の DB に書き込み、
-   メソッド見出しの直下に <dd class="rbs-signatures"> として出る)。
-   参考情報なので、本文のコード例(背景色付きの pre)とは違う
-   控えめな見た目にする */
-dd.rbs-signatures {
-    margin: 0.3em 0 0.5em 4em;
-}
-dd.rbs-signatures pre {
-    background-color: transparent;
-    padding: 0 0 0.2em 0;
-    border-bottom: 1px dotted #ccc;
+   メソッド見出しの <dt> 群の直後に 1 オーバーロード 1 行の
+   <dt class="rbs-signature"> として出る)。参考情報なのでメソッド
+   見出しより控えめな見た目にし、インラインコードのチップ背景も外す */
+dt.rbs-signature {
+    font-weight: normal;
     font-size: 85%;
     color: #555;
     line-height: 1.4;
+}
+dt.rbs-signature code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
 }

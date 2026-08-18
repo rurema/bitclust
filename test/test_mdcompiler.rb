@@ -60,15 +60,15 @@ class TestMDCompiler < Test::Unit::TestCase
   # ---- メソッドエントリ ----
 
   # RBS シグネチャ表示: MDCompiler も entry_chunk をオーバーライドしている
-  # ので、rd 経路と同じ位置(説明 <dd> の直前)に同じ <dd> が出ること
-  def test_rbs_signatures_dd_matches_rd_output
+  # ので、rd 経路と同じ位置(説明 <dd> の直前)に同じ <dt> が出ること
+  def test_rbs_signatures_dt_matches_rd_output
     rd_src = "--- index(val) -> Integer\n\n説明\n"
     segments = [[['t', '() -> void']]]
     md_src = BitClust::RRDToMarkdown.convert(rd_src)
     rd_html = compile_method(@rd, rd_src, rbs_signature_segments: segments)
     md_html = compile_method(@md, md_src, rbs_signature_segments: segments)
     assert_include md_html,
-      '<dd class="rbs-signatures"><pre><code>() &rarr; void</code></pre></dd>'
+      '<dt class="rbs-signature"><code>() &rarr; void</code></dt>'
     assert_equal rd_html, md_html
   end
 
