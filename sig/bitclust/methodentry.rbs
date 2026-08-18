@@ -65,9 +65,9 @@ module BitClust
 
     def index_id: () -> String
 
-    # rbs_sig(JSON)のデコード結果(RbsSigImporter::segment_line の配列)。
+    # rbs_sig(JSON)のデコード結果(RbsSigImporter::overload の配列)。
     # 値が無い・壊れている場合は nil
-    def rbs_signature_segments: () -> Array[RbsSigImporter::segment_line]?
+    def rbs_signature_overloads: () -> Array[RbsSigImporter::overload]?
 
     def labels: () -> Array[String]
 

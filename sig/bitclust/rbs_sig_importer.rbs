@@ -1,6 +1,6 @@
 module BitClust
   # RBS 型シグネチャ(.rbs)を "Class#method"/"Class.method" キーの
-  # セグメント行列にして MethodEntry の rbs_sig property に書き込む
+  # オーバーロード配列にして MethodEntry の rbs_sig property に書き込む
   class RbsSigImporter
     # セグメント = [種別("t" は素のテキスト / "c" はクラス名), テキスト]
     type segment = [String, String]
@@ -8,7 +8,11 @@ module BitClust
     # 1 行 = 1 オーバーロードのシグネチャ
     type segment_line = Array[segment]
 
-    type signatures = Hash[String, Array[segment_line]]
+    # オーバーロード: "segments"(segment_line)に加えて、チャンク振り分け
+    # (RbsOverloadMatcher)用のメタ情報 "params"/"arity"/"block" を持ちうる
+    type overload = Hash[String, untyped]
+
+    type signatures = Hash[String, Array[overload]]
 
     type stats = { entries_updated: Integer, sigs_matched: Integer, methods_missed: Integer }
 
@@ -24,7 +28,7 @@ module BitClust
 
     def signatures: () -> signatures
 
-    def lookup: (String class_name, String typechar, Array[String] names) -> Array[segment_line]?
+    def lookup: (String class_name, String typechar, Array[String] names) -> Array[overload]?
 
     def apply: (MethodDatabase db) -> stats
 
@@ -44,9 +48,11 @@ module BitClust
 
     def alias_key: (String class_name, untyped member, Symbol name) -> String
 
-    def method_type_segments: (String sig) -> segment_line
+    def method_type_overload: (String sig) -> overload
 
-    def type_segments: (String sig) -> segment_line
+    def attr_overload: (String sig) -> overload
+
+    def add_overload_meta: (overload overload, untyped method_type) -> void
 
     def collect_function_type_names: (untyped fun, Array[[String, Integer]] locs) -> void
 

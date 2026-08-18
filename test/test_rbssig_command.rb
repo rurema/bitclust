@@ -69,15 +69,15 @@ class TestRbssigCommand < Test::Unit::TestCase
     out = run_command(["--sig-dir=#{@sig_dir}", db])
     assert_match(/version 10\.0/, out)
     assert_equal [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']],
-                 find_entry(db, 'bar').rbs_signature_segments[0]
+                 find_entry(db, 'bar').rbs_signature_overloads[0]['segments']
   end
 
   def test_fills_rbs_sig_and_prints_stats
     db = build_db('4.0')
     out = run_command(["--sig-dir=#{@sig_dir}", db])
     assert_equal '(Integer) -> String',
-                 find_entry(db, 'bar').rbs_signature_segments[0].map {|_k, t| t }.join
-    assert_nil find_entry(db, 'nope').rbs_signature_segments
+                 find_entry(db, 'bar').rbs_signature_overloads[0]['segments'].map {|_k, t| t }.join
+    assert_nil find_entry(db, 'nope').rbs_signature_overloads
     assert_match(
       /\Adb-4\.0 \(version 4\.0\): entries_updated=1 sigs_matched=1 methods_missed=1\n\z/,
       out)
@@ -86,7 +86,7 @@ class TestRbssigCommand < Test::Unit::TestCase
   def test_dry_run_leaves_database_untouched
     db = build_db('4.0')
     out = run_command(["--sig-dir=#{@sig_dir}", db, '--dry-run'])
-    assert_nil find_entry(db, 'bar').rbs_signature_segments
+    assert_nil find_entry(db, 'bar').rbs_signature_overloads
     assert_match(/entries_updated=1/, out)
   end
 
@@ -106,7 +106,7 @@ class TestRbssigCommand < Test::Unit::TestCase
     db = build_db('4.0')
     run_command(["--sig-root=#{root}", db])
     assert_equal '(String) -> Integer',
-                 find_entry(db, 'bar').rbs_signature_segments[0].map {|_k, t| t }.join
+                 find_entry(db, 'bar').rbs_signature_overloads[0]['segments'].map {|_k, t| t }.join
   end
 
   def test_registered_in_runner

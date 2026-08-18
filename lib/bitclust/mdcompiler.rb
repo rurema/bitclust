@@ -126,10 +126,10 @@ module BitClust
           break
         end
       end
-      # RBS シグネチャは見出し <dt> 群の直後・説明 <dd> の直前に <dt> 行と
-      # して出す(rd 側 entry_chunk と同じ。rbs_sig property が無ければ
-      # 何も出ない)
-      if @method and (rbs_dts = rbs_signature_dts(@method))
+      # RBS シグネチャは見出し <dt> 群の直後・説明 <dd> の直前に、この
+      # チャンクへ振り分けられたぶんだけ <dt> 行として出す(rd 側
+      # entry_chunk と同じ。rbs_sig property が無ければ何も出ない)
+      if (rbs_dts = rbs_signature_dts_for_chunk())
         @out.puts rbs_dts
       end
       @out.puts %Q(<dd class="#{@type.to_s}-description">)
@@ -188,6 +188,12 @@ module BitClust
     # （MethodSignature.parse・permalink・edit link）を継承する
     def method_signature(sig_line, first)
       super(sig_line.sub(signature_re, '--- '), first)
+    end
+
+    # RBS シグネチャのチャンク走査（RbsSignatures）用: md のシグネチャ行を
+    # rd の正規形にして返す（method_signature と同じ変換）
+    def rbs_signature_line(line)
+      line.sub(signature_re, '--- ') if signature_re =~ line
     end
 
     def headline(line)

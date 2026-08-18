@@ -119,9 +119,9 @@ module BitClust
       # 現れない前提。fill_since/fill_until で検査する）
       property :since_by_name,   '[String]'
       property :until_by_name,   '[String]'
-      # RBS シグネチャ表示。セグメント行列(RbsSigImporter 参照)の JSON
-      # 1 行を持つ。型シグネチャは ',' を普通に含むので [String] 型(','
-      # 区切り)は使えない。JSON は改行を含まず、property ファイルの
+      # RBS シグネチャ表示。オーバーロード配列(RbsSigImporter 参照)の
+      # JSON 1 行を持つ。型シグネチャは ',' を普通に含むので [String] 型
+      # (',' 区切り)は使えない。JSON は改行を含まず、property ファイルの
       # key=value 1 行形式は値中の '=' を許す(split('=', 2))ので安全
       property :rbs_sig,         'String'
     }
@@ -172,15 +172,20 @@ module BitClust
       "#{methodid2typechar(@id)}_#{encodename_fs(name).gsub(/=/, '--')}".upcase
     end
 
-    # rbs_sig(JSON)をセグメント行列に戻す。property が無い古い DB(nil)・
+    # rbs_sig(JSON)をオーバーロード配列に戻す。現行形式は
+    # {"overloads":[{"segments":..., "params":..., "arity":..., "block":...}]}
+    # で、セグメント行列そのものの配列だった旧形式の DB は segments だけの
+    # オーバーロード列に読み替える。property が無い古い DB(nil)・
     # シグネチャ無しで保存された空文字列・未保存エントリの "(uninitialized)"
     # センチネル・壊れた JSON はすべて nil(= 表示しない)に落として
     # 描画側を守る
-    def rbs_signature_segments
+    def rbs_signature_overloads
       json = rbs_sig()
-      return nil unless json && json.start_with?('[')
-      segments = JSON.parse(json)
-      segments.empty? ? nil : segments
+      return nil unless json && (json.start_with?('{') || json.start_with?('['))
+      data = JSON.parse(json)
+      overloads = data.is_a?(Hash) ? data['overloads']
+                                   : data.map {|segments| {'segments' => segments} }
+      overloads.is_a?(Array) && !overloads.empty? ? overloads : nil
     rescue JSON::ParserError
       nil
     end

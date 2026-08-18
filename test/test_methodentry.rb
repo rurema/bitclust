@@ -328,20 +328,26 @@ class TestMethodEntrySinceUntil < Test::Unit::TestCase
   end
 end
 
-# rbs_sig property(RBS シグネチャ表示)。セグメント行列(行 = [種別, テキスト]
-# の配列)を JSON 1 行で 'String' 型 property に格納する。JSON は改行を含まず、
-# 値中の '=' や ',' も property ファイル(key=value 1 行形式)で安全。
+# rbs_sig property(RBS シグネチャ表示)。オーバーロード配列
+# ({"segments" => 行, "params"/"arity"/"block" => メタ情報} の配列)を
+# {"overloads": [...]} の JSON 1 行で 'String' 型 property に格納する。
+# JSON は改行を含まず、値中の '=' や ',' も property ファイル
+# (key=value 1 行形式)で安全。
 #
 # テストリスト:
-# [x] 既定は nil で rbs_signature_segments も nil
+# [x] 既定は nil で rbs_signature_overloads も nil
 # [x] JSON を入れて save → reload で round-trip する
+# [x] 旧形式(セグメント行列そのものの配列)は segments だけの
+#     オーバーロード列に読み替える(#322 以前の DB)
 # [x] property 行が無い古い DB でも nil(後方互換)
 # [x] 空文字列(シグネチャ無しで save された値)も nil 扱い
 # [x] 壊れた JSON は nil 扱い(描画を落とさない)
 class TestMethodEntryRbsSig < Test::Unit::TestCase
-  SEGMENTS = [
-    [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']],
-    [['t', '() -> void']],
+  OVERLOADS = [
+    {'segments' => [['t', '('], ['c', 'Integer'], ['t', ') -> '], ['c', 'String']],
+     'params' => ['base'], 'arity' => [1, 1]},
+    {'segments' => [['t', '() -> void']],
+     'params' => [], 'arity' => [0, 0], 'block' => 'req'},
   ]
 
   def setup
@@ -359,19 +365,29 @@ class TestMethodEntryRbsSig < Test::Unit::TestCase
   end
 
   # 未保存エントリの String 型 property は "(uninitialized)" センチネル
-  # なので、rbs_sig そのものではなく segments が nil であることを見る
-  def test_default_has_no_segments
+  # なので、rbs_sig そのものではなく overloads が nil であることを見る
+  def test_default_has_no_overloads
     m = build_entry('sig')
-    assert_nil m.rbs_signature_segments
+    assert_nil m.rbs_signature_overloads
   end
 
   def test_roundtrip
     m = build_entry('sig')
-    m.rbs_sig = JSON.generate(SEGMENTS)
+    m.rbs_sig = JSON.generate({'overloads' => OVERLOADS})
     m.save
 
     reloaded = reload_entry(m.id)
-    assert_equal(SEGMENTS, reloaded.rbs_signature_segments)
+    assert_equal(OVERLOADS, reloaded.rbs_signature_overloads)
+  end
+
+  def test_old_array_format_is_read_as_segments_only
+    m = build_entry('sig')
+    m.rbs_sig = JSON.generate(OVERLOADS.map {|o| o['segments'] })
+    m.save
+
+    reloaded = reload_entry(m.id)
+    assert_equal(OVERLOADS.map {|o| {'segments' => o['segments']} },
+                 reloaded.rbs_signature_overloads)
   end
 
   def test_missing_property_is_backward_compatible
@@ -381,7 +397,7 @@ class TestMethodEntryRbsSig < Test::Unit::TestCase
 
     reloaded = reload_entry(m.id)
     assert_nil reloaded.rbs_sig
-    assert_nil reloaded.rbs_signature_segments
+    assert_nil reloaded.rbs_signature_overloads
   end
 
   def test_saved_without_signature_is_treated_as_absent
@@ -389,13 +405,13 @@ class TestMethodEntryRbsSig < Test::Unit::TestCase
     m.save
 
     reloaded = reload_entry(m.id)
-    assert_nil reloaded.rbs_signature_segments
+    assert_nil reloaded.rbs_signature_overloads
   end
 
   def test_broken_json_is_treated_as_absent
     m = build_entry('sig')
     m.rbs_sig = '{broken'
-    assert_nil m.rbs_signature_segments
+    assert_nil m.rbs_signature_overloads
   end
 
   private
