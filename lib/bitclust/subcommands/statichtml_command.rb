@@ -242,6 +242,7 @@ module BitClust
         FileUtils.cp(@manager_config[:themedir] + "script.js",
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         copy_run_ruby_wasm_script if @run_ruby_wasm
+        copy_version_switcher_script
         FileUtils.cp(@manager_config[:themedir] + @manager_config[:favicon_url],
                      @outputdir.to_s, :verbose => @verbose, :preserve => true)
         Dir.mktmpdir do |tmpdir|
@@ -418,6 +419,19 @@ HERE
           FileUtils.mkdir_p(jsdir) unless jsdir.directory?
           FileUtils.cp(src.to_s, jsdir.to_s, :verbose => @verbose, :preserve => true)
         end
+      end
+
+      # Copy the version-switcher script. A themedir without it is
+      # tolerated: warn and skip instead of aborting the whole build.
+      def copy_version_switcher_script
+        src = @manager_config[:themedir] + "js" + "version_switcher.js"
+        unless src.file?
+          $stderr.puts "warning: #{src} not found; version switcher script not copied"
+          return
+        end
+        jsdir = @outputdir + "js"
+        FileUtils.mkdir_p(jsdir) unless jsdir.directory?
+        FileUtils.cp(src.to_s, jsdir.to_s, :verbose => @verbose, :preserve => true)
       end
 
       def create_html_file(entry, manager, outputdir, db)

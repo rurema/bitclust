@@ -297,3 +297,45 @@ class TestStatichtmlMarkdownOutput < Test::Unit::TestCase
     end
   end
 end
+
+class TestStatichtmlVersionSwitcher < Test::Unit::TestCase
+  def build_command(themedir, outputdir)
+    cmd = BitClust::Subcommands::StatichtmlCommand.new
+    cmd.instance_variable_set(:@manager_config, { :themedir => Pathname.new(themedir) })
+    cmd.instance_variable_set(:@outputdir, Pathname.new(outputdir))
+    cmd.instance_variable_set(:@verbose, false)
+    cmd
+  end
+
+  def test_version_switcher_js_is_copied
+    Dir.mktmpdir do |dir|
+      themedir = File.join(dir, 'theme')
+      outputdir = File.join(dir, 'out')
+      FileUtils.mkdir_p(File.join(themedir, 'js'))
+      FileUtils.mkdir_p(outputdir)
+      File.write(File.join(themedir, 'js', 'version_switcher.js'), "// vs\n")
+      cmd = build_command(themedir, outputdir)
+      cmd.send(:copy_version_switcher_script)
+      assert_true(File.file?(File.join(outputdir, 'js', 'version_switcher.js')))
+    end
+  end
+
+  # An older themedir without the file must not abort the whole build.
+  def test_theme_without_version_switcher_js_is_tolerated
+    Dir.mktmpdir do |dir|
+      themedir = File.join(dir, 'theme')
+      outputdir = File.join(dir, 'out')
+      FileUtils.mkdir_p(themedir)
+      FileUtils.mkdir_p(outputdir)
+      cmd = build_command(themedir, outputdir)
+      orig_stderr, $stderr = $stderr, StringIO.new
+      begin
+        assert_nothing_raised { cmd.send(:copy_version_switcher_script) }
+        assert_match(/version_switcher\.js not found/, $stderr.string)
+      ensure
+        $stderr = orig_stderr
+      end
+      assert_false(File.exist?(File.join(outputdir, 'js', 'version_switcher.js')))
+    end
+  end
+end

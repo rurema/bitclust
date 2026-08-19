@@ -26,6 +26,27 @@
   text-overflow: ellipsis;
 }
 
+/* Version switcher: sits next to the brand; the auto margin keeps the
+   search box pinned to the right. The slot is empty until
+   version_switcher.js fills it (only on /ja/<version>/ pages). */
+#version-switcher {
+  flex: 0 0 auto;
+  margin-right: auto;
+}
+
+#version-switcher:empty {
+  display: none;
+}
+
+#version-switcher select {
+  font-size: 0.9em;
+  padding: 0.2em 0.3em;
+  border: 1px solid #99a;
+  border-radius: 4px;
+  background: #fff;
+  color: inherit;
+}
+
 #search-section {
   position: relative;
   flex: 0 0 auto;

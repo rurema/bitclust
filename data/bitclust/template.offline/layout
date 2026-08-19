@@ -21,6 +21,7 @@
 <script src="<%=h custom_js_url('js/search_ranker.js') %>"></script>
 <script src="<%=h custom_js_url('js/search_controller.js') %>"></script>
 <script src="<%=h custom_js_url('js/search_init.js') %>"></script>
+<script defer src="<%=h custom_js_url('js/version_switcher.js') %>"></script>
 <% if run_ruby_wasm_url %>
 <meta name="rurema-run-ruby-wasm" content="<%=h run_ruby_wasm_url %>">
 <meta name="rurema-run-help" content="<%=h document_url('help') %>#run">
@@ -36,6 +37,7 @@
 <% end %>
 <div id="rurema-topbar">
   <div id="rurema-brand"><%= manual_home_link %></div>
+  <div id="version-switcher"></div>
   <div id="search-section" role="search">
     <input id="search-field" type="text" autocomplete="off" spellcheck="false"
            placeholder="クラス・メソッドを検索 (/)"
