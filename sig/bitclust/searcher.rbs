@@ -1,4 +1,9 @@
 module BitClust
+  # TerminalView の出力先($stdout や StringIO)
+  interface _SearcherOutput
+    def puts: (*untyped args) -> void
+  end
+
   # Body of bin/refe.
   class Searcher
     @dblocation: (URI::File | URI::Generic)?
@@ -30,6 +35,8 @@ module BitClust
     def exec: (Subcommand::argv argv, ?Subcommand::options options) -> void
 
     def help: () -> String
+
+    def run_query: (MethodDatabase | FunctionDatabase | nil db, Array[String] argv, TerminalView view) -> void
 
     private
 
@@ -93,7 +100,9 @@ module BitClust
 
     @encoding: String?
 
-    def initialize: (Plain compiler, { :describe_all => bool, :line => bool, :encoding => String? } opts) -> void
+    @io: _SearcherOutput?
+
+    def initialize: (Plain compiler, { :describe_all => bool, :line => bool, :encoding => String? } opts, ?io: _SearcherOutput?) -> void
 
     attr_accessor database: MethodDatabase
 

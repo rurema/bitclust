@@ -121,6 +121,14 @@ module BitClust
       @parser.help
     end
 
+    # irb プラグインなど組み込み利用向けの入口。argv のパターンを db から
+    # 検索し、結果を view(TerminalView)へ出力する。db が nil なら
+    # 既定の場所(~/.bitclust/config など)から探す
+    def run_query(db, argv, view)
+      @view = view
+      search_pattern db, argv
+    end
+
     private
 
     def server_mode_check(argv)
@@ -374,12 +382,14 @@ module BitClust
 
   class TerminalView
 
-    def initialize(compiler, opts)
+    # io を省略すると出力先は呼び出し時点の $stdout(従来挙動)
+    def initialize(compiler, opts, io: nil)
       @compiler = compiler
       @describe_all = opts[:describe_all]
       @line = opts[:line]
       @encoding = opts[:encoding]
       @database = nil
+      @io = io
     end
 
     attr_accessor :database
@@ -546,7 +556,7 @@ module BitClust
     end
 
     def puts(*args)
-      super(*args.collect {|arg| convert(arg)})
+      (@io || $stdout).puts(*args.collect {|arg| convert(arg)})
     end
 
     def convert(string)
