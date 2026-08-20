@@ -158,7 +158,13 @@
         html += '<span class="search-type search-type-' +
           this.escapeHTML(typeClass) + '">' + this.formatType(r.type) + '</span>';
       }
-      html += '</p><p class="search-versions">';
+      html += '</p>';
+      // snippet はインデックス生成側が入れたプレーンテキスト
+      // (エントリの説明の最初の段落)。HTML として解釈させない
+      if (r.snippet) {
+        html += '<div class="search-snippet">' + this.escapeHTML(r.snippet) + '</div>';
+      }
+      html += '<p class="search-versions">';
       for (var i = 0; i < versions.length; i++) {
         html += '<a href="' + this.escapeHTML(versionHref(versions[i], r.path)) +
           '">' + this.escapeHTML(versions[i]) + '</a>';

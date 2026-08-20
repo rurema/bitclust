@@ -414,6 +414,49 @@ function setupSearchPage(index) {
   }
 }
 
+// --- snippet(検索結果の説明文)の描画 --------------------------------
+// SearchIndexGenerator はプレーンテキストの snippet を格納し、HTML
+// エスケープは表示側で行う。"<b>" を含む説明が HTML として解釈されずに
+// 描画されること、snippet の無いエントリには div が付かないことを、
+// ページ内検索(search_init.js)と /ja/search(search_page.js)の両方で
+// 確認する。
+const snippetIndex = [
+  { name: 'each', full_name: 'Array#each', type: 'instance_method',
+    path: 'method/-array/i/each.html', versions: ['3.4'],
+    snippet: '各要素についてブロックを <b> のまま評価します。' },
+  { name: 'Array', full_name: 'Array', type: 'class',
+    path: 'class/-array.html', versions: ['3.4'] },
+]
+{
+  loadRankerScripts()  // 直前のスタンドイン ranker テストが差し替えた globals を本物に戻す
+  const { input, result } = setupSearchBox(snippetIndex)
+  input.value = 'each'
+  input.dispatch('keyup', { key: 'h' })
+  const htmls = result.children.map(li => li.innerHTML)
+  const html = htmls.find(h => h.includes('method/-array/i/each.html'))
+  assert(html !== undefined, 'search_init.js lists the each entry (got: ' + htmls.join(' | ') + ')')
+  assert(html.includes('search-snippet'), 'search_init.js renders a snippet div when the entry has one')
+  assert(html.includes('&#60;b&#62;'), 'search_init.js HTML-escapes the snippet text')
+  assert(!html.includes('<b>'), 'search_init.js never injects the raw snippet as HTML')
+
+  input.value = 'Array'
+  input.dispatch('keyup', { key: 'y' })
+  const classItem = result.children.map(li => li.innerHTML).find(h => h.includes('class/-array.html'))
+  assert(classItem && !classItem.includes('search-snippet'),
+         'search_init.js omits the snippet div when the entry has none')
+}
+{
+  const { input, result } = setupSearchPage(snippetIndex)
+  input.value = 'each'
+  input.dispatch('keyup', { key: 'h' })
+  const htmls = result.children.map(li => li.innerHTML)
+  const html = htmls.find(h => h.includes('method/-array/i/each.html'))
+  assert(html !== undefined, 'search_page.js lists the each entry')
+  assert(html.includes('search-snippet'), 'search_page.js renders a snippet div when the entry has one')
+  assert(html.includes('&#60;b&#62;'), 'search_page.js HTML-escapes the snippet text')
+  assert(!html.includes('<b>'), 'search_page.js never injects the raw snippet as HTML')
+}
+
 if (failures > 0) {
   throw new Error(failures + ' JS test(s) failed')
 }

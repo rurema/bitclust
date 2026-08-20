@@ -114,6 +114,9 @@ module BitClust
           key = e.values_at(:name, :full_name, :type, :path)
           entry = (merged[key] ||= e.merge(versions: []))
           entry[:versions] << version
+          # 説明文は「最新版か、収録されている最終版」のものを採用する。
+          # 昇順走査なので後勝ちで上書きすればよい
+          entry[:snippet] = e[:snippet] if e[:snippet]
         end
       end
       merged.values
@@ -126,14 +129,29 @@ module BitClust
 
     private
 
+    # 検索結果に添える説明文。meta description と同じ entry.description
+    # (最初の説明段落のプレーンテキスト)を使い、空なら nil(キー自体を
+    # 持たせない)。プレーンテキストのまま格納し、HTML エスケープは
+    # 表示側(search_init.js / search_page.js)で行う
+    def entry_snippet(entry)
+      desc = entry.description
+      desc unless desc.nil? || desc.empty?
+    end
+
+    def with_snippet(hash, entry)
+      snippet = entry_snippet(entry)
+      hash[:snippet] = snippet if snippet
+      hash
+    end
+
     def class_entries(db)
       db.classes.sort.reject(&:dummy?).map do |c|
-        {
+        with_snippet({
           name:      c.name,
           full_name: c.name,
           type:      c.type.to_s,
           path:      "class/#{encode(c.name)}#{@suffix}",
-        }
+        }, c)
       end
     end
 
@@ -162,11 +180,11 @@ module BitClust
             # sigil is the only thing distinguishing it, so keep it in +name+
             # too (not just +full_name+) or a "$;"-style query can't match it.
             name = full_name = tmark + mname
-            result << { name: name, full_name: full_name, type: type, path: path }
+            result << with_snippet({ name: name, full_name: full_name, type: type, path: path }, entry)
           else
             name = mname
             full_name = cname + tmark + mname
-            item = { name: name, full_name: full_name, type: type, path: path } #: entry
+            item = with_snippet({ name: name, full_name: full_name, type: type, path: path }, entry) #: entry
             if tmark.include?('.')
               # bitclust#279: singleton methods (".") and module functions
               # (".#"/"?.") keep a literal "." in full_name for display, but
@@ -185,12 +203,12 @@ module BitClust
 
     def library_entries(db)
       db.libraries.sort.map do |lib|
-        {
+        with_snippet({
           name:      lib.name,
           full_name: lib.name,
           type:      'library',
           path:      "library/#{encode(lib.name)}#{@suffix}",
-        }
+        }, lib)
       end
     end
 
@@ -201,12 +219,12 @@ module BitClust
         # Prose pages are identified by a Japanese title, so index the title
         # (for human queries) together with the slug (for identifier queries).
         label = (title && !title.empty? && title != slug) ? "#{title} (#{slug})" : slug
-        {
+        with_snippet({
           name:      label,
           full_name: label,
           type:      'document',
           path:      "doc/#{encode(slug)}#{@suffix}",
-        }
+        }, doc)
       end
     end
 
@@ -272,12 +290,12 @@ module BitClust
 
     def function_entries(fdb)
       fdb.functions.sort.map do |func|
-        {
+        with_snippet({
           name:      func.name,
           full_name: func.name,
           type:      'function',
           path:      "function/#{func.name}#{@suffix}",
-        }
+        }, func)
       end
     end
 
