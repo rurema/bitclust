@@ -112,7 +112,9 @@
           this.escapeHTML(typeClass) + '">' + this.formatType(r.type) + '</span>';
       }
       html += '</p>';
-      if (r.snippet) html += '<div class="search-snippet">' + r.snippet + '</div>';
+      // snippet はインデックス生成側が入れたプレーンテキスト
+      // (エントリの説明の最初の段落)。HTML として解釈させない
+      if (r.snippet) html += '<div class="search-snippet">' + this.escapeHTML(r.snippet) + '</div>';
       li.innerHTML = html;
       return li;
     };

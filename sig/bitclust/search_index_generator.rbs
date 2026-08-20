@@ -27,7 +27,16 @@ module BitClust
 
     def self.merged_js: (Array[[String, Array[entry]]] version_indexes) -> String
 
+    # 説明文(entry.description)を持つエントリ
+    interface _DescribedEntry
+      def description: () -> String?
+    end
+
     private
+
+    def entry_snippet: (_DescribedEntry entry) -> String?
+
+    def with_snippet: (entry hash, _DescribedEntry entry) -> entry
 
     def class_entries: (MethodDatabase db) -> Array[entry]
 

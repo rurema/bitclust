@@ -511,3 +511,84 @@ HERE
     end
   end
 end
+
+class TestSearchIndexSnippet < Test::Unit::TestCase
+  # 検索結果の説明文(snippet)。meta description と同じ entry.description
+  # (最初の説明段落のプレーンテキスト)を、空でないときだけ持たせる。
+  #
+  # テストリスト:
+  # [x] class/method/special variable の各エントリが snippet を持つ
+  # [x] 説明が空のエントリは snippet キー自体を持たない
+  # [x] merge は複数版で同一エントリのとき最新版の snippet を採用する
+  # [x] 最新版に無いページは収録されている最終版の snippet を保つ
+  def setup
+    @prefix = 'db_snip'
+    @base = 'tree_snip'
+    @root = "#{@base}/refm/api/src"
+    FileUtils.mkdir_p("#{@root}")
+    File.open("#{@root}/LIBRARIES", 'w+') { |f| f.puts '_builtin' }
+    File.open("#{@root}/_builtin.rd", 'w+') do |f|
+      f.puts <<'HERE'
+description
+
+= class Foo < Object
+クラスの説明。
+== Instance Methods
+--- foo
+
+メソッドの説明。
+--- undocumented
+= module Kernel
+== Special Variables
+--- $; -> String | nil
+
+区切り文字。
+HERE
+    end
+    @db = BitClust::MethodDatabase.new(@prefix)
+    @db.init
+    @db.transaction do
+      [%w[version 3.4], %w[encoding utf-8]].each { |k, v| @db.propset(k, v) }
+    end
+    @db.transaction { @db.update_by_stdlibtree(@root) }
+    @gen = BitClust::SearchIndexGenerator.new
+  end
+
+  def teardown
+    FileUtils.rm_r([@prefix, @base], :force => true)
+  end
+
+  def find_entry(index, full_name)
+    index.find { |e| e[:full_name] == full_name }
+  end
+
+  def test_snippet_carries_entry_description
+    index = @gen.build_index(@db)
+    assert_equal 'クラスの説明。', find_entry(index, 'Foo')[:snippet]
+    assert_equal 'メソッドの説明。', find_entry(index, 'Foo#foo')[:snippet]
+    assert_equal '区切り文字。', find_entry(index, '$;')[:snippet]
+  end
+
+  def test_snippet_is_omitted_when_description_is_empty
+    index = @gen.build_index(@db)
+    e = find_entry(index, 'Foo#undocumented')
+    assert_not_nil e
+    assert_false e.key?(:snippet)
+  end
+
+  def test_merge_takes_snippet_from_newest_version
+    old_e = { name: 'X', full_name: 'X', type: 'class', path: 'class/-x.html', snippet: '古い説明' }
+    new_e = { name: 'X', full_name: 'X', type: 'class', path: 'class/-x.html', snippet: '新しい説明' }
+    merged = BitClust::SearchIndexGenerator.merge([['3.4', [new_e]], ['3.3', [old_e]]])
+    assert_equal 1, merged.size
+    assert_equal '新しい説明', merged.first[:snippet]
+    assert_equal %w[3.3 3.4], merged.first[:versions]
+  end
+
+  def test_merge_keeps_snippet_of_last_version_having_the_page
+    only_old = { name: 'Y', full_name: 'Y', type: 'class', path: 'class/-y.html', snippet: '最終収録版の説明' }
+    merged = BitClust::SearchIndexGenerator.merge([['3.4', []], ['3.3', [only_old]]])
+    assert_equal '最終収録版の説明', merged.first[:snippet]
+    assert_equal %w[3.3], merged.first[:versions]
+  end
+end
