@@ -133,6 +133,8 @@ module BitClust
 
       def copy_run_ruby_wasm_script: () -> void
 
+      def copy_version_switcher_script: () -> void
+
       SEARCH_JS_FILES: Array[String]
 
       def create_search_index: (Pathname outputdir, MethodDatabase db, FunctionDatabase fdb) -> void
