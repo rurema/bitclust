@@ -319,18 +319,28 @@ span.method-until-badge { background-color: #f7e6e6; color: #aa3333; }
 
 /* RBS 型シグネチャ(rbssig サブコマンドが 4.0 以降の DB に書き込み、
    メソッド見出しの <dt> 群の直後に 1 オーバーロード 1 行の
-   <dt class="rbs-signature"> として出る)。参考情報なのでメソッド
-   見出しより控えめな見た目にし、インラインコードのチップ背景も外す */
+   <dt class="rbs-signature"> として出る)。参考情報なので rdoc の型表示の
+   ように小さく・薄く・少し字下げして、メソッド定義の見出しと明確に
+   区別する。行の大半はクラスへのリンクなので、リンクの太字(a の既定)と
+   リンク色もここで打ち消さないと見出しと同じ太字の青になってしまう。
+   インラインコードのチップ背景も外す */
 dt.rbs-signature {
   font-weight: normal;
-  font-size: 85%;
-  color: #555;
+  font-size: 80%;
+  color: #999;
   line-height: 1.4;
+  margin-left: 2em;
 }
 dt.rbs-signature code {
   background-color: transparent;
   padding: 0;
   border-radius: 0;
+  font-size: 100%;  /* code の縮小と二重に掛けない(実効 80%) */
+}
+dt.rbs-signature a:link,
+dt.rbs-signature a:visited {
+  font-weight: normal;
+  color: #8895b5;
 }
 
 .method-description{
