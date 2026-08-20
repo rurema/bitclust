@@ -133,6 +133,15 @@ assert(VS.attach({
   checkExists: () => Promise.resolve(true),
 }) === false, 'attach outside a versioned page is a no-op')
 
+// Local statichtml output (rake statichtml:X.Y opened via file:// or a
+// local server without the /ja/<version>/ prefix): no switcher, no fetch.
+assert(VS.attach({
+  document: makeDocument(makeElement('div')),
+  location: { pathname: '/tmp/html/3.4/class/Array.html' },
+  setHref() { failures++ },
+  checkExists: () => { failures++; return Promise.resolve(true) },
+}) === false, 'attach on a local statichtml path is a no-op')
+
 // Normal attachment: builds a select with the current version selected.
 let slot = makeElement('div')
 let navigated = []
