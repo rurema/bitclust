@@ -1,0 +1,31 @@
+# irb 本体の型定義は rbs collection に無いため、bitclust/irb.rb が使う
+# 範囲だけの最小のスタブを併せて宣言する
+module IRB
+  def self.const_defined?: (Symbol) -> bool
+
+  module Command
+    def self.register: (Symbol name, untyped command_class) -> void
+
+    class Base
+      def self.category: (String category) -> void
+      def self.description: (String description) -> void
+      def self.help_message: (String help_message) -> void
+    end
+  end
+
+  module Pager
+    def self.page_content: (String content) -> void
+  end
+end
+
+module BitClust
+  module Irb
+    USAGE: String
+
+    def self.lookup: (untyped pattern, ?io: _SearcherOutput, ?db: (MethodDatabase | FunctionDatabase)?) -> void
+
+    class RefeCommand < ::IRB::Command::Base
+      def execute: (String arg) -> void
+    end
+  end
+end

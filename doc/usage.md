@@ -53,6 +53,21 @@ $ gem install bitclust-core bitclust-dev refe2
 <dd>BitClust データベースに対応した ReFe (ReFe2)。</dd>
 </dl>
 
+## irb から使う(bitclust-irb)
+
+bitclust-irb gem を入れて `~/.irbrc` に次の 1 行を書くと、
+irb(1.13 以降)に `refe` コマンドが追加されます。
+
+```ruby
+require "bitclust/irb"
+```
+
+irb のセッション中に `refe String#gsub` のように入力すると、
+refe コマンドと同じデータベース($HOME/.bitclust/config か
+環境変数 BITCLUST_DATADIR で指定した場所)を検索して
+結果をページャで表示します。データベースは事前に `bitclust setup`
+で作成しておいてください。
+
 ## bitclust サブコマンド
 
 ```--capi``` オプションを付けた場合，C API（doctree の manual/capi 以下）を対象とします。付けない場合，ライブラリ（manual/api 以下）と言語仕様など（manual/doc 以下）を対象とします。
