@@ -2,8 +2,9 @@
 #
 # irb からるりま(Ruby リファレンスマニュアル)を引く refe コマンド。
 # ~/.irbrc に `require "bitclust/irb"` と書くと irb に `refe` コマンドが
-# 登録される。検索対象の DB は refe コマンドと同じ場所
-# (bitclust setup が作る ~/.bitclust/config)から探す。
+# 登録される。検索対象の DB は refe コマンドと同じ場所(bitclust setup が
+# 作る設定ファイル)から探し、DB が無ければ docs.ruby-lang.org の検索索引と
+# Markdown 配信から取得する(BitClust::Remote)。
 
 require 'stringio'
 require 'bitclust'
@@ -18,15 +19,18 @@ module BitClust
         refe String#gsub     インスタンスメソッド
         refe Array.new       特異メソッド
         refe Comparable      クラス・モジュール
-        refe printf          名前だけでの検索
+        refe each            名前だけでの検索(該当が複数なら一覧)
 
-      DB が無い場合は `bitclust setup` で作成してください。
+      DB が無い場合は docs.ruby-lang.org から取得します(1 日キャッシュ)。
+      `bitclust setup` で DB を作ると手元で検索できます。
     USAGE
 
     # pattern を検索して整形済みテキストを io へ書く。db が nil なら
-    # 既定の場所から探す。検索の失敗は例外にせず io へメッセージを書く
-    # (irb セッションを止めないため)
-    def self.lookup(pattern, io: $stdout, db: nil)
+    # 既定の場所から探し、そこにも無ければ remote(省略時は
+    # Remote.default。nil ならフォールバックしない)で検索する。
+    # 検索の失敗は例外にせず io へメッセージを書く(irb セッションを
+    # 止めないため)
+    def self.lookup(pattern, io: $stdout, db: nil, remote: Remote.default)
       words = pattern.to_s.split
       if words.empty?
         io.puts USAGE
@@ -35,7 +39,9 @@ module BitClust
       view = TerminalView.new(Plain.new,
                               { describe_all: false, line: false, encoding: nil },
                               io: io)
-      Searcher.new.run_query(db, words, view)
+      searcher = Searcher.new
+      searcher.remote = remote
+      searcher.run_query(db, words, view)
     rescue BitClust::UserError => err
       io.puts err.message
     end

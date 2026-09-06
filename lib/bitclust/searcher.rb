@@ -9,10 +9,12 @@
 #
 
 require 'bitclust/methoddatabase'
+require 'bitclust/remote'
 require 'bitclust/functiondatabase'
 require 'bitclust/nameutils'
 require 'bitclust/methodid'
 require 'bitclust/exception'
+require 'bitclust/user_dirs'
 require 'uri'
 require 'rbconfig'
 require 'optparse'
@@ -36,6 +38,7 @@ module BitClust
       @target_type = nil
       @listen_url = nil
       @foreground = false
+      @remote = Remote.default
       @parser = OptionParser.new {|parser|
         parser.banner = "Usage: #{@name} <pattern>"
         unless cmd == 'bitclust'
@@ -91,6 +94,10 @@ module BitClust
 
     attr_reader :parser
 
+    # ローカル DB が無いときに使うリモート検索(BitClust::Remote)。nil なら
+    # DB が無いことをエラーにする
+    attr_accessor :remote
+
     def parse(argv)
       @parser.parse! argv
       if @listen_url   # server mode
@@ -123,10 +130,18 @@ module BitClust
 
     # irb プラグインなど組み込み利用向けの入口。argv のパターンを db から
     # 検索し、結果を view(TerminalView)へ出力する。db が nil なら
-    # 既定の場所(~/.bitclust/config など)から探す
+    # 既定の場所(環境変数 BITCLUST_DATADIR など・設定ファイル(UserDirs))
+    # から探す
     def run_query(db, argv, view)
       @view = view
       search_pattern db, argv
+    end
+
+    # 既定の場所(環境変数 BITCLUST_DATADIR など・設定ファイル(UserDirs))に
+    # ローカル DB があるか。irb プラグインが HTTP フォールバックへ切り替える
+    # 判定に使う。環境変数が不正な DB を指していれば InvalidDatabase
+    def local_database?
+      !find_dblocation().nil?
     end
 
     private
@@ -251,15 +266,23 @@ module BitClust
       [ "#{datadir}/refe2", "#{datadir}/bitclust" ].each do |path|
         return path if MethodDatabase.datadir?(path)
       end
-      config_path = Pathname(ENV.fetch('HOME')) + ".bitclust" + "config"
-      if config_path.exist?
-        config = YAML.load_file(config_path)
+      config = UserDirs.load_config
+      if config
         return "#{config[:database_prefix]}-#{config[:default_version]}"
       end
       nil
     end
 
     def search_pattern(db, argv)
+      if db.nil? && !find_dblocation
+        remote = @remote
+        unless remote
+          raise InvalidDatabase, "no database found: run `bitclust setup` to create one (remote search is disabled by BITCLUST_REMOTE_URL)"
+        end
+        remote.lookup(argv, @view.io, describe_all: @describe_all, line: @linep,
+                      class_only: @target_type == :class)
+        return
+      end
       db ||= new_database()
       @view.database ||= db if @view
       # FIXME なぜか else 節にきかないのでここに書いておく
@@ -360,16 +383,6 @@ module BitClust
       find_method db, cnames.join('::'), '::', name
     end
 
-    # 区切りは反転文字列上で探す。"?." は 4.0 以降の module function の
-    # 表示形式(反転すると ".?")で、内部表記の ".#" に正規化する
-    def parse_method_spec_pattern(pat)
-      _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|\.\?|[\#\.\,])/, 2)
-      c = (_c || raise).reverse
-      t = (_t || raise).tr(',', '#').sub(/\#\.|\.\?/, '.#')
-      m = (_m || raise).reverse
-      return c, t, m
-    end
-
   end
 
 
@@ -393,6 +406,22 @@ module BitClust
     end
 
     attr_accessor :database
+
+    # 出力先(io: 省略時は $stdout)
+    def io
+      @io || $stdout
+    end
+
+    # 名前の一覧を表示する(-l なら 1 行 1 件、それ以外は端末幅に詰める)
+    def print_names(names)
+      if @line
+        names.sort.each do |n|
+          puts n
+        end
+      else
+        print_packed_names names.sort
+      end
+    end
 
     def show_class(cs)
       if cs.size == 1
@@ -449,16 +478,6 @@ module BitClust
     end
 
     private
-
-    def print_names(names)
-      if @line
-        names.sort.each do |n|
-          puts n
-        end
-      else
-        print_packed_names names.sort
-      end
-    end
 
     def print_packed_names(names)
       max = terminal_column()

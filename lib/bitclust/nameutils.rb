@@ -222,6 +222,19 @@ module BitClust
       Gem::Version.new(version) >= Gem::Version.new('4.0') ? '?.' : mark
     end
 
+    # refe の検索パターン("String#gsub"・"Array.new"・"Kernel.#printf" や
+    # "," を "#" の代用にした "String,gsub" など)を [クラス名, typemark,
+    # メソッド名] に分ける。区切りは反転文字列上で探す。"?." は 4.0 以降の
+    # module function の表示形式(反転すると ".?")で、内部表記の ".#" に
+    # 正規化する
+    def parse_method_spec_pattern(pat)
+      _m, _t, _c = pat.reverse.split(/([\#,]\.|\.[\#,]|\.\?|[\#\.\,])/, 2)
+      c = (_c || raise).reverse
+      t = (_t || raise).tr(',', '#').sub(/\#\.|\.\?/, '.#')
+      m = (_m || raise).reverse
+      return c, t, m
+    end
+
     def functionname?(n)
       /\A\w+\z/ =~ n ? true : false
     end

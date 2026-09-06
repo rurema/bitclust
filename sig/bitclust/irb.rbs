@@ -22,7 +22,7 @@ module BitClust
   module Irb
     USAGE: String
 
-    def self.lookup: (untyped pattern, ?io: _SearcherOutput, ?db: (MethodDatabase | FunctionDatabase)?) -> void
+    def self.lookup: (untyped pattern, ?io: _SearcherOutput, ?db: (MethodDatabase | FunctionDatabase)?, ?remote: Remote?) -> void
 
     class RefeCommand < ::IRB::Command::Base
       def execute: (String arg) -> void

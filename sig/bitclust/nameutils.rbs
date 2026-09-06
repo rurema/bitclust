@@ -101,6 +101,8 @@ module BitClust
     # 型ではなく String にする(識別子として使ってはいけない)。
     def self?.display_typemark: (typemark mark, String? version) -> String
 
+    def self?.parse_method_spec_pattern: (String pat) -> [String, String, String]
+
     def self?.functionname?: (String n) -> bool
 
     # string -> case-sensitive ID

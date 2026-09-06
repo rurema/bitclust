@@ -9,6 +9,7 @@ require 'uri'
 
 require 'bitclust'
 require 'bitclust/subcommand'
+require 'bitclust/user_dirs'
 
 module BitClust
   module Subcommands
@@ -91,7 +92,7 @@ module BitClust
         set_srcdir(srcdir_root) unless @srcdir
 
         unless @baseurl
-          $stderr.puts "missing base URL.  Use --baseurl or check ~/.bitclust/config"
+          $stderr.puts "missing base URL.  Use --baseurl or check the config file (bitclust setup)"
           exit 1
         end
         unless @dbpath || @autop
@@ -211,10 +212,8 @@ module BitClust
       end
 
       def load_config_file
-        home_directory = Pathname(ENV.fetch('HOME'))
-        config_path = home_directory + ".bitclust/config"
-        if config_path.exist?
-          config = YAML.load_file(config_path)
+        config = UserDirs.load_config
+        if config
           @baseurl  ||= config[:baseurl]
           @dbpath   ||= "#{config[:database_prefix]}-#{config[:default_version]}"
           @port     ||= config[:port]

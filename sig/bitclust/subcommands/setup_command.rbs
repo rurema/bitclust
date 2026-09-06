@@ -36,6 +36,8 @@ module BitClust
 
       def purge: () -> bot
 
+      def layout: () -> [Pathname, String, Pathname]
+
       def prepare: () -> void
 
       def generate_config: (Pathname path, config config) -> void

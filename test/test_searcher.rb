@@ -1,8 +1,10 @@
 require "test/unit"
 require "bitclust"
 require "bitclust/searcher"
+require "bitclust/user_dirs"
 require "fileutils"
 require "tmpdir"
+require "yaml"
 
 class TestTerminalView < Test::Unit::TestCase
   include BitClust
@@ -149,5 +151,66 @@ class TestSearcherModuleFunctionQuery < Test::Unit::TestCase
   def test_predicate_method_names_unaffected
     assert_equal ["Foo", "#", "empty?"], parse("Foo#empty?")
     assert_equal ["Foo", ".", "b?"], parse("Foo.b?")
+  end
+end
+
+# refe/bitclust search が、環境変数指定が無いとき設定ファイル(UserDirs)
+# 経由で DB を見つけること。XDG の場所→従来の ~/.bitclust の順
+class TestSearcherDefaultDbpath < Test::Unit::TestCase
+  include BitClust
+
+  ENV_KEYS = %w[HOME XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME
+                REFE2_SERVER BITCLUST_SERVER REFE2_DATADIR BITCLUST_DATADIR].freeze
+
+  def setup
+    @saved = ENV_KEYS.to_h {|k| [k, ENV[k]] }
+    @home = Dir.mktmpdir
+    ENV['HOME'] = @home
+    (ENV_KEYS - %w[HOME]).each {|k| ENV.delete(k) }
+  end
+
+  def teardown
+    @saved.each {|k, v| v ? ENV[k] = v : ENV.delete(k) }
+    FileUtils.rm_rf(@home)
+  end
+
+  def write_config(path, prefix)
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, { :default_version => '9.9', :database_prefix => prefix }.to_yaml)
+  end
+
+  def test_default_dbpath_via_xdg_config
+    prefix = File.join(@home, 'data', 'bitclust', 'db')
+    MethodDatabase.new("#{prefix}-9.9").init
+    write_config(File.join(@home, '.config', 'bitclust', 'config'), prefix)
+    searcher = Searcher.new
+    assert_equal("#{prefix}-9.9", searcher.send(:default_dbpath))
+    assert_true(searcher.local_database?)
+  end
+
+  def test_default_dbpath_via_legacy_config
+    prefix = File.join(@home, '.bitclust', 'db')
+    MethodDatabase.new("#{prefix}-9.9").init
+    write_config(File.join(@home, '.bitclust', 'config'), prefix)
+    searcher = Searcher.new
+    assert_equal("#{prefix}-9.9", searcher.send(:default_dbpath))
+    assert_true(searcher.local_database?)
+  end
+
+  def test_default_dbpath_prefers_xdg_over_legacy
+    legacy_prefix = File.join(@home, '.bitclust', 'db')
+    MethodDatabase.new("#{legacy_prefix}-9.9").init
+    write_config(File.join(@home, '.bitclust', 'config'), legacy_prefix)
+    xdg_prefix = File.join(@home, 'data', 'bitclust', 'db')
+    MethodDatabase.new("#{xdg_prefix}-9.9").init
+    write_config(File.join(@home, '.config', 'bitclust', 'config'), xdg_prefix)
+    searcher = Searcher.new
+    assert_equal("#{xdg_prefix}-9.9", searcher.send(:default_dbpath))
+  end
+
+  def test_default_dbpath_nil_without_config
+    searcher = Searcher.new
+    assert_nil(searcher.send(:default_dbpath))
+    assert_false(searcher.local_database?)
   end
 end

@@ -63,16 +63,39 @@ require "bitclust/irb"
 ```
 
 irb のセッション中に `refe String#gsub` のように入力すると、
-refe コマンドと同じデータベース($HOME/.bitclust/config か
-環境変数 BITCLUST_DATADIR で指定した場所)を検索して
-結果をページャで表示します。データベースは事前に `bitclust setup`
-で作成しておいてください。
+refe コマンドと同じデータベース(環境変数 BITCLUST_DATADIR か
+`bitclust setup` が作る設定ファイル)を検索して
+結果をページャで表示します。
+
+## データベースが無いときの動作(refe・irb の refe コマンド共通)
+
+データベースが無い場合、refe コマンドと irb の `refe` コマンドは
+docs.ruby-lang.org の検索索引(`/ja/latest/js/search_data.js`)を
+refe と同じ規則で引き、1 件に決まればその Markdown 配信
+(`/ja/latest/` 配下の `.md`)を取得して表示します。複数に当たれば
+名前の一覧を出します(`-l` や `-a` も使えます)。
+`refe each` のようなメソッド名だけの検索もできます。
+
+取得した索引とページは `$XDG_CACHE_HOME/bitclust/`
+(既定 `~/.cache/bitclust/`)にキャッシュされ、1 日以内はそのまま
+使います。それより古い場合は If-Modified-Since で更新を確認し、
+接続できないときは古いキャッシュで動きます。
+
+取得先は環境変数 `BITCLUST_REMOTE_URL` で変更でき(既定は
+`https://docs.ruby-lang.org/ja/latest/`)、`none` を設定すると
+リモート検索をしません(空文字列でも同じですが、Windows の cmd.exe や
+PowerShell では空の環境変数を作れないので `none` を使ってください)。
+索引と `.md` を配信しているのは latest だけです。
+手元で検索したい場合は `bitclust setup` でデータベースを作成してください。
 
 ## bitclust サブコマンド
 
 ```--capi``` オプションを付けた場合，C API（doctree の manual/capi 以下）を対象とします。付けない場合，ライブラリ（manual/api 以下）と言語仕様など（manual/doc 以下）を対象とします。
 
-$HOME/.bitclust/config がある場合は、```-d```オプションは省略可能です。
+設定ファイル（$XDG_CONFIG_HOME/bitclust/config、既定は
+`~/.config/bitclust/config`）がある場合は、```-d```オプションは省略可能です
+（1.7 以前の `bitclust setup` が作った `~/.bitclust/config` が残っていれば、
+そちらも fallback として読みます）。
 
 ### ユーザー向け
 
@@ -83,7 +106,11 @@ $HOME/.bitclust/config がある場合は、```-d```オプションは省略可�
 生成までを一括で実行します。refe を使うための最短の入り口です。
 git コマンドに PATH が通っている必要があります。
 doctree の Markdown ツリー（manual/）から DB を構築します。
-生成物は $HOME/.bitclust 以下に置かれます。
+設定ファイルは $XDG_CONFIG_HOME/bitclust/config（既定は
+`~/.config/bitclust/config`）に、DB と doctree のチェックアウトは
+$XDG_DATA_HOME/bitclust 以下（既定は `~/.local/share/bitclust`）に
+置かれます。既に `~/.bitclust`（1.7 以前の setup が作った場所）がある場合は、
+そちらをそのまま読み書きします。
 </dd>
 </dl>
 

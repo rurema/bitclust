@@ -14,6 +14,7 @@ $LOAD_PATH.unshift(libdir.to_s)
 
 require 'bitclust'
 require 'bitclust/subcommand'
+require 'bitclust/user_dirs'
 
 subcommands_dir = libdir + "bitclust/subcommands"
 Dir.glob(File.join(subcommands_dir.to_s, "*.rb")) do |entry|
@@ -143,12 +144,12 @@ Global Options:
         @version ||= config[:default_version]
         @prefix ||= "#{config[:database_prefix]}-#{@version}"
       end
-      # DB 必須のサブコマンドで --database も ~/.bitclust/config も無ければ
-      # 案内付きで中断する。needs_database? が false のサブコマンドと、
+      # DB 必須のサブコマンドで --database も設定ファイル(UserDirs)も
+      # 無ければ案内付きで中断する。needs_database? が false のサブコマンドと、
       # 自前で DB を探す search (Searcher) は対象外
       needs_database = cmd.respond_to?(:needs_database?) && cmd.needs_database?
       if needs_database && !@prefix
-        error "no database given. Use --database (-d) option or ~/.bitclust/config"
+        error "no database given. Use --database (-d) option or run `bitclust setup` (config: #{UserDirs.config_candidates.join(' or ')})"
       end
       # @type var options: Subcommand::options
       options = {
@@ -162,13 +163,7 @@ Global Options:
     end
 
     def load_config
-      home_directory = Pathname(ENV.fetch('HOME'))
-      config_path = home_directory + ".bitclust/config"
-      if config_path.exist?
-        YAML.load_file(config_path)
-      else
-        nil
-      end
+      UserDirs.load_config
     end
 
     def error(message)

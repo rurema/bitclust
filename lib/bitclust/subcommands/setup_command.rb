@@ -8,6 +8,7 @@ require 'yaml'
 
 require 'bitclust'
 require 'bitclust/subcommand'
+require 'bitclust/user_dirs'
 
 module BitClust
   module Subcommands
@@ -43,7 +44,9 @@ module BitClust
         }
       end
 
-      # DB は ~/.bitclust 配下に自前で作るのでグローバル --database は不要
+      # DB は設定ファイル(UserDirs)が示す場所(既定は $XDG_DATA_HOME/bitclust、
+      # 旧 ~/.bitclust があればそちら)に自前で作るのでグローバル --database
+      # は不要
       def needs_database?
         false
       end
@@ -68,22 +71,37 @@ module BitClust
       private
 
       def purge
-        home_directory = Pathname(ENV.fetch("HOME"))
-        config_dir = home_directory + ".bitclust"
         print "Remove all generated files..."
-        FileUtils.rm_rf(config_dir.to_s)
+        puts
+        [UserDirs.legacy_dir, UserDirs.config_home, UserDirs.data_home, UserDirs.cache_home].each do |dir|
+          next unless dir.exist?
+          FileUtils.rm_rf(dir.to_s)
+          puts "  removed #{dir}"
+        end
         puts "done!"
         exit 0
       end
 
+      # 設定ファイル・DB・doctree checkout の置き場所を選ぶ。既に旧
+      # ~/.bitclust/config があり、まだ XDG 側の設定ファイルが無ければ
+      # 互換のため旧レイアウトを維持する。それ以外は XDG レイアウトを使う
+      def layout
+        legacy_config = UserDirs.legacy_dir + "config"
+        xdg_config = UserDirs.config_home + "config"
+        if legacy_config.exist? && !xdg_config.exist?
+          config_dir = UserDirs.legacy_dir
+          [config_dir + "config", (config_dir + "db").to_s, config_dir + "rubydoc"]
+        else
+          [xdg_config, (UserDirs.data_home + "db").to_s, UserDirs.data_home + "rubydoc"]
+        end
+      end
+
       def prepare
-        home_directory = Pathname(ENV.fetch("HOME")).expand_path
-        config_dir = home_directory + ".bitclust"
-        config_dir.mkpath
-        config_path = config_dir + "config"
-        rubydoc_dir = config_dir + "rubydoc"
+        config_path, database_prefix, rubydoc_dir = layout
+        config_path.dirname.mkpath
+        rubydoc_dir.dirname.mkpath
         @config = {
-          :database_prefix => (config_dir + "db").to_s,
+          :database_prefix => database_prefix,
           :encoding        => "utf-8",
           :versions        => @versions,
           :default_version => @versions.max,

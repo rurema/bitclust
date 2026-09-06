@@ -1,5 +1,8 @@
 require 'bitclust'
 require 'bitclust/runner'
+require 'bitclust/user_dirs'
+require 'tmpdir'
+require 'fileutils'
 
 class TestRunner < Test::Unit::TestCase
   def setup
@@ -116,7 +119,10 @@ class TestRunner < Test::Unit::TestCase
     original_stderr = $stderr
     $stderr = StringIO.new
     assert_raise(SystemExit) { @runner.run(["init"]) }
-    assert_include($stderr.string, "--database")
+    message = $stderr.string
+    assert_include(message, "--database (-d)")
+    assert_include(message, "bitclust setup")
+    assert_include(message, BitClust::UserDirs.config_candidates.join(' or '))
   ensure
     $stderr = original_stderr
   end
@@ -144,5 +150,59 @@ class TestRunner < Test::Unit::TestCase
     ].each do |klass|
       assert_true(klass.new.needs_database?, klass.name)
     end
+  end
+end
+
+# Runner#load_config が UserDirs 経由で設定ファイルを読むこと(実ファイルで検証)。
+#
+# テストリスト:
+# [x] XDG の場所(~/.config/bitclust/config)にあればそれを読む
+# [x] 従来の場所(~/.bitclust/config)にあればそれを読む
+# [x] どちらも無ければ nil
+class TestRunnerLoadConfig < Test::Unit::TestCase
+  ENV_KEYS = %w[HOME XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME
+                REFE2_SERVER BITCLUST_SERVER REFE2_DATADIR BITCLUST_DATADIR].freeze
+
+  def setup
+    @saved = ENV_KEYS.to_h {|k| [k, ENV[k]] }
+    @home = Dir.mktmpdir
+    ENV['HOME'] = @home
+    (ENV_KEYS - %w[HOME]).each {|k| ENV.delete(k) }
+    @runner = BitClust::Runner.new
+  end
+
+  def teardown
+    @saved.each {|k, v| v ? ENV[k] = v : ENV.delete(k) }
+    FileUtils.rm_rf(@home)
+  end
+
+  def write_config(path, prefix, version)
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, { :default_version => version, :database_prefix => prefix }.to_yaml)
+  end
+
+  def test_load_config_from_xdg_location
+    write_config(File.join(@home, '.config', 'bitclust', 'config'), '/xdg/db', '4.0')
+    config = @runner.load_config
+    assert_equal('/xdg/db', config[:database_prefix])
+    assert_equal('4.0', config[:default_version])
+  end
+
+  def test_load_config_from_legacy_location
+    write_config(File.join(@home, '.bitclust', 'config'), '/legacy/db', '3.4')
+    config = @runner.load_config
+    assert_equal('/legacy/db', config[:database_prefix])
+    assert_equal('3.4', config[:default_version])
+  end
+
+  def test_load_config_prefers_xdg_over_legacy
+    write_config(File.join(@home, '.bitclust', 'config'), '/legacy/db', '3.4')
+    write_config(File.join(@home, '.config', 'bitclust', 'config'), '/xdg/db', '4.0')
+    config = @runner.load_config
+    assert_equal('/xdg/db', config[:database_prefix])
+  end
+
+  def test_load_config_nil_without_any_config_file
+    assert_nil(@runner.load_config)
   end
 end

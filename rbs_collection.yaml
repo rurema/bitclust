@@ -36,6 +36,7 @@ gems:
   - name: erb
   - name: fileutils
   - name: json
+  - name: net-http
   - name: nkf
   - name: optparse
   - name: pathname

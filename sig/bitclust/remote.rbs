@@ -1,0 +1,155 @@
+module BitClust
+  # ローカル DB が無いときのリモート検索(docs.ruby-lang.org の検索索引と
+  # Markdown 配信をキャッシュ付きで使う)
+  class Remote
+    include NameUtils
+
+    # (URI, ヘッダ) を受け取り [HTTP ステータス, 本文] を返す
+    interface _Fetcher
+      def call: (URI::Generic uri, Hash[String, String] headers) -> [Integer, String]
+    end
+
+    class HTTPError < StandardError
+    end
+
+    DEFAULT_BASE_URL: String
+
+    SEARCH_URL: String
+
+    INDEX_PATH: String
+
+    ENV_KEY: String
+
+    DISABLED_VALUE: String
+
+    NETWORK_ERRORS: Array[singleton(Exception)]
+
+    self.@index_memo: [[String, Time], Index]?
+
+    @base_url: String
+
+    @http: HttpFetcher?
+
+    @cache: Cache
+
+    def self.default: () -> Remote?
+
+    def self.index_for: (String path, String body) -> Index
+
+    attr_reader base_url: String
+
+    def initialize: (?base_url: String, ?fetcher: _Fetcher?, ?cache_dir: Pathname | String, ?clock: (^() -> Time)?) -> void
+
+    def lookup: (Array[String] words, _SearcherOutput io, ?describe_all: bool, ?line: bool, ?class_only: bool) -> bool
+
+    def search_url: (Array[String] words) -> String
+
+    private
+
+    def load_index: () -> Index
+
+    def show_page: (Entry entry, _SearcherOutput io) -> void
+
+    def not_found_message: (Array[String] words, bool class_only) -> String
+
+    class Entry
+      attr_reader name: String
+      attr_reader full_name: String
+      attr_reader type: String
+      attr_reader path: String
+      attr_accessor klass: String?
+      attr_accessor typechar: String?
+
+      def initialize: (name: String, full_name: String, type: String, path: String, ?klass: String?, ?typechar: String?) -> void
+    end
+
+    class Index
+      include NameUtils
+
+      CLASS_TYPES: Array[String]
+
+      METHOD_TYPES: Array[String]
+
+      METHOD_PATH_RE: Regexp
+
+      @classes: Array[Entry]
+
+      @methods: Array[Entry]
+
+      @libraries: Array[Entry]
+
+      @functions: Array[Entry]
+
+      def self.parse: (String js) -> Index
+
+      def initialize: (Array[Entry] entries) -> void
+
+      def search: (Array[String] words, ?class_only: bool) -> Array[Entry]
+
+      private
+
+      def search_one: (String pat) -> Array[Entry]
+
+      def search_method: (String? c, String? t, String m) -> Array[Entry]
+
+      def narrow: (Array[Entry] xs, String pattern) { (Entry) -> String } -> Array[Entry]
+    end
+
+    class Cache
+      MAX_AGE: Integer
+
+      class Hit
+        attr_reader body: String
+        attr_reader path: String
+        attr_reader stale: bool
+
+        def initialize: (body: String, path: String, stale: bool) -> void
+      end
+
+      @dir: String
+
+      @fetcher: _Fetcher
+
+      @max_age: Integer
+
+      @clock: ^() -> Time
+
+      def initialize: (dir: String, fetcher: _Fetcher, ?max_age: Integer, ?clock: ^() -> Time) -> void
+
+      def fetch: (URI::Generic uri) -> Hit?
+
+      private
+
+      def path_for: (URI::Generic uri) -> String
+
+      def read: (String path) -> String
+
+      def write: (String path, String text, Time now) -> void
+
+      def to_utf8: (String body) -> String
+    end
+
+    # Net::HTTP による既定の取得(接続を使い回し、close で閉じる)
+    class HttpFetcher
+      HEADERS: Hash[String, String]
+
+      MAX_REDIRECTS: Integer
+
+      @open_timeout: Integer
+
+      @read_timeout: Integer
+
+      @sessions: Hash[[String?, Integer?], Net::HTTP]
+
+      def initialize: (?open_timeout: Integer, ?read_timeout: Integer) -> void
+
+      def call: (URI::Generic uri, ?Hash[String, String] headers) -> [Integer, String]
+
+      def close: () -> void
+
+      private
+
+      def session: (URI::Generic uri) -> Net::HTTP
+    end
+  end
+end

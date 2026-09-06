@@ -33,6 +33,14 @@ gems:
   version: '0'
   source:
     type: stdlib
+- name: net-http
+  version: '0'
+  source:
+    type: stdlib
+- name: net-protocol
+  version: '0'
+  source:
+    type: stdlib
 - name: nkf
   version: '0.2'
   source:
@@ -98,6 +106,10 @@ gems:
   source:
     type: stdlib
 - name: time
+  version: '0'
+  source:
+    type: stdlib
+- name: timeout
   version: '0'
   source:
     type: stdlib

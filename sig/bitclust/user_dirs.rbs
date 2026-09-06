@@ -1,0 +1,22 @@
+module BitClust
+  # 設定・DB・キャッシュの置き場所(XDG 準拠+従来の ~/.bitclust fallback)
+  module UserDirs
+    def self?.home: () -> Pathname
+
+    def self?.legacy_dir: () -> Pathname
+
+    def self?.config_home: () -> Pathname
+
+    def self?.data_home: () -> Pathname
+
+    def self?.cache_home: () -> Pathname
+
+    def self?.config_candidates: () -> Array[Pathname]
+
+    def self?.config_file: () -> Pathname?
+
+    def self?.load_config: () -> Hash[Symbol, untyped]?
+
+    def self?.xdg_dir: (String env_key, String default_subdir) -> Pathname
+  end
+end
