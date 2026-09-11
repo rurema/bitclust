@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'bitclust/exception'
+require 'bitclust/preprocessor'
+
 module BitClust
   # 新パイプラインのファイル発見（MARKUP_SPEC §1.1）。
   #
@@ -116,36 +119,39 @@ module BitClust
       if lines[0] =~ /\A---\s*\z/
         i = 1
         in_library_block = false
-        gate_stack = [] #: Array[[Symbol, String?]]
+        gate_stack = [] #: Array[list_gate]
         while i < lines.length && lines[i] !~ /\A---\s*\z/
           line = lines[i]
           if in_library_block
-            # 多重所属のゲート付きリスト（MARKUP_SPEC §1.2）。
+            # 多重所属のゲート付きリスト（MARKUP_SPEC §1.2.1）。
             # 項目は積まれているゲートをすべてまとって membership になる
             case line
             when /\A\s+- (\S+)/
-              m = { library: $1 }
-              gate_stack.each { |kind, ver| m[kind] = ver }
-              info[:memberships] << m
+              info[:memberships].concat gated_memberships($1 || raise, gate_stack)
               i += 1; next
-            when /\A\#[@%]since\s+(\S+)/ then gate_stack.push([:since, $1]); i += 1; next
-            when /\A\#[@%]until\s+(\S+)/ then gate_stack.push([:until, $1]); i += 1; next
-            when /\A\#[@%]end\s*\z/ then gate_stack.pop; i += 1; next
+            when /\A\#[@%]\#/   # 前処理コメント（Preprocessor と同じく無視）
+              i += 1; next
+            when /\A\#[@%]/
+              list_directive(line, gate_stack, path, i + 1)
+              i += 1; next
             else
-              in_library_block = false  # ブロック終端。この行は通常キーとして処理
+              # ブロック終端。この行は通常キーとして処理
+              list_end(gate_stack, path, i + 1)
+              in_library_block = false
             end
           end
           case line
           when /\Atype:\s*library\s*\z/ then info[:library_file] = true
           when /\Aname:\s*(\S+)/ then info[:name] = $1
-          when /\Alibrary:\s*\z/ then in_library_block = true; gate_stack = [] #: Array[[Symbol, String?]]
-          when /\Alibrary:\s*(\S+)/ then info[:memberships] << { library: $1 }
+          when /\Alibrary:\s*\z/ then in_library_block = true; gate_stack = [] #: Array[list_gate]
+          when /\Alibrary:\s*(\S+)/ then info[:memberships] << { library: $1 || raise }
           when /\Asince:\s*"?([^"\s]+)"?/ then info[:since] = $1
           when /\Auntil:\s*"?([^"\s]+)"?/ then info[:until] = $1
           when RELATION_KEY_RE then info[:front_matter_relations] = true
           end
           i += 1
         end
+        list_end(gate_stack, path, i + 1) if in_library_block
         i += 1
       end
       info[:library] = info[:memberships].dig(0, :library)
@@ -188,6 +194,101 @@ module BitClust
         end
       end
       info
+    end
+
+    # --- front matter ゲート付きリストのディレクティブ（bitclust#331） ---
+    # 本文側 Preprocessor と同じ集合のうち #%since/#%until/#%version/#%else/#%end
+    # を解釈する。#%if（任意の条件式）は非対応。解釈できない行は無音で
+    # リストを打ち切らず ParseError にする（本文側の unknown directive と同じ扱い）。
+    #
+    # ゲート1段は clause の選言。clause は since（以上）/until（未満）/
+    # version（その版のみ）/except（その版以外）の交差で、#%else は直前ゲートの
+    # 補集合（#%version A...B なら「A 未満」または「B 以上」の 2 clause）
+
+    def list_directive(line, stack, path, lineno)
+      err = ->(msg) { raise ParseError, "#{path}:#{lineno}: #{msg}: #{line.strip}" }
+      case line
+      when /\A\#[@%](since|until)\b(.*)/
+        kind, raw = $1, $2 || raise
+        ver = version_literal(raw.strip) or err.("wrong conditional expr")
+        clause = kind == 'since' ? { since: ver } : { until: ver } #: gate_clause
+        stack.push({ clauses: [clause], elsed: false })
+      when /\A\#[@%]version\b(.*)/
+        clause = version_range(($1 || raise).strip) or
+          err.("wrong version range (expected V / A...B / A... / ...B)")
+        stack.push({ clauses: [clause], elsed: false })
+      when /\A\#[@%]if\b/
+        err.("#%if is not supported in front matter library list (use #%since/#%until/#%version/#%else)")
+      when /\A\#[@%]else\s*\z/
+        gate = stack.last or err.("no matching #%since/#%until/#%version")
+        err.("duplicate #%else") if gate[:elsed]
+        stack[-1] = { clauses: gate[:clauses].flat_map { |c| complement(c) }, elsed: true }
+      when /\A\#[@%]end\s*\z/
+        stack.pop or err.("no matching #%since/#%until/#%version")
+      else
+        err.("unknown preprocessor directive")
+      end
+    end
+
+    def list_end(stack, path, lineno)
+      return if stack.empty?
+      raise ParseError, "#{path}:#{lineno}: unterminated #%since/#%until/#%version in front matter library list"
+    end
+
+    VERSION_LITERAL = Preprocessor::VERSION_LITERAL
+
+    def version_literal(raw)
+      raw =~ /\A#{VERSION_LITERAL}\z/o ? ($1 || $2) : nil
+    end
+
+    # #%version の版範囲（Preprocessor#build_cond_by_range と同じ記法）
+    def version_range(raw)
+      case raw
+      when /\A#{VERSION_LITERAL}\.\.\.#{VERSION_LITERAL}\z/o
+        { since: $1 || $2 || raise, until: $3 || $4 || raise }
+      when /\A#{VERSION_LITERAL}\.\.\.\z/o then { since: $1 || $2 || raise }
+      when /\A\.\.\.#{VERSION_LITERAL}\z/o then { until: $1 || $2 || raise }
+      when /\A#{VERSION_LITERAL}\z/o then { version: $1 || $2 || raise }
+      end
+    end
+
+    def complement(clause)
+      return [{ except: [clause[:version] || raise] }] if clause[:version]
+      alts = [] #: Array[gate_clause]
+      alts << { until: clause[:since] || raise } if clause[:since]
+      alts << { since: clause[:until] || raise } if clause[:until]
+      alts
+    end
+
+    # 積まれた全ゲートの交差。各段が選言なので組合せごとに1つの membership
+    # （矛盾する組合せ = 異なる単一版どうしは捨てる）
+    def gated_memberships(library, stack)
+      seed = [{}] #: Array[gate_clause]
+      combos = stack.inject(seed) { |acc, gate|
+        acc.product(gate[:clauses]).filter_map { |a, b| intersect(a, b) }
+      }
+      combos.map { |c|
+        m = { library: library } #: membership
+        m[:since] = c[:since] || raise if c[:since]
+        m[:until] = c[:until] || raise if c[:until]
+        m[:version] = c[:version] || raise if c[:version]
+        m[:except] = c[:except] || raise if c[:except]
+        m
+      }
+    end
+
+    def intersect(a, b)
+      r = {} #: gate_clause
+      sinces = [a[:since], b[:since]].compact
+      r[:since] = sinces.max_by { |v| Gem::Version.new(v) } || raise unless sinces.empty?
+      untils = [a[:until], b[:until]].compact
+      r[:until] = untils.min_by { |v| Gem::Version.new(v) } || raise unless untils.empty?
+      versions = [a[:version], b[:version]].compact.uniq
+      return nil if versions.size > 1
+      r[:version] = versions.first if versions.size == 1
+      excepts = (a[:except] || []) + (b[:except] || [])
+      r[:except] = excepts.uniq unless excepts.empty?
+      r
     end
 
     # 大文字小文字のみが異なる名前は macOS/Windows の case-insensitive FS で

@@ -366,4 +366,136 @@ class TestMarkdownTree < Test::Unit::TestCase
       "version-range-gated H1 relations must not be flagged"
     assert_equal [], tree.warnings
   end
+
+  # --- front matter ゲート付きリストのディレクティブ(bitclust#331) ---
+  # テストリスト:
+  # [x] #%else は直前ゲートの反転(until → since / since → until)
+  # [x] #%version A...B / A... / ...B / V(単一版)
+  # [x] #%version A...B の #%else は「A 未満」と「B 以上」の 2 membership
+  # [x] #%version V の #%else は except: [V]
+  # [x] 入れ子のゲートは交差(since は max・until は min)
+  # [x] 矛盾する入れ子(単一版 ≠ 単一版)は membership を作らない
+  # [x] #%# コメント行は無視
+  # [x] 未知の #% 行・#%if・対応のない #%else/#%end・二重 #%else・
+  #     リスト終端で閉じていないゲートは ParseError(無音の打ち切りをやめる)
+
+  def membership_scan(list)
+    scan(
+      "a.md" => LIB, "b.md" => LIB, "c.md" => LIB,
+      "a/X.md" => "---\nlibrary:\n#{list}---\n# class X < Object\n"
+    )
+  end
+
+  def memberships_of(list)
+    tree = membership_scan(list)
+    assert_equal [], tree.warnings
+    tree.entities["a/X.md"][:memberships]
+  end
+
+  def test_else_inverts_until
+    assert_equal [
+      { library: "a", until: "3.4" },
+      { library: "b", since: "3.4" },
+    ], memberships_of("#%until 3.4\n  - a\n#%else\n  - b\n#%end\n")
+  end
+
+  def test_else_inverts_since
+    assert_equal [
+      { library: "a", since: "3.4" },
+      { library: "b", until: "3.4" },
+    ], memberships_of("#%since 3.4\n  - a\n#%else\n  - b\n#%end\n")
+  end
+
+  def test_version_range_forms
+    assert_equal [
+      { library: "a", since: "3.1", until: "3.3" },
+      { library: "b", since: "3.1" },
+      { library: "c", until: "3.3" },
+    ], memberships_of(
+      "#%version 3.1...3.3\n  - a\n#%end\n" \
+      "#%version 3.1...\n  - b\n#%end\n" \
+      "#%version ...3.3\n  - c\n#%end\n"
+    )
+  end
+
+  def test_single_version
+    assert_equal [{ library: "a", version: "3.1" }],
+      memberships_of("#%version 3.1\n  - a\n#%end\n")
+  end
+
+  def test_else_of_version_range_splits_into_two_memberships
+    assert_equal [
+      { library: "a", since: "3.1", until: "3.3" },
+      { library: "b", until: "3.1" },
+      { library: "b", since: "3.3" },
+    ], memberships_of("#%version 3.1...3.3\n  - a\n#%else\n  - b\n#%end\n")
+  end
+
+  def test_else_of_single_version_is_except
+    assert_equal [
+      { library: "a", version: "3.1" },
+      { library: "b", except: ["3.1"] },
+    ], memberships_of("#%version 3.1\n  - a\n#%else\n  - b\n#%end\n")
+  end
+
+  def test_nested_gates_intersect
+    assert_equal [
+      { library: "a", since: "3.2", until: "3.4" },
+      { library: "b", since: "3.0", until: "3.2" },
+    ], memberships_of(
+      "#%since 3.0\n#%until 3.4\n#%since 3.2\n  - a\n#%else\n  - b\n#%end\n#%end\n#%end\n"
+    )
+  end
+
+  def test_contradicting_nested_single_versions_yield_no_membership
+    assert_equal [{ library: "b", version: "3.1" }],
+      memberships_of("#%version 3.1\n#%version 3.2\n  - a\n#%end\n  - b\n#%end\n")
+  end
+
+  def test_directive_comment_lines_are_ignored
+    assert_equal [{ library: "a" }, { library: "b", until: "3.4" }],
+      memberships_of("#%# comment\n  - a\n#%until 3.4\n#%# another\n  - b\n#%end\n")
+  end
+
+  def test_at_prefix_else_and_version
+    assert_equal [
+      { library: "a", since: "3.1", until: "3.3" },
+      { library: "b", until: "3.1" },
+      { library: "b", since: "3.3" },
+    ], memberships_of("\#@version 3.1...3.3\n  - a\n\#@else\n  - b\n\#@end\n")
+  end
+
+  def assert_list_parse_error(list, pattern)
+    e = assert_raise(BitClust::ParseError) { membership_scan(list) }
+    assert_match pattern, e.message
+    assert_match(/a\/X\.md:\d+/, e.message, "message must locate the file and line")
+  end
+
+  def test_unknown_directive_in_list_raises
+    assert_list_parse_error("  - a\n#%sinse 3.4\n  - b\n#%end\n", /unknown preprocessor directive/)
+  end
+
+  def test_if_in_list_is_unsupported
+    assert_list_parse_error("#%if (version >= \"3.4\")\n  - a\n#%end\n", /#%if is not supported/)
+  end
+
+  def test_else_without_gate_raises
+    assert_list_parse_error("  - a\n#%else\n  - b\n#%end\n", /no matching/)
+  end
+
+  def test_end_without_gate_raises
+    assert_list_parse_error("  - a\n#%end\n", /no matching/)
+  end
+
+  def test_duplicate_else_raises
+    assert_list_parse_error("#%since 3.4\n  - a\n#%else\n  - b\n#%else\n  - c\n#%end\n", /duplicate/)
+  end
+
+  def test_unterminated_gate_at_list_end_raises
+    assert_list_parse_error("#%since 3.4\n  - a\n", /unterminated/)
+  end
+
+  def test_wrong_version_range_raises
+    assert_list_parse_error("#%version 3.1..3.3\n  - a\n#%end\n", /wrong version range/)
+  end
 end

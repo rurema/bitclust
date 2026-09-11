@@ -91,6 +91,41 @@ class TestMarkdownBridge < Test::Unit::TestCase
       out["thread.rd"]
   end
 
+  def test_membership_version_and_else_wrap_include_sites
+    # bitclust#331: #@version V は #@if (version == "V")、その #@else は
+    # #@if (version != "V") で再具現化する。範囲の #@else は 2 つの
+    # membership（A 未満 / B 以上）になるので include サイトも 2 つ
+    out = build_from(
+      "builtin.md" => "---\ntype: library\n---\nbuiltin 概要。\n",
+      "onlylib.md" => "---\ntype: library\n---\nonlylib 概要。\n",
+      "range.md" => "---\ntype: library\n---\nrange 概要。\n",
+      "onlylib/Shared.md" =>
+        "---\n" \
+        "library:\n" \
+        "\#@version 3.2\n" \
+        "  - onlylib\n" \
+        "\#@else\n" \
+        "  - builtin\n" \
+        "\#@end\n" \
+        "\#@version 3.1...3.3\n" \
+        "  - range\n" \
+        "\#@else\n" \
+        "  - range\n" \
+        "\#@end\n" \
+        "---\n" \
+        "# class Shared < Object\nS。\n"
+    )
+    assert_equal "onlylib 概要。\n\n\#@if (version == \"3.2\")\n\#@include(onlylib/Shared)\n\#@end\n",
+      out["onlylib.rd"]
+    assert_equal "builtin 概要。\n\n\#@if (version != \"3.2\")\n\#@include(onlylib/Shared)\n\#@end\n",
+      out["builtin.rd"]
+    assert_equal "range 概要。\n\n" \
+      "\#@until 3.3\n\#@since 3.1\n\#@include(onlylib/Shared)\n\#@end\n\#@end\n" \
+      "\#@until 3.1\n\#@include(onlylib/Shared)\n\#@end\n" \
+      "\#@since 3.3\n\#@include(onlylib/Shared)\n\#@end\n",
+      out["range.rd"]
+  end
+
   def test_libraries_manifest
     out = build
     assert_equal "bar/baz\ndual\nfoo\n\#@until 3.1\ngated\n\#@end\nsub/sub\n", out["LIBRARIES"]

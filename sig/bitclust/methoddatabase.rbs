@@ -78,6 +78,9 @@ module BitClust
     # front matter 由来のバージョン文字列（Gem::Version へ変換して比較する）
     def md_version_covers?: (String version, String? since_version, String? until_version) -> bool
 
+    # membership のゲート（since/until/version/except）でこの版を含むか
+    def md_gate_covers?: (String version, MarkdownTree::gate_clause | MarkdownTree::membership gate) -> bool
+
     public
 
     def refs: () -> RefsDatabase
