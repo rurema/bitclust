@@ -1,10 +1,17 @@
 module BitClust
   # 新パイプラインのファイル発見（MARKUP_SPEC §1.1）
   class MarkdownTree
-    # ゲート付き所属（{ library:, since:, until: }）。項目は動的なキー
-    # （gate_stack 由来の Symbol）で代入されるためレコードではなく Hash。
-    # 値は $1 由来の String? を受ける
-    type membership = Hash[Symbol, String?]
+    # ゲート付きリスト1段分の clause（交差）。since は以上・until は未満・
+    # version はその版のみ・except はその版以外（bitclust#331）
+    type gate_clause = { ?since: String, ?until: String, ?version: String,
+                         ?except: Array[String] }
+
+    # ゲート1段（clause の選言。#%else 済みかを elsed で持つ）
+    type list_gate = { clauses: Array[gate_clause], elsed: bool }
+
+    # ゲート付き所属（library + gate_clause）
+    type membership = { library: String, ?since: String, ?until: String,
+                        ?version: String, ?except: Array[String] }
 
     # @libraries の値（name => { path:, since:, until: }）
     type library_info = { path: String, since: String?, until: String? }
@@ -35,6 +42,8 @@ module BitClust
 
     BLANK_RE: ::Regexp
 
+    VERSION_LITERAL: ::Regexp
+
     def self.scan: (String root) -> instance
 
     attr_reader libraries: Hash[String, library_info]
@@ -56,6 +65,20 @@ module BitClust
     def validate: (String path, file_info info) -> void
 
     def parse_file: (String path) -> file_info
+
+    def list_directive: (String line, Array[list_gate] stack, String path, Integer lineno) -> void
+
+    def list_end: (Array[list_gate] stack, String path, Integer lineno) -> void
+
+    def version_literal: (String raw) -> String?
+
+    def version_range: (String raw) -> gate_clause?
+
+    def complement: (gate_clause clause) -> Array[gate_clause]
+
+    def gated_memberships: (String library, Array[list_gate] stack) -> Array[membership]
+
+    def intersect: (gate_clause a, gate_clause b) -> gate_clause?
 
     def warn_case_collisions: (Array[String] files) -> void
 
