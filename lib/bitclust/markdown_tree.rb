@@ -134,6 +134,12 @@ module BitClust
             when /\A\#[@%]/
               list_directive(line, gate_stack, path, i + 1)
               i += 1; next
+            when /\A\s+\#[@%]/
+              # 列 0 でない #% 行は Preprocessor でも指令にならない（YAML の
+              # コメント扱い）。ゲートが無音で無視されないようエラーにする
+              raise ParseError, "#{path}:#{i + 1}: preprocessor directive must start at column 0: #{line.strip}"
+            when /\A\s+\#/   # YAML コメント
+              i += 1; next
             else
               # ブロック終端。この行は通常キーとして処理
               list_end(gate_stack, path, i + 1)

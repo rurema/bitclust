@@ -495,6 +495,18 @@ class TestMarkdownTree < Test::Unit::TestCase
     assert_list_parse_error("#%since 3.4\n  - a\n", /unterminated/)
   end
 
+  def test_indented_directive_in_list_raises
+    # 列 0 でない #% 行は Preprocessor でも指令にならない(YAML コメント扱い)。
+    # リスト内で無音にゲートが無視されたりリストが打ち切られたりしないよう、
+    # 指令風のインデント行はエラーにする
+    assert_list_parse_error("  - a\n  #%since 3.0\n  - b\n#%end\n", /must start at column 0/)
+  end
+
+  def test_yaml_comment_in_list_is_ignored
+    assert_equal [{ library: "a" }, { library: "b", since: "3.0" }],
+      memberships_of("  # plain yaml comment\n  - a\n#%since 3.0\n  # another\n  - b\n#%end\n")
+  end
+
   def test_wrong_version_range_raises
     assert_list_parse_error("#%version 3.1..3.3\n  - a\n#%end\n", /wrong version range/)
   end
