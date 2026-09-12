@@ -290,9 +290,12 @@ bitclust methods --ruby=3.4 --diff=../doctree/refm/api/src/_builtin/Object Objec
 例
 
 ```
-bitclust chm -d ./db -o ~/tmp/chm    #-o省略時は ./chm に出力される
+bitclust -d ./db chm -o ~/tmp/chm    #-o省略時は ./chm に出力される
 このあと、hhc.exe ~/tmp/chm/refm.hhp とするとrefm.chmができる
 ```
+
+データベースはグローバルオプションの `-d`/`--database` で指定します
+（`chm` サブコマンド自身には `-d` はありません）。
 
 <dl>
 <dt>bitclust statichtml</dt>

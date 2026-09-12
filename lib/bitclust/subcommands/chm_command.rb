@@ -102,7 +102,7 @@ EOS
           end
 
           def to_html
-            str = "<LI> <OBJECT type=\"text/sitemap\">\n"
+            str = +"<LI> <OBJECT type=\"text/sitemap\">\n"
             str << "        <param name=\"Name\" value=\"<%=h @name%>\">\n"
             if @local
               str << "        <param name=\"Local\" value=\"<%=@local%>\">\n"
