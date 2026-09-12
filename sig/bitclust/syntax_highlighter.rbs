@@ -81,6 +81,8 @@ module BitClust
 
     def on_tstring_content: (String token, String data) -> String
 
+    def on_label_end: (String token, String data) -> String
+
     def on_tstring_end: (String token, String data) -> String
 
     def on_qwords_beg: (String token, String data) -> String

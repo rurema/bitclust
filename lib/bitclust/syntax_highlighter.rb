@@ -161,9 +161,6 @@ module BitClust
         data << "<span class=\"nf\">#{token}</span>"
       when @stack.last == :embexpr
         data << "<span class=\"n\">#{token}</span>"
-      when @stack.last == :heredoc
-        style = COLORS[:heredoc_beg]
-        data << "<span class=\"#{style}\">#{token}"
       when @stack.last == :method_call
         data << "<span class=\"nf\">#{token}</span>"
         @stack.pop
@@ -384,6 +381,22 @@ module BitClust
         data << escape_html(token)
       else
         on_default(:on_tstring_content, token, data)
+      end
+      data
+    end
+
+    # "a": / 'b': 形式のシンボルキー。開いている文字列の span を
+    # 文字列終端と同じ流儀で閉じる
+    def on_label_end(token, data)
+      case @stack.last
+      when :string1
+        data << "#{escape_html(token)}</span>"
+        @stack.pop
+      when :string2
+        data << "<span class=\"s2\">#{escape_html(token)}</span>"
+        @stack.pop
+      else
+        on_default(:on_label_end, token, data)
       end
       data
     end

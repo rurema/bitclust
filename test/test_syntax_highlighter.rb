@@ -234,4 +234,36 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
     END
     assert_equal(expected, highlight(source))
   end
+
+  sub_test_case "heredoc argument and quoted label" do
+    def assert_balanced(html)
+      assert_equal html.scan(/<span\b/).size, html.scan(%r{</span>}).size, html
+    end
+
+    test 'identifier after a heredoc argument is rendered normally' do
+      html = highlight("method(arg1, <<LABEL, arg2)\n    x\nLABEL\n")
+      assert_include(html, ', arg2<span class="p">)</span>')
+      assert_balanced(html)
+    end
+
+    test 'block argument after a heredoc argument' do
+      html = highlight("ERB.new(<<~'END_PRODUCT', eoutvar: \"@product\").result b\n  x\nEND_PRODUCT\n")
+      assert_balanced(html)
+      assert_not_include(html, '<span class="no">b')
+    end
+
+    test 'quoted symbol keys close the string span' do
+      html = highlight(%q({ "a":"A", 'b':"B" }) + "\n")
+      assert_balanced(html)
+      assert_include(html, %q(<span class="s1">'b':</span>))
+      assert_include(html, %q(<span class="s2">a</span><span class="s2">&quot;:</span>))
+    end
+
+    test 'quoted symbol key does not leak the stack' do
+      with = highlight(%q({ "a":"A" }) + "\ndef foo\nend\n")
+      without = highlight("def foo\nend\n")
+      assert_include(with, without.lines[0].chomp)
+      assert_balanced(with)
+    end
+  end
 end
