@@ -278,7 +278,8 @@ bitclust methods --ruby=3.4 --diff=../doctree/refm/api/src/_builtin/Object Objec
 ```
 
 --diff に渡せるのは旧 RD ソース(refm)のみで、Markdown ソース(manual/)には
-未対応です(htmlfile と同じ)。
+未対応です(htmlfile と同じ)。extract も同様に旧 RD ソース専用で、
+`.md` を渡すと未対応である旨のエラーになります。
 
 ### パッケージ作成者向け
 

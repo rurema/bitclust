@@ -25,6 +25,7 @@ module BitClust
       def exec(argv, options)
         success = true
         argv.each do |path|
+          reject_markdown_source(path)
           begin
             lib = RRDParser.parse_stdlib_file(path)
             if @check_only
@@ -39,6 +40,13 @@ module BitClust
           end
         end
         exit success
+      end
+
+      # 旧 RD ソース(refm)専用。Markdown を渡されたときは無関係なパースエラー
+      # にせず、未対応であることを案内する
+      def reject_markdown_source(path)
+        return unless path.end_with?('.md')
+        error "#{path}: extract は旧 RD ソース(refm)専用で、Markdown(manual/ の .md)には未対応です。manual/ の内容は doctree の rake generate:X.Y と bitclust server で確認してください"
       end
 
       def show_library(lib)
