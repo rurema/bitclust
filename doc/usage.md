@@ -135,7 +135,10 @@ setup し直してください（DB はキャッシュなので消して問題�
 
 ```
 bitclust server -d ./db-3_4 --baseurl="" --port=30080 --debug
+bitclust -d ./db-3_4 server --baseurl="" --port=30080 --debug   # グローバル側の -d でも可
 ```
+
+`--debug` を付けないとデーモンとして起動します（端末には戻ってきます）。
 
 <dl>
 <dt>bitclust init</dt>

@@ -51,7 +51,7 @@ module BitClust
         @parser.on('--baseurl=URL', 'The base URL to host.') {|url|
           @baseurl = url
         }
-        @parser.on('--database=PATH', 'MethodDatabase root directory.') {|path|
+        @parser.on('-d', '--database=PATH', 'MethodDatabase root directory.') {|path|
           @dbpath = path
         }
         @parser.on('--srcdir=PATH', 'BitClust source directory.') {|path|
@@ -86,6 +86,13 @@ module BitClust
         }
       end
 
+      # DB はサブコマンド自身の -d/--database か、グローバル --database
+      # (options[:prefix])のどちらでも受ける。runner にはグローバル側を
+      # 要求させない(ancestors と同じ扱い)
+      def needs_database?
+        false
+      end
+
       def parse(argv)
         super
         load_config_file
@@ -93,10 +100,6 @@ module BitClust
 
         unless @baseurl
           $stderr.puts "missing base URL.  Use --baseurl or check the config file (bitclust setup)"
-          exit 1
-        end
-        unless @dbpath || @autop
-          $stderr.puts "missing database path.  Use --database"
           exit 1
         end
         unless @datadir
@@ -117,6 +120,7 @@ module BitClust
       end
 
       def exec(argv, options)
+        @dbpath = resolve_dbpath(options)
         begin
           require 'webrick'
         rescue LoadError
@@ -209,6 +213,17 @@ module BitClust
         @srcdir ||= dir
         @datadir ||= "#{@srcdir}/data/bitclust"
         @themedir ||= "#{@srcdir}/theme"
+      end
+
+      # サブコマンド側の --database が無ければグローバル --database
+      # (runner の options[:prefix])を使う。--auto のときは不要
+      def resolve_dbpath(options)
+        dbpath = @dbpath || options[:prefix]
+        unless dbpath || @autop
+          $stderr.puts "missing database path.  Use --database (-d)"
+          exit 1
+        end
+        dbpath
       end
 
       def load_config_file
