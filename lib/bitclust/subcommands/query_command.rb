@@ -19,6 +19,7 @@ module BitClust
       end
 
       def exec(argv, options)
+        super   # @db を用意する(スクリプトからは @db で参照する)
         argv.each do |query|
           # pp eval(query)   # FIXME: causes ArgumentError
           p eval(query)
