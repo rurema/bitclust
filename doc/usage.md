@@ -239,6 +239,7 @@ htmlfile が処理できるのは旧 RD ソース（refm）のみで、Markdown 
 
 <dl>
 <dt>bitclust query</dt>
+<dd>データベースに対して Ruby スクリプトを実行する（スクリプトからは `@db` で参照する）。</dd>
 <dt>bitclust property</dt>
 <dd>データベースプロパティを操作する。</dd>
 </dl>
@@ -246,6 +247,8 @@ htmlfile が処理できるのは旧 RD ソース（refm）のみで、Markdown 
 例
 
 ```
+bitclust -d ./db query '@db.classes.size'
+bitclust -d ./db query '@db.fetch_class("Array").superclass.name'
 bitclust -d ./db property --list
 bitclust -d ./db property --get encoding
 bitclust -d ./db property --set encoding euc-jp
