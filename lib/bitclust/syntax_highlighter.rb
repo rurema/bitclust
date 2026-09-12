@@ -192,6 +192,48 @@ module BitClust
       data
     end
 
+    # on_symbeg が開いた <span class="ss"> を、シンボルの末尾トークン
+    # (HTML エスケープ済み)を添えて閉じ、@stack の :symbol を外す。
+    # on_ident/on_const/on_kw は従来どおり自前で閉じるので、それ以外の
+    # 末尾になりうるトークン(ivar/cvar/gvar/backtick/op/文字列終端)から呼ぶ
+    def close_symbol_span(token, data)
+      data << "#{escape_html(token)}</span>"
+      @stack.pop
+      data
+    end
+
+    def on_ivar(token, data)
+      if @stack.last == :symbol
+        close_symbol_span(token, data)
+      else
+        on_default(:on_ivar, token, data)
+      end
+    end
+
+    def on_cvar(token, data)
+      if @stack.last == :symbol
+        close_symbol_span(token, data)
+      else
+        on_default(:on_cvar, token, data)
+      end
+    end
+
+    def on_gvar(token, data)
+      if @stack.last == :symbol
+        close_symbol_span(token, data)
+      else
+        on_default(:on_gvar, token, data)
+      end
+    end
+
+    def on_backtick(token, data)
+      if @stack.last == :symbol
+        close_symbol_span(token, data)
+      else
+        on_default(:on_backtick, token, data)
+      end
+    end
+
     def on_kw(token, data)
       case
       when @stack.last == :symbol
@@ -221,6 +263,8 @@ module BitClust
 
     def on_op(token, data)
       case
+      when @stack.last == :symbol
+        close_symbol_span(token, data)
       when token == "::" && [:class, :module].include?(_ = @stack.last)
         @name_buffer << token
       when token == "<<" && @stack.last == :class
@@ -312,7 +356,7 @@ module BitClust
 
     def on_symbeg(token, data)
       style = COLORS[:symbeg]
-      data << "<span class=\"#{style}\">#{token}"
+      data << "<span class=\"#{style}\">#{escape_html(token)}"
       @stack << :symbol
       data
     end
@@ -336,6 +380,8 @@ module BitClust
         data << escape_html(token)
       when @stack.last == :string2
         data << "<span class=\"s2\">#{escape_html(token)}</span>"
+      when @stack.last == :symbol
+        data << escape_html(token)
       else
         on_default(:on_tstring_content, token, data)
       end
@@ -344,6 +390,8 @@ module BitClust
 
     def on_tstring_end(token, data)
       case
+      when @stack.last == :symbol
+        data << "#{escape_html(token)}</span>"
       when token == "'"
         data << "#{token}</span>"
       when %i[qwords words qsymbols symbols].include?(_ = @stack.last)

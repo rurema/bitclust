@@ -49,6 +49,16 @@ module BitClust
 
     def on_const: (String token, String data) -> String
 
+    def close_symbol_span: (String token, String data) -> String
+
+    def on_ivar: (String token, String data) -> String
+
+    def on_cvar: (String token, String data) -> String
+
+    def on_gvar: (String token, String data) -> String
+
+    def on_backtick: (String token, String data) -> String
+
     def on_kw: (String token, String data) -> String
 
     def on_period: (String token, String data) -> String
