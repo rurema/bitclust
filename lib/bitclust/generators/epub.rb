@@ -24,11 +24,17 @@ module BitClust
 
       CONTENTS_DIR_NAME = 'OEBPS'
 
+      # StatichtmlCommand が出力ルートに書く 2 行のリダイレクト用スタブ
+      # (<meta http-equiv="refresh"> と <a>)。ルート要素が無く XHTML として
+      # 整形式でない。EPUB の入口は nav.xhtml なのでスタブは同梱せず削除する
+      INDEX_STUB_NAME = 'index.xhtml'
+
       def generate
         make_epub_directory do |epub_directory|
           contents_directory = epub_directory + CONTENTS_DIR_NAME
           copy_static_files(epub_directory)
           generate_xhtml_files(contents_directory)
+          remove_index_stub(contents_directory)
           generate_contents_opf(epub_directory)
           pack_epub(epub_directory)
         end
@@ -71,15 +77,45 @@ module BitClust
         cmd.exec(argv, options)
       end
 
+      # manifest に id="index" で固定的に載せる doc/index ページの href
+      # (epub_directory 相対)。other_items からは除いて二重掲載を避ける
+      INDEX_PATH = Pathname.new("#{CONTENTS_DIR_NAME}/doc/index.xhtml")
+
+      MEDIA_TYPES = {
+        '.xhtml' => 'application/xhtml+xml',
+        '.css'   => 'text/css',
+        '.js'    => 'application/javascript',
+        '.png'   => 'image/png',
+        '.jpg'   => 'image/jpeg',
+        '.jpeg'  => 'image/jpeg',
+        '.gif'   => 'image/gif',
+        '.svg'   => 'image/svg+xml',
+      }.freeze
+
       def generate_contents_opf(epub_directory)
-        items = [] #: Array[{:id => String, :path => Pathname}]
+        class_items = [] #: Array[{:id => String, :path => Pathname, :media_type => String}]
         glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/class/*.xhtml").each do |path|
-          items << {
-            :id => decodename_package(path.basename(".*").to_s),
-            :path => path
+          class_items << {
+            :id => "class-#{decodename_package(path.basename(".*").to_s)}",
+            :path => path,
+            :media_type => media_type_for(path),
           }
         end
-        items.sort_by!{|item| item[:path] }
+        class_items.sort_by!{|item| item[:path] }
+
+        excluded_paths = class_items.map{|item| item[:path] } + [INDEX_PATH]
+        other_items = [] #: Array[{:id => String, :path => Pathname, :media_type => String}]
+        oebps_file_paths(epub_directory).each do |path|
+          next if excluded_paths.include?(path)
+
+          other_items << {
+            :id => manifest_id_for(path),
+            :path => path,
+            :media_type => media_type_for(path),
+          }
+        end
+        other_items.sort_by!{|item| item[:path] }
+
         template = (@templatedir + "contents").read
         if ::ERB.instance_method(:initialize).parameters.last.first == :key
           erb = ::ERB.new(template, trim_mode: '-')
@@ -90,6 +126,34 @@ module BitClust
         File.open(epub_directory + "contents.opf", "w") do |f|
           f.write contents
         end
+      end
+
+      # OEBPS 配下の通常ファイル全部(method/library/doc/function ページと、
+      # statichtml がコピーした CSS・画像)を epub_directory 相対で返す。
+      # class ページも含む(呼び出し側で class_items と重複排除する)
+      def oebps_file_paths(epub_directory)
+        glob_relative_path(epub_directory, "#{CONTENTS_DIR_NAME}/**/*").select do |relative_path|
+          (epub_directory + relative_path).file?
+        end
+      end
+
+      def media_type_for(path)
+        MEDIA_TYPES[path.extname.downcase] || 'application/octet-stream'
+      end
+
+      # class ページ以外("OEBPS/method/Array/i/each.xhtml" 等)の manifest
+      # item id。XML の NCName として妥当で一意になるよう、使えない文字は "-" に
+      # 置き換え、ディレクトリ境界は "--" にして encodename 由来の "-" と
+      # 区別する
+      def manifest_id_for(path)
+        relative = path.to_s.sub(%r{\A#{Regexp.escape(CONTENTS_DIR_NAME)}/}, "")
+        segments = relative.split("/").map{|segment| segment.gsub(/[^A-Za-z0-9_.-]/, "-") }
+        "item-#{segments.join('--')}"
+      end
+
+      def remove_index_stub(contents_directory)
+        stub_path = contents_directory + INDEX_STUB_NAME
+        FileUtils.rm_f(stub_path.to_s, :verbose => @verbose) if stub_path.file?
       end
 
       def pack_epub(epub_directory)

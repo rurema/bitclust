@@ -7,7 +7,7 @@ module BitClust
         :outputdir => Pathname,
         :filename => String,
         :templatedir => Pathname,
-        :catalog => nil,
+        :catalog => Pathname,
         :themedir => Pathname,
         :fs_casesensitive => true?,
         :keep => bool,
@@ -26,7 +26,7 @@ module BitClust
 
       @templatedir: Pathname
 
-      @catalog: nil
+      @catalog: Pathname
 
       @themedir: Pathname
 
@@ -40,6 +40,8 @@ module BitClust
 
       CONTENTS_DIR_NAME: "OEBPS"
 
+      INDEX_STUB_NAME: "index.xhtml"
+
       def generate: () -> void
 
       private
@@ -50,7 +52,25 @@ module BitClust
 
       def generate_xhtml_files: (Pathname contents_directory) -> void
 
+      INDEX_PATH: Pathname
+
+      MEDIA_TYPES: Hash[String, String]
+
+      type manifest_item = {
+        :id => String,
+        :path => Pathname,
+        :media_type => String,
+      }
+
       def generate_contents_opf: (Pathname epub_directory) -> void
+
+      def oebps_file_paths: (Pathname epub_directory) -> Array[Pathname]
+
+      def media_type_for: (Pathname path) -> String
+
+      def manifest_id_for: (Pathname path) -> String
+
+      def remove_index_stub: (Pathname contents_directory) -> void
 
       def pack_epub: (Pathname epub_directory) -> void
 
