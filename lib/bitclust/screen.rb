@@ -654,7 +654,8 @@ module BitClust
     attr_reader :search_full_url
 
     def body
-      run_template('opensearchdescription')
+      # XML なので HTML の layout は通さない
+      run_template('opensearchdescription', false)
     end
 
     def content_type
