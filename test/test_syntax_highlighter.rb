@@ -123,6 +123,98 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
     assert_equal(expected, highlight(source))
   end
 
+  sub_test_case "symbol span" do
+    test 'ivar symbol' do
+      source = "x = :@records\n"
+      expected = "x <span class=\"o\">=</span> <span class=\"ss\">:@records</span>\n"
+      assert_equal(expected, highlight(source))
+    end
+
+    test 'cvar symbol' do
+      source = "x = :@@cv\n"
+      expected = "x <span class=\"o\">=</span> <span class=\"ss\">:@@cv</span>\n"
+      assert_equal(expected, highlight(source))
+    end
+
+    test 'gvar symbol' do
+      source = "x = :$stdout\n"
+      expected = "x <span class=\"o\">=</span> <span class=\"ss\">:$stdout</span>\n"
+      assert_equal(expected, highlight(source))
+    end
+
+    test 'operator symbols' do
+      source = <<~END
+        a = :+
+        b = :<<
+        c = :[]
+        d = :[]=
+        e = :<=>
+        f = :!
+      END
+      expected = <<~END
+        a <span class="o">=</span> <span class="ss">:+</span>
+        b <span class="o">=</span> <span class="ss">:&lt;&lt;</span>
+        c <span class="o">=</span> <span class="ss">:[]</span>
+        d <span class="o">=</span> <span class="ss">:[]=</span>
+        e <span class="o">=</span> <span class="ss">:&lt;=&gt;</span>
+        f <span class="o">=</span> <span class="ss">:!</span>
+      END
+      assert_equal(expected, highlight(source))
+    end
+
+    test '%s dynamic symbol literal' do
+      source = "x = %s!sym!\n"
+      expected = "x <span class=\"o\">=</span> <span class=\"ss\">%s!sym!</span>\n"
+      assert_equal(expected, highlight(source))
+    end
+
+    test 'double-quoted dynamic symbol' do
+      source = "x = :\"dyn\"\n"
+      expected = "x <span class=\"o\">=</span> <span class=\"ss\">:&quot;dyn&quot;</span>\n"
+      assert_equal(expected, highlight(source))
+    end
+
+    test 'well-formedness of mixed symbol spans' do
+      source = <<~END
+        x = :@records
+        y = :@@cv
+        z = :$stdout
+        a = :+
+        b = :<<
+        c = :[]
+        s = %s!sym!
+        d = :"dyn"
+      END
+      result = highlight(source)
+      assert_equal(result.scan('<span').size, result.scan('</span>').size)
+    end
+
+    test 'symbol does not leak the stack into later tokens' do
+      source = <<~END
+        x = :@records
+        def foo
+        end
+      END
+      baseline = highlight("def foo\nend\n")
+      result = highlight(source)
+      assert(
+        result.end_with?(baseline),
+        "expected result to end with unaffected `def foo/end` rendering:\n" \
+        "  baseline: #{baseline.inspect}\n" \
+        "  result:   #{result.inspect}"
+      )
+    end
+
+    test 'label is not treated as a symbol' do
+      source = "h = { a: 1 }\nfoo(:x, k: 2)\n"
+      result = highlight(source)
+      assert_equal(result.scan('<span').size, result.scan('</span>').size)
+      assert_match(%r{<span class="ss">a:</span>}, result)
+      assert_match(%r{<span class="ss">k:</span>}, result)
+      assert_match(%r{<span class="ss">:x</span>}, result)
+    end
+  end
+
   test 'one liner module' do
     source = <<~END
       module Foo; end
@@ -141,5 +233,37 @@ class TestSyntaxHighlighter < Test::Unit::TestCase
       <span class="k">class</span> <span class="nn"></span><span class="o"></span><span class="nc">Foo</span>; <span class="k">end</span>
     END
     assert_equal(expected, highlight(source))
+  end
+
+  sub_test_case "heredoc argument and quoted label" do
+    def assert_balanced(html)
+      assert_equal html.scan(/<span\b/).size, html.scan(%r{</span>}).size, html
+    end
+
+    test 'identifier after a heredoc argument is rendered normally' do
+      html = highlight("method(arg1, <<LABEL, arg2)\n    x\nLABEL\n")
+      assert_include(html, ', arg2<span class="p">)</span>')
+      assert_balanced(html)
+    end
+
+    test 'block argument after a heredoc argument' do
+      html = highlight("ERB.new(<<~'END_PRODUCT', eoutvar: \"@product\").result b\n  x\nEND_PRODUCT\n")
+      assert_balanced(html)
+      assert_not_include(html, '<span class="no">b')
+    end
+
+    test 'quoted symbol keys close the string span' do
+      html = highlight(%q({ "a":"A", 'b':"B" }) + "\n")
+      assert_balanced(html)
+      assert_include(html, %q(<span class="s1">'b':</span>))
+      assert_include(html, %q(<span class="s2">a</span><span class="s2">&quot;:</span>))
+    end
+
+    test 'quoted symbol key does not leak the stack' do
+      with = highlight(%q({ "a":"A" }) + "\ndef foo\nend\n")
+      without = highlight("def foo\nend\n")
+      assert_include(with, without.lines[0].chomp)
+      assert_balanced(with)
+    end
   end
 end
