@@ -30,6 +30,8 @@ EOD
   s.add_development_dependency "test-unit", ">= 2.3.0"
   s.add_development_dependency "test-unit-notify"
   s.add_development_dependency "test-unit-rr"
+  # test/test_epub_generator.rb が contents.opf / 生成 XHTML の整形式検証に使う
+  s.add_development_dependency "rexml"
   s.add_runtime_dependency "rack"
   s.add_runtime_dependency "rouge"
   s.add_runtime_dependency "progressbar", ">= 1.9.0", "< 2.0"
