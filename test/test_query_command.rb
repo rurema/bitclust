@@ -4,8 +4,6 @@ require 'tmpdir'
 require 'bitclust'
 require 'bitclust/subcommands/query_command'
 
-# bitclust query(rurema/bitclust の出力監査 2026-09):
-# exec が super を呼ばず @db が nil のまま eval していたため使えなかった
 class TestQueryCommand < Test::Unit::TestCase
   def run_query(script, capi: false)
     Dir.mktmpdir do |dir|
