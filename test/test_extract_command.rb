@@ -5,9 +5,6 @@ require 'bitclust'
 require 'bitclust/subcommands/extract_command'
 require 'bitclust/subcommands/htmlfile_command'
 
-# extract / htmlfile は旧 RD ソース(refm)専用(rurema/bitclust の出力監査 2026-09):
-# Markdown(manual/ の .md)を渡すと無関係なパースエラーになっていたので、
-# 未対応であることを案内して失敗する
 class TestRdOnlyCommandsRejectMarkdown < Test::Unit::TestCase
   def with_md_file
     Dir.mktmpdir do |dir|
