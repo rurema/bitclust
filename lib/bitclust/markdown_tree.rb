@@ -202,7 +202,7 @@ module BitClust
       info
     end
 
-    # --- front matter ゲート付きリストのディレクティブ（bitclust#331） ---
+    # --- front matter ゲート付きリストのディレクティブ ---
     # 本文側 Preprocessor と同じ集合のうち #%since/#%until/#%version/#%else/#%end
     # を解釈する。#%if（任意の条件式）は非対応。解釈できない行は無音で
     # リストを打ち切らず ParseError にする（本文側の unknown directive と同じ扱い）。

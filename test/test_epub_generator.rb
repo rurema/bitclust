@@ -11,8 +11,6 @@ require 'bitclust/subcommands/statichtml_command'
 # contents.opf のマニフェストは、statichtml が OEBPS 以下に生成する
 # class/method/library/doc/function ページと css/image リソースを
 # すべて（ユニークな id で）列挙しなければならない（EPUB の仕様上必須）。
-# 以前は class ページと nav.xhtml、決め打ちの
-# "OEBPS/doc/index.html"（拡張子が誤り）だけしか載っていなかった。
 class TestEpubGeneratorContentsOpf < Test::Unit::TestCase
   def build_epub_generator
     datadir = File.expand_path('../data/bitclust', __dir__)
@@ -183,11 +181,9 @@ class TestEpubGeneratorIndexStub < Test::Unit::TestCase
   end
 end
 
-# data/bitclust/template.epub/layout の <meta>/<link> が自己終了しておらず
-# XHTML として整形式でなかった（bug 2）。また template.epub/class の
-# インデックス一覧が escape_html を通さずメソッド名を出力していたため、
-# "<=>" や "&" のようなメソッド名を含むページが整形式 XML にならなかった
-# （bug 3、template.offline はエスケープ済み: commit 95e1475）。
+# data/bitclust/template.epub が整形式 XHTML を出力すること（layout の
+# <meta>/<link> の自己終了、class のインデックス一覧での "<=>" や "&" を
+# 含むメソッド名のエスケープ）を検証する。
 #
 # Screen#run_template は ERB 化したテンプレート本体をレシーバの
 # self.class（ClassScreen / MethodScreen そのもの）に「respond_to? なら
