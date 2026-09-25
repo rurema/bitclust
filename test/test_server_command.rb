@@ -3,12 +3,6 @@ require 'stringio'
 require 'bitclust'
 require 'bitclust/subcommands/server_command'
 
-# bitclust server の DB 指定(rurema/bitclust の出力監査 2026-09):
-# runner の DB 必須チェックはグローバル --database を見るが、server は自前の
-# --database を見ていたため、片方だけでは起動できなかった。
-# - server は DB を自前で受けるので runner に要求させない(needs_database? false)
-# - サブコマンド側の -d/--database と、グローバル --database(options[:prefix])の
-#   どちらでも起動できる
 class TestServerCommand < Test::Unit::TestCase
   def build(argv)
     cmd = BitClust::Subcommands::ServerCommand.new

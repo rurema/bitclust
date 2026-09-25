@@ -219,10 +219,7 @@ module BitClust
       # (runner の options[:prefix])を使う。--auto のときは不要
       def resolve_dbpath(options)
         dbpath = @dbpath || options[:prefix]
-        unless dbpath || @autop
-          $stderr.puts "missing database path.  Use --database (-d)"
-          exit 1
-        end
+        abort "missing database path.  Use --database (-d)" unless dbpath || @autop
         dbpath
       end
 
