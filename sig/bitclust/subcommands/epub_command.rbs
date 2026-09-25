@@ -3,7 +3,7 @@ module BitClust
     class EPUBCommand < Subcommand
       @verbose: bool
 
-      @catalogdir: Pathname?
+      @catalogdir: Pathname
 
       @templatedir: Pathname
 

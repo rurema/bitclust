@@ -12,7 +12,7 @@ module BitClust
       def initialize
         super
         @verbose = true
-        @catalogdir = nil
+        @catalogdir = srcdir_root + "data/bitclust/catalog"
         @templatedir = srcdir_root + "data/bitclust/template.epub"
         @themedir = srcdir_root + "theme/default"
         @filename = "rurema-#{Date.today}.epub"
@@ -54,7 +54,7 @@ module BitClust
         generator = BitClust::Generators::EPUB.new(:prefix           => options[:prefix],
                                                    :capi             => options[:capi],
                                                    :outputdir        => @outputdir,
-                                                   :catalog          => @catalog,
+                                                   :catalog          => @catalogdir,
                                                    :templatedir      => @templatedir,
                                                    :themedir         => @themedir,
                                                    :fs_casesensitive => @fs_casesensitive,

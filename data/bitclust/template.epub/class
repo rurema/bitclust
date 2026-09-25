@@ -24,20 +24,20 @@
 <% end %>
 
 <% unless @entry.extended.empty? %>
-<br>extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
+<br />extend: <%= @entry.extended.map {|c| class_link(c.name) }.join(', ') %>
 <% end %>
 <% unless @entry.aliases.empty? %>
-<br>aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
+<br />aliases: <%=h @entry.aliases.map{|c| c.name}.join(', ') %>
 <% end %>
 <% unless @entry.dynamically_included.empty? %>
-<br> dynamic include:
+<br /> dynamic include:
  <%= @entry.dynamically_included.map{|m|
        class_link(m.name) + " (by " + library_link(m.library.name) + ")"
      }.join(", ")
  %>
 <% end %>
 <% unless @entry.dynamically_extended.empty? %>
-<br> dynamic extend:
+<br /> dynamic extend:
  <%= @entry.dynamically_extended.map{|m|
        class_link(m.name) + " (by " + library_link(m.library.name) + ")"
      }.join(", ")
@@ -72,7 +72,7 @@
   entries.each do |m|
     m.names.each do |mname|
 %>
-<a href="#<%= m.index_id %>"><%= "#{prefix}#{mname}" %></a>
+<a href="#<%= m.index_id %>"><%= escape_html "#{prefix}#{mname}" %></a>
 <%
     end
   end

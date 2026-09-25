@@ -8,15 +8,18 @@
   </metadata>
   <manifest>
     <item id="toc" properties="nav" href="nav.xhtml" media-type="application/xhtml+xml" />
-    <item id="index" href="OEBPS/doc/index.html" media-type="application/xhtml+xml" />
-<% items.each do |item| -%>
-    <item id="<%= item[:id] %>" href="<%= item[:path] %>" media-type="application/xhtml+xml" />
+    <item id="index" href="OEBPS/doc/index.xhtml" media-type="application/xhtml+xml" />
+<% class_items.each do |item| -%>
+    <item id="<%= item[:id] %>" href="<%= item[:path] %>" media-type="<%= item[:media_type] %>" />
+<% end -%>
+<% other_items.each do |item| -%>
+    <item id="<%= item[:id] %>" href="<%= item[:path] %>" media-type="<%= item[:media_type] %>" />
 <% end -%>
   </manifest>
   <spine>
     <itemref idref="toc" />
     <itemref idref="index" />
-<% items.each do |item| -%>
+<% class_items.each do |item| -%>
     <itemref idref="<%= item[:id] %>" />
 <% end -%>
   </spine>
