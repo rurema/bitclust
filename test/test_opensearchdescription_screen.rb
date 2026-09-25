@@ -3,10 +3,6 @@ require 'uri'
 require 'bitclust'
 require 'bitclust/screen'
 
-# bitclust server の /opensearchdescription(rurema/bitclust の出力監査 2026-09):
-# OpenSearchDescriptionScreen が HTML の layout を通っていたため、layout が呼ぶ
-# charset() が無く NoMethodError で 500 になっていた。XML なので layout を
-# 通さずテンプレートだけを描画する
 class TestOpenSearchDescriptionScreen < Test::Unit::TestCase
   SRC = <<'HERE'
 = class Foo
