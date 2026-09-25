@@ -412,6 +412,45 @@ class TestMDParser < Test::Unit::TestCase
     end
   end
 
+  def test_update_by_markdowntree_else_and_single_version_memberships
+    # bitclust#331: ゲート付き library リストの #@version V（単一版）と #@else。
+    # 3.2 だけ onlylib、それ以外は builtin に属する。版の比較は Gem::Version
+    # なので 3.2.0 の DB でも 3.2 と同じ版として扱う
+    require 'tmpdir'
+    Dir.mktmpdir do |root|
+      write = ->(rel, s) {
+        path = File.join(root, rel)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, s)
+      }
+      write.call('builtin.md', "---\ntype: library\n---\nbuiltin。\n")
+      write.call('onlylib.md', "---\ntype: library\n---\nonlylib。\n")
+      write.call('onlylib/Shared.md', <<~'MD')
+        ---
+        library:
+        #@version 3.2
+          - onlylib
+        #@else
+          - builtin
+        #@end
+        ---
+        # class Shared < Object
+
+        共有クラス。
+      MD
+
+      classes = ->(version) {
+        db = BitClust::MethodDatabase.dummy("version" => version)
+        db.update_by_markdowntree(root)
+        %w[builtin onlylib].map { |lib| db.fetch_library(lib).classes.map(&:name) }
+      }
+      assert_equal [[], %w[Shared]], classes.call("3.2")
+      assert_equal [[], %w[Shared]], classes.call("3.2.0")
+      assert_equal [%w[Shared], []], classes.call("3.4")
+      assert_equal [%w[Shared], []], classes.call("3.0")
+    end
+  end
+
   def test_update_by_markdowntree_parse_error_suggests_gem_update
     # manual/ が新しい bitclust を必要とする記法を含むとき、古い gem では
     # パースエラーになる。原因へたどり着けるよう gem 更新の案内を添える

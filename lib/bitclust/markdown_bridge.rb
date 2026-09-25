@@ -134,12 +134,17 @@ module BitClust
         reopen_only = members[path][:kinds].all? { |kind, _| %w[reopen redefine].include?(kind) }
         [reopen_only ? 1 : 0, path]
       end
-      "\n" + sorted.map { |path|
-        m = members[path][:memberships].find { |mm| mm[:library] == libname } || raise
-        inc = "\#@include(#{relative(emitted[path], base)})\n"
-        inc = "\#@since #{m[:since]}\n#{inc}\#@end\n" if m[:since]
-        inc = "\#@until #{m[:until]}\n#{inc}\#@end\n" if m[:until]
-        inc
+      # 同じライブラリへの membership が複数ある（#%version A...B の #%else =
+      # A 未満と B 以上）ときは、それぞれのゲートで include サイトを繰り返す
+      "\n" + sorted.flat_map { |path|
+        members[path][:memberships].select { |mm| mm[:library] == libname }.map { |m|
+          inc = "\#@include(#{relative(emitted[path], base)})\n"
+          inc = "\#@since #{m[:since]}\n#{inc}\#@end\n" if m[:since]
+          inc = "\#@until #{m[:until]}\n#{inc}\#@end\n" if m[:until]
+          inc = "\#@if (version == \"#{m[:version]}\")\n#{inc}\#@end\n" if m[:version]
+          (m[:except] || []).each { |x| inc = "\#@if (version != \"#{x}\")\n#{inc}\#@end\n" }
+          inc
+        }
       }.join
     end
 

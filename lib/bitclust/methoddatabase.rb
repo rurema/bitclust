@@ -186,7 +186,7 @@ module BitClust
         # membership を持つライブラリだけがメンバーとして取り込む
         members = tree.entities.select { |_, e|
           e[:memberships].any? { |m|
-            m[:library] == libname && md_version_covers?(version, m[:since], m[:until])
+            m[:library] == libname && md_gate_covers?(version, m)
           }
         }
         sorted = members.keys.sort_by { |path|
@@ -211,12 +211,25 @@ module BitClust
     # since は「その版以降」、until は「その版未満」（ブリッジの
     # #@since/#@until ラッパーと同じ意味論）
     def md_version_covers?(version, since_version, until_version)
-      v = Gem::Version.new(version)
-      return false if since_version && v < Gem::Version.new(since_version)
-      return false if until_version && v >= Gem::Version.new(until_version)
-      true
+      gate = {} #: MarkdownTree::gate_clause
+      gate[:since] = since_version if since_version
+      gate[:until] = until_version if until_version
+      md_gate_covers?(version, gate)
     end
     private :md_version_covers?
+
+    # membership のゲート（MarkdownTree の since/until/version/except）がこの版を
+    # 含むか。version は「その版のみ」、except は「その版以外」（#%version V と
+    # その #%else）。比較は Gem::Version なので 3.4 と 3.4.0 は同じ版
+    def md_gate_covers?(version, gate)
+      v = Gem::Version.new(version)
+      return false if (s = gate[:since]) && v < Gem::Version.new(s)
+      return false if (u = gate[:until]) && v >= Gem::Version.new(u)
+      return false if (only = gate[:version]) && v != Gem::Version.new(only)
+      return false if (except = gate[:except]) && except.any? { |x| v == Gem::Version.new(x) }
+      true
+    end
+    private :md_gate_covers?
 
     def refs
       @refs ||= RefsDatabase.load(realpath('refs'))
