@@ -343,40 +343,4 @@ module BitClust
       end
     end
   end
-
-  # Used by tools/stattodo.rb
-  class LineCollector < LineFilter
-
-    def LineCollector.process(path)
-      fopen(path) {|f|
-        return wrap(f).to_a
-      }
-    end
-
-    def LineCollector.wrap(f)
-      new(LineStream.new(f))
-    end
-
-    private
-
-    def next_line(f)
-      while line = f.gets
-        if /\A\#[@%]include\s*\((.*?)\)/ =~ line
-          begin
-            file = ($1 || raise).strip
-            basedir = File.dirname(line.location.file || raise)
-            @buf.concat LineCollector.process("#{basedir}/#{file}")
-          rescue Errno::ENOENT => _err
-            raise WrongInclude, "#{line.location}: \#@include'ed file not exist: #{file}"
-          end
-        else
-          @buf.push line
-        end
-        break unless @buf.empty?
-      end
-      @buf.shift
-    end
-
-  end
-
 end

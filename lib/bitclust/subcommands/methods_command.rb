@@ -29,15 +29,8 @@ module BitClust
           @mode = :diff
           @target = path
         }
-        @parser.on('-c', '') {
-          @content = true
-          require 'bitclust/ridatabase'
-        }
         @parser.on('--ruby=[VER]', "The version of Ruby interpreter"){|version|
           @version = version
-        }
-        @parser.on('--ri-database', 'The path of ri database'){|path|
-          @ri_path = path
         }
       end
 
@@ -67,27 +60,11 @@ module BitClust
           list0 = c.entries + list0
           # @type var list: Array[String]
           list = list0.map {|ent| ent.labels.map {|n| expand_mf(n) } }.flatten
-          if @content
-            ri = @ri_path ? RiDatabase.open(@ri_path, nil) : RiDatabase.open_system_db
-            ri.current_class = c.name
-            mthds = ( ri.singleton_methods + ri.instance_methods )
-            fmt = Formatter.new
-            (keys - list).sort.each do |name|
-              mthd = mthds.find{|m| name == m.fullname }
-              if mthd
-                puts fmt.method_info(mthd.entry)
-              else
-                name = name.sub(/\A\w+#/, '')
-                puts "--- #{name}\n#%todo\n\n"
-              end
-            end
-          else
-            (keys - list).sort.each do |name|
-              puts "-#{name}"
-            end
-            (list - keys).sort.each do |name|
-              puts "+#{name}"
-            end
+          (keys - list).sort.each do |name|
+            puts "-#{name}"
+          end
+          (list - keys).sort.each do |name|
+            puts "+#{name}"
           end
         else
           raise "must not happen: #{@mode.inspect}"
