@@ -191,7 +191,7 @@ module BitClust
 
     # on_symbeg が開いた <span class="ss"> を、シンボルの末尾トークン
     # (HTML エスケープ済み)を添えて閉じ、@stack の :symbol を外す。
-    # on_ident/on_const/on_kw は従来どおり自前で閉じるので、それ以外の
+    # on_ident/on_const/on_kw は自前で閉じるので、それ以外の
     # 末尾になりうるトークン(ivar/cvar/gvar/backtick/op/文字列終端)から呼ぶ
     def close_symbol_span(token, data)
       data << "#{escape_html(token)}</span>"
