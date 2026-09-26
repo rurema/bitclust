@@ -9,6 +9,8 @@ module BitClust
 
       def exec: (Subcommand::argv argv, Subcommand::options options) -> void
 
+      def reject_markdown_source: (String path) -> void
+
       def show_library: (LibraryEntry lib) -> void
     end
   end

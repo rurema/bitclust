@@ -21,6 +21,8 @@ module BitClust
 
       private
 
+      def reject_markdown_source: (String? path) -> void
+
       def lookup: (Array[FunctionEntry] | LibraryEntry lib, String key) -> (FunctionEntry | ClassEntry | Array[MethodEntry] | bot)
     end
   end
