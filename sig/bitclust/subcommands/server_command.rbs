@@ -40,9 +40,13 @@ module BitClust
 
       def initialize: () -> void
 
+      def needs_database?: () -> bool
+
       def parse: (Array[String] argv) -> void
 
       def exec: (Subcommand::argv argv, Subcommand::options options) -> void
+
+      def resolve_dbpath: (Subcommand::options options) -> String?
 
       private
 
