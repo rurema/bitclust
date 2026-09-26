@@ -23,9 +23,7 @@ EOD
   }
 
   s.files         = Dir["tools/*"]
-  s.executables   = Dir["tools/*"].
-    map {|v| File.basename(v) }.
-    reject {|f| %w(ToDoHistory check-signature.rb).include?(f) }
+  s.executables   = Dir["tools/*"].map {|v| File.basename(v) }
   s.require_paths = ["lib"]
   s.bindir        = "tools"
 

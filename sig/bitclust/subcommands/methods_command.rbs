@@ -11,10 +11,6 @@ module BitClust
 
       @target: String
 
-      @content: bool
-
-      @ri_path: String
-
       include CrossRubyUtils
 
       def initialize: () -> void

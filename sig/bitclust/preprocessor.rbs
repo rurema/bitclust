@@ -102,13 +102,4 @@ module BitClust
     end
   end
 
-  class LineCollector < LineFilter
-    def self.process: (String path) -> Array[String]
-
-    def self.wrap: (File f) -> instance
-
-    private
-
-    def next_line: (_Gets f) -> String?
-  end
 end

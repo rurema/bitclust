@@ -268,7 +268,6 @@ bitclust -d ./db property --set encoding euc-jp
 <dd>
 システムに存在する全 ruby について、定義されているメソッドを表示する。
 るりまのリファレンスファイルに書かれてあるメソッドに不足がないかもチェックできる。
- -c をつけると不足しているメソッドの ri の内容が表示される。
 ライブラリに対して使うときは -r オプションが必須。
 [ruby-reference-manual:468], [ruby-reference-manual:558]
 </dd>
@@ -280,7 +279,6 @@ bitclust -d ./db property --set encoding euc-jp
 bitclust methods Object
 bitclust methods -rLIBRARY --ruby=RUBY_VERSION --diff=RDFILE CLASS_NAME
 bitclust methods -rstringio --ruby=3.4 --diff=../doctree/refm/api/src/stringio StringIO
-bitclust methods --ruby=3.4 --diff=../doctree/refm/api/src/_builtin/Object Object -c
 ```
 
 --diff に渡せるのは旧 RD ソース(refm)のみで、Markdown ソース(manual/)には
@@ -318,12 +316,8 @@ bitclust -d ./db chm -o ~/tmp/chm    #-o省略時は ./chm に出力される
 るりまを書く人用のツールです。gem install bitclust-devでインストールできます。
 
 <dl>
-<dt>bc-rdoc</dt>
-<dd>RDoc データベースと BitClust データベースを比較処理。 [ruby-reference-manual:468]</dd>
 <dt>forall-ruby</dt>
 <dd>システムに存在する全 ruby について、同じコマンドラインオプションを付けて実行する</dd>
-<dt>bc-convert</dt>
-<dd>旧リファレンスマニュアルのファイルを BitClustフォーマットに変換します。今はもう使われていません。</dd>
 <dt>rrd2md (bin/rrd2md)</dt>
 <dd>旧 RD ソースを Markdown へ一括変換する。2026年7月の Markdown 移行に使ったもので、refm 凍結後は旧版のサルベージ用。</dd>
 </dl>
