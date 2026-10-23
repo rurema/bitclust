@@ -3,6 +3,8 @@ module BitClust
     class HtmlfileCommand < Subcommand
       @target: String
 
+      @library: String?
+
       @templatedir: Pathname | String
 
       @baseurl: String
@@ -21,7 +23,11 @@ module BitClust
 
       private
 
-      def reject_markdown_source: (String? path) -> void
+      def exec_markdown: (String path, MethodDatabase? real_db) -> void
+
+      def markdown_doc_entry: (MethodDatabase db, String path, Database::database_properties props) -> DocEntry
+
+      def markdown_libname: (MethodDatabase db, String path) -> String
 
       def lookup: (Array[FunctionEntry] | LibraryEntry lib, String key) -> (FunctionEntry | ClassEntry | Array[MethodEntry] | bot)
     end

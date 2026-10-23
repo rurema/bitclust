@@ -46,6 +46,9 @@ module BitClust
 
     def self.scan: (String root) -> instance
 
+    # 1 ファイル分の front matter と本文の情報（scan が各ファイルで読むもの）
+    def self.file_info: (String path) -> file_info
+
     attr_reader libraries: Hash[String, library_info]
 
     attr_reader entities: Hash[String, entity_info]
@@ -59,6 +62,9 @@ module BitClust
     def initialize: (String root) -> void
 
     def scan: () -> self
+
+    # root 相対の path を 1 ファイルだけ読む
+    def file_info: (String path) -> file_info
 
     private
 
