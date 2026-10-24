@@ -3,7 +3,6 @@ require 'stringio'
 require 'tmpdir'
 require 'bitclust'
 require 'bitclust/subcommands/extract_command'
-require 'bitclust/subcommands/htmlfile_command'
 
 class TestRdOnlyCommandsRejectMarkdown < Test::Unit::TestCase
   def with_md_file
@@ -30,16 +29,6 @@ class TestRdOnlyCommandsRejectMarkdown < Test::Unit::TestCase
       msg = capture_stderr { assert_raise(SystemExit) { cmd.exec([path], {:prefix => nil, :capi => false}) } }
       assert_match(/Markdown/, msg)
       assert_match(/refm/, msg)
-    end
-  end
-
-  def test_htmlfile_explains_markdown_is_unsupported
-    with_md_file do |path|
-      cmd = BitClust::Subcommands::HtmlfileCommand.new
-      cmd.parse([path])
-      msg = capture_stderr { assert_raise(SystemExit) { cmd.exec([path], {:prefix => nil, :capi => false}) } }
-      assert_match(/Markdown/, msg)
-      assert_match(/rake generate|bitclust server/, msg)
     end
   end
 end

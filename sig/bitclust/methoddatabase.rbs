@@ -70,8 +70,6 @@ module BitClust
     # あり得るが、読む側は常に truthy ガード付きなので @root と同じ扱いで非 nil 宣言
     @md_root: String
 
-    private
-
     # since は「その版以降」、until は「その版未満」（ブリッジの
     # #@since/#@until ラッパーと同じ意味論）。
     # version は properties()["version"]、since/until は MarkdownTree の
@@ -80,8 +78,6 @@ module BitClust
 
     # membership のゲート（since/until/version/except）でこの版を含むか
     def md_gate_covers?: (String version, MarkdownTree::gate_clause | MarkdownTree::membership gate) -> bool
-
-    public
 
     def refs: () -> RefsDatabase
 

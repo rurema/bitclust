@@ -216,7 +216,6 @@ module BitClust
       gate[:until] = until_version if until_version
       md_gate_covers?(version, gate)
     end
-    private :md_version_covers?
 
     # membership のゲート（MarkdownTree の since/until/version/except）がこの版を
     # 含むか。version は「その版のみ」、except は「その版以外」（#%version V と
@@ -229,7 +228,6 @@ module BitClust
       return false if (except = gate[:except]) && except.any? { |x| v == Gem::Version.new(x) }
       true
     end
-    private :md_gate_covers?
 
     def refs
       @refs ||= RefsDatabase.load(realpath('refs'))

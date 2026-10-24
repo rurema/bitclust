@@ -235,10 +235,31 @@ bitclust htmlfile --ruby=3.4 --target=Array ../doctree/refm/api/src/_builtin/Arr
 bitclust htmlfile --capi ../doctree/refm/capi/src/array.c.rd --target=rb_ary_new3 # C API では現状 --target 必須
 ```
 
-htmlfile が処理できるのは旧 RD ソース（refm）のみで、Markdown ソース
-（manual/）には未対応です。manual/ の編集内容の確認は doctree の
-`rake generate:X.Y` と `bitclust server`（または `rake statichtml:X.Y`）で
-行ってください。
+Markdown ソース（manual/ の `.md`）も渡せます。拡張子が `.md` なら Markdown として変換します。
+
+```
+bitclust htmlfile --ruby=4.1 --target=Array ../doctree/manual/api/_builtin/Array.md > t.html
+bitclust htmlfile --ruby=4.1 ../doctree/manual/api/json.md > a.html                  #ライブラリjson
+bitclust htmlfile --library=json --target=JSON ../doctree/manual/api/json/JSON.md    #所属ライブラリを指定する
+bitclust htmlfile ../doctree/manual/doc/spec/lexical.md > d.html                     #doc ページ
+bitclust htmlfile --capi ../doctree/manual/capi/array.c.md --target=rb_ary_new3       # C API では現状 --target 必須
+```
+
+- 所属ライブラリは、エンティティファイル（`manual/api/<lib>/<Klass>.md` など）では
+  front matter の `library:` から決まります（多重所属なら `--ruby` の版で有効な先頭の所属）。
+  `library:` が無いファイルは `--library=NAME` で指定します。`--library` は
+  front matter より優先します。
+- ライブラリルート（front matter に `type: library` を持つ `manual/api/<lib>.md`）は
+  `manual/api/` からの相対パス（`_builtin.md` なら `_builtin`）がライブラリ名になります。
+- `manual/doc/` 以下のファイルは doc ページとして変換します。
+- `#%since` などの版ディレクティブは `--ruby` の版で解決します。front matter の
+  `since:`/`until:` の範囲外の版を指定すると警告を出したうえで変換します。
+- 1 ファイルだけを変換するため、他のファイルにあるクラス・メソッド・doc ページは
+  参照できません。祖先クラスのメソッド一覧、他ライブラリが追加するメソッド、
+  ライブラリルートのクラス一覧、`[d:...]` などのリンクの表示名は出ません
+  （`--database` を指定すると、リンクの表示名はそのデータベースから引きます）。
+  これらを含めた確認は doctree の `rake generate:X.Y` と `bitclust server`
+  （または `rake statichtml:X.Y`）で行ってください。
 
 <dl>
 <dt>bitclust query</dt>
@@ -282,7 +303,7 @@ bitclust methods -rstringio --ruby=3.4 --diff=../doctree/refm/api/src/stringio S
 ```
 
 --diff に渡せるのは旧 RD ソース(refm)のみで、Markdown ソース(manual/)には
-未対応です(htmlfile と同じ)。extract も同様に旧 RD ソース専用で、
+未対応です。extract も同様に旧 RD ソース専用で、
 `.md` を渡すと未対応である旨のエラーになります。
 
 ### パッケージ作成者向け

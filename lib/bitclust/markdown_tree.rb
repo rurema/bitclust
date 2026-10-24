@@ -32,6 +32,11 @@ module BitClust
       new(root).scan
     end
 
+    # 1 ファイル分の front matter と本文の情報（scan が各ファイルで読むもの）
+    def self.file_info(path)
+      new(File.dirname(path)).file_info(File.basename(path))
+    end
+
     attr_reader :libraries, :entities, :fragments, :warnings
 
     def initialize(root)
@@ -85,6 +90,11 @@ module BitClust
         validate(path, info) unless info[:fragment]
       end
       self
+    end
+
+    # root 相対の path を 1 ファイルだけ読む
+    def file_info(path)
+      parse_file(path)
     end
 
     private
