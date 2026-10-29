@@ -2,6 +2,12 @@ name: Release
 
 # タグ push で起動し、RubyGems.org への公開に成功してから GitHub release を
 # 作成する(immutable releases 対応のため、release 作成をトリガーにしない)。
+# リリースは GitHub の Web UI で release を作らず、master のリリースコミットに
+# タグ(vX.Y.Z)を打って push するだけにする。Web UI で release を先に作ると、
+# その操作によるタグ push でこの workflow が起動し、gem の公開までは成功するが
+# 最後の gh release create が「a release with the same tag name already
+# exists」で失敗して gem がアセットに付かない(v1.9.0 で発生。アセットは後から
+# gh release upload で補えたが、immutable releases を有効にすると補えない)。
 # 認証は rubygems.org の trusted publishing(OIDC)。事前に rubygems.org 側で
 # bitclust-core / bitclust-dev / bitclust-irb / refe2 の 4 gem それぞれに、
 # このリポジトリの release.yml(environment: release)を trusted publisher
