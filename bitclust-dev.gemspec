@@ -22,8 +22,8 @@ EOD
     "github_repo"       => "https://github.com/rurema/bitclust",
   }
 
-  s.files         = Dir["tools/*"]
-  s.executables   = Dir["tools/*"].map {|v| File.basename(v) }
+  s.executables   = %w[forall-ruby.rb gencatalog.rb md-db-check.rb md-tree-check.rb]
+  s.files         = s.executables.map {|v| "tools/#{v}" }
   s.require_paths = ["lib"]
   s.bindir        = "tools"
 
