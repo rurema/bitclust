@@ -336,9 +336,17 @@ bitclust -d ./db chm -o ~/tmp/chm    #-o省略時は ./chm に出力される
 
 るりまを書く人用のツールです。gem install bitclust-devでインストールできます。
 
+tools/ にあるそれ以外の md-*-check.rb は Markdown 移行の検証専用で、gem には含めていません（使い方は [markdown-operations.md](markdown-operations.md)）。
+
 <dl>
-<dt>forall-ruby</dt>
+<dt>forall-ruby.rb</dt>
 <dd>システムに存在する全 ruby について、同じコマンドラインオプションを付けて実行する</dd>
+<dt>gencatalog.rb</dt>
+<dd>テンプレートなどから <code>_("...")</code> のメッセージを抜き出し、メッセージカタログ (data/bitclust/catalog/) の形式で出力する。<code>--merge=PATH</code> で既存のカタログの訳を引き継ぐ。</dd>
+<dt>md-tree-check.rb</dt>
+<dd>Markdown ツリー (manual/api) を読み、孤児ファイルや関係の不整合などの警告を表示する。</dd>
+<dt>md-db-check.rb</dt>
+<dd>2 つのデータベースを比較し、エントリやソースの差分を表示する。</dd>
 <dt>rrd2md (bin/rrd2md)</dt>
 <dd>旧 RD ソースを Markdown へ一括変換する。2026年7月の Markdown 移行に使ったもので、refm 凍結後は旧版のサルベージ用。</dd>
 </dl>

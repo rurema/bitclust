@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'pathname'
-
-bindir = Pathname.new(__FILE__).realpath.dirname
-$LOAD_PATH.unshift((bindir + '../lib').realpath)
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 
 require 'bitclust/crossrubyutils'
 
